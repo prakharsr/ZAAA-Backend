@@ -7,6 +7,16 @@ var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var path = require('path');
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    if (req.method === 'OPTIONS') {
+        res.end();
+    } else {
+        next();
+    }
+});
 
 var jwt = require('jsonwebtoken');
 
@@ -22,17 +32,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 app.use('/api', require('./api/routes/router'));
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-    if (req.method === 'OPTIONS') {
-        res.end();
-    } else {
-        next();
-    }
-});
-
 
 mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){
