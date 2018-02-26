@@ -18,7 +18,8 @@ module.exports.signup = function(req,res){
 			
 			email : reqBody.email,
 			password : reqBody.password,
-			phone:""
+			phone:"",
+			isAdmin:true
 		});
 		
 		user.save(function(err, doc){
