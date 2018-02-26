@@ -37,13 +37,10 @@ module.exports.signup = function(req,res){
 				}
 			}
 			else {
-				console.log(user._id);
-				
 				var token_data = {
-					_id: user._id,
+					id: mongoose.mongo.ObjectId(doc._id),
 					dateLogOn: new Date()
 				};
-				
 				var token = jwt.sign(token_data, config.SECRET);
 				
 				res.json({
@@ -264,7 +261,7 @@ module.exports.verifyMobile = function(request, response) {
 			return response.send({
                 success: false,
                 msg: "err" +err
-            });
+            });		var _id = mongoose.mongo.ObjectId(decoded.id);
 		}
 		if(!user){
 			return response.send({
@@ -325,11 +322,8 @@ module.exports.verifyMobile = function(request, response) {
 
 function getUser(token,req,res, cb){
 	console.log(token);
-	var decoded = jwt.verify(token, config.SECRET);
-		
-		var _id = mongoose.mongo.ObjectId(decoded.id);
-		console.log(_id);
-	User.findById(_id, function(err, doc) {
+	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
+	User.findById(decoded.id, function(err, doc) {
 		if (err || !doc) {
 			return  cb(err,null);
 		}
@@ -339,6 +333,9 @@ function getUser(token,req,res, cb){
 			return cb(null, doc);
 		}
 	});
+	});
+		
+
 	}
 		
 	
