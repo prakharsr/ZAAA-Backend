@@ -34,7 +34,7 @@ app.use(function(req, res, next) {
 });
 
 
-mongoose.connect('mongodb://localhost:12877/zaaaDB', function(err){
+mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){
 		console.log('FAILED TO CONNECT' + err);
 	}
