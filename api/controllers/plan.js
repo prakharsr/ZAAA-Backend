@@ -6,7 +6,6 @@ var jwt = require('jsonwebtoken');
 //http://localhost:8000/api/get/plans
 module.exports.getPlans = function(req,res){
     var plans = Plan.find({}, function(err, plans){
-
             if(err){
                 console.log("here" +err);
             }

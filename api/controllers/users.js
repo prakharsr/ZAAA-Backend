@@ -318,6 +318,62 @@ module.exports.verifyMobile = function(request, response) {
 	    
 }
 
+module.exports.setState = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			res.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			user.state = request.body.state;
+			user.save(function(err, doc) {
+				if (err) {
+						response.send({
+							success: false,
+							msg: err
+						});
+				} else {
+					response.send({
+						success: true
+					});
+					}
+			});
+		}
+	});	
+};
+
+module.exports.getState = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			res.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			if (err) {
+				response.send({
+				success: false,
+				msg: err
+				});
+			} else {
+				response.send({
+					success: true,
+					msg: {
+						state : user.state
+					}
+				});
+			}
+		}
+	});
+};
+
 
 module.exports.setPlan = function(request,response){
 	var token = getToken(request.headers);
@@ -337,7 +393,7 @@ module.exports.setPlan = function(request,response){
 				if (err) {
 						response.send({
 							success: false,
-							msg: err +"bhjdw"
+							msg: err
 						});
 				} else {
 					response.send({
@@ -361,16 +417,13 @@ function getUser(token,req,res, cb){
 		if (err || !doc) {
 			return  cb(err,null);
 		}
-		
 		else{
 			console.log(doc);
 			return cb(null, doc);
 		}
 	});
 	});
-		
-
-	}
+}
 		
 	
 
