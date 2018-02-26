@@ -1,24 +1,19 @@
 var config = require('../../config');
-var Plan = require('../models/Plan');
+var Template = require('../models/Template');
 var User = require('../models/User');
 var jwt = require('jsonwebtoken');
 
 //http://localhost:8000/api/get/plans
 
-module.exports.getPlans = function(req,res){
-    var plans = Plan.find({},null, {sort: {cost: 1}},function(err, plans){
+module.exports.getTemplates = function(req,res){
+    var templates = Template.find({},function(err, plans){
 
             if(err){
                 console.log("here" +err);
             }
             else{
-                if(plans.length== 0){
-                    plan0 = new Plan({
-                        name : "trial",
-                        cost : 0,
-                        maxUsers : 2,
-                        maxAdmins : 1,
-                    });
+                if(templates.length== 0){
+                    
                     plan1 = new Plan({
                         name : "Small",
                         cost : 5000,
