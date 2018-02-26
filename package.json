@@ -1,0 +1,28 @@
+{
+  "name": "zaaa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "4",
+    "start": "node server.js"
+  },
+  "author": "Team ZAAA",
+  "license": "ISC",
+  "dependencies": {
+    "authy": "^1.3.0",
+    "bcrypt": "^1.0.3",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "jsonwebtoken": "^8.1.1",
+    "lodash": "^4.17.5",
+    "mongoose": "^5.0.7",
+    "morgan": "^1.9.0",
+    "nodemailer": "^4.6.0",
+    "passport": "^0.4.0",
+    "passport-jwt": "^3.0.1",
+    "socks": "^2.1.2",
+    "twilio": "^3.11.3"
+  }
+}

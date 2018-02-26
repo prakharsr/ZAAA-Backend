@@ -1,0 +1,331 @@
+var config = require('../../config');
+var User = require('../models/User');
+var jwt = require('jsonwebtoken');
+var mongoose = require('mongoose');
+
+var authy = require('authy')(config.authyKey);
+var twilioClient = require('twilio')(config.accountSid, config.authToken);
+var nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'sonumeewa@gmail.com',
+        pass: 'Vipul1997'
+    }
+});
+
+//POST https://localhost:8000/api/signup
+module.exports.signup = function(req,res){
+	var reqBody = req.body;
+	
+	if(!reqBody.email || !reqBody.password ){
+		res.json({
+			success : false,
+			msg : "Provide all the credentials to signup successfully"
+		});
+	}
+	else{
+		var user = new User({
+			
+			email : reqBody.email,
+			password : reqBody.password,
+			phone:""
+		});
+		
+		user.save(function(err, doc){
+			if(err){
+				if(err.code == 11000){
+					res.send({
+						success : false,
+						msg : "User already registered"
+					});
+				}
+				else{
+					res.send({
+						success : false,
+						msg : err
+					});
+				}
+			}
+			else {
+				console.log(user._id);
+				
+				var token_data = {
+					_id: user._id,
+					dateLogOn: new Date()
+				};
+				
+				var token = jwt.sign(token_data, config.SECRET);
+				
+				res.json({
+					success:true,
+					token:"JWT "+ token,
+					msg:"Signup complete"
+				});
+				
+			}
+		});
+	}
+};
+//POST https://localhost:8000/api/login
+module.exports.login = function(req,res){
+	
+	var user =	User.findOne({email:req.body.email}, function(err, user){
+		if(err) throw err;
+		if(!user){
+			res.send({
+				success: false,
+				msg: 'Authentication Failed'
+			});
+		}
+		else{
+			user.comparePassword(req.body.password, function(err, isMatch){
+				if (isMatch && !err){
+					var token_data = {
+						_id: user._id,
+						dateLogOn: new Date()
+					};
+					var token = jwt.sign(token_data, config.SECRET);
+					
+					res.json({
+						success:true,
+						token:"JWT "+ token,
+						msg:""
+					});
+				} else{
+					res.send({
+						success:false,
+						msg: 'Authentication Failed'
+					});
+				}
+			});
+		}	
+	});
+};
+
+module.exports.setMobile=function(req, res){
+	var reqBody =req.body;
+	console.log(reqBody);
+	var token =  getToken(req.headers);
+	var user = getUser(token,req,res, function(err, user){
+		if(err) throw err;
+		else{
+			console.log(user);
+			user.phone = reqBody.phone;
+			user.save(function(err, doc) {
+				if (err) {
+					if (err.code == 11000) {
+						return response.json({
+							success: false,
+							msg: "Username already exists"
+						});
+					} else {
+						//Throw error message if not known
+						response.send({
+							success: false,
+							msg: err +"bhjdw"
+						});
+					}
+				} else {
+					//We may not to want to always send SMS messages.
+					if (config.enableValidationSMS == 1) {
+						// If the user is created successfully, send them an account
+						// verification token
+						user.sendAuthyToken(function(err) {
+							if (err) {
+								res.send({
+									success: false,
+									msg: " in sendAuthyToken" + err
+								});
+							} else {
+								// Send for verification page
+								res.send({
+									success: true,
+									msg: {
+										msg: doc._id
+									}
+								});
+							}
+						});
+					} else {
+
+						//If we do not want to enable sms verification lets register and send confirmation
+						res.send({
+							success: true,
+							msg: {
+								msg: "Account created (SMS validation false)"
+							}
+						});
+					}
+				}
+			});
+		}
+	});
+
+
+}
+module.exports.sendVerMail = function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,req,res, function(err, user){
+		if(err) throw err;
+		else{
+			console.log(user);
+			user.sendVerificationMail(err, user, function(err){
+				if(err){
+					console.log(err);
+
+				}
+				else{
+					response.send(
+						{
+							success:true,
+							msg:"done"
+						}
+					)
+				}
+			});
+		}
+	});
+}
+module.exports.verifyEmail = function(request, response){
+	var user = User.findById(request.params.id, function(err, user){
+		if(!user){
+			return response.send({
+				success:false,
+				msg: "err not found" + err
+			});
+		}
+		else{
+			user.email_verified = true;
+			user.save(postSave(err));
+		}
+	
+		// after we save the user, handle sending a confirmation
+		function postSave(err) {
+			if (err) {
+				return response.send({
+					success: true,
+					msg: "There was a problem validating your account."
+				});
+			}
+	
+			else{
+				return response.send({
+					success:true,
+					msg:"Email  verified"});
+			}
+		
+		}
+	
+		// respond with an error not current used
+		function die(message) {
+			response.send({
+				success: false,
+				msg: message
+			});
+		}
+	
+
+
+		});
+}
+module.exports.verifyMobile = function(request, response) {
+  	var token = getToken(request.headers);
+	var user = getUser(token, request, response, function(err, user){
+		if(err){
+			console.log(err);
+			return response.send({
+                success: false,
+                msg: "err" +err
+            });
+		}
+		if(!user){
+			return response.send({
+				success:false,
+				msg: "err not found" + err
+			});
+		}
+		else{
+			user.verifyAuthyToken(request.body.code, postVerify);
+			// Handle verification response
+		function postVerify(err, self) {
+			if (err) {
+				return response.send({
+					success: false,
+					msg: "The token you entered was invalid - please retry."
+				});
+			}
+	
+			// If the token was valid, flip the bit to validate the user account
+			user.mobile_verified = true;
+			user.save(postSave(err));
+		}
+	
+		// after we save the user, handle sending a confirmation
+		function postSave(err) {
+			if (err) {
+				return response.send({
+					success: true,
+					msg: "There was a problem validating your account."
+				});
+			}
+	
+			else{
+				return response.send({
+					success:true,
+					msg:"phone number verified"});
+			}
+		
+		}
+	
+		// respond with an error not current used
+		function die(message) {
+			response.send({
+				success: false,
+				msg: message
+			});
+		}
+	
+
+
+		}
+	});
+	    
+}
+
+function getUser(token,req,res, cb){
+	console.log(token);
+	var decoded = jwt.verify(token, config.SECRET,function(err,decoded){
+		console.log(decoded._id + "jhygbjyhbjhbj");
+		var _id = mongoose.mongo.ObjectId(decoded._id);
+	User.findById(_id, function(err, doc) {
+		if (err || !doc) {
+			return  cb(err,null);
+		}
+		
+		else{
+			console.log(doc);
+			return cb(null, doc);
+		}
+    });
+})
+}
+
+function getToken(headers) {
+	if (headers && headers.authorization) {
+		var parted = headers.authorization.split(' ');
+		if (parted.length === 2) {
+			return parted[1];
+		} else {
+			return null;
+		}
+	} else {
+		return null;
+	}
+}
+
+
+
+
+
