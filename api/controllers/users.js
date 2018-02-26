@@ -319,7 +319,7 @@ module.exports.verifyMobile = function(request, response) {
 }
 
 
-module.exports.setPlan = function(req,res){
+module.exports.setPlan = function(request,response){
 	var token = getToken(request.headers);
 	var user = getUser(token,request,response, function(err, user){
 		if(err||!user){
@@ -330,7 +330,8 @@ module.exports.setPlan = function(req,res){
 			});
 		}
 		else{
-			user.planID = req.planID;
+			user.planID = request.body.planID;
+			user.paymentID = request.body.paymentID;
 			user.planCreatedOn = Date.now();
 			user.save(function(err, doc) {
 				if (err) {
@@ -339,7 +340,7 @@ module.exports.setPlan = function(req,res){
 							msg: err +"bhjdw"
 						});
 				} else {
-					res.send({
+					response.send({
 						success: true,
 						msg: {
 							msg: doc.planID
