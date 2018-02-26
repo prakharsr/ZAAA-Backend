@@ -7,16 +7,12 @@ var nodemailer = require('nodemailer');
 
 
 
-
-
-
 var UserSchema = new mongoose.Schema({
     
     isAdmin : {
         type : Boolean,
         default : false,
     },
-
     name : String,
     email :{
         type:String,
@@ -30,6 +26,9 @@ var UserSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
+    planID : String,
+    planCreatedOn: Date,
+    paymentID : String,
     mobile_verified : {
         type:Boolean,
         default: false

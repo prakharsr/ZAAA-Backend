@@ -15,7 +15,7 @@ module.exports.signup = function(req,res){
 	}
 	else{
 		var user = new User({
-			
+			createdOn: Date.now(),
 			email : reqBody.email,
 			password : reqBody.password,
 			phone:"",
@@ -318,6 +318,38 @@ module.exports.verifyMobile = function(request, response) {
 	    
 }
 
+
+module.exports.setPlan = function(req,res){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			res.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			user.planID = req.planID;
+			user.planCreatedOn = Date.now();
+			user.save(function(err, doc) {
+				if (err) {
+						response.send({
+							success: false,
+							msg: err +"bhjdw"
+						});
+				} else {
+					res.send({
+						success: true,
+						msg: {
+							msg: doc.planID
+						}
+					});
+					}
+			});
+		}
+	});
+};
 
 
 
