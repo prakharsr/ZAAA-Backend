@@ -8,12 +8,12 @@ var nodemailer = require('nodemailer');
 
 
 var UserSchema = new mongoose.Schema({
-    
     isAdmin : {
         type : Boolean,
         default : false,
     },
     name : String,
+    designation:String,
     email :{
         type:String,
         unique: true
@@ -26,9 +26,6 @@ var UserSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
-    planID : String,
-    planCreatedOn: Date,
-    paymentID : String,
     mobile_verified : {
         type:Boolean,
         default: false
@@ -36,6 +33,10 @@ var UserSchema = new mongoose.Schema({
     email_verified : {
         type:Boolean,
         default:false
+    },
+    firm : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Firm"
     }
 },
 {
@@ -153,9 +154,4 @@ UserSchema.methods.sendMessage = function(message, cb) {
 };
         
         
-        module.exports = mongoose.model('User', UserSchema);
-        
-        //UserSchema.methods. = function(){};
-        
-        
-        
+module.exports = mongoose.model('User', UserSchema);

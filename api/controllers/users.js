@@ -1,5 +1,6 @@
 var config = require('../../config');
 var User = require('../models/User');
+var Firm = require('../models/Firm');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 
@@ -14,12 +15,22 @@ module.exports.signup = function(req,res){
 		});
 	}
 	else{
+		var firm = new Firm();
 		var user = new User({
 			createdOn: Date.now(),
 			email : reqBody.email,
 			password : reqBody.password,
 			phone:"",
-			isAdmin:true
+			isAdmin:true,
+			firm : firm
+		});
+
+		firm.admins.push(user);
+		firm.save(function(err,doc){
+			if(err){
+				console.log(err);
+				throw err;
+			}
 		});
 		
 		user.save(function(err, doc){
@@ -386,23 +397,34 @@ module.exports.setPlan = function(request,response){
 			});
 		}
 		else{
-			user.planID = request.body.planID;
-			user.paymentID = request.body.paymentID;
-			user.planCreatedOn = Date.now();
-			user.save(function(err, doc) {
-				if (err) {
+				
+
+		Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+				if(err){
+					console.log("error in finding firm" + err);
+				}
+				if(!firm){
+					console.log("firm does not exist for this admin");
+				}
+				else{
+				firm.plan.Plan = request.body.planID;
+				firm.plan.paymentID = request.body.paymentID;
+				firm.plan.CreatedOn = Date.now();
+				firm.save(function(err, doc) {
+					if (err) {
+							response.send({
+								success: false,
+								msg: err
+							});
+					} else {
 						response.send({
-							success: false,
-							msg: err
+							success: true,
+							msg:doc._id +"bjhbyhjb  " + doc
 						});
-				} else {
-					response.send({
-						success: true,
-						msg: {
-							msg: doc.planID
 						}
-					});
-					}
+				});
+				
+				}
 			});
 		}
 	});
@@ -410,7 +432,7 @@ module.exports.setPlan = function(request,response){
 
 
 
-function getUser(token,req,res, cb){
+module.exports.getUser=function(token,req,res, cb){
 	console.log(token);
 	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
 	User.findById(decoded.id, function(err, doc) {
@@ -426,8 +448,7 @@ function getUser(token,req,res, cb){
 }
 		
 	
-
-function getToken(headers) {
+module.exports.getToken = function(headers) {
 	if (headers && headers.authorization) {
 		var parted = headers.authorization.split(' ');
 		if (parted.length === 2) {
