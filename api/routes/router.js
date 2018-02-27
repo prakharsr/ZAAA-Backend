@@ -13,5 +13,6 @@ router.get('/plans', plan.getPlans);
 router.post('/user/plan', user.setPlan);
 router.post('/user/state', user.setState);
 router.get('/user/state', user.getState);
+router.post('/user/co-user', user.createCoUser);
 
 module.exports = router;

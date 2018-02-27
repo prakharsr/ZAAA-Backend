@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
 
+
+
 var FirmSchema = new mongoose.Schema({
     FirmName : {type:String},
     TagLine: String,
@@ -35,7 +37,15 @@ var FirmSchema = new mongoose.Schema({
     Website:String,
     PanNo: String,
     GSTIN: String,
-
+    BankDetails:{
+        AccountName:String,
+        AccountNo:String,
+        BankName:String,
+        IFSC:String,
+        BranchAddress:String,
+        AccountType:String  
+    },
+    
     templates : [{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Template"
@@ -45,6 +55,11 @@ var FirmSchema = new mongoose.Schema({
         paymentID : String,
         Plan : {type:mongoose.Schema.Types.ObjectId, ref:"Plan"} 
     },
+    Socials:{
+        fb:String,
+        twitter:String,
+        Others:String
+    }
 });
 
 module.exports = mongoose.model('Firm', FirmSchema);

@@ -465,7 +465,7 @@ module.exports.setRtemplate = function(request,response){
 
 
 
-module.exports.getUser=function(token,req,res, cb){
+function getUser(token,req,res, cb){
 	console.log(token);
 	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
 	User.findById(decoded.id, function(err, doc) {
@@ -479,9 +479,8 @@ module.exports.getUser=function(token,req,res, cb){
 	});
 	});
 }
-		
-	
-module.exports.getToken = function(headers) {
+
+function getToken(headers) {
 	if (headers && headers.authorization) {
 		var parted = headers.authorization.split(' ');
 		if (parted.length === 2) {
@@ -493,5 +492,92 @@ module.exports.getToken = function(headers) {
 		return null;
 	}
 }
+		
+	
+module.exports.getToken = getToken;
+module.exports.getUser = getUser;
 
+
+module.exports.createCoUser=function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			res.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			if (err) {
+				response.send({
+				success: false,
+				msg: err
+				});
+			} else {
+				Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+					if(err){
+						console.log("error in finding firm" + err);
+					}
+					if(!firm){
+						console.log("firm does not exist for this admin");
+					}
+					else{
+						var CoUser = new User({
+						createdOn: Date.now(),
+						email : reqBody.email,
+						password : reqBody.password,
+						phone:req.body.phone,
+						isAdmin:false,
+						firm : firm
+					});
+			
+					firm.co_users.push(CoUser);
+					firm.save(function(err, doc) {
+						if (err) {
+								response.send({
+									success: false,
+									msg: err
+								});
+						} else {
+							response.send({
+								success: true,
+								msg:doc._id +"bjhbyhjb  " + doc
+							});
+							}
+					});
+					
+					}
+				});
+
+				
+				user.save(function(err, doc){
+					if(err){
+						if(err.code == 11000){
+							res.send({
+								success : false,
+								msg : "User already registered"
+							});
+						}
+						else{
+							res.send({
+								success : false,
+								msg : err
+							});
+						}
+					}
+					else {
+						
+						res.json({
+							success:true,
+							msg:doc._id
+						});
+						
+					}
+				});
+			}
+		}
+	});
+
+}
 
