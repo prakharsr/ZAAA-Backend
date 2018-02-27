@@ -4,9 +4,6 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
-var Template = require('./Template');
-
-
 
 var UserSchema = new mongoose.Schema({
     isAdmin : {
