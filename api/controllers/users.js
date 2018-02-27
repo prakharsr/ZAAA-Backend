@@ -430,6 +430,39 @@ module.exports.setPlan = function(request,response){
 	});
 };
 
+module.exports.setRtemplate = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			res.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			user.setRtemplate = Template;
+			user.paymentID = request.body.paymentID;
+			user.planCreatedOn = Date.now();
+			user.save(function(err, doc) {
+				if (err) {
+						response.send({
+							success: false,
+							msg: err
+						});
+				} else {
+					response.send({
+						success: true,
+						msg: {
+							msg: doc.planID
+						}
+					});
+					}
+			});
+		}
+	});
+};
+
 
 
 module.exports.getUser=function(token,req,res, cb){

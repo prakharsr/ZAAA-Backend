@@ -9,9 +9,9 @@ router.post('/user/mobile', user.setMobile);
 router.post('/user/verify/mobile', user.verifyMobile);
 router.get('/user/verify/email/:id', user.verifyEmail);
 router.post('/user/verify/email', user.sendVerMail);
-router.get('/get/plans', plan.getPlans);
-router.post('/user/set/plan', user.setPlan);
-router.post('/user/set/state', user.setState);
-router.get('/user/get/state', user.getState);
+router.get('/plans', plan.getPlans);
+router.post('/user/plan', user.setPlan);
+router.post('/user/state', user.setState);
+router.get('/user/state', user.getState);
 
 module.exports = router;
