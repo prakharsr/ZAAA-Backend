@@ -22,10 +22,10 @@ module.exports.signup = function(req,res){
 			password : reqBody.password,
 			phone:"",
 			isAdmin:true,
-			firm : firm
+			firm : firm._id
 		});
 
-		firm.admins.push(user);
+		firm.admins.push(user._id);
 		firm.save(function(err,doc){
 			if(err){
 				console.log(err);
@@ -501,21 +501,18 @@ module.exports.getUser = getUser;
 module.exports.createCoUser=function(request,response){
 	var token = getToken(request.headers);
 	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			res.send({
+		if(err){
+			console.log(err);
+			response.send({
 				success:false,
-				msg:err
+				msg:"1"
 			});
 		}
+		else if(!user){
+			console.log("5");
+		}
 		else{
-			if (err) {
-				response.send({
-				success: false,
-				msg: err
-				});
-			} else {
-				Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+			var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
 					if(err){
 						console.log("error in finding firm" + err);
 					}
@@ -525,14 +522,14 @@ module.exports.createCoUser=function(request,response){
 					else{
 						var CoUser = new User({
 						createdOn: Date.now(),
-						email : reqBody.email,
-						password : reqBody.password,
-						phone:req.body.phone,
+						email : request.body.email,
+						password : request.body.password,
+						phone:request.body.phone,
 						isAdmin:false,
-						firm : firm
+						firm : firm._id
 					});
 			
-					firm.co_users.push(CoUser);
+					firm.co_users.push(CoUser._id);
 					firm.save(function(err, doc) {
 						if (err) {
 								response.send({
@@ -540,44 +537,35 @@ module.exports.createCoUser=function(request,response){
 									msg: err
 								});
 						} else {
-							response.send({
-								success: true,
-								msg:doc._id +"bjhbyhjb  " + doc
+							CoUser.save(function(err, doc){
+								if(err){
+									if(err.code == 11000){
+										console.log(err);
+										// response.send({
+										// 	success : false,
+										// 	msg : "User already registered"
+										// });
+									}
+									else{
+										console.log(err);						// response.send({
+										// 	success : false,
+										// 	msg : err
+										// });
+									}
+								}
+								else {
+									response.json({
+										success:true,
+										msg:doc._id
+									});
+									
+								}
 							});
-							}
+						}
 					});
-					
 					}
 				});
-
-				
-				user.save(function(err, doc){
-					if(err){
-						if(err.code == 11000){
-							res.send({
-								success : false,
-								msg : "User already registered"
-							});
-						}
-						else{
-							res.send({
-								success : false,
-								msg : err
-							});
-						}
-					}
-					else {
-						
-						res.json({
-							success:true,
-							msg:doc._id
-						});
-						
-					}
-				});
-			}
 		}
 	});
-
 }
 

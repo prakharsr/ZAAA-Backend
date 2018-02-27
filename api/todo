@@ -1,0 +1,24 @@
+deleting co-users
+setting roles
+image uploading
+
+
+templates
+bank details(IFSC)
+edit credentials(
+    change : {
+        password,
+        email,
+        phoneNumber,
+        roles
+    }
+)
+
+
+SMSVerification = function(mobile);
+
+/user/getProfile
+/user/setProfile
+
+
+
