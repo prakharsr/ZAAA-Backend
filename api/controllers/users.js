@@ -5,6 +5,7 @@ var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
+var path = require('path');
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
@@ -784,35 +785,44 @@ module.exports.verifyEmail = function(request, response){
 							})
 						}
 						else{
-
-					var storage = multer.diskStorage({
-						destination: function(request,file,cb){
-							cb(null,dirname);
-						},
-						filename: function(request, file,cb){
-							cb(null, file.fieldname + '-'+Date.now());
-						}
-					});
-					var upload = multer({storage : storage}).single('userPhoto');
-
-					upload(request,response,function(err){
-						if(err){
-							response.send({
-								success : false,
-								msg : "error uploading file." + err
-							});
-						}
-						else{
-							response.send({
-								success : true,
-								msg : "File is uploaded."
-							});
-						}
-					});
+                            var storage = multer.diskStorage({
+                                destination: function(request,file,cb){
+                                    cb(null,dirname);
+                                },
+                                filename: function(request, file,cb){
+                                    user.photo = dirname+'/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
+                                    cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
+                                }
+                            });                            
+                            var upload = multer({storage : storage}).single('userPhoto');
+                            upload(request,response,function(err){
+                                if(err){
+                                    response.send({
+                                        success : false,
+                                        msg : "error uploading file." + err
+                                    });
+                                }
+                                else{
+                                    user.save(function(err,doc){
+                                        if (err) {
+                                            console.log(err);
+                                            response.send({
+                                                success: false,
+                                                msg: err
+                                            });
+                                        } 
+                                        else{
+                                        response.send({
+                                            success : true,
+                                            msg : "File is uploaded."
+                                        });
+                                    }
+                                });
+                            }
+                            });
 						}
 					});
 				});
 				}
 			});
 		}
-		
