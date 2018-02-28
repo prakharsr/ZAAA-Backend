@@ -14,6 +14,7 @@ router.post('/user/plan', user.setPlan);
 router.post('/user/state', user.setState);
 router.get('/user/state', user.getState);
 router.post('/user/co_user', user.createCoUser);
+router.get('/user/co_user', user.getCoUsers);
 router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
 router.post('/user/image', user.profileImage);

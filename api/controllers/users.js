@@ -108,7 +108,9 @@ module.exports.login = function(req,res){
 										msg: {
 											msg: user._id,
 											token:"JWT "+ token,
-										}
+											
+										},
+										user:user
 									});
 								}
 							});
@@ -171,7 +173,8 @@ module.exports.login = function(req,res){
 										msg: {
 											msg: user._id,
 											token:"JWT "+ token,
-										}
+										},
+										user:user
 									});
 								}
 							});
