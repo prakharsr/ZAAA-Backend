@@ -725,7 +725,7 @@ module.exports.verifyEmail = function(request, response){
 		}
 
 		module.exports.getRoles = function(request,response){
-			var user = User.findById(mongoose.mongo.ObjectId(request.id) , function(err,user){
+			var user = User.findById(mongoose.mongo.ObjectId(request.params.id) , function(err,user){
 				if(err||!user){
 					console.log("User not found");
 					response.send({
