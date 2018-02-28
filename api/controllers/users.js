@@ -601,16 +601,17 @@ module.exports.verifyEmail = function(request, response){
 										if(err){
 											if(err.code == 11000){
 												console.log(err);
-												// response.send({
-												// 	success : false,
-												// 	msg : "User already registered"
-												// });
+												response.send({
+													success : false,
+													msg : "User already registered"
+												});
 											}
 											else{
-												console.log(err);						// response.send({
-												// 	success : false,
-												// 	msg : err
-												// });
+												console.log(err);	
+												response.send({
+													success : false,
+													msg : err
+												});
 											}
 										}
 										else {
