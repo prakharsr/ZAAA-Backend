@@ -521,8 +521,6 @@ module.exports.verifyEmail = function(request, response){
 			});
 		};
 		
-		
-		
 		function getUser(token,req,res, cb){
 			console.log(token);
 			var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
@@ -665,6 +663,80 @@ module.exports.verifyEmail = function(request, response){
 					  });
 				}
 			});
-
 		}
+	
+		
+		module.exports.setRole = function(request,response){
+			var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					if(user.isAdmin){
+						user.roles.all = true;
+						user.save(function(err,doc){
+							if (err) {
+								console.log(err);
+								response.send({
+									success: false,
+									msg: err
+								});
+							} else {
+								response.send({
+									success : true,
+									msg : "Roles set for admin"
+								});
+							}
+						});
+					}
+					else{
+						user.roles.Release_order 		 = request.body.release_order;
+						user.roles.Invoice				 = request.body.invoice;
+						user.roles.Payment_reciepts		 = request.body.payment_reciepts;
+						user.roles.Accounts				 = request.body.accounts;
+						user.roles.Reports				 = request.body.reports;
+						user.roles.directory.media_house = request.body.media_house;
+						user.roles.directory.clients	 = request.body.clients;
+						user.roles.directory.executives	 = request.body.executives;
+						user.save(function(err,doc){
+							if (err) {
+								console.log(err);
+								response.send({
+									success: false,
+									msg: err
+								});
+							} else {
+								response.send({
+									success : true,
+									msg : "Roles set for co-user"
+								});
+							}
+						});
+					}
+				}
+			});
+		}
+
+		module.exports.getRoles = function(request,response){
+			var user = User.findById(mongoose.mongo.ObjectId(request.id) , function(err,user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					response.send({
+						success : true,
+						msg : user.roles
+					});
+				}
+			});
+		}
+		
 		

@@ -37,18 +37,20 @@ var UserSchema = new mongoose.Schema({
         ref:"Firm"
     },
     roles:{
-        All:Boolean,
+        All:{
+            type: Boolean,
+            default : false
+        },
         Release_order:Number,
         Invoice:Number,
         Payment_reciepts:Number,
         Accounts:Number,
         Reports:Number,
-       directory:{
+        directory:{
            media_house:Boolean,
            clients:Boolean,
            executives:Boolean
-
-       } 
+       }
     }
 },
 {
