@@ -10,12 +10,12 @@ var UserSchema = new mongoose.Schema({
         type : Boolean,
         default : false,
     },
-    name : String,
-    designation:String,
     email :{
         type:String,
         unique: true
     },
+    name :String,
+    designation:String,
     phone : String,
     authyId:String,
     password : String,

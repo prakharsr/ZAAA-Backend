@@ -18,6 +18,7 @@ module.exports.signup = function(req,res){
 		var firm = new Firm();
 		var user = new User({
 			createdOn: Date.now(),
+			name:reqBody.name||reqBody.email.substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email,
 			password : reqBody.password,
 			phone:"",
@@ -580,6 +581,7 @@ module.exports.verifyEmail = function(request, response){
 						else{
 							var CoUser = new User({
 								createdOn: Date.now(),
+								name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
 								email : request.body.email,
 								password : request.body.password,
 								phone:request.body.phone,
