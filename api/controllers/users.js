@@ -105,11 +105,8 @@ module.exports.login = function(req,res){
 									res.json({
 										
 										success: true,
-										msg: {
-											msg: user._id,
-											token:"JWT "+ token,
-											
-										},
+										msg: user._id,
+										token:"JWT "+ token,
 										user:user
 									});
 								}
@@ -119,8 +116,10 @@ module.exports.login = function(req,res){
 							var token = jwt.sign(token_data, config.SECRET);
 							
 							res.json({
-								success:true,
+								success: true,
+								msg: user._id,
 								token:"JWT "+ token,
+								user:user,
 								msg:""
 							});
 							
@@ -170,10 +169,8 @@ module.exports.login = function(req,res){
 									res.json({
 										
 										success: true,
-										msg: {
-											msg: user._id,
-											token:"JWT "+ token,
-										},
+										msg: user._id,
+										token:"JWT "+ token,
 										user:user
 									});
 								}
@@ -185,7 +182,8 @@ module.exports.login = function(req,res){
 							res.json({
 								success:true,
 								token:"JWT "+ token,
-								msg:""
+								msg:"",
+								user:user
 							});
 							
 						}
