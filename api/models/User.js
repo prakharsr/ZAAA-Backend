@@ -35,6 +35,20 @@ var UserSchema = new mongoose.Schema({
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
+    },
+    roles:{
+        All:Boolean,
+        Release_order:Number,
+        Invoice:Number,
+        Payment_reciepts:Number,
+        Accounts:Number,
+        Reports:Number,
+       directory:{
+           media_house:Boolean,
+           clients:Boolean,
+           executives:Boolean
+
+       } 
     }
 },
 {

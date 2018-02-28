@@ -626,5 +626,48 @@ module.exports.verifyEmail = function(request, response){
 				}
 			});
 		}
-		
+
+		module.exports.getCoUsers= function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:"1"
+					});
+				}
+				else if(!user){
+					console.log("5");
+				}
+				else{
+					var firm=	Firm.findById(user.firm,function(err,firm){
+						if(err){
+							console.log("error in finding firm" + err);
+						}
+						if(!firm){
+							console.log("firm does not exist for this admin");
+						}
+						else{
+						 User.find({firm:firm,isAdmin:false}).exec(function (err, co_users) {
+								if (err){
+									response.json({
+										success:false,
+										msg: "err in finding all co_user with same firm " + err
+									});
+								}
+								else{
+									response.json({
+										success:true,
+										co_users: firm.co_users,
+									});
+								}
+							  });
+							
+						}
+					});
+				}
+			});
+
+		}
 		
