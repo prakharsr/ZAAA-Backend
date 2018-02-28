@@ -4,7 +4,7 @@ var config = require('../../config');
 
 
 var FirmSchema = new mongoose.Schema({
-    FirmName : {type:String},
+    FirmName : String,
     TagLine: String,
     DisplayName: String,
     admins : [{

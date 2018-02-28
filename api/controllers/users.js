@@ -4,6 +4,7 @@ var Firm = require('../models/Firm');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
+var mkdirp = require('mkdirp');
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
@@ -743,4 +744,74 @@ module.exports.verifyEmail = function(request, response){
 			});
 		}
 		
+		module.exports.profileImage = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else if(!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg : "User not found"
+					});
+				}
+				else{
+					var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+						if(err){
+							console.log(err);
+							response.send({
+								success:false,
+								msg:err
+							});
+						}
+					
+					var str;
+					if(user.isAdmin) str="/admins/";
+					else str="/cousers/";
+					var dirname = __dirname + '../../../public/images/'+firm._id+str+user._id;
+					mkdirp(dirname, function(err){
+						if(err){
+							res.send({
+								success : false,
+								msg : "Directory can not be created"
+							})
+						}
+						else{
+
+					var storage = multer.diskStorage({
+						destination: function(request,file,cb){
+							cb(null,dirname);
+						},
+						filename: function(request, file,cb){
+							cb(null, file.fieldname + '-'+Date.now());
+						}
+					});
+					var upload = multer({storage : storage}).single('userPhoto');
+
+					upload(request,response,function(err){
+						if(err){
+							response.send({
+								success : false,
+								msg : "error uploading file." + err
+							});
+						}
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded."
+							});
+						}
+					});
+						}
+					});
+				});
+				}
+			});
+		}
 		

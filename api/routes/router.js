@@ -16,5 +16,6 @@ router.get('/user/state', user.getState);
 router.post('/user/co_user', user.createCoUser);
 router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
+router.post('/user/image', user.profileImage);
 
 module.exports = router;
