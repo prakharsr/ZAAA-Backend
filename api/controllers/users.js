@@ -106,11 +106,8 @@ module.exports.login = function(req,res){
 									res.json({
 										
 										success: true,
-										msg: {
-											msg: user._id,
-											token:"JWT "+ token,
-											
-										},
+										msg: user._id,
+										token:"JWT "+ token,
 										user:user
 									});
 								}
@@ -120,8 +117,10 @@ module.exports.login = function(req,res){
 							var token = jwt.sign(token_data, config.SECRET);
 							
 							res.json({
-								success:true,
+								success: true,
+								msg: user._id,
 								token:"JWT "+ token,
+								user:user,
 								msg:""
 							});
 							
@@ -171,10 +170,8 @@ module.exports.login = function(req,res){
 									res.json({
 										
 										success: true,
-										msg: {
-											msg: user._id,
-											token:"JWT "+ token,
-										},
+										msg: user._id,
+										token:"JWT "+ token,
 										user:user
 									});
 								}
@@ -186,7 +183,8 @@ module.exports.login = function(req,res){
 							res.json({
 								success:true,
 								token:"JWT "+ token,
-								msg:""
+								msg:"",
+								user:user
 							});
 							
 						}
@@ -583,51 +581,64 @@ module.exports.verifyEmail = function(request, response){
 							console.log("firm does not exist for this admin");
 						}
 						else{
-							var CoUser = new User({
-								createdOn: Date.now(),
-								name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
-								email : request.body.email,
-								password : request.body.password,
-								phone:request.body.phone,
-								isAdmin:false,
-								firm : firm._id
-							});
-							
-							firm.co_users.push(CoUser._id);
-							firm.save(function(err, doc) {
-								if (err) {
-									response.send({
-										success: false,
-										msg: err
+							var planCreatedOn = firm.plan.planCreatedOn;
+							var plan = Plan.findById(firm.plan.planID, function(err, plan, planCreatedOn){
+								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers)){
+									var CoUser = new User({
+										createdOn: Date.now(),
+										name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
+										email : request.body.email,
+										password : request.body.password,
+										phone:request.body.phone,
+										isAdmin:false,
+										firm : firm._id
 									});
-								} else {
-									CoUser.save(function(err, doc){
-										if(err){
-											if(err.code == 11000){
-												console.log(err);
-												response.send({
-													success : false,
-													msg : "User already registered"
-												});
-											}
-											else{
-												console.log(err);	
-												response.send({
-													success : false,
-													msg : err
-												});
-											}
-										}
-										else {
-											response.json({
-												success:true,
-												msg:doc._id
+									
+									firm.co_users.push(CoUser._id);
+									firm.save(function(err, doc) {
+										if (err) {
+											response.send({
+												success: false,
+												msg: err
 											});
-											
+										} else {
+											CoUser.save(function(err, doc){
+												if(err){
+													if(err.code == 11000){
+														console.log(err);
+														response.send({
+															success : false,
+															msg : "User already registered"
+														});
+													}
+													else{
+														console.log(err);	
+														response.send({
+															success : false,
+															msg : err
+														});
+													}
+												}
+												else {
+													response.json({
+														success:true,
+														msg:doc._id
+													});
+													
+												}
+											});
 										}
 									});
 								}
-							});
+								else{
+									response.json({
+										success:false,
+										msg:"co_user limit for plan exceeded"
+									});
+								}
+
+							})
+
 						}
 					});
 				}
@@ -673,7 +684,133 @@ module.exports.verifyEmail = function(request, response){
 				}
 			});
 		}
-        
+
+		module.exports.createAdmins=function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:"1"
+					});
+				}
+				else if(!user){
+					console.log("5");
+				}
+				else{
+					var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+						if(err){
+							console.log("error in finding firm" + err);
+						}
+						if(!firm){
+							console.log("firm does not exist for this admin");
+						}
+						else{
+							var planCreatedOn = firm.plan.planCreatedOn;
+							var plan = Plan.findById(firm.plan.planID, function(err, plan, planCreatedOn){
+								if((firm.co_users.length +firm.admins.length) < (plan.maxUsers)&&(firm.admins.length <plan.maxAdmins)){
+									var newAdmin = new User({
+										createdOn: Date.now(),
+										name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
+										email : request.body.email,
+										password : request.body.password,
+										phone:request.body.phone,
+										isAdmin:true,
+										firm : firm._id
+									});
+									
+									firm.admins.push(newAdmin._id);
+									firm.save(function(err, doc) {
+										if (err) {
+											response.send({
+												success: false,
+												msg: err
+											});
+										} else {
+											CoUser.save(function(err, doc){
+												if(err){
+													if(err.code == 11000){
+														console.log(err);
+														response.send({
+															success : false,
+															msg : "User already registered"
+														});
+													}
+													else{
+														console.log(err);	
+														response.send({
+															success : false,
+															msg : err
+														});
+													}
+												}
+												else {
+													response.json({
+														success:true,
+														msg:doc._id
+													});
+													
+												}
+											});
+										}
+									});
+								}
+								else{
+									response.json({
+										success:false,
+										msg:"Admin limit for plan exceeded"
+									});
+								}
+
+							})
+
+						}
+					});
+				}
+			});
+		}
+
+		module.exports.getAdmins= function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:"1"
+					});
+				}
+				else if(!user){
+					console.log("5");
+				}
+				else{
+					User.find({firm:user.firm,isAdmin:true}).exec(function (err, admins) {
+						if (err||!co_users){
+							if(err){
+								response.json({
+									success:false,
+									msg: "err in finding admins " + err
+								});
+							}
+							else{
+								response.json({
+									success:false,
+									msg: "no extra admin for this admin/firm" + err
+								});
+							}
+						}
+						else{
+							response.json({
+								success:true,
+								admins: admins,
+							});
+						}
+					  });
+				}
+			});
+		}
+	
 		
 		module.exports.setRole = function(request,response){
 			var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){

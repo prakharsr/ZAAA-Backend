@@ -20,6 +20,9 @@ router.get('/user/state', user.getState);
 router.post('/user/co_user', user.createCoUser);
 router.get('/user/co_user', user.getCoUsers);
 
+router.post('/user/admins', user.createAdmins);
+router.get('/user/admins', user.getAdmins);
+
 router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
 
