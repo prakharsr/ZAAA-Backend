@@ -3,7 +3,6 @@ var User = require('../models/User');
 var Firm = require('../models/Firm');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
-var multer = require('multer');
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
