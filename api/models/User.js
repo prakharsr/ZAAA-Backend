@@ -15,6 +15,7 @@ var UserSchema = new mongoose.Schema({
         unique: true
     },
     name :String,
+    photo : String,
     designation:String,
     phone : String,
     authyId:String,
@@ -43,7 +44,7 @@ var UserSchema = new mongoose.Schema({
         },
         Release_order:Number,
         Invoice:Number,
-        Payment_reciepts:Number,
+        Payment_receipts:Number,
         Accounts:Number,
         Reports:Number,
         directory:{

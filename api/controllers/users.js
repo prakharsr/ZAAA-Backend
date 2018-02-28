@@ -3,6 +3,7 @@ var User = require('../models/User');
 var Firm = require('../models/Firm');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
+var multer = require('multer');
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
@@ -699,7 +700,7 @@ module.exports.verifyEmail = function(request, response){
 					else{
 						user.roles.Release_order 		 = request.body.release_order;
 						user.roles.Invoice				 = request.body.invoice;
-						user.roles.Payment_reciepts		 = request.body.payment_reciepts;
+						user.roles.Payment_receipts		 = request.body.payment_receipts;
 						user.roles.Accounts				 = request.body.accounts;
 						user.roles.Reports				 = request.body.reports;
 						user.roles.directory.media_house = request.body.media_house;
