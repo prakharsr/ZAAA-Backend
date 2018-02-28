@@ -15,6 +15,6 @@ router.post('/user/state', user.setState);
 router.get('/user/state', user.getState);
 router.post('/user/co_user', user.createCoUser);
 router.post('/user/role' , user.setRole);
-router.get('/user/role', user.getRoles);
+router.get('/user/role/:id', user.getRoles);
 
 module.exports = router;
