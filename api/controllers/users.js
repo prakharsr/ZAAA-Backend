@@ -581,51 +581,64 @@ module.exports.verifyEmail = function(request, response){
 							console.log("firm does not exist for this admin");
 						}
 						else{
-							var CoUser = new User({
-								createdOn: Date.now(),
-								name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
-								email : request.body.email,
-								password : request.body.password,
-								phone:request.body.phone,
-								isAdmin:false,
-								firm : firm._id
-							});
-							
-							firm.co_users.push(CoUser._id);
-							firm.save(function(err, doc) {
-								if (err) {
-									response.send({
-										success: false,
-										msg: err
+							var planCreatedOn = firm.plan.planCreatedOn;
+							var plan = Plan.findById(firm.plan.planID, function(err, plan, planCreatedOn){
+								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers)){
+									var CoUser = new User({
+										createdOn: Date.now(),
+										name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
+										email : request.body.email,
+										password : request.body.password,
+										phone:request.body.phone,
+										isAdmin:false,
+										firm : firm._id
 									});
-								} else {
-									CoUser.save(function(err, doc){
-										if(err){
-											if(err.code == 11000){
-												console.log(err);
-												response.send({
-													success : false,
-													msg : "User already registered"
-												});
-											}
-											else{
-												console.log(err);	
-												response.send({
-													success : false,
-													msg : err
-												});
-											}
-										}
-										else {
-											response.json({
-												success:true,
-												msg:doc._id
+									
+									firm.co_users.push(CoUser._id);
+									firm.save(function(err, doc) {
+										if (err) {
+											response.send({
+												success: false,
+												msg: err
 											});
-											
+										} else {
+											CoUser.save(function(err, doc){
+												if(err){
+													if(err.code == 11000){
+														console.log(err);
+														response.send({
+															success : false,
+															msg : "User already registered"
+														});
+													}
+													else{
+														console.log(err);	
+														response.send({
+															success : false,
+															msg : err
+														});
+													}
+												}
+												else {
+													response.json({
+														success:true,
+														msg:doc._id
+													});
+													
+												}
+											});
 										}
 									});
 								}
-							});
+								else{
+									response.json({
+										success:false,
+										msg:"co_user limit for plan exceeded"
+									});
+								}
+
+							})
+
 						}
 					});
 				}
