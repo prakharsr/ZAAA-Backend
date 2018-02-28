@@ -641,31 +641,28 @@ module.exports.verifyEmail = function(request, response){
 					console.log("5");
 				}
 				else{
-					var firm=	Firm.findById(user.firm,function(err,firm){
-						if(err){
-							console.log("error in finding firm" + err);
-						}
-						if(!firm){
-							console.log("firm does not exist for this admin");
+					User.find({firm:user.firm,isAdmin:false}).exec(function (err, co_users) {
+						if (err||!co_users){
+							if(err){
+								response.json({
+									success:false,
+									msg: "err in finding co_users " + err
+								});
+							}
+							else{
+								response.json({
+									success:false,
+									msg: "no co_user for this admin/firm" + err
+								});
+							}
 						}
 						else{
-						 User.find({firm:firm,isAdmin:false}).exec(function (err, co_users) {
-								if (err){
-									response.json({
-										success:false,
-										msg: "err in finding all co_user with same firm " + err
-									});
-								}
-								else{
-									response.json({
-										success:true,
-										co_users: firm.co_users,
-									});
-								}
-							  });
-							
+							response.json({
+								success:true,
+								co_users: co_users,
+							});
 						}
-					});
+					  });
 				}
 			});
 
