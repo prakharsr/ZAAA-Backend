@@ -24,7 +24,7 @@ module.exports.signup = function(req,res){
 			isAdmin:true,
 			firm : firm._id
 		});
-
+		
 		firm.admins.push(user._id);
 		firm.save(function(err,doc){
 			if(err){
@@ -67,7 +67,7 @@ module.exports.signup = function(req,res){
 };
 //POST https://localhost:8000/api/login
 module.exports.login = function(req,res){
-
+	
 	if(req.body.phone){
 		var user =	User.findOne({phone:req.body.phone}, function(err, user){
 			if(err) throw err;
@@ -78,19 +78,48 @@ module.exports.login = function(req,res){
 				});
 			}
 			else{
-				user.comparePassword(req.body.password, function(err, isMatch){
+				user.comparePassword(req.body.password, function(err, isMatch,user){
 					if (isMatch && !err){
 						var token_data = {
 							id: user._id,
 							dateLogOn: new Date()
 						};
-						var token = jwt.sign(token_data, config.SECRET);
-						
-						res.json({
-							success:true,
-							token:"JWT "+ token,
-							msg:""
-						});
+						if(!(user.isAdmin||user.mobile_verified)){
+							user.sendAuthyToken(function(err) {
+								if (err) {
+									res.send({
+										success: false,
+										msg: " in sendAuthyToken" + err
+									});
+								} else {
+									var token_data = {
+										id: user._id,
+										dateLogOn: new Date()
+									};
+									// Send for verification page
+									var token = jwt.sign(token_data, config.SECRET);
+									
+									res.json({
+										
+										success: true,
+										msg: {
+											msg: user._id,
+											token:"JWT "+ token,
+										}
+									});
+								}
+							});
+						}
+						else{
+							var token = jwt.sign(token_data, config.SECRET);
+							
+							res.json({
+								success:true,
+								token:"JWT "+ token,
+								msg:""
+							});
+							
+						}
 					} else{
 						res.send({
 							success:false,
@@ -100,7 +129,7 @@ module.exports.login = function(req,res){
 				});
 			}	
 		});
-
+		
 	}
 	else if (req.body.email){
 		var user =	User.findOne({email:req.body.email}, function(err, user){
@@ -112,19 +141,48 @@ module.exports.login = function(req,res){
 				});
 			}
 			else{
-				user.comparePassword(req.body.password, function(err, isMatch){
+				user.comparePassword(req.body.password, function(err, isMatch,user){
 					if (isMatch && !err){
 						var token_data = {
 							id: user._id,
 							dateLogOn: new Date()
 						};
-						var token = jwt.sign(token_data, config.SECRET);
-						
-						res.json({
-							success:true,
-							token:"JWT "+ token,
-							msg:""
-						});
+						if(!(user.isAdmin||user.mobile_verified)){
+							user.sendAuthyToken(function(err) {
+								if (err) {
+									res.send({
+										success: false,
+										msg: " in sendAuthyToken" + err
+									});
+								} else {
+									var token_data = {
+										id: user._id,
+										dateLogOn: new Date()
+									};
+									// Send for verification page
+									var token = jwt.sign(token_data, config.SECRET);
+									
+									res.json({
+										
+										success: true,
+										msg: {
+											msg: user._id,
+											token:"JWT "+ token,
+										}
+									});
+								}
+							});
+						}
+						else{
+							var token = jwt.sign(token_data, config.SECRET);
+							
+							res.json({
+								success:true,
+								token:"JWT "+ token,
+								msg:""
+							});
+							
+						}
 					} else{
 						res.send({
 							success:false,
@@ -181,7 +239,7 @@ module.exports.setMobile=function(req, res){
 							}
 						});
 					} else {
-
+						
 						//If we do not want to enable sms verification lets register and send confirmation
 						res.send({
 							success: true,
@@ -210,13 +268,13 @@ module.exports.sendVerMail = function(request, response){
 						success:false,
 						msg:"failed"
 					});
-
+					
 				}
 				else{
 					response.send({
-							success:true,
-							msg:"done"
-						});
+						success:true,
+						msg:"done"
+					});
 				}
 			});
 		}
@@ -235,7 +293,7 @@ module.exports.verifyEmail = function(request, response){
 			user.email_verified = true;
 			user.save(postSave(err));
 		}
-	
+		
 		// after we save the user, handle sending a confirmation
 		function postSave(err) {
 			if (err) {
@@ -244,328 +302,329 @@ module.exports.verifyEmail = function(request, response){
 					msg: "There was a problem validating your account."
 				});
 			}
-	
+			
 			else{
 				return response.send({
 					success:true,
 					msg:"Email  verified"});
+				}
+				
 			}
-		
-		}
-	
-		// respond with an error not current used
-		function die(message) {
-			response.send({
-				success: false,
-				msg: message
-			});
-		}
-	
-
-
+			
+			// respond with an error not current used
+			function die(message) {
+				response.send({
+					success: false,
+					msg: message
+				});
+			}
+			
+			
+			
 		});
-}
-module.exports.verifyMobile = function(request, response) {
-  	var token = getToken(request.headers);
-	var user = getUser(token, request, response, function(err, user){
-		if(err){
-			console.log(err);
-			return response.send({
-                success: false,
-                msg: "err" +err
-            });		var _id = mongoose.mongo.ObjectId(decoded.id);
-		}
-		if(!user){
-			return response.send({
-				success:false,
-				msg: "err not found" + err
-			});
-		}
-		else{
-			user.verifyAuthyToken(request.body.code, postVerify);
-			// Handle verification response
-		function postVerify(err, self) {
-			if (err) {
+	}
+	module.exports.verifyMobile = function(request, response) {
+		var token = getToken(request.headers);
+		var user = getUser(token, request, response, function(err, user){
+			if(err){
+				console.log(err);
 				return response.send({
 					success: false,
-					msg: "The token you entered was invalid - please retry."
-				});
+					msg: "err" +err
+				});		var _id = mongoose.mongo.ObjectId(decoded.id);
 			}
-	
-			// If the token was valid, flip the bit to validate the user account
-			user.mobile_verified = true;
-			user.save(postSave(err));
-		}
-	
-		// after we save the user, handle sending a confirmation
-		function postSave(err) {
-			if (err) {
+			if(!user){
 				return response.send({
-					success: true,
-					msg: "There was a problem validating your account."
+					success:false,
+					msg: "err not found" + err
 				});
 			}
-	
 			else{
-				return response.send({
-					success:true,
-					msg:"phone number verified"});
-			}
-		
-		}
-	
-		// respond with an error not current used
-		function die(message) {
-			response.send({
-				success: false,
-				msg: message
-			});
-		}
-	
-
-
-		}
-	});
-	    
-}
-
-module.exports.setState = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			res.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			user.state = request.body.state;
-			user.save(function(err, doc) {
-				if (err) {
+				user.verifyAuthyToken(request.body.code, postVerify);
+				// Handle verification response
+				function postVerify(err, self) {
+					if (err) {
+						return response.send({
+							success: false,
+							msg: "The token you entered was invalid - please retry."
+						});
+					}
+					
+					// If the token was valid, flip the bit to validate the user account
+					user.mobile_verified = true;
+					user.save(postSave(err));
+				}
+				
+				// after we save the user, handle sending a confirmation
+				function postSave(err) {
+					if (err) {
+						return response.send({
+							success: true,
+							msg: "There was a problem validating your account."
+						});
+					}
+					
+					else{
+						return response.send({
+							success:true,
+							msg:"phone number verified"});
+						}
+						
+					}
+					
+					// respond with an error not current used
+					function die(message) {
 						response.send({
 							success: false,
-							msg: err
+							msg: message
 						});
-				} else {
-					response.send({
-						success: true
-					});
 					}
-			});
-		}
-	});	
-};
-
-module.exports.getState = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			res.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			if (err) {
-				response.send({
-				success: false,
-				msg: err
-				});
-			} else {
-				response.send({
-					success: true,
-					msg: {
-						state : user.state
-					}
-				});
-			}
-		}
-	});
-};
-
-
-module.exports.setPlan = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			res.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-				
-
-		Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
-				if(err){
-					console.log("error in finding firm" + err);
+					
+					
+					
 				}
-				if(!firm){
-					console.log("firm does not exist for this admin");
+			});
+			
+		}
+		
+		module.exports.setState = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
 				}
 				else{
-				firm.plan.Plan = request.body.planID;
-				firm.plan.paymentID = request.body.paymentID;
-				firm.plan.CreatedOn = Date.now();
-				firm.save(function(err, doc) {
-					if (err) {
+					user.state = request.body.state;
+					user.save(function(err, doc) {
+						if (err) {
 							response.send({
 								success: false,
 								msg: err
 							});
-					} else {
-						response.send({
-							success: true,
-							msg:doc._id +"bjhbyhjb  " + doc
-						});
+						} else {
+							response.send({
+								success: true
+							});
 						}
-				});
-				
+					});
 				}
-			});
-		}
-	});
-};
-
-module.exports.setRtemplate = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			res.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			user.setRtemplate = Template;
-			user.paymentID = request.body.paymentID;
-			user.planCreatedOn = Date.now();
-			user.save(function(err, doc) {
-				if (err) {
+			});	
+		};
+		
+		module.exports.getState = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					if (err) {
 						response.send({
 							success: false,
 							msg: err
 						});
-				} else {
-					response.send({
-						success: true,
-						msg: {
-							msg: doc.planID
+					} else {
+						response.send({
+							success: true,
+							msg: {
+								state : user.state
+							}
+						});
+					}
+				}
+			});
+		};
+		
+		
+		module.exports.setPlan = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					
+					
+					Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+						if(err){
+							console.log("error in finding firm" + err);
+						}
+						if(!firm){
+							console.log("firm does not exist for this admin");
+						}
+						else{
+							firm.plan.Plan = request.body.planID;
+							firm.plan.paymentID = request.body.paymentID;
+							firm.plan.CreatedOn = Date.now();
+							firm.save(function(err, doc) {
+								if (err) {
+									response.send({
+										success: false,
+										msg: err
+									});
+								} else {
+									response.send({
+										success: true,
+										msg:doc._id +"bjhbyhjb  " + doc
+									});
+								}
+							});
+							
 						}
 					});
-					}
+				}
 			});
-		}
-	});
-};
-
-
-
-function getUser(token,req,res, cb){
-	console.log(token);
-	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
-	User.findById(decoded.id, function(err, doc) {
-		if (err || !doc) {
-			return  cb(err,null);
-		}
-		else{
-			console.log(doc);
-			return cb(null, doc);
-		}
-	});
-	});
-}
-
-function getToken(headers) {
-	if (headers && headers.authorization) {
-		var parted = headers.authorization.split(' ');
-		if (parted.length === 2) {
-			return parted[1];
-		} else {
-			return null;
-		}
-	} else {
-		return null;
-	}
-}
+		};
 		
-	
-module.exports.getToken = getToken;
-module.exports.getUser = getUser;
-
-
-module.exports.createCoUser=function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:"1"
-			});
-		}
-		else if(!user){
-			console.log("5");
-		}
-		else{
-			var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
-					if(err){
-						console.log("error in finding firm" + err);
-					}
-					if(!firm){
-						console.log("firm does not exist for this admin");
-					}
-					else{
-						var CoUser = new User({
-						createdOn: Date.now(),
-						email : request.body.email,
-						password : request.body.password,
-						phone:request.body.phone,
-						isAdmin:false,
-						firm : firm._id
+		module.exports.setRtemplate = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
 					});
-			
-					firm.co_users.push(CoUser._id);
-					firm.save(function(err, doc) {
+				}
+				else{
+					user.setRtemplate = Template;
+					user.paymentID = request.body.paymentID;
+					user.planCreatedOn = Date.now();
+					user.save(function(err, doc) {
 						if (err) {
-								response.send({
-									success: false,
-									msg: err
-								});
+							response.send({
+								success: false,
+								msg: err
+							});
 						} else {
-							CoUser.save(function(err, doc){
-								if(err){
-									if(err.code == 11000){
-										console.log(err);
-										// response.send({
-										// 	success : false,
-										// 	msg : "User already registered"
-										// });
-									}
-									else{
-										console.log(err);						// response.send({
-										// 	success : false,
-										// 	msg : err
-										// });
-									}
-								}
-								else {
-									response.json({
-										success:true,
-										msg:doc._id
-									});
-									
+							response.send({
+								success: true,
+								msg: {
+									msg: doc.planID
 								}
 							});
 						}
 					});
+				}
+			});
+		};
+		
+		
+		
+		function getUser(token,req,res, cb){
+			console.log(token);
+			var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
+				User.findById(decoded.id, function(err, doc) {
+					if (err || !doc) {
+						return  cb(err,null);
+					}
+					else{
+						console.log(doc);
+						return cb(null, doc);
 					}
 				});
+			});
 		}
-	});
-}
-
+		
+		function getToken(headers) {
+			if (headers && headers.authorization) {
+				var parted = headers.authorization.split(' ');
+				if (parted.length === 2) {
+					return parted[1];
+				} else {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		}
+		
+		
+		module.exports.getToken = getToken;
+		module.exports.getUser = getUser;
+		
+		
+		module.exports.createCoUser=function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:"1"
+					});
+				}
+				else if(!user){
+					console.log("5");
+				}
+				else{
+					var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+						if(err){
+							console.log("error in finding firm" + err);
+						}
+						if(!firm){
+							console.log("firm does not exist for this admin");
+						}
+						else{
+							var CoUser = new User({
+								createdOn: Date.now(),
+								email : request.body.email,
+								password : request.body.password,
+								phone:request.body.phone,
+								isAdmin:false,
+								firm : firm._id
+							});
+							
+							firm.co_users.push(CoUser._id);
+							firm.save(function(err, doc) {
+								if (err) {
+									response.send({
+										success: false,
+										msg: err
+									});
+								} else {
+									CoUser.save(function(err, doc){
+										if(err){
+											if(err.code == 11000){
+												console.log(err);
+												// response.send({
+												// 	success : false,
+												// 	msg : "User already registered"
+												// });
+											}
+											else{
+												console.log(err);						// response.send({
+												// 	success : false,
+												// 	msg : err
+												// });
+											}
+										}
+										else {
+											response.json({
+												success:true,
+												msg:doc._id
+											});
+											
+										}
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+		
+		
