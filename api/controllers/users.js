@@ -460,8 +460,6 @@ module.exports.verifyEmail = function(request, response){
 					});
 				}
 				else{
-					
-					
 					Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
 						if(err){
 							console.log("error in finding firm" + err);
@@ -914,7 +912,7 @@ module.exports.profileImage = function(request,response){
                 var str;
                 if(user.isAdmin) str="/admins/";
                 else str="/cousers/";
-                var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
+				var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
                 mkdirp(dirname, function(err){
                     if(err){
                         res.send({
@@ -928,11 +926,11 @@ module.exports.profileImage = function(request,response){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                user.photo = dirname+'/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
+                                user.photo = '/public/images/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
                                 cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
                             }
                         });                            
-                        var upload = multer({storage : storage}).single('userPhoto');
+                        var upload = multer({storage : storage}).single('userImage');
                         upload(request,response,function(err){
                             if(err){
                                 response.send({

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var user = require('../controllers/users');
 var plan = require('../controllers/plan');
+var firm = require('../controllers/firm');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -27,5 +28,8 @@ router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
 
 router.post('/user/image', user.profileImage);
+
+router.post('/firm/signature', firm.signature);
+router.post('/firm/logo', firm.logoImage);
 
 module.exports = router;
