@@ -1,6 +1,7 @@
 var config = require('../../config');
 var User = require('../models/User');
 var Firm = require('../models/Firm');
+var Plan = require('../models/Plan');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
@@ -21,8 +22,8 @@ module.exports.signup = function(req,res){
 		var firm = new Firm();
 		var user = new User({
 			createdOn: Date.now(),
-			name:reqBody.name||reqBody.email.toLowercase().substring(0, reqBody.email.indexOf("@")),
-			email : reqBody.email.toLowercase(),
+			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
+			email : reqBody.email.toLowerCase(),
 			password : reqBody.password,
 			phone:"",
 			isAdmin:true,
@@ -136,7 +137,7 @@ module.exports.login = function(req,res){
 		
 	}
 	else if (req.body.email){
-		var user =	User.findOne({email:req.body.email.toLowercase()}, function(err, user){
+		var user =	User.findOne({email:req.body.email.toLowerCase()}, function(err, user){
 			if(err) throw err;
 			if(!user){
 				res.send({
@@ -469,7 +470,7 @@ module.exports.verifyEmail = function(request, response){
 							console.log("firm does not exist for this admin");
 						}
 						else{
-							firm.plan.Plan = request.body.planID;
+							firm.plan.planID = request.body.planID;
 							firm.plan.paymentID = request.body.paymentID;
 							firm.plan.CreatedOn = Date.now();
 							firm.save(function(err, doc) {
@@ -572,7 +573,7 @@ module.exports.verifyEmail = function(request, response){
 					console.log("5");
 				}
 				else{
-					var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+					Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
 						if(err){
 							console.log("error in finding firm" + err);
 						}
@@ -581,12 +582,13 @@ module.exports.verifyEmail = function(request, response){
 						}
 						else{
 							var planCreatedOn = firm.plan.planCreatedOn;
-							var plan = Plan.findById(firm.plan.planID, function(err, plan, planCreatedOn){
+							console.log(firm.plan);
+							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
 								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers)){
 									var CoUser = new User({
 										createdOn: Date.now(),
-										name: request.body.name||request.body.email.toLowercase().substring(0, request.body.email.indexOf("@")),
-										email : request.body.email.toLowercase(),
+										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
+										email : request.body.email.toLowerCase(),
 										password : request.body.password,
 										phone:request.body.phone,
 										isAdmin:false,
@@ -707,12 +709,13 @@ module.exports.verifyEmail = function(request, response){
 						}
 						else{
 							var planCreatedOn = firm.plan.planCreatedOn;
-							var plan = Plan.findById(firm.plan.planID, function(err, plan, planCreatedOn){
+							
+							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
 								if((firm.co_users.length +firm.admins.length) < (plan.maxUsers)&&(firm.admins.length <plan.maxAdmins)){
 									var newAdmin = new User({
 										createdOn: Date.now(),
-										name: request.body.name||request.body.email.toLowercase().substring(0, request.body.email.indexOf("@")),
-										email : request.body.email.toLowercase(),
+										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
+										email : request.body.email.toLowerCase(),
 										password : request.body.password,
 										phone:request.body.phone,
 										isAdmin:true,
