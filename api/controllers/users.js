@@ -643,7 +643,7 @@ module.exports.verifyEmail = function(request, response){
 				}
 			});
 		}
-
+        
 		module.exports.getCoUsers= function(request, response){
 			var token = getToken(request.headers);
 			var user = getUser(token,request,response, function(err, user){
@@ -679,7 +679,7 @@ module.exports.verifyEmail = function(request, response){
 								co_users: co_users,
 							});
 						}
-					  });
+                    });
 				}
 			});
 		}
@@ -865,7 +865,7 @@ module.exports.verifyEmail = function(request, response){
 				}
 			});
 		}
-
+        
 		module.exports.getRoles = function(request,response){
 			var user = User.findById(mongoose.mongo.ObjectId(request.params.id) , function(err,user){
 				if(err||!user){
@@ -884,72 +884,71 @@ module.exports.verifyEmail = function(request, response){
 			});
 		}
 		
-		module.exports.profileImage = function(request,response){
-			var token = getToken(request.headers);
-			var user = getUser(token,request,response, function(err, user){
+module.exports.profileImage = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found"
+			});
+		}
+		else{
+			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
 				if(err){
 					console.log(err);
 					response.send({
 						success:false,
 						msg:err
 					});
-				}
-				else if(!user){
-					console.log("User not found");
-					response.send({
-						success:false,
-						msg : "User not found"
-					});
-				}
-				else{
-					var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
-						if(err){
-							console.log(err);
-							response.send({
-								success:false,
-								msg:err
-							});
-						}
-					
-					var str;
-					if(user.isAdmin) str="/admins/";
-					else str="/cousers/";
-					var dirname = __dirname + '../../../public/images/'+firm._id+str+user._id;
-					mkdirp(dirname, function(err){
-						if(err){
-							res.send({
-								success : false,
-								msg : "Directory can not be created"
-							})
-						}
-						else{
-                            var storage = multer.diskStorage({
-                                destination: function(request,file,cb){
-                                    cb(null,dirname);
-                                },
-                                filename: function(request, file,cb){
-                                    user.photo = dirname+'/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
-                                    cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
-                                }
-                            });                            
-                            var upload = multer({storage : storage}).single('userPhoto');
-                            upload(request,response,function(err){
-                                if(err){
-                                    response.send({
-                                        success : false,
-                                        msg : "error uploading file." + err
-                                    });
-                                }
-                                else{
-                                    user.save(function(err,doc){
-                                        if (err) {
-                                            console.log(err);
-                                            response.send({
-                                                success: false,
-                                                msg: err
-                                            });
-                                        } 
-                                        else{
+				}  
+                var str;
+                if(user.isAdmin) str="/admins/";
+                else str="/cousers/";
+                var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
+                mkdirp(dirname, function(err){
+                    if(err){
+                        res.send({
+                            success : false,
+                            msg : "Directory can not be created"
+                        })
+                    }
+                    else{
+                        var storage = multer.diskStorage({
+                            destination: function(request,file,cb){
+                                cb(null,dirname);
+                            },
+                            filename: function(request, file,cb){
+                                user.photo = dirname+'/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
+                                cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
+                            }
+                        });                            
+                        var upload = multer({storage : storage}).single('userPhoto');
+                        upload(request,response,function(err){
+                            if(err){
+                                response.send({
+                                    success : false,
+                                    msg : "error uploading file." + err
+                                });
+                            }
+                            else{
+                                user.save(function(err,doc){
+                                    if (err) {
+                                        console.log(err);
+                                        response.send({
+                                            success: false,
+                                            msg: err
+                                        });
+                                    } 
+                                    else{
                                         response.send({
                                             success : true,
                                             msg : "File is uploaded."
@@ -957,10 +956,10 @@ module.exports.verifyEmail = function(request, response){
                                     }
                                 });
                             }
-                            });
-						}
-					});
-				});
-				}
-			});
+                        });
+                    }
+                });
+            });
 		}
+	});
+}    
