@@ -21,8 +21,8 @@ module.exports.signup = function(req,res){
 		var firm = new Firm();
 		var user = new User({
 			createdOn: Date.now(),
-			name:reqBody.name||reqBody.email.substring(0, reqBody.email.indexOf("@")),
-			email : reqBody.email,
+			name:reqBody.name||reqBody.email.toLowercase().substring(0, reqBody.email.indexOf("@")),
+			email : reqBody.email.toLowercase(),
 			password : reqBody.password,
 			phone:"",
 			isAdmin:true,
@@ -136,7 +136,7 @@ module.exports.login = function(req,res){
 		
 	}
 	else if (req.body.email){
-		var user =	User.findOne({email:req.body.email}, function(err, user){
+		var user =	User.findOne({email:req.body.email.toLowercase()}, function(err, user){
 			if(err) throw err;
 			if(!user){
 				res.send({
@@ -585,8 +585,8 @@ module.exports.verifyEmail = function(request, response){
 								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers)){
 									var CoUser = new User({
 										createdOn: Date.now(),
-										name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
-										email : request.body.email,
+										name: request.body.name||request.body.email.toLowercase().substring(0, request.body.email.indexOf("@")),
+										email : request.body.email.toLowercase(),
 										password : request.body.password,
 										phone:request.body.phone,
 										isAdmin:false,
@@ -711,8 +711,8 @@ module.exports.verifyEmail = function(request, response){
 								if((firm.co_users.length +firm.admins.length) < (plan.maxUsers)&&(firm.admins.length <plan.maxAdmins)){
 									var newAdmin = new User({
 										createdOn: Date.now(),
-										name: request.body.name||request.body.email.substring(0, request.body.email.indexOf("@")),
-										email : request.body.email,
+										name: request.body.name||request.body.email.toLowercase().substring(0, request.body.email.indexOf("@")),
+										email : request.body.email.toLowercase(),
 										password : request.body.password,
 										phone:request.body.phone,
 										isAdmin:true,
