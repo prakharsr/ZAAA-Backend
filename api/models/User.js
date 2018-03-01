@@ -53,6 +53,11 @@ var UserSchema = new mongoose.Schema({
            clients:Boolean,
            executives:Boolean
        }
+    },
+    Socials:{
+        fb:String,
+        twitter:String,
+        other:String
     }
 },
 {
