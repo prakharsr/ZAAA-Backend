@@ -635,15 +635,15 @@ module.exports.verifyEmail = function(request, response){
 										msg:"co_user limit for plan exceeded"
 									});
 								}
-
+								
 							})
-
+							
 						}
 					});
 				}
 			});
 		}
-        
+		
 		module.exports.getCoUsers= function(request, response){
 			var token = getToken(request.headers);
 			var user = getUser(token,request,response, function(err, user){
@@ -679,11 +679,11 @@ module.exports.verifyEmail = function(request, response){
 								co_users: co_users,
 							});
 						}
-                    });
+					});
 				}
 			});
 		}
-
+		
 		module.exports.createAdmins=function(request,response){
 			var token = getToken(request.headers);
 			var user = getUser(token,request,response, function(err, user){
@@ -762,15 +762,15 @@ module.exports.verifyEmail = function(request, response){
 										msg:"Admin limit for plan exceeded"
 									});
 								}
-
+								
 							})
-
+							
 						}
 					});
 				}
 			});
 		}
-
+		
 		module.exports.getAdmins= function(request, response){
 			var token = getToken(request.headers);
 			var user = getUser(token,request,response, function(err, user){
@@ -806,11 +806,11 @@ module.exports.verifyEmail = function(request, response){
 								admins: admins,
 							});
 						}
-					  });
+					});
 				}
 			});
 		}
-	
+		
 		
 		module.exports.setRole = function(request,response){
 			var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
@@ -866,7 +866,7 @@ module.exports.verifyEmail = function(request, response){
 				}
 			});
 		}
-        
+		
 		module.exports.getRoles = function(request,response){
 			var user = User.findById(mongoose.mongo.ObjectId(request.params.id) , function(err,user){
 				if(err||!user){
@@ -885,82 +885,248 @@ module.exports.verifyEmail = function(request, response){
 			});
 		}
 		
-module.exports.profileImage = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found"
-			});
-		}
-		else{
-			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+		module.exports.profileImage = function(request,response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
 				if(err){
 					console.log(err);
 					response.send({
 						success:false,
 						msg:err
 					});
-				}  
-                var str;
-                if(user.isAdmin) str="/admins/";
-                else str="/cousers/";
-				var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
-                mkdirp(dirname, function(err){
-                    if(err){
-                        res.send({
-                            success : false,
-                            msg : "Directory can not be created"
-                        })
-                    }
-                    else{
-                        var storage = multer.diskStorage({
-                            destination: function(request,file,cb){
-                                cb(null,dirname);
-                            },
-                            filename: function(request, file,cb){
-                                user.photo = '/public/images/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
-                                cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
-                            }
-                        });                            
-                        var upload = multer({storage : storage}).single('userImage');
-                        upload(request,response,function(err){
-                            if(err){
-                                response.send({
-                                    success : false,
-                                    msg : "error uploading file." + err
-                                });
-                            }
-                            else{
-                                user.save(function(err,doc){
-                                    if (err) {
-                                        console.log(err);
-                                        response.send({
-                                            success: false,
-                                            msg: err
-                                        });
-                                    } 
-                                    else{
-                                        response.send({
-                                            success : true,
-                                            msg : "File is uploaded."
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-		}
-	});
-}    
+				}
+				else if(!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg : "User not found"
+					});
+				}
+				else{
+					var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+						if(err){
+							console.log(err);
+							response.send({
+								success:false,
+								msg:err
+							});
+						}  
+						var str;
+						if(user.isAdmin) str="/admins/";
+						else str="/cousers/";
+						var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
+						mkdirp(dirname, function(err){
+							if(err){
+								res.send({
+									success : false,
+									msg : "Directory can not be created"
+								})
+							}
+							else{
+								var storage = multer.diskStorage({
+									destination: function(request,file,cb){
+										cb(null,dirname);
+									},
+									filename: function(request, file,cb){
+										user.photo = '/public/images/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
+										cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
+									}
+								});                            
+								var upload = multer({storage : storage}).single('userImage');
+								upload(request,response,function(err){
+									if(err){
+										response.send({
+											success : false,
+											msg : "error uploading file." + err
+										});
+									}
+									else{
+										user.save(function(err,doc){
+											if (err) {
+												console.log(err);
+												response.send({
+													success: false,
+													msg: err
+												});
+											} 
+											else{
+												response.send({
+													success : true,
+													msg : "File is uploaded."
+												});
+											}
+										});
+									}
+								});
+							}
+						});
+					});
+				}
+			});
+		}    
+		module.exports.setUserProfile = function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					if(request.body.name)
+					user.name = request.body.name;
+					if(request.body.designation)
+					user.designation = request.body.designation;
+					if(request.body.fb)
+					user.Socials.fb=request.body.fb;
+					if(request.body.twitter)
+					user.Socials.twitter=request.body.twitter;
+					if(request.body.other)
+					user.Socials.other=request.body.other;
+					user.save(function(){
+						if(err){
+							console.log(err);
+							response.send({
+								success:false,
+								msg:" error in set user profile" + err
+							});
+						}
+						else{
+							console.log(user);
+							response.json({
+								success:false,
+								msg:"saved ",
+								user:user
+							});
+						}
+					});
+					
+				}
+			});
+			
+		};
+		module.exports.getUserProfile = function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+							console.log(user);
+							response.json({
+								success:false,
+								msg:"user profile obtained ",
+								user:user
+							});
+					
+				}
+			});
+			
+		};
+
+		module.exports.setFirmProfile = function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					res.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+					
+					if(request.body.name)
+					firm.FirmName = request.body.name;
+					if(request.body.tagline)
+					firm.TagLine = request.body.tagLine;
+					if(request.body.displayName)
+					firm.DisplayName = request.body.displayName;
+					if(request.body.registeredAddress)
+					firm.RegisteredAddress = request.body.registeredAddress;
+					if(request.body.incorporationDate)
+					firm.IncorporationDate = request.body.incorporationDate;
+					if(request.body.officeAddress)
+					firm.OfficeAddress = request.body.officeAddress;
+					if(request.body.fax)
+					firm.Fax = request.body.fax;
+					if(request.body.mobile)
+					firm.Mobile = request.body.mobile;
+					if(request.body.email)
+					firm.Email = request.body.email;
+					if(request.body.landline)
+					firm.Landline = request.body.landline;
+					if(request.body.website)
+					firm.Website = request.body.website;
+					if(request.body.pan)
+					firm.PanNo = request.body.pan;
+					if(request.body.gst)
+					firm.GSTIN = request.body.gst;
+					if(request.body.accountName)
+					firm.BankDetails.AccountName = request.body.accountName;
+					if(request.body.accountNo)
+					firm.BankDetails.AccountNo = request.body.accountNo;
+					if(request.body.ifsc)
+					firm.BankDetails.IFSC = request.body.ifsc;
+					if(request.body.bankName)
+					firm.BankDetails.BankName = request.body.bankName;
+					if(request.body.bankAddress)
+					firm.BankDetails.BranchAddress = request.body.bankAddress;
+					if(request.body.accountType)
+					firm.BankDetails.AccountType = request.body.accountType;
+
+				});
+				}
+			});
+			
+		};
+module.exports.getFirmProfile = function(request, response){
+var token = getToken(request.headers);
+var user = getUser(token,request,response, function(err, user){
+	if(err||!user){
+		console.log("User not found");
+		res.send({
+			success:false,
+			msg:err
+		});
+	}
+	else{
+			console.log(user);
+			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+					if(err){
+						response.send({
+							success:false,
+							msg:"error in finding plan" + err,
+							
+						})
+					}
+					if(!plan){
+						response.json({
+							success:false,
+							msg:"plan not found for the firm ",
+							firm:firm
+						});
+					}
+					else{
+						response.json({
+							success:false,
+							msg:"firm profile obtained ",
+							firm:firm,
+							plan:plan
+						});
+					}
+				})
+			});
+		
+	}
+});
+
+};
