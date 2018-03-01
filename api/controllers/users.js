@@ -917,7 +917,7 @@ module.exports.verifyEmail = function(request, response){
 						var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
 						mkdirp(dirname, function(err){
 							if(err){
-								res.send({
+								response.send({
 									success : false,
 									msg : "Directory can not be created"
 								})
@@ -969,7 +969,7 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
@@ -1012,121 +1012,215 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
 				}
 				else{
-							console.log(user);
-							response.json({
-								success:false,
-								msg:"user profile obtained ",
-								user:user
-							});
+					console.log(user);
+					response.json({
+						success:false,
+						msg:"user profile obtained ",
+						user:user
+					});
 					
 				}
 			});
 			
 		};
-
+		
 		module.exports.setFirmProfile = function(request, response){
 			var token = getToken(request.headers);
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
 				}
 				else{
 					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
-					
-					if(request.body.name)
-					firm.FirmName = request.body.name;
-					if(request.body.tagline)
-					firm.TagLine = request.body.tagLine;
-					if(request.body.displayName)
-					firm.DisplayName = request.body.displayName;
-					if(request.body.registeredAddress)
-					firm.RegisteredAddress = request.body.registeredAddress;
-					if(request.body.incorporationDate)
-					firm.IncorporationDate = request.body.incorporationDate;
-					if(request.body.officeAddress)
-					firm.OfficeAddress = request.body.officeAddress;
-					if(request.body.fax)
-					firm.Fax = request.body.fax;
-					if(request.body.mobile)
-					firm.Mobile = request.body.mobile;
-					if(request.body.email)
-					firm.Email = request.body.email;
-					if(request.body.landline)
-					firm.Landline = request.body.landline;
-					if(request.body.website)
-					firm.Website = request.body.website;
-					if(request.body.pan)
-					firm.PanNo = request.body.pan;
-					if(request.body.gst)
-					firm.GSTIN = request.body.gst;
-					if(request.body.accountName)
-					firm.BankDetails.AccountName = request.body.accountName;
-					if(request.body.accountNo)
-					firm.BankDetails.AccountNo = request.body.accountNo;
-					if(request.body.ifsc)
-					firm.BankDetails.IFSC = request.body.ifsc;
-					if(request.body.bankName)
-					firm.BankDetails.BankName = request.body.bankName;
-					if(request.body.bankAddress)
-					firm.BankDetails.BranchAddress = request.body.bankAddress;
-					if(request.body.accountType)
-					firm.BankDetails.AccountType = request.body.accountType;
-
-				});
+						
+						if(request.body.name)
+						firm.FirmName = request.body.name;
+						if(request.body.tagline)
+						firm.TagLine = request.body.tagLine;
+						if(request.body.displayName)
+						firm.DisplayName = request.body.displayName;
+						if(request.body.registeredAddress)
+						firm.RegisteredAddress = request.body.registeredAddress;
+						if(request.body.incorporationDate)
+						firm.IncorporationDate = request.body.incorporationDate;
+						if(request.body.officeAddress)
+						firm.OfficeAddress = request.body.officeAddress;
+						if(request.body.fax)
+						firm.Fax = request.body.fax;
+						if(request.body.mobile)
+						firm.Mobile = request.body.mobile;
+						if(request.body.email)
+						firm.Email = request.body.email;
+						if(request.body.landline)
+						firm.Landline = request.body.landline;
+						if(request.body.website)
+						firm.Website = request.body.website;
+						if(request.body.pan)
+						firm.PanNo = request.body.pan;
+						if(request.body.gst)
+						firm.GSTIN = request.body.gst;
+						if(request.body.accountName)
+						firm.BankDetails.AccountName = request.body.accountName;
+						if(request.body.accountNo)
+						firm.BankDetails.AccountNo = request.body.accountNo;
+						if(request.body.ifsc)
+						firm.BankDetails.IFSC = request.body.ifsc;
+						if(request.body.bankName)
+						firm.BankDetails.BankName = request.body.bankName;
+						if(request.body.bankAddress)
+						firm.BankDetails.BranchAddress = request.body.bankAddress;
+						if(request.body.accountType)
+						firm.BankDetails.AccountType = request.body.accountType;
+						
+					});
 				}
 			});
 			
 		};
-module.exports.getFirmProfile = function(request, response){
-var token = getToken(request.headers);
-var user = getUser(token,request,response, function(err, user){
-	if(err||!user){
-		console.log("User not found");
-		res.send({
-			success:false,
-			msg:err
-		});
-	}
-	else{
-			console.log(user);
-			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
-				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
-					if(err){
-						response.send({
-							success:false,
-							msg:"error in finding plan" + err,
-							
+		module.exports.getFirmProfile = function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					console.log(user);
+					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+						Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+							if(err){
+								response.send({
+									success:false,
+									msg:"error in finding plan" + err,
+									
+								})
+							}
+							if(!plan){
+								response.json({
+									success:false,
+									msg:"plan not found for the firm ",
+									firm:firm
+								});
+							}
+							else{
+								response.json({
+									success:false,
+									msg:"firm profile obtained ",
+									firm:firm,
+									plan:plan
+								});
+							}
 						})
-					}
-					if(!plan){
-						response.json({
-							success:false,
-							msg:"plan not found for the firm ",
-							firm:firm
-						});
-					}
-					else{
-						response.json({
-							success:false,
-							msg:"firm profile obtained ",
-							firm:firm,
-							plan:plan
-						});
-					}
-				})
+					});
+					
+				}
 			});
+			
+		};
+		module.exports.getCurrentUser=function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					response.send({
+						success:true,
+						user:user
+					});
+				}
+			});
+			
+		};
+		module.exports.getCurrentFirm=function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+						if(err||!user){
+							console.log("User not found");
+							response.send({
+								success:false,
+								msg:err
+							});
+						}
+						else{
+							response.send({
+								success:true,
+								user:user,
+								firm:firm
+							})
+							
+						}
+					});
+					
+				}
+			});
+		};
 		
-	}
-});
-
-};
+		module.exports.getCurrentPlan=function(request, response){
+			var token = getToken(request.headers);
+			var user = getUser(token,request,response, function(err, user){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					
+					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+						Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+							if(err){
+								response.send({
+									success:false,
+									msg:"error in finding plan" + err,
+									
+								});
+							}
+							if(!plan){
+								response.json({
+									success:false,
+									msg:"plan not found for the firm ",
+									firm:firm
+								});
+							}
+							else{
+								response.json({
+									success:false,
+									msg:"plan  obtained ",
+									user:user,
+									firm:firm,
+									plan:plan
+								});
+							}
+						});
+					});
+				}
+			});
+		}
