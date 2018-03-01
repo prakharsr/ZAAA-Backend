@@ -29,7 +29,9 @@ router.get('/user/role/:id', user.getRoles);
 
 router.post('/user/image', user.profileImage);
 
-router.post('/firm/signature', firm.signature);
+router.post('/user/sign', user.signature);
 router.post('/firm/logo', firm.logoImage);
+
+router.post('/user/deleteusers', user.deleteUser);
 
 module.exports = router;

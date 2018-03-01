@@ -7,6 +7,8 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
+var bcrypt = require('bcrypt');
+var SALT_WORK_FACTOR = 10;
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
@@ -812,60 +814,60 @@ module.exports.verifyEmail = function(request, response){
 		}
 	
 		
-		module.exports.setRole = function(request,response){
-			var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
-				if(err||!user){
-					console.log("User not found");
-					response.send({
-						success:false,
-						msg:err
-					});
-				}
-				else{
-					if(user.isAdmin){
-						user.roles.all = true;
-						user.save(function(err,doc){
-							if (err) {
-								console.log(err);
-								response.send({
-									success: false,
-									msg: err
-								});
-							} else {
-								response.send({
-									success : true,
-									msg : "Roles set for admin"
-								});
-							}
-						});
-					}
-					else{
-						user.roles.Release_order 		 = request.body.release_order;
-						user.roles.Invoice				 = request.body.invoice;
-						user.roles.Payment_receipts		 = request.body.payment_receipts;
-						user.roles.Accounts				 = request.body.accounts;
-						user.roles.Reports				 = request.body.reports;
-						user.roles.directory.media_house = request.body.media_house;
-						user.roles.directory.clients	 = request.body.clients;
-						user.roles.directory.executives	 = request.body.executives;
-						user.save(function(err,doc){
-							if (err) {
-								console.log(err);
-								response.send({
-									success: false,
-									msg: err
-								});
-							} else {
-								response.send({
-									success : true,
-									msg : "Roles set for co-user"
-								});
-							}
-						});
-					}
-				}
+module.exports.setRole = function(request,response){
+	var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
 			});
 		}
+		else{
+			if(user.isAdmin){
+				user.roles.all = true;
+				user.save(function(err,doc){
+					if (err) {
+						console.log(err);
+						response.send({
+							success: false,
+							msg: err
+						});
+					} else {
+						response.send({
+							success : true,
+							msg : "Roles set for admin"
+						});
+					}
+				});
+			}
+			else{
+				user.roles.Release_order 		 = request.body.release_order;
+				user.roles.Invoice				 = request.body.invoice;
+				user.roles.Payment_receipts		 = request.body.payment_receipts;
+				user.roles.Accounts				 = request.body.accounts;
+				user.roles.Reports				 = request.body.reports;
+				user.roles.directory.media_house = request.body.media_house;
+				user.roles.directory.clients	 = request.body.clients;
+				user.roles.directory.executives	 = request.body.executives;
+				user.save(function(err,doc){
+					if (err) {
+						console.log(err);
+						response.send({
+							success: false,
+							msg: err
+						});
+					} else {
+						response.send({
+							success : true,
+							msg : "Roles set for co-user"
+						});
+					}
+				});
+			}
+		}
+	});
+}
         
 		module.exports.getRoles = function(request,response){
 			var user = User.findById(mongoose.mongo.ObjectId(request.params.id) , function(err,user){
@@ -911,28 +913,27 @@ module.exports.profileImage = function(request,response){
 						msg:err
 					});
 				}  
-                var str;
-                if(user.isAdmin) str="/admins/";
-                else str="/cousers/";
-				var dirname = __dirname + '../../../public/images/'+firm._id+'/users'+str+user._id;
+				
+				var dirname = __dirname+'../../../public/uploads/'+firm._id;
                 mkdirp(dirname, function(err){
                     if(err){
-                        res.send({
+                        response.send({
                             success : false,
-                            msg : "Directory can not be created"
+                            msg : "Directory can not be created " + err
                         })
                     }
                     else{
+						var location;
                         var storage = multer.diskStorage({
                             destination: function(request,file,cb){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                user.photo = '/public/images/'+file.fieldname + '-'+Date.now()+path.extname(file.originalname);
-                                cb(null, file.fieldname + '-'+Date.now()+path.extname(file.originalname));
+                                location = '/public/uploads/'+firm._id+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
+                                cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
                             }
                         });                            
-                        var upload = multer({storage : storage}).single('userImage');
+						var upload = multer({storage : storage}).single('user');
                         upload(request,response,function(err){
                             if(err){
                                 response.send({
@@ -941,6 +942,7 @@ module.exports.profileImage = function(request,response){
                                 });
                             }
                             else{
+								user.photo = location;
                                 user.save(function(err,doc){
                                     if (err) {
                                         console.log(err);
@@ -964,3 +966,146 @@ module.exports.profileImage = function(request,response){
 		}
 	});
 }    
+		
+module.exports.signature = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found"
+			});
+		}
+		else{
+			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				var dirname = __dirname+'../../../public/uploads/'+firm._id;
+                mkdirp(dirname, function(err){
+                    if(err){
+                        res.send({
+                            success : false,
+                            msg : "Directory can not be created"
+                        })
+                    }
+                    else{
+						var location;
+                        var storage = multer.diskStorage({
+                            destination: function(request,file,cb){
+                                cb(null,dirname);
+                            },
+                            filename: function(request, file,cb){
+                                location = '/public/uploads/'+firm._id+'/'+file.fieldname +'-'+path.extname(file.originalname);
+                                cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
+                            }
+                        });                            
+                        var upload = multer({storage : storage}).single('sign');
+                        upload(request,response,function(err){
+                            if(err){
+                                response.send({
+                                    success : false,
+                                    msg : "error uploading file." + err
+                                });
+                            }
+                            else{
+								user.sign = location;
+                                user.save(function(err,doc){
+                                    if (err) {
+                                        console.log(err);
+                                        response.send({
+                                            success: false,
+                                            msg: err
+                                        });
+                                    } 
+                                    else{
+                                        response.send({
+                                            success : true,
+                                            msg : "File is uploaded."
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+		}
+	});
+}    
+
+module.exports.deleteUser = function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found"
+			});
+		}
+		else{
+			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:err
+					});
+				}  
+				else if(!firm){
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					if(user._id === request.body.id || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
+					else{
+						User.findOneAndRemove({_id : Mongoose.mongo.ObjectID(request.body.id)}, function(err){
+							if(err){
+								console.log(err);
+								response.send({
+									success : false,
+									msg : err
+								})
+							}
+							else{
+								firm.admins = firm.admins.filter(function(item){
+										return item !== request.body.id;
+								});
+								firm.co_users = firm.co_users.filter(function(item){
+									return item !== request.body.id;
+								});
+								response.send({
+									success : true,
+									msg : "Co-User deleted"
+								});
+							}
+						});
+					}
+				}
+			});
+		}
+	});
+}
+
