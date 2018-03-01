@@ -53,7 +53,7 @@ var FirmSchema = new mongoose.Schema({
     plan : {
         createdOn: Date,
         paymentID : String,
-        Plan : {type:mongoose.Schema.Types.ObjectId, ref:"Plan"} 
+        planID : {type:mongoose.Schema.Types.ObjectId, ref:"Plan"} 
     },
     Socials:{
         fb:String,
