@@ -120,8 +120,7 @@ module.exports.login = function(req,res){
 								success: true,
 								msg: user._id,
 								token:"JWT "+ token,
-								user:user,
-								msg:""
+								user:user
 							});
 							
 						}
@@ -183,7 +182,7 @@ module.exports.login = function(req,res){
 							res.json({
 								success:true,
 								token:"JWT "+ token,
-								msg:"",
+								msg:user._id,
 								user:user
 							});
 							
