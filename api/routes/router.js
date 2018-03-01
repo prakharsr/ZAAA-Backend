@@ -28,16 +28,15 @@ router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
 
 router.post('/user/image', user.profileImage);
+router.post('/user/signature', user.signature);
 
 router.post('/user/sign', user.signature);
 router.get('/user/profile', user.getUserProfile);
 router.post('/user/profile', user.setUserProfile);
 router.get('/firm/profile', user.getFirmProfile);
 router.post('/firm/profile', user.setFirmProfile);
-
-router.post('/firm/signature', firm.signature);
 router.post('/firm/logo', firm.logoImage);
 
-router.post('/user/deleteusers', user.deleteUser);
+router.delete('/user/co_users', user.deleteUser);
 
 module.exports = router;

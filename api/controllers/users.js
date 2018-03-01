@@ -898,7 +898,13 @@ module.exports.setRole = function(request,response){
 						msg:err
 					});
 				}  
-				
+				else if(!user){
+					response.send({
+						success:false,
+						msg:"user not found"
+					});
+				}
+				else{
 				var dirname = __dirname+'../../../public/uploads/'+firm._id;
                 mkdirp(dirname, function(err){
                     if(err){
@@ -906,8 +912,8 @@ module.exports.setRole = function(request,response){
                             success : false,
                             msg : "Directory can not be created " + err
                         })
-                    }
-                    else{
+					}
+				});
 						var location;
                         var storage = multer.diskStorage({
                             destination: function(request,file,cb){
@@ -945,9 +951,8 @@ module.exports.setRole = function(request,response){
                                 });
                             }
                         });
-                    }
+					}
                 });
-            });
 	}
    
 		
