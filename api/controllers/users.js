@@ -1049,7 +1049,7 @@ module.exports.deleteUser = function(request, response){
 				else{
 					if(user._id === request.params.id || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
 					else{
-						User.findOneAndRemove({_id : Mongoose.mongo.ObjectID(request.params.id)}, function(err){
+						User.findOneAndRemove({_id : mongoose.mongo.ObjectID(request.params.id)}, function(err){
 							if(err){
 								console.log(err);
 								response.send({
