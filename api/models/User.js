@@ -16,6 +16,7 @@ var UserSchema = new mongoose.Schema({
     },
     name :String,
     photo : String,
+    signature : String,
     designation:String,
     phone : String,
     authyId:String,
