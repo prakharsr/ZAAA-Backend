@@ -50,7 +50,7 @@ module.exports.logoImage = function(request,response){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                location = '/public/uploads/'+firm._id+'/'+file.fieldname +'-'+path.extname(file.originalname);
+                                location = '/uploads/'+firm._id+'/'+file.fieldname+path.extname(file.originalname);
                                 cb(null, file.fieldname+path.extname(file.originalname));
                             }
                         });                            
@@ -75,7 +75,8 @@ module.exports.logoImage = function(request,response){
                                     else{
                                         response.send({
                                             success : true,
-                                            msg : "File is uploaded."
+                                            msg : "File is uploaded.",
+                                            photo: location
                                         });
                                     }
                                 });
