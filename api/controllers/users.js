@@ -1151,67 +1151,10 @@ module.exports.setUserProfile = function(request, response){
 						Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
 						if(err){
 							response.send({
-<<<<<<< HEAD
-								success:false,
-								msg:" error in set user profile" + err
-							});
-						}
-						else{
-							console.log(user);
-							response.json({
-								success:true,
-								msg:"saved ",
-								user:user
-							});
-						}
-					});
-					
-				}
-			});
-			
-		};
-		module.exports.getUserProfile = function(request, response){
-			var token = getToken(request.headers);
-			var user = getUser(token,request,response, function(err, user){
-				if(err||!user){
-					console.log("User not found");
-					response.send({
-						success:false,
-						msg:err
-					});
-				}
-				else{
-					console.log(user);
-					response.json({
-						success:true,
-						msg:"user profile obtained ",
-						user:user
-					});
-					
-				}
-			});
-			
-		};
-		
-		module.exports.setFirmProfile = function(request, response){
-			var token = getToken(request.headers);
-			var user = getUser(token,request,response, function(err, user){
-				if(err||!user){
-					console.log("User not found");
-					response.send({
-						success:false,
-						msg:err
-					});
-				}
-				else{
-					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
-						
-=======
-								success : false,
+							success : false,
 								msg : "Firm not found"
 							})
 						}
->>>>>>> c941f47723a7fe9525853aa922f7c92477a21a06
 						if(request.body.name)
 						firm.FirmName = request.body.name;
 						if(request.body.tagline)
@@ -1252,41 +1195,6 @@ module.exports.setUserProfile = function(request, response){
 						firm.BankDetails.AccountType = request.body.accountType;
 						
 						firm.save(function(err){
-<<<<<<< HEAD
-							if(err){
-								console.log("error in setfirmprofile" + err);
-							}
-							else{
-								console.log(firm);
-								response.send({
-									success:true,
-									firm:firm,
-									msg:"success setting firm profile"
-								});
-							}
-						})
-						
-					});
-				}
-			});
-			
-		};
-		module.exports.getFirmProfile = function(request, response){
-			var token = getToken(request.headers);
-			var user = getUser(token,request,response, function(err, user){
-				if(err||!user){
-					console.log("User not found");
-					response.send({
-						success:false,
-						msg:err
-					});
-				}
-				else{
-					console.log(user);
-					Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
-						Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
-=======
->>>>>>> c941f47723a7fe9525853aa922f7c92477a21a06
 							if(err){
 								console.log(err);
 								response.send({
