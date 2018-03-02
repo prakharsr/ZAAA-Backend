@@ -920,7 +920,7 @@ module.exports.setRole = function(request,response){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                location = '/public/uploads/'+user.firm+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
+                                location = '/uploads/'+user.firm+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
                                 cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
                             }
                         });                            
@@ -945,7 +945,8 @@ module.exports.setRole = function(request,response){
                                     else{
                                         response.send({
                                             success : true,
-                                            msg : "File is uploaded."
+											msg : "File is uploaded.",
+											photo: user.photo
                                         });
                                     }
                                 });
