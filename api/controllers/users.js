@@ -1257,3 +1257,97 @@ module.exports.setUserProfile = function(request, response){
 	});
 }; 
 		
+module.exports.getCurrentUser=function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			response.send({
+				success:true,
+				user:user
+			});
+		}
+	});
+	
+};
+module.exports.getCurrentFirm=function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					response.send({
+						success:true,
+						user:user,
+						firm:firm
+					})
+					
+				}
+			});
+			
+		}
+	});
+};
+
+module.exports.getCurrentPlan=function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			
+			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+					if(err){
+						response.send({
+							success:false,
+							msg:"error in finding plan" + err,
+							
+						});
+					}
+					if(!plan){
+						response.json({
+							success:false,
+							msg:"plan not found for the firm ",
+							firm:firm
+						});
+					}
+					else{
+						response.json({
+							success:false,
+							msg:"plan  obtained ",
+							user:user,
+							firm:firm,
+							plan:plan
+						});
+					}
+				});
+			});
+		}
+	});
+}
