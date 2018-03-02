@@ -905,8 +905,7 @@ module.exports.setRole = function(request,response){
 					});
 				}
 				else{
-					Firm.find({_id:mongoose.mongo.ObjectID(user.firm)}, function(err, firm){
-				var dirname = __dirname+'../../../public/uploads/'+firm._id;
+				var dirname = __dirname+'/../../public/uploads/'+user.firm;
                 mkdirp(dirname, function(err){
                     if(err){
                         response.send({
@@ -914,14 +913,14 @@ module.exports.setRole = function(request,response){
                             msg : "Directory can not be created " + err
                         })
 					}
-				});
+					else{
 						var location;
                         var storage = multer.diskStorage({
                             destination: function(request,file,cb){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                location = '/public/uploads/'+firm._id+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
+                                location = '/public/uploads/'+user.firm+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
                                 cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
                             }
                         });                            
@@ -940,7 +939,7 @@ module.exports.setRole = function(request,response){
                                         console.log(err);
                                         response.send({
                                             success: false,
-                                            msg: err
+                                            msg: err+"gy"
                                         });
                                     } 
                                     else{
@@ -952,9 +951,11 @@ module.exports.setRole = function(request,response){
                                 });
                             }
 						});
-					});
 					}
-                });
+				});
+						
+			}
+        });
 	}
    
 		
@@ -1458,3 +1459,27 @@ module.exports.setNewPassword = function(request, response){
 		}
 	});	
 };
+module.exports.resetPassword = function(request,response){
+	User.findById(request.params.id, function(err,user){
+		if(err){
+			console.log(err)
+			response.send({
+				success:false,
+				msg:err +" error"
+			});
+		}
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"User not found for this Id",
+			});
+		}
+		else{
+			response.send({
+				success:success,
+				user:user,
+				msg:"user exist"
+			});
+		}
+	})
+}

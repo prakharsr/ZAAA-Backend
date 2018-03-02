@@ -39,7 +39,10 @@ router.post('/firm/logo', firm.logoImage);
 router.get('/user', user.getCurrentUser);
 router.get('/firm', user.getCurrentFirm);
 router.get('/plan', user.getCurrentPlan);
-
+router.post('/user/changePassword', user.changePassword);
+router.post('/user/resetpassword', user.resetPasswordLinkgenerator);
+router.post('/user/setNewPassword', user.setNewPassword);
+router.get('user/resetPassword/:id',user.resetPassword);
 router.delete('/user/co_users', user.deleteUser);
 
 module.exports = router;
