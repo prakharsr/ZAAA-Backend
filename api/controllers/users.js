@@ -996,7 +996,7 @@ module.exports.verifyEmail = function(request, response){
 						else{
 							console.log(user);
 							response.json({
-								success:false,
+								success:true,
 								msg:"saved ",
 								user:user
 							});
@@ -1020,7 +1020,7 @@ module.exports.verifyEmail = function(request, response){
 				else{
 					console.log(user);
 					response.json({
-						success:false,
+						success:true,
 						msg:"user profile obtained ",
 						user:user
 					});
@@ -1081,6 +1081,20 @@ module.exports.verifyEmail = function(request, response){
 						firm.BankDetails.BranchAddress = request.body.bankAddress;
 						if(request.body.accountType)
 						firm.BankDetails.AccountType = request.body.accountType;
+						
+						firm.save(function(err){
+							if(err){
+								console.log("error in setfirmprofile" + err);
+							}
+							else{
+								console.log(firm);
+								response.send({
+									success:true,
+									firm:firm,
+									msg:"success setting firm profile"
+								});
+							}
+						})
 						
 					});
 				}

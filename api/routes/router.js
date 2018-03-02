@@ -36,5 +36,8 @@ router.post('/firm/profile', user.setFirmProfile);
 
 router.post('/firm/signature', firm.signature);
 router.post('/firm/logo', firm.logoImage);
+router.get('/user', user.getCurrentUser);
+router.get('/firm', user.getCurrentFirm);
+router.get('/plan', user.getCurrentPlan);
 
 module.exports = router;
