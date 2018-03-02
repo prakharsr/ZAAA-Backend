@@ -16,19 +16,9 @@ var FirmSchema = new mongoose.Schema({
         ref:"User"
     }],
     LogoURL : String,
-    RegisteredAddress: {
-        street: String,
-        city: String,
-        state: String,
-        pin: Number
-    },
+    RegisteredAddress: String,
     IncorporationDate: Date,
-    OfficeAddress: {
-        street: String,
-        city: String,
-        state: String,
-        pin: Number
-    },
+    OfficeAddress: String,
     Fax:String,
     Mobile: String,
     Email:String,
