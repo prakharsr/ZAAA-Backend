@@ -43,6 +43,6 @@ router.post('/user/changePassword', user.changePassword);
 router.post('/user/resetpassword', user.resetPasswordLinkgenerator);
 router.post('/user/setNewPassword', user.setNewPassword);
 router.get('user/resetPassword/:id',user.resetPassword);
-router.delete('/user/co_users', user.deleteUser);
+router.delete('/user/co_user/:id', user.deleteUser);
 
 module.exports = router;

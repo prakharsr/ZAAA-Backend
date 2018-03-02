@@ -1047,9 +1047,9 @@ module.exports.deleteUser = function(request, response){
 					console.log(err);
 				}
 				else{
-					if(user._id === request.body.id || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
+					if(user._id === request.params.id || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
 					else{
-						User.findOneAndRemove({_id : Mongoose.mongo.ObjectID(request.body.id)}, function(err){
+						User.findOneAndRemove({_id : Mongoose.mongo.ObjectID(request.params.id)}, function(err){
 							if(err){
 								console.log(err);
 								response.send({
@@ -1059,10 +1059,10 @@ module.exports.deleteUser = function(request, response){
 							}
 							else{
 								firm.admins = firm.admins.filter(function(item){
-										return item !== request.body.id;
+										return item !== request.params.id;
 								});
 								firm.co_users = firm.co_users.filter(function(item){
-									return item !== request.body.id;
+									return item !== request.params.id;
 								});
 								response.send({
 									success : true,
