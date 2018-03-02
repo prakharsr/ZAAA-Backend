@@ -977,6 +977,7 @@ module.exports.signature = function(request,response){
                         })
                     }
                     else{
+						Firm.find({_id:mongoose.mongo.ObjectID(user.firm)}, function(err, firm){
 						var location;
                         var storage = multer.diskStorage({
                             destination: function(request,file,cb){
@@ -1013,7 +1014,8 @@ module.exports.signature = function(request,response){
                                     }
                                 });
                             }
-                        });
+						});
+					});
                     }
                 });
             });
