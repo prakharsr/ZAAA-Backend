@@ -1022,6 +1022,16 @@ module.exports.signature = function(request,response){
             });
 		}
 
+		function removeA(arr) {
+			var what, a = arguments, L = a.length, ax;
+			while (L > 1 && arr.length) {
+				what = a[--L];
+				while ((ax= arr.indexOf(what)) !== -1) {
+					arr.splice(ax, 1);
+				}
+			}
+			return arr;
+		}
 
 module.exports.deleteUser = function(request, response){
 	var token = getToken(request.headers);
@@ -1046,8 +1056,10 @@ module.exports.deleteUser = function(request, response){
 					console.log(err);
 				}
 				else{
-					if(user._id === request.params.id || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
+					if(user._id === mongoose.mongo.ObjectID(request.params.id) || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
 					else{
+						firm.co_users.pull({ _id: mongoose.mongo.ObjectID(request.params.id) });
+						firm.admins.pull({ _id: mongoose.mongo.ObjectID(request.params.id) });
 						User.findOneAndRemove({_id : mongoose.mongo.ObjectID(request.params.id)}, function(err){
 							if(err){
 								console.log(err);
@@ -1057,15 +1069,19 @@ module.exports.deleteUser = function(request, response){
 								})
 							}
 							else{
-								firm.admins = firm.admins.filter(function(item){
-										return item !== request.params.id;
-								});
-								firm.co_users = firm.co_users.filter(function(item){
-									return item !== request.params.id;
-								});
-								response.send({
-									success : true,
-									msg : "Co-User deleted"
+								firm.save(function(err){
+									if(err){
+										response.send({
+											success : false,
+											msg : err
+										});
+									}
+									else{
+										response.send({
+											success : true,
+											msg : "Co-User deleted"
+										});
+									}
 								});
 							}
 						});
