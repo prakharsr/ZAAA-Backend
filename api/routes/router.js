@@ -28,7 +28,6 @@ router.post('/user/role' , user.setRole);
 router.get('/user/role/:id', user.getRoles);
 
 router.post('/user/image', user.profileImage);
-router.post('/user/signature', user.signature);
 
 router.post('/user/sign', user.signature);
 router.get('/user/profile', user.getUserProfile);

@@ -970,7 +970,7 @@ module.exports.signature = function(request,response){
 						msg:err
 					});
 				}
-				var dirname = __dirname+'../../../public/uploads/'+firm._id;
+				var dirname = __dirname+'../../../public/uploads/'+user.firm;
                 mkdirp(dirname, function(err){
                     if(err){
                         res.send({
@@ -979,14 +979,13 @@ module.exports.signature = function(request,response){
                         })
                     }
                     else{
-						Firm.find({_id:mongoose.mongo.ObjectID(user.firm)}, function(err, firm){
 						var location;
                         var storage = multer.diskStorage({
                             destination: function(request,file,cb){
                                 cb(null,dirname);
                             },
                             filename: function(request, file,cb){
-                                location = '/public/uploads/'+firm._id+'/'+file.fieldname +'-'+path.extname(file.originalname);
+                                location = '/uploads/'+user.firm+'/'+file.fieldname +'-'+user._id+path.extname(file.originalname);
                                 cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
                             }
                         });                            
@@ -999,7 +998,7 @@ module.exports.signature = function(request,response){
                                 });
                             }
                             else{
-								user.sign = location;
+								user.signature = location;
                                 user.save(function(err,doc){
                                     if (err) {
                                         console.log(err);
@@ -1011,13 +1010,13 @@ module.exports.signature = function(request,response){
                                     else{
                                         response.send({
                                             success : true,
-                                            msg : "File is uploaded."
+											msg : "File is uploaded.",
+											photo: location
                                         });
                                     }
                                 });
                             }
 						});
-					});
                     }
                 });
             });
