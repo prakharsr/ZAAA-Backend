@@ -1384,8 +1384,9 @@ module.exports.changePassword=function(request, response){
 			});
 		}
 		else{
-			user.comparePassword(request.body.oldPassword, function(err){
-			user.password = request.body.newPassword;
+			user.comparePassword(request.body.oldPassword, function(err, isMatch){
+			if(isMatch && !err){
+				user.password = request.body.newPassword;
 				user.save(function(err){
 					if(err){
 						console.log(err);
@@ -1400,7 +1401,14 @@ module.exports.changePassword=function(request, response){
 							user:user
 						});
 					}
-				})
+				});
+			}
+			else{
+				response.send({
+					success : true,
+					msg : err
+				});
+			}
 			})
 		}
 	});
