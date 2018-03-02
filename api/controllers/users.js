@@ -62,6 +62,23 @@ module.exports.signup = function(req,res){
 				};
 				var token = jwt.sign(token_data, config.SECRET);
 				
+				user.sendVerificationMail( function(err, user){
+					if(err){
+						console.log(err);
+						// response.send({
+						// 	success:false,
+						// 	msg:"failed"
+						// });
+						
+					}
+					else{
+						// response.send({
+						// 	success:true,
+						// 	msg:"Verification mail sent to Your Email Address."
+						// });
+					}
+				});
+				
 				res.json({
 					success:true,
 					token:"JWT "+ token,
@@ -260,33 +277,6 @@ module.exports.setMobile=function(req, res){
 		}
 	});
 };
-module.exports.sendVerMail = function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("vgjvjdsc");
-		}
-		else{
-			console.log(user);
-			user.sendVerificationMail(err, user, function(err){
-				if(err){
-					console.log(err);
-					response.send({
-						success:false,
-						msg:"failed"
-					});
-					
-				}
-				else{
-					response.send({
-						success:true,
-						msg:"done"
-					});
-				}
-			});
-		}
-	});
-}
 
 module.exports.verifyEmail = function(request, response){
 	var user = User.findById(request.params.id, function(err, user){

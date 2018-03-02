@@ -132,7 +132,7 @@ UserSchema.methods.sendVerificationMail = function(cb){
     var self=this;
     var mailOptions = {
     from: "sonumeewa@gmail.com", // sender address
-    to: "sonumeewa@gmail.com", // list of receivers
+    to: self.email, // list of receivers
     subject: "Account Confirmation",// Subject lin
     text: "Here is the link to confirm your mail", // plaintext body
     html:  "<p>click here: http://3eed0736.ngrok.io/api/user/verify/email/"+ self._id+ "</p>"// html body
@@ -146,7 +146,7 @@ transporter = nodemailer.createTransport({
         user: "sonumeewa@gmail.com", // Gmail id
         pass: "Vipul@1997"  // Gmail password
     },
-    secure:true,proxy: process.env.http_proxy||"" 
+    secure:false//,proxy: process.env.http_proxy||"" 
 });
 
 transporter.sendMail(mailOptions,cb, function(error, info){

@@ -10,7 +10,6 @@ router.post('/user/mobile', user.setMobile);
 
 router.post('/user/verify/mobile', user.verifyMobile);
 router.get('/user/verify/email/:id', user.verifyEmail);
-router.post('/user/verify/email', user.sendVerMail);
 
 router.get('/plans', plan.getPlans);
 router.post('/user/plan', user.setPlan);
