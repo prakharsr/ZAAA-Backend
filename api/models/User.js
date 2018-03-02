@@ -162,6 +162,40 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 });
 
 };
+UserSchema.methods.sendPasswordResetMail = function(cb){
+    var self=this;
+    var mailOptions = {
+    from: "sonumeewa@gmail.com", // sender address
+    to: "sonumeewa@gmail.com", // list of receivers
+    subject: "Reset Password",// Subject lin
+    text: "Here is the link to reset your password", // plaintext body
+    html:  "<p>click here: http://3eed0736.ngrok.io/api/user/reset/password/"+ self._id+Date.now()+ "</p>"// html body
+};
+
+// send mail with defined transport object
+transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587, // Gmail Port
+    auth: {
+        user: "sonumeewa@gmail.com", // Gmail id
+        pass: "Vipul@1997"  // Gmail password
+    },
+    secure:true,proxy: process.env.http_proxy||"" 
+});
+
+transporter.sendMail(mailOptions,cb, function(error, info){
+    if(error){
+        cb.call(err, null);
+    }
+    else{
+
+    console.log('Message sent: ' + info.response);
+    cb.call(null, self);
+
+    }
+});
+
+};
 
 UserSchema.methods.sendMessage = function(message, cb) {
     var self = this;

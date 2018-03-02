@@ -905,6 +905,7 @@ module.exports.setRole = function(request,response){
 					});
 				}
 				else{
+					Firm.find({_id:mongoose.mongo.ObjectID(user.firm)}, function(err, firm){
 				var dirname = __dirname+'../../../public/uploads/'+firm._id;
                 mkdirp(dirname, function(err){
                     if(err){
@@ -950,7 +951,8 @@ module.exports.setRole = function(request,response){
                                     }
                                 });
                             }
-                        });
+						});
+					});
 					}
                 });
 	}
@@ -1351,3 +1353,106 @@ module.exports.getCurrentPlan=function(request, response){
 		}
 	});
 }
+
+module.exports.changePassword=function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			user.comparePassword(request.body.oldPassword, function(err){
+			user.password = request.body.newPassword;
+				user.save(function(err){
+					if(err){
+						console.log(err);
+						response.send({
+							success:false,
+							msg : err
+						});
+					}
+					else{
+						response.send({
+							success:true,
+							user:user
+						});
+					}
+				})
+			})
+		}
+	});
+};
+module.exports.resetPasswordLinkgenerator = function(request, response){
+	var email = request.body.email;
+	User.find({email:request.body.email}, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg: err
+			});
+	
+		}
+		else if (!user){
+			console.log("user not found");
+			response.send({
+				success:false,
+				msg: "user not found"
+			});
+		
+		}
+		else{
+			user.sendPasswordResetMail(function(err, user){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg: err
+					});
+				}
+				else{
+					response.send({
+						success:true,
+						msg:" password reset link sent",
+					});
+				}
+			})
+		}
+	});
+
+}
+module.exports.setNewPassword = function(request, response){
+
+	User.findById(request.body.id, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			
+			user.password = request.body.newPassword;
+				user.save(function(err){
+					if(err){
+						console.log(err);
+						response.send({
+							success:false,
+							msg : err
+						});
+					}
+					else{
+						response.send({
+							success:true,
+							user:user
+						});
+					}
+				});
+		}
+	});	
+};
