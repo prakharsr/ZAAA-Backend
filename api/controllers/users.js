@@ -230,13 +230,13 @@ module.exports.setMobile=function(req, res){
 			user.save(function(err, doc) {
 				if (err) {
 					if (err.code == 11000) {
-						return response.json({
+						return res.json({
 							success: false,
 							msg: "Username already exists"
 						});
 					} else {
 						//Throw error message if not known
-						response.send({
+						res.send({
 							success: false,
 							msg: err +"bhjdw"
 						});
