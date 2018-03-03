@@ -573,7 +573,7 @@ module.exports.verifyEmail = function(request, response){
 							var planCreatedOn = firm.plan.planCreatedOn;
 							console.log(firm.plan);
 							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
-								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers)){
+								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers+1)){
 									var CoUser = new User({
 										createdOn: Date.now(),
 										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
@@ -700,7 +700,7 @@ module.exports.verifyEmail = function(request, response){
 							var planCreatedOn = firm.plan.planCreatedOn;
 							
 							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
-								if((firm.co_users.length +firm.admins.length) < (plan.maxUsers)&&(firm.admins.length <plan.maxAdmins)){
+								if((firm.co_users.length +firm.admins.length) < (plan.maxUsers+1)&&(firm.admins.length <plan.maxAdmins)){
 									var newAdmin = new User({
 										createdOn: Date.now(),
 										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
