@@ -109,7 +109,7 @@ module.exports.login = function(req,res){
 							dateLogOn: new Date()
 						};
 						if(!(user.isAdmin||user.mobile_verified)){
-							user.sendAuthyToken(function(err) {
+							user.sendAuthyToken(function(err,user) {
 								if (err) {
 									res.send({
 										success: false,
