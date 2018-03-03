@@ -91,7 +91,7 @@ module.exports.signup = function(req,res){
 };
 //POST https://localhost:8000/api/login
 module.exports.login = function(req,res){
-	
+
 	if(req.body.phone){
 		var user =	User.findOne({phone:req.body.phone}, function(err, user){
 			if(err) throw err;
@@ -102,48 +102,19 @@ module.exports.login = function(req,res){
 				});
 			}
 			else{
-				user.comparePassword(req.body.password, function(err, isMatch,user){
+				user.comparePassword(req.body.password, function(err, isMatch){
 					if (isMatch && !err){
 						var token_data = {
 							id: user._id,
 							dateLogOn: new Date()
 						};
-						if(!(user.isAdmin||user.mobile_verified)){
-							user.sendAuthyToken(function(err,user) {
-								if (err) {
-									res.send({
-										success: false,
-										msg: " in sendAuthyToken" + err
-									});
-								} else {
-									var token_data = {
-										id: user._id,
-										dateLogOn: new Date()
-									};
-									// Send for verification page
-									var token = jwt.sign(token_data, config.SECRET);
-									
-									res.json({
-										
-										success: true,
-										msg: user._id,
-										token:"JWT "+ token,
-										user:user
-									});
-								}
-							});
-						}
-						else{
-							var token = jwt.sign(token_data, config.SECRET);
-							
-							res.json({
-								success: true,
-								msg: user._id,
-								token:"JWT "+ token,
-								user:user
-							});
-							
-						}
+						var token = jwt.sign(token_data, config.SECRET);
+						
+						res.json({
+							success:true,
+							token:"JWT "+ token,
+							msg:""
+						});
 					} else{
 						res.send({
 							success:false,
@@ -153,10 +124,10 @@ module.exports.login = function(req,res){
 				});
 			}	
 		});
-		
+
 	}
 	else if (req.body.email){
-		var user =	User.findOne({email:req.body.email.toLowerCase()}, function(err, user){
+		var user =	User.findOne({email:req.body.email}, function(err, user){
 			if(err) throw err;
 			if(!user){
 				res.send({
@@ -165,48 +136,19 @@ module.exports.login = function(req,res){
 				});
 			}
 			else{
-				user.comparePassword(req.body.password, function(err, isMatch,user){
+				user.comparePassword(req.body.password, function(err, isMatch){
 					if (isMatch && !err){
 						var token_data = {
 							id: user._id,
 							dateLogOn: new Date()
 						};
-						if(!(user.isAdmin||user.mobile_verified)){
-							user.sendAuthyToken(function(err, user) {
-								if (err) {
-									res.send({
-										success: false,
-										msg: err +""
-									});
-								} else {
-									var token_data = {
-										id: user._id,
-										dateLogOn: new Date()
-									};
-									// Send for verification page
-									var token = jwt.sign(token_data, config.SECRET);
-									
-									res.json({
-										
-										success: true,
-										msg: user._id,
-										token:"JWT "+ token,
-										user:user
-									});
-								}
-							});
-						}
-						else{
-							var token = jwt.sign(token_data, config.SECRET);
-							
-							res.json({
-								success:true,
-								token:"JWT "+ token,
-								msg:user._id,
-								user:user
-							});
-							
-						}
+						var token = jwt.sign(token_data, config.SECRET);
+						
+						res.json({
+							success:true,
+							token:"JWT "+ token,
+							msg:""
+						});
 					} else{
 						res.send({
 							success:false,

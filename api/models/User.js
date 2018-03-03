@@ -80,13 +80,14 @@ UserSchema.pre('save', function(next) {
 
 UserSchema.methods.comparePassword = function(candidatePassword, cb) {
     var self = this;
-    bcrypt.compare(candidatePassword, self.password, function(err, isMatch, self) {
+    bcrypt.compare(candidatePassword, self.password, function(err, isMatch) {
         if (err) return cb(err);
-        cb(null, isMatch,self);
+        cb(null, isMatch, self);
     });
     
     
 };
+
 
 // Send a verification token to the user (two step auth for login)
 UserSchema.methods.sendAuthyToken = function(cb) {
