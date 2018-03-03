@@ -127,7 +127,7 @@ module.exports.login = function(req,res){
 
 	}
 	else if (req.body.email){
-		var user =	User.findOne({email:req.body.email}, function(err, user){
+		var user =	User.findOne({email:req.body.email.toLowerCase()}, function(err, user){
 			if(err) throw err;
 			if(!user){
 				res.send({
