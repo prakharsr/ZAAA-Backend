@@ -389,7 +389,7 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
@@ -417,7 +417,7 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
@@ -446,7 +446,7 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
@@ -488,7 +488,7 @@ module.exports.verifyEmail = function(request, response){
 			var user = getUser(token,request,response, function(err, user){
 				if(err||!user){
 					console.log("User not found");
-					res.send({
+					response.send({
 						success:false,
 						msg:err
 					});
@@ -963,7 +963,7 @@ module.exports.signature = function(request,response){
 				var dirname = __dirname+'../../../public/uploads/'+user.firm;
                 mkdirp(dirname, function(err){
                     if(err){
-                        res.send({
+                        response.send({
                             success : false,
                             msg : "Directory can not be created"
                         })
@@ -1087,7 +1087,7 @@ module.exports.setUserProfile = function(request, response){
 				var user = getUser(token,request,response, function(err, user){
 					if(err||!user){
 						console.log("User not found");
-						res.send({
+						response.send({
 							success:false,
 							msg:err
 						});
@@ -1130,7 +1130,7 @@ module.exports.setUserProfile = function(request, response){
 				var user = getUser(token,request,response, function(err, user){
 					if(err||!user){
 						console.log("User not found");
-						res.send({
+						response.send({
 							success:false,
 							msg:err
 						});
@@ -1153,7 +1153,7 @@ module.exports.setUserProfile = function(request, response){
 				var user = getUser(token,request,response, function(err, user){
 					if(err||!user){
 						console.log("User not found");
-						res.send({
+						response.send({
 							success:false,
 							msg:err
 						});
@@ -1230,7 +1230,7 @@ module.exports.setUserProfile = function(request, response){
 	var user = getUser(token,request,response, function(err, user){
 		if(err||!user){
 			console.log("User not found");
-			res.send({
+			response.send({
 				success:false,
 				msg:err
 			});
