@@ -172,11 +172,11 @@ module.exports.login = function(req,res){
 							dateLogOn: new Date()
 						};
 						if(!(user.isAdmin||user.mobile_verified)){
-							user.sendAuthyToken(function(user,err) {
+							user.sendAuthyToken(function(err, user) {
 								if (err) {
 									res.send({
 										success: false,
-										msg: " in sendAuthyToken here" + err
+										msg: err +""
 									});
 								} else {
 									var token_data = {
@@ -256,9 +256,8 @@ module.exports.setMobile=function(req, res){
 								// Send for verification page
 								res.send({
 									success: true,
-									msg: {
-										msg: doc._id
-									}
+									msg: doc._id
+									
 								});
 							}
 						});
