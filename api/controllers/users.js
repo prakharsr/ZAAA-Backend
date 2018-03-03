@@ -1169,7 +1169,7 @@ module.exports.setUserProfile = function(request, response){
 						if(request.body.name)
 						firm.FirmName = request.body.name;
 						if(request.body.tagline)
-						firm.TagLine = request.body.tagLine;
+						firm.TagLine = request.body.tagline;
 						if(request.body.displayName)
 						firm.DisplayName = request.body.displayName;
 						if(request.body.registeredAddress)
