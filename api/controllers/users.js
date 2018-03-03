@@ -172,11 +172,11 @@ module.exports.login = function(req,res){
 							dateLogOn: new Date()
 						};
 						if(!(user.isAdmin||user.mobile_verified)){
-							user.sendAuthyToken(function(err) {
+							user.sendAuthyToken(function(user,err) {
 								if (err) {
 									res.send({
 										success: false,
-										msg: " in sendAuthyToken" + err
+										msg: " in sendAuthyToken here" + err
 									});
 								} else {
 									var token_data = {
@@ -1370,11 +1370,11 @@ module.exports.changePassword=function(request, response){
 			console.log("User not found");
 			response.send({
 				success:false,
-				msg:err
+				msg:err+"error in finding user"
 			});
 		}
 		else{
-			user.comparePassword(request.body.oldPassword, function(err, isMatch){
+			user.comparePassword(request.body.oldPassword, function(err, isMatch,user){
 			if(isMatch && !err){
 				user.password = request.body.newPassword;
 				user.save(function(err){
@@ -1382,7 +1382,7 @@ module.exports.changePassword=function(request, response){
 						console.log(err);
 						response.send({
 							success:false,
-							msg : err
+							msg : err + "error saving"
 						});
 					}
 					else{
@@ -1395,8 +1395,8 @@ module.exports.changePassword=function(request, response){
 			}
 			else{
 				response.send({
-					success : true,
-					msg : err
+					success : false,
+					msg : "Wrong Current Password"
 				});
 			}
 			})
