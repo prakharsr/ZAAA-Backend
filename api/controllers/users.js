@@ -765,7 +765,6 @@ module.exports.setRole = function(request,response){
 		}
 		else{
 			if(user.isAdmin){
-				user.roles.all = true;
 				user.save(function(err,doc){
 					if (err) {
 						console.log(err);
@@ -786,10 +785,6 @@ module.exports.setRole = function(request,response){
 				user.roles.Invoice				 = request.body.invoice;
 				user.roles.Payment_receipts		 = request.body.payment_receipts;
 				user.roles.Accounts				 = request.body.accounts;
-				user.roles.Reports				 = request.body.reports;
-				user.roles.directory.media_house = request.body.media_house;
-				user.roles.directory.clients	 = request.body.clients;
-				user.roles.directory.executives	 = request.body.executives;
 				user.save(function(err,doc){
 					if (err) {
 						console.log(err);

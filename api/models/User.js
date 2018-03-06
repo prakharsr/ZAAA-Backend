@@ -46,13 +46,7 @@ var UserSchema = new mongoose.Schema({
         Release_order:Number,
         Invoice:Number,
         Payment_receipts:Number,
-        Accounts:Number,
-        Reports:Number,
-        directory:{
-           media_house:Boolean,
-           clients:Boolean,
-           executives:Boolean
-       }
+        Accounts:Number
     },
     Socials:{
         fb:String,
