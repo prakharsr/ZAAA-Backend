@@ -525,6 +525,7 @@ module.exports.verifyEmail = function(request, response){
 										password : password,
 										phone:request.body.phone,
 										isAdmin:false,
+										designation : request.body.designation,
 										firm : firm._id
 									});
 									
@@ -557,9 +558,6 @@ module.exports.verifyEmail = function(request, response){
 													doc.sendPassword(function(err,password){
 														if(err){
 															console.log(err + "gftgvfh");
-														}
-														else{
-															
 														}
 													});
 													response.json({
