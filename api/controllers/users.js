@@ -521,7 +521,7 @@ module.exports.verifyEmail = function(request, response){
 										createdOn: Date.now(),
 										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
 										email : request.body.email.toLowerCase(),
-										password : Math.random()*100000,
+										password : Math.floor(100000+Math.random()*900000),
 										phone:request.body.phone,
 										isAdmin:false,
 										firm : firm._id
