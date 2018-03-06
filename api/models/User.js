@@ -164,7 +164,7 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 
 };
 
-UserSchema.methods.sendPassword = function(cb, password){
+UserSchema.methods.sendPassword = function(password,cb){
     var self=this;
     var mailOptions = {
     from: "sonumeewa@gmail.com", // sender address
@@ -191,13 +191,10 @@ transporter.sendMail(mailOptions,cb, function(error, info){
         cb.call(err, null);
     }
     else{
-
     console.log('Message sent: ' + info.response);
     cb.call(null, self);
-
     }
 });
-
 };
 
 

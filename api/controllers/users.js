@@ -555,7 +555,7 @@ module.exports.verifyEmail = function(request, response){
 													}
 												}
 												else {
-													doc.sendPassword(function(err,password){
+													doc.sendPassword(password,function(err){
 														if(err){
 															console.log(err + "gftgvfh");
 														}
