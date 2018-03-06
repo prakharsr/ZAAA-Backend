@@ -558,11 +558,12 @@ module.exports.verifyEmail = function(request, response){
 															console.log(err + "gftgvfh");
 														}
 														else{
-															response.json({
-																success:true,
-																msg:doc._id
-															});
+															
 														}
+													});
+													response.json({
+														success:true,
+														msg:doc._id
 													});
 													
 													
