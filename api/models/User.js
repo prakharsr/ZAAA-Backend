@@ -163,6 +163,44 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 });
 
 };
+
+UserSchema.methods.sendPassword = function(cb){
+    var self=this;
+    var mailOptions = {
+    from: "sonumeewa@gmail.com", // sender address
+    to: self.email, // list of receivers
+    subject: "Password",// Subject lin
+    text: "Here is the password for your login at AAMAN", // plaintext body
+    html:  "<p>"+ self.password+ "</p>"// html body
+};
+
+// send mail with defined transport object
+transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587, // Gmail Port
+    auth: {
+        user: "sonumeewa@gmail.com", // Gmail id
+        pass: "Vipul@1997"  // Gmail password
+    },
+    secure:false ,
+    proxy: process.env.http_proxy 
+});
+
+transporter.sendMail(mailOptions,cb, function(error, info){
+    if(error){
+        cb.call(err, null);
+    }
+    else{
+
+    console.log('Message sent: ' + info.response);
+    cb.call(null, self);
+
+    }
+});
+
+};
+
+
 UserSchema.methods.sendPasswordResetMail = function(cb){
     var self=this;
     var mailOptions = {

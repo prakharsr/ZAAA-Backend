@@ -516,11 +516,12 @@ module.exports.verifyEmail = function(request, response){
 							console.log(firm.plan);
 							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
 								if((firm.co_users.length + firm.admins.length) < (plan.maxUsers+1)){
+					
 									var CoUser = new User({
 										createdOn: Date.now(),
 										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
 										email : request.body.email.toLowerCase(),
-										password : request.body.password,
+										password : Math.random()*100000,
 										phone:request.body.phone,
 										isAdmin:false,
 										firm : firm._id
@@ -552,10 +553,18 @@ module.exports.verifyEmail = function(request, response){
 													}
 												}
 												else {
-													response.json({
-														success:true,
-														msg:doc._id
+													doc.sendPassword(function(err, user){
+														if(err){
+															console.log(err + "gftgvfh");
+														}
+														else{
+															response.json({
+																success:true,
+																msg:doc._id
+															});
+														}
 													});
+													
 													
 												}
 											});
