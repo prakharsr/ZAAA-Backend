@@ -182,7 +182,7 @@ transporter = nodemailer.createTransport({
         user: "sonumeewa@gmail.com", // Gmail id
         pass: "Vipul@1997"  // Gmail password
     },
-    secure:false 
+    secure:false
     //proxy: process.env.http_proxy 
 });
 
