@@ -512,6 +512,7 @@ module.exports.verifyEmail = function(request, response){
 							console.log("firm does not exist for this admin");
 						}
 						else{
+							var password = Math.floor(100000+Math.random()*900000);
 							var planCreatedOn = firm.plan.planCreatedOn;
 							console.log(firm.plan);
 							var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
@@ -521,7 +522,7 @@ module.exports.verifyEmail = function(request, response){
 										createdOn: Date.now(),
 										name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
 										email : request.body.email.toLowerCase(),
-										password : Math.floor(100000+Math.random()*900000),
+										password : password,
 										phone:request.body.phone,
 										isAdmin:false,
 										firm : firm._id
@@ -553,7 +554,7 @@ module.exports.verifyEmail = function(request, response){
 													}
 												}
 												else {
-													doc.sendPassword(function(err, user){
+													doc.sendPassword(function(err, user,password){
 														if(err){
 															console.log(err + "gftgvfh");
 														}

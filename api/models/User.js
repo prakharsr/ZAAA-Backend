@@ -164,14 +164,14 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 
 };
 
-UserSchema.methods.sendPassword = function(cb){
+UserSchema.methods.sendPassword = function(cb, password){
     var self=this;
     var mailOptions = {
     from: "sonumeewa@gmail.com", // sender address
     to: self.email, // list of receivers
     subject: "Password",// Subject lin
     text: "Here is the password for your login at AAMAN", // plaintext body
-    html:  "<p>"+ self.password+ "</p>"// html body
+    html:  "<p>"+ password+ "</p>"// html body
 };
 
 // send mail with defined transport object
