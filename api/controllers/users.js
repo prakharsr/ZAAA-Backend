@@ -14,7 +14,7 @@ var SALT_WORK_FACTOR = 10;
 module.exports.signup = function(req,res){
 	var reqBody = req.body;
 	
-	if(!reqBody.email || !reqBody.password ){
+	if(!reqBody.email ){
 		res.json({
 			success : false,
 			msg : "Provide all the credentials to signup successfully"
