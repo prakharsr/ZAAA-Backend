@@ -1,6 +1,6 @@
 var config = require('../../config');
 var Plan = require('../models/Plan');
-var usercontroller = require('./users');
+var userController = require('./users');
 var User = require('../models/User');
 var jwt = require('jsonwebtoken');
 
@@ -8,8 +8,8 @@ var jwt = require('jsonwebtoken');
 
 module.exports.getPlans = function(request,response){
     
-    var token = usercontroller.getToken(request.headers);
-	var user = usercontroller.getUser(token,request,response, function(err, user){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
 		if(err||!user){
 			console.log("User not found");
 			res.send({
@@ -80,4 +80,47 @@ module.exports.getPlans = function(request,response){
     
 };
 
+
+module.exports.getCurrentPlan=function(request, response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			
+			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+					if(err){
+						response.send({
+							success:false,
+							msg:"error in finding plan" + err,
+							
+						});
+					}
+					if(!plan){
+						response.json({
+							success:false,
+							msg:"plan not found for the firm ",
+							firm:firm
+						});
+					}
+					else{
+						response.json({
+							success:false,
+							msg:"plan  obtained ",
+							user:user,
+							firm:firm,
+							plan:plan
+						});
+					}
+				});
+			});
+		}
+	});
+}
 
