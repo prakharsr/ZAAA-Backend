@@ -10,6 +10,9 @@ var path = require('path');
 var bcrypt = require('bcrypt');
 var SALT_WORK_FACTOR = 10;
 
+
+
+
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
 	var reqBody = req.body;
@@ -26,7 +29,7 @@ module.exports.signup = function(req,res){
 			createdOn: Date.now(),
 			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email.toLowerCase(),
-			password : reqBody.password,
+			password :  Math.floor(100000+Math.random()*900000),
 			phone:"",
 			isAdmin:true,
 			firm : firm._id
@@ -49,6 +52,11 @@ module.exports.signup = function(req,res){
 					});
 				}
 				else{
+                    doc.sendPassword(password,function(err){
+                        if(err){
+                            console.log(err + "gftgvfh");
+                        }
+                    });
 					res.send({
 						success : false,
 						msg : err
