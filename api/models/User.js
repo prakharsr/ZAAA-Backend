@@ -121,7 +121,7 @@ UserSchema.methods.sendVerificationMail = function(cb){
     to: self.email, // list of receivers
     subject: "Account Confirmation",// Subject lin
     text: "Here is the link to confirm your mail", // plaintext body
-    html:  "<p>click here: http://3eed0736.ngrok.io/api/user/verify/email/"+ self._id+ "</p>"// html body
+    html:  "<p>click <a href='http://3eed0736.ngrok.io/api/user/verify/email/" + self._id + "'>here</a></p>"// html body
 };
 
 // send mail with defined transport object
