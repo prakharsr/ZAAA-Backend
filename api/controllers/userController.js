@@ -16,8 +16,8 @@ var SALT_WORK_FACTOR = 10;
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
 	var reqBody = req.body;
-	
-	if(!reqBody.email || !reqBody.password || reqBody.phone ){
+	var password = Math.floor(100000+Math.random()*900000);
+	if(!reqBody.email){
 		res.json({
 			success : false,
 			msg : "Provide all the credentials to signup successfully"
@@ -29,7 +29,7 @@ module.exports.signup = function(req,res){
 			createdOn: Date.now(),
 			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email.toLowerCase(),
-			password :  Math.floor(100000+Math.random()*900000),
+			password : password,
 			phone:"",
 			isAdmin:true,
 			firm : firm._id
@@ -291,7 +291,7 @@ module.exports.verifyMobile = function(request, response) {
 		
 	}
 		
-module.exports.getUser = function(token,req,res, cb){
+function getUser(token,req,res, cb){
 	console.log(token);
 	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
 		User.findById(decoded.id, function(err, doc) {
@@ -306,7 +306,7 @@ module.exports.getUser = function(token,req,res, cb){
 	});
 }
 		
-module.exports.getToken = function(headers) {
+function getToken(headers) {
 	if (headers && headers.authorization) {
 		var parted = headers.authorization.split(' ');
 		if (parted.length === 2) {
@@ -318,6 +318,9 @@ module.exports.getToken = function(headers) {
 		return null;
 	}
 }
+
+module.exports.getToken = getToken;
+module.exports.getUser = getUser;
 		
 module.exports.profileImage = function(request,response){
 	var token = getToken(request.headers);
