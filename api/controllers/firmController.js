@@ -112,7 +112,10 @@ module.exports.setPlan = function(request,response){
 				else{
 					firm.plan.planID = request.body.planID;
 					firm.plan.paymentID = request.body.paymentID;
-					firm.plan.CreatedOn = Date.now();
+                    firm.plan.CreatedOn = Date.now();
+                    firm.FirmName = request.body.firmName;
+                    firm.GSTIN = request.body.gstNo;
+                    firm.RegisteredAddress = request.body.billingAddress;
 					firm.save(function(err, doc) {
 						if (err) {
 							response.send({
