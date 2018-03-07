@@ -21,12 +21,13 @@ module.exports.signup = function(req,res){
 		});
 	}
 	else{
+		var password= Math.floor(100000+Math.random()*900000);
 		var firm = new Firm();
 		var user = new User({
 			createdOn: Date.now(),
 			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email.toLowerCase(),
-			password :  Math.floor(100000+Math.random()*900000),
+			password : password,
 			phone:"",
 			isAdmin:true,
 			firm : firm._id
