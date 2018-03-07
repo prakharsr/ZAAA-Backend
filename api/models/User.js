@@ -39,19 +39,10 @@ var UserSchema = new mongoose.Schema({
         ref:"Firm"
     },
     roles:{
-        All:{
-            type: Boolean,
-            default : false
-        },
         Release_order:Number,
         Invoice:Number,
         Payment_receipts:Number,
         Accounts:Number
-    },
-    Socials:{
-        fb:String,
-        twitter:String,
-        other:String
     }
 },
 {

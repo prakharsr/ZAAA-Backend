@@ -1040,14 +1040,7 @@ module.exports.setUserProfile = function(request, response){
 					else{
 						if(request.body.name)
 						user.name = request.body.name;
-						if(request.body.designation)
-						user.designation = request.body.designation;
-						if(request.body.fb)
-						user.Socials.fb=request.body.fb;
-						if(request.body.twitter)
-						user.Socials.twitter=request.body.twitter;
-						if(request.body.other)
-						user.Socials.other=request.body.other;
+
 						user.save(function(){
 							if(err){
 								console.log(err);
