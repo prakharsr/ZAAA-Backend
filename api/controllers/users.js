@@ -1142,6 +1142,12 @@ module.exports.setFirmProfile = function(request, response){
 			firm.BankDetails.BranchAddress = request.body.bankAddress;
 			if(request.body.accountType)
 			firm.BankDetails.AccountType = request.body.accountType;
+			if(request.body.Socials.fb)
+			firm.Socials.fb=request.body.Socials.fb;			
+			if(request.body.Socials.twitter)
+			firm.Socials.twitter=request.body.Socials.twitter;			
+			if(request.body.Socials.other)
+			firm.Socials.other=request.body.Socials.other;
 			
 			firm.save(function(err){
 				if(err){
