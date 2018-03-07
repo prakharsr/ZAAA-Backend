@@ -49,11 +49,7 @@ module.exports.signup = function(req,res){
 					});
 				}
 				else{
-                    doc.sendPassword(password,function(err){
-                        if(err){
-                            console.log(err + "gftgvfh");
-                        }
-                    });
+                    
 					res.send({
 						success : false,
 						msg : err
@@ -61,29 +57,18 @@ module.exports.signup = function(req,res){
 				}
 			}
 			else {
+				
 				var token_data = {
 					id: mongoose.mongo.ObjectId(doc._id),
 					dateLogOn: new Date()
 				};
 				var token = jwt.sign(token_data, config.SECRET);
 				
-				user.sendVerificationMail( function(err, user){
+				doc.sendPassword(password,function(err){
 					if(err){
-						console.log(err);
-						// response.send({
-						// 	success:false,
-						// 	msg:"failed"
-						// });
-						
-					}
-					else{
-						// response.send({
-						// 	success:true,
-						// 	msg:"Verification mail sent to Your Email Address."
-						// });
+						console.log(err + "gftgvfh");
 					}
 				});
-				
 				res.json({
 					success:true,
 					token:"JWT "+ token,
