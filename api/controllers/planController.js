@@ -94,7 +94,7 @@ module.exports.getCurrentPlan=function(request, response){
 		else{
 			
 			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
-				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+				Plan.findById(mongoose.mongo.ObjectId(firm.plan.planID), function(err,plan){
 					if(err){
 						response.send({
 							success:false,

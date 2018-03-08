@@ -167,7 +167,7 @@ module.exports.createAdmins=function(request,response){
 				else{
 					var planCreatedOn = firm.plan.planCreatedOn;
 					
-					var plan = Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err, plan, planCreatedOn){
+					var plan = Plan.findById(mongoose.mongo.ObjectId(firm.plan.planID), function(err, plan, planCreatedOn){
 						if((firm.co_users.length +firm.admins.length) < (plan.maxUsers+1)&&(firm.admins.length <plan.maxAdmins)){
 							var newAdmin = new User({
 								createdOn: Date.now(),

@@ -490,11 +490,11 @@ module.exports.deleteUser = function(request, response){
 					console.log(err);
 				}
 				else{
-					if(user._id === mongoose.mongo.ObjectID(request.params.id) || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
+					if(user._id === mongoose.mongo.ObjectId(request.params.id) || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
 					else{
-						firm.co_users.pull({ _id: mongoose.mongo.ObjectID(request.params.id) });
-						firm.admins.pull({ _id: mongoose.mongo.ObjectID(request.params.id) });
-						User.findOneAndRemove({_id : mongoose.mongo.ObjectID(request.params.id)}, function(err){
+						firm.co_users.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
+						firm.admins.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
+						User.findOneAndRemove({_id : mongoose.mongo.ObjectId(request.params.id)}, function(err){
 							if(err){
 								console.log(err);
 								response.send({

@@ -148,12 +148,12 @@ module.exports.setFirmProfile = function(request, response){
 			});
 		}
 		else{
-			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
 			if(err){
 				response.send({
 				success : false,
 					msg : "Firm not found"
-				})
+				});
 			}
 			if(request.body.name)
 			firm.FirmName = request.body.name;
@@ -232,7 +232,7 @@ module.exports.getFirmProfile = function(request, response){
 	}
 	else{
 			console.log(user);
-			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
 				Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
 					if(err){
 						response.send({
@@ -275,7 +275,7 @@ module.exports.getCurrentFirm=function(request, response){
 			});
 		}
 		else{
-			Firm.findById(mongoose.mongo.ObjectID(user.firm), function(err, firm){
+			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
 				if(err||!user){
 					console.log("User not found");
 					response.send({
