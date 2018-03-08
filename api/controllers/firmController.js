@@ -55,7 +55,7 @@ module.exports.logoImage = function(request,response){
                                 cb(null, file.fieldname+path.extname(file.originalname));
                             }
                         });                            
-                        var upload = multer({storage : storage}).single('logo');
+                        var upload = multer({storage: storage}).single('logo');
                         upload(request,response,function(err){
                             if(err){
                                 response.send({
@@ -102,7 +102,7 @@ module.exports.setPlan = function(request,response){
 			});
 		}
 		else{
-			Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+			Firm.findById(user.firm,function(err,firm){
 				if(err){
 					console.log("error in finding firm" + err);
 				}
@@ -148,14 +148,16 @@ module.exports.setFirmProfile = function(request, response){
 			});
 		}
 		else{
-			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+			Firm.findById(user.firm, function(err, firm){
 			if(err){
+                console.log(err);
 				response.send({
 				success : false,
 					msg : "Firm not found"
 				});
-			}
-			if(request.body.name)
+            }
+            else{
+            if(request.body.name)
 			firm.FirmName = request.body.name;
 			if(request.body.tagline)
 			firm.TagLine = request.body.tagline;
@@ -193,12 +195,12 @@ module.exports.setFirmProfile = function(request, response){
 			firm.BankDetails.BranchAddress = request.body.bankAddress;
 			if(request.body.accountType)
 			firm.BankDetails.AccountType = request.body.accountType;
-			if(request.body.Socials.fb)
-			firm.Socials.fb=request.body.Socials.fb;			
-			if(request.body.Socials.twitter)
-			firm.Socials.twitter=request.body.Socials.twitter;			
-			if(request.body.Socials.other)
-			firm.Socials.other=request.body.Socials.other;
+			if(request.body.fb)
+			firm.Socials.fb=request.body.fb;			
+			if(request.body.twitter)
+			firm.Socials.twitter=request.body.twitter;			
+			if(request.body.other)
+			firm.Socials.other=request.body.other;
 			
 			firm.save(function(err){
 				if(err){
@@ -215,6 +217,8 @@ module.exports.setFirmProfile = function(request, response){
 					})
 				}
 			})
+            }
+			
 		});
 		}
 	});
