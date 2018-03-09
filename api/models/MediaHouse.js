@@ -5,7 +5,15 @@ var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
 
-
+var scheduling=new mongoose.Schema({
+    Person:String,
+    Designation:String,
+    MobileNo:String,
+    DeskExtension:String,
+    EmailId:String,
+    AssignAdType:String,
+    AssignEdition:String
+    });
 
 var MediahouseSchema = new mongoose.Schema({
 OrganizationName:String,
@@ -23,13 +31,6 @@ DeskExtension:String,
 EmailId:String,
 AssignAdtype:String,
 AssignEdition:String,
-Scheduling:[{Person:String,
-    Designation:String,
-    MobileNo:String,
-    DeskExtension:String,
-    EmailId:String,
-    AssignAdType:String,
-    AssignEdition:String
-    }]
+Scheduling:[scheduling]
 });
 module.exports = mongoose.model('MediaHouse', MediahouseSchema);

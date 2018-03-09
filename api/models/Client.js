@@ -5,7 +5,17 @@ var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
 
-
+var contactDetails = new mongoose.Schema({
+    Name:String,
+    Designation:String,
+    Department:String,
+    MobileNo:String,
+    EmailId:String,
+    PersonalDetails:String,
+    Photo:String,
+    DateOfBirth:Date,
+    Anniversary:Date    
+});
 
 var ClientSchema = new mongoose.Schema({
     OrganizationName:String,
@@ -17,16 +27,6 @@ var ClientSchema = new mongoose.Schema({
     Website:String,
     PanNO:String,
     GSTNo:String,
-    ContactPerson:{
-        Name:String,
-        Designation:String,
-        Department:String,
-        MobileNo:String,
-        EmailId:String,
-        PersonalDetails:String,
-        Photo:String,
-        DateOfBirth:Date,
-        Anniversary:Date    
-    }
+    ContactPerson:contactDetails,
 });
 module.exports = mongoose.model('Client', ClientSchema);
