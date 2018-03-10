@@ -32,8 +32,8 @@ module.exports.createExecutive = function(request,response){
                 MobileNo:request.body.mobileNo,
                 EmailId:request.body.email,
                 Photo:request.body.photo,
-                DateOfBirth:request.body.date,
-                Anniversary:request.body.date,    
+                DateOfBirth:request.body.dob,
+                Anniversary:request.body.anniversary,    
                 firm : user.firm
                 
             });
