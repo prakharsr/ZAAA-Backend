@@ -160,6 +160,25 @@ module.exports.deleteClient = function(request, response){
 		}	
 	});
 };
+module.exports.queryClients = function(request, response){
+  
+    Client.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, clients){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                clients: clients
+            });
+        }
+    });
+    
+};
 
 module.exports.updateClient = function(request, response){
 	var token = userController.getToken(request.headers);

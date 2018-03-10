@@ -43,12 +43,14 @@ router.get('/user/clients', client.getClients);
 router.get('/user/client/:id', client.getClient);
 router.delete('/user/client/:id', client.deleteClient);
 router.patch('/user/client', client.updateClient);
+router.get('/user/clients/:keyword', client.queryClients);
 
 router.post('/user/executive', executive.createExecutive);
 router.get('/user/executives', executive.getExecutives);
 router.get('/user/executive/:id', executive.getExecutive);
 router.delete('/user/executive/:id', executive.deleteExecutive);
 router.patch('/user/executive', executive.updateExecutive);
+router.get('/user/executives/:keyword', executive.queryExecutives);
 
 
 router.post('/user/mediahouse', mediahouse.createMediahouse);
@@ -57,4 +59,5 @@ router.get('/user/mediahouses/global', mediahouse.getGlobalMediahouses);
 router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
+router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
 module.exports = router;

@@ -160,6 +160,25 @@ module.exports.deleteExecutive = function(request, response){
 		}	
 	});
 };
+module.exports.queryExecutives = function(request, response){
+  
+    Executive.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, executives){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                executives: executives
+            });
+        }
+    });
+    
+};
 
 module.exports.updateExecutive = function(request, response){
 	var token = userController.getToken(request.headers);

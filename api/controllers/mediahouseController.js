@@ -109,7 +109,7 @@ function findMediaHouses(request,response, global){
 		}
 		else{
             
-            MediaHouse.find({firm:mongoose.mongo.ObjectId(user.firm),global:global},null,function(err, mediahouses){
+            MediaHouse.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, mediahouses){
                 
                 if(err){
                     console.log("here" +err);
@@ -132,6 +132,26 @@ module.exports.getLocalMediahouses = function(request,response){
 };
 module.exports.getGlobalMediahouses = function(request,response){
     findMediaHouses(request, response, true);
+};
+
+module.exports.queryMediaHouse = function(request, response){
+  
+    MediaHouse.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, mediahouses){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                mediahouses: mediahouses
+            });
+        }
+    });
+    
 };
 
 module.exports.deleteMediahouse = function(request, response){
