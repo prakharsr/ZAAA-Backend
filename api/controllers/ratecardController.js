@@ -1,5 +1,5 @@
 var config = require('../../config');
-var MediaHouse = require('../models/MediaHouse');
+var RateCard = require('../models/Ratecard');
 var userController = require('./users');
 var firmController = require('./firmController');
 var User = require('../models/User');
@@ -14,7 +14,7 @@ var path = require('path');
 
 
 //http://localhost:8000/api/get/plans
-module.exports.createMediahouse = function(request,response){
+module.exports.createRatecard = function(request,response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err||!user){
@@ -25,30 +25,41 @@ module.exports.createMediahouse = function(request,response){
 			});
 		}
 		else{
-            var mediahouse = new MediaHouse({
-                OrganizationName:request.body.organizationName,
-                PublicationName:request.body.publicationName,
-                NickName:request.body.nickName,
-                Edition:request.body.edition,
-                Address:request.body.address,
-                OfficeLandline:request.body.officeLandline,
-                Scheduling:request.body.scheduling,
-                global:false,
-                firm : user.firm
-                
+            var ratecard = new RateCard({
+                MediaType:request.body.mediaType,
+                AdType:request.body.adType,
+                RateCardType:request.body.rateCardType,
+                BookingCenter:request.body.bookingCenter,
+                Frequency:request.body.frequency,
+                Category:request.body.categories,
+                Rate:request.body.rate,
+                Position:request.body.position,
+                Hue:request.body.hue,
+                MaxSizeLimit: request.body.maxSizeLimit,
+                MinSizeLimit:request.body.minSizeLimit,
+                FixSize:request.body.fixSize,
+                Scheme:request.body.scheme,
+                Premium:request.body.premium,
+                Tax:request.body.tax,
+                ValidFrom:request.body.validFrom,
+                ValidTill:request.body.validTill,
+                Covered:request.body.covered,
+                Remarks:request.body.remarks,
+                firm :user.firm,
+                global:false
             });
-            mediahouse.save(function(err){
+            ratecard.save(function(err){
                 if(err){
                     console.log(err);
                     response.send({
                         success : false,
-                        msg : "cannot save media house data"
+                        msg : "cannot save ratecard data"
                     })
                 }
                 else{
                     response.send({
                         success : true,
-                        msg : "mediahouse data saved"
+                        msg : "ratecard data saved"
                     })
                 }
             });
@@ -58,7 +69,7 @@ module.exports.createMediahouse = function(request,response){
     
 };
 
-module.exports.getMediaHouse = function(request,response){
+module.exports.getRatecard = function(request,response){
     
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
@@ -71,7 +82,7 @@ module.exports.getMediaHouse = function(request,response){
 		}
 		else{
             
-            MediaHouse.findById(request.params.id,function(err, mediahouse){
+            RateCard.findById(request.params.id,function(err, ratecard){
                 
                 if(err){
                     console.log("here" +err);
@@ -83,7 +94,7 @@ module.exports.getMediaHouse = function(request,response){
                 else{
                     response.send({
                         success : true,
-                        mediahouse : mediahouse
+                        ratecard : ratecard
                     }); 
                 }
             });
@@ -93,7 +104,7 @@ module.exports.getMediaHouse = function(request,response){
     
 };
 
-function findMediaHouses(request,response, global){
+function findRatecards(request,response, global){
     
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
@@ -106,7 +117,7 @@ function findMediaHouses(request,response, global){
 		}
 		else{
             
-            MediaHouse.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, mediahouses){
+            RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, ratecards){
                 
                 if(err){
                     console.log("here" +err);
@@ -114,7 +125,7 @@ function findMediaHouses(request,response, global){
                 else{
                     response.send({
                         success : true,
-                        mediahouses : mediahouses,
+                        ratecards : ratecards,
                     }); 
                 }
             });
@@ -124,16 +135,16 @@ function findMediaHouses(request,response, global){
     
 };
 
-module.exports.getLocalMediahouses = function(request,response){
-    findMediaHouses(request, response, false);
+module.exports.getLocalRatecards = function(request,response){
+    findRatecards(request, response, false);
 };
-module.exports.getGlobalMediahouses = function(request,response){
-    findMediaHouses(request, response, true);
+module.exports.getGlobalRatecards = function(request,response){
+    findRatecards(request, response, true);
 };
 
-module.exports.queryMediaHouse = function(request, response){
-  
-    MediaHouse.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, mediahouses){
+module.exports.queryRatecards = function(request, response){
+    
+    RateCard.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, ratecards){
         if(err){
             console.log(err+ "");
             response.send({
@@ -144,14 +155,14 @@ module.exports.queryMediaHouse = function(request, response){
         else{
             response.send({
                 success:true,
-                mediahouses: mediahouses
+                ratecards: ratecards
             });
         }
     });
     
 };
 
-module.exports.deleteMediahouse = function(request, response){
+module.exports.deleteRatecard = function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -169,7 +180,7 @@ module.exports.deleteMediahouse = function(request, response){
 			});
 		}
 		else{
-            MediaHouse.findByIdAndRemove(request.params.id,function(err){
+            RateCard.findByIdAndRemove(request.params.id,function(err){
                 if(err){
                     console.log(err);
                     response.send({
@@ -180,7 +191,7 @@ module.exports.deleteMediahouse = function(request, response){
                 else{
                     response.send({
                         success:true,
-                        msg: "MediaHouse deleted"
+                        msg: "Ratecard deleted"
                     });
                 }
                 
@@ -189,7 +200,7 @@ module.exports.deleteMediahouse = function(request, response){
 	});
 };
 
-module.exports.updateMediaHouse = function(request, response){
+module.exports.updateRatecard = function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -207,7 +218,7 @@ module.exports.updateMediaHouse = function(request, response){
 			});
 		}
 		else{
-            Client.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouses){
+            RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
                 if(err){
                     console.log(err);
                     response.send({
@@ -221,7 +232,7 @@ module.exports.updateMediaHouse = function(request, response){
                     // }
                     response.send({
                         success:true,
-                        msg: "MediaHouse Updated"
+                        msg: "Ratecard Updated"
                     });
                 }
                 

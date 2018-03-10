@@ -27,5 +27,9 @@ firm : {
     type:mongoose.Schema.Types.ObjectId,
     ref:"Firm"
 },
+global:{
+    type:Boolean,
+    default:false
+}
 });
 module.exports = mongoose.model('MediaHouse', MediahouseSchema);
