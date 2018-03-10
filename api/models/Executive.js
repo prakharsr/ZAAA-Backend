@@ -6,11 +6,8 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
 
 
-var personalDetails=new mongoose.Schema({
-    Photo:String,
-    DateOfBirth:Date,
-    Anniversary:Date
-    });
+
+ 
 var ExecutiveSchema = new mongoose.Schema({
     OrganizationName:String,
     CompanyName:String,
@@ -18,10 +15,10 @@ var ExecutiveSchema = new mongoose.Schema({
     Designation:String,
     Department:String,
     MobileNo:String,
-    EmailId:String,
-    PersonalDetails:{
-        type:personalDetails
-    },
+    EmailId:String, 
+    Photo:String,
+    DateOfBirth:Date,
+    Anniversary:Date,
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
