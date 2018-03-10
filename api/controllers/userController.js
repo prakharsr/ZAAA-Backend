@@ -52,11 +52,6 @@ module.exports.signup = function(req,res){
 					});
 				}
 				else{
-                    doc.sendPassword(password,function(err){
-                        if(err){
-                            console.log(err + "gftgvfh");
-                        }
-                    });
 					res.send({
 						success : false,
 						msg : err
@@ -70,7 +65,7 @@ module.exports.signup = function(req,res){
 				};
 				var token = jwt.sign(token_data, config.SECRET);
 				
-				user.sendVerificationMail( function(err, user){
+				user.sendPassword( function(err, user){
 					if(err){
 						console.log(err);
 						// response.send({
