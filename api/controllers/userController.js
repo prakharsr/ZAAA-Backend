@@ -52,6 +52,7 @@ module.exports.signup = function(req,res){
 					});
 				}
 				else{
+                   
 					res.send({
 						success : false,
 						msg : err
@@ -65,7 +66,7 @@ module.exports.signup = function(req,res){
 				};
 				var token = jwt.sign(token_data, config.SECRET);
 				
-				user.sendPassword( function(err, user){
+				user.sendPassword( password,function(err, user){
 					if(err){
 						console.log(err);
 						// response.send({
