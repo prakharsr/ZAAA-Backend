@@ -48,7 +48,8 @@ var FirmSchema = new mongoose.Schema({
         fb:String,
         twitter:String,
         Others:String
-    }
+    },
 });
+
 
 module.exports = mongoose.model('Firm', FirmSchema);

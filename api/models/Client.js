@@ -11,7 +11,6 @@ var contactDetails = new mongoose.Schema({
     Department:String,
     MobileNo:String,
     EmailId:String,
-    PersonalDetails:String,
     Photo:String,
     DateOfBirth:Date,
     Anniversary:Date    
@@ -28,5 +27,9 @@ var ClientSchema = new mongoose.Schema({
     PanNO:String,
     GSTNo:String,
     ContactPerson:contactDetails,
+    firm : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Firm"
+    },
 });
 module.exports = mongoose.model('Client', ClientSchema);

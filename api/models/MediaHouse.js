@@ -31,6 +31,11 @@ DeskExtension:String,
 EmailId:String,
 AssignAdtype:String,
 AssignEdition:String,
-Scheduling:[scheduling]
+Scheduling:[scheduling],
+
+firm : {
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"Firm"
+},
 });
 module.exports = mongoose.model('MediaHouse', MediahouseSchema);

@@ -21,7 +21,12 @@ var ExecutiveSchema = new mongoose.Schema({
     EmailId:String,
     PersonalDetails:{
         type:personalDetails
-    }
+    },
+    firm : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Firm"
+    },
     
 });
 module.exports = mongoose.model('Executive', ExecutiveSchema);
+

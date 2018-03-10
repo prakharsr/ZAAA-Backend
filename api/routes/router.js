@@ -4,6 +4,9 @@ var user = require('../controllers/userController');
 var plan = require('../controllers/planController');
 var firm = require('../controllers/firmController');
 var coUser = require('../controllers/coUserController');
+var client = require('../controllers/clientController');
+var executive = require('../controllers/executiveController');
+var mediahouse = require('../controllers/mediahouseController');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -35,4 +38,23 @@ router.post('/user/setNewPassword', user.setNewPassword);
 router.get('user/resetPassword/:id',user.resetPassword);
 router.delete('/user/co_user/:id', user.deleteUser);
 
+router.post('/user/client', client.createClient);
+router.get('/user/clients', client.getClients);
+router.get('/user/client/:id', client.getClient);
+router.delete('/user/client/:id', client.deleteClient);
+router.patch('/user/client', client.updateClient);
+
+router.post('/user/executive', executive.createExecutive);
+router.get('/user/executives', executive.getExecutives);
+router.get('/user/executive/:id', executive.getExecutive);
+router.delete('/user/executive/:id', executive.deleteExecutive);
+router.patch('/user/executive', executive.updateExecutive);
+
+
+router.post('/user/mediahouse', mediahouse.createMediahouse);
+router.get('/user/mediahouses', mediahouse.getLocalMediahouses);
+router.get('/user/mediahouses/global', mediahouse.getGlobalMediahouses);
+router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
+router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
+router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
 module.exports = router;
