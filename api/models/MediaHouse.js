@@ -10,9 +10,7 @@ var scheduling=new mongoose.Schema({
     Designation:String,
     MobileNo:String,
     DeskExtension:String,
-    EmailId:String,
-    AssignAdType:String,
-    AssignEdition:String
+    EmailId:String
     });
 
 var MediahouseSchema = new mongoose.Schema({
@@ -23,14 +21,6 @@ MediaType:String,
 Edition:String,
 Address:String,
 OfficeLandline:String,
-Scheduling:String,
-Person: String,
-Designation:String,
-MobileNo:String,
-DeskExtension:String,
-EmailId:String,
-AssignAdtype:String,
-AssignEdition:String,
 Scheduling:[scheduling],
 
 firm : {

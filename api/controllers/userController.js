@@ -695,4 +695,4 @@ module.exports.resetPassword = function(request,response){
 			});
 		}
 	})
-}
+};
