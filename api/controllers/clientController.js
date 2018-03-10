@@ -83,7 +83,7 @@ module.exports.getClient = function(request,response){
                 else{
                     response.send({
                         success : true,
-                        msg : client + ""
+                        client : client
                     }); 
                 }
             });
