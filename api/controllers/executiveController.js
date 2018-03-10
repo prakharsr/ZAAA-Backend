@@ -83,7 +83,7 @@ module.exports.getExecutive = function(request,response){
                 else{
                     response.send({
                         success : true,
-                        msg : executive + ""
+                        executive : executive
                     }); 
                 }
             });

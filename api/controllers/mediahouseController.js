@@ -86,7 +86,7 @@ module.exports.getMediaHouse = function(request,response){
                 else{
                     response.send({
                         success : true,
-                        msg : mediahouse + ""
+                        mediahouse : mediahouse
                     }); 
                 }
             });
