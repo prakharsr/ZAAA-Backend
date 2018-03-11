@@ -155,13 +155,13 @@ module.exports.deleteClient = function(request, response){
                         msg: "Client deleted"
                     });
                 }
-
+                
             })
 		}	
 	});
 };
 module.exports.queryClients = function(request, response){
-  
+    
     Client.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, clients){
         if(err){
             console.log(err+ "");
@@ -215,7 +215,7 @@ module.exports.updateClient = function(request, response){
                         msg: "Client Updated"
                     });
                 }
-
+                
             })
 		}	
 	});
@@ -238,56 +238,58 @@ module.exports.profileImage = function(request,response){
 			});
 		}
 		else{
-		var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Clients/'+request.Name;
-		mkdirp(dirname, function(err){
-			if(err){
-				response.send({
-					success : false,
-					msg : "Directory can not be created " + err
-				})
-			}
-			else{
-				var location;
-				var storage = multer.diskStorage({
-					destination: function(request,file,cb){
-						cb(null,dirname);
-					},
-					filename: function(request, file,cb){
-						location = '/uploads/'+user.firm+'/Clients/'+request.Name+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
-						cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
-					}
-				});                            
-				var upload = multer({storage : storage}).single('user');
-				upload(request,response,function(err){
-					if(err){
-						response.send({
-							success : false,
-							msg : "error uploading file." + err
-						});
-					}
-					else{
-						user.photo = location;
-						user.save(function(err,doc){
-							if (err) {
-								console.log(err);
-								response.send({
-									success: false,
-									msg: err+""
-								});
-							} 
-							else{
-								response.send({
-									success : true,
-									msg : "File is uploaded.",
-									photo: user.photo
-								});
-							}
-						});
-					}
-				});
-			}
-		});
-				
-	}
-});
+            var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Clients/'+request.Name;
+            mkdirp(dirname, function(err){
+                if(err){
+                    response.send({
+                        success : false,
+                        msg : "Directory can not be created " + err
+                    })
+                }
+                else{
+                    var location;
+                    var storage = multer.diskStorage({
+                        destination: function(request,file,cb){
+                            cb(null,dirname);
+                        },
+                        filename: function(request, file,cb){
+                            location = '/uploads/'+user.firm+'/Clients/'+request.Name+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
+                            cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
+                        }
+                    });                            
+                    var upload = multer({storage : storage}).single('user');
+                    upload(request,response,function(err){
+                        if(err){
+                            response.send({
+                                success : false,
+                                msg : "error uploading file." + err
+                            });
+                        }
+                        else{
+                            Client.findById(request.body.id, function(err, client){
+                                client.photo = location;
+                                client.save(function(err,doc){
+                                    if (err) {
+                                        console.log(err);
+                                        response.send({
+                                            success: false,
+                                            msg: err+""
+                                        });
+                                    } 
+                                    else{
+                                        response.send({
+                                            success : true,
+                                            msg : "File is uploaded.",
+                                            photo: client.photo
+                                        });
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+            
+        }
+    });
 }
