@@ -252,7 +252,7 @@ module.exports.profileImage = function(request,response){
                     });
                 }
                 else{
-                    var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Clients/'+client.ContactPerson.Name;
+                    var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Clients/';
                     mkdirp(dirname, function(err){
                         if(err){
                             response.send({
@@ -267,7 +267,7 @@ module.exports.profileImage = function(request,response){
                                     cb(null,dirname);
                                 },
                                 filename: function(request, file,cb){
-                                    location = '/uploads/'+user.firm+'/Clients/'+client.ContactPerson.Name+'/'+file.fieldname + '-'+client._id+path.extname(file.originalname);
+                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client._id+path.extname(file.originalname);
                                     cb(null, file.fieldname + '-'+client._id+path.extname(file.originalname));
                                 }
                             });                            
