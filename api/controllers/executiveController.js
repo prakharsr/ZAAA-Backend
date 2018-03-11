@@ -220,3 +220,90 @@ module.exports.updateExecutive = function(request, response){
 		}	
 	});
 };
+module.exports.profileImage = function(request,response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+            Executive.findById(mongoose.mongo.ObjectId(request.params.id), function(err,executive){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else if(!executive){
+                    response.send({
+                        success:false,
+                        id: request.params.id + ""
+                    });
+                }
+                else{
+                    var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Executives/';
+                    mkdirp(dirname, function(err){
+                        if(err){
+                            response.send({
+                                success : false,
+                                msg : "Directory can not be created " + err
+                            })
+                        }
+                        else{
+                            var location;
+                            var storage = multer.diskStorage({
+                                destination: function(request,file,cb){
+                                    cb(null,dirname);
+                                },
+                                filename: function(request, file,cb){
+                                    location = '/uploads/'+user.firm+'/Executives/'+file.fieldname + '-'+executive._id+path.extname(file.originalname);
+                                    cb(null, file.fieldname + '-'+executive._id+path.extname(file.originalname));
+                                }
+                            });                            
+                            var upload = multer({storage : storage}).single('executive');
+                            upload(request,response,function(err){
+                                if(err){
+                                    response.send({
+                                        success : false,
+                                        msg : "error uploading file." + err
+                                    });
+                                }
+                                else{
+                                    
+                                    executive.Photo = location;
+                                    executive.save(function(err,doc){
+                                        if (err) {
+                                            console.log(err);
+                                            response.send({
+                                                success: false,
+                                                msg: err+""
+                                            });
+                                        } 
+                                        else{
+                                            response.send({
+                                                success : true,
+                                                msg : "File is uploaded.",
+                                                photo: executive.Photo
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    
+                }
+            });
+        }
+    });
+}

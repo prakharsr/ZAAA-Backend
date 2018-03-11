@@ -44,7 +44,7 @@ router.get('/user/client/:id', client.getClient);
 router.delete('/user/client/:id', client.deleteClient);
 router.patch('/user/client', client.updateClient);
 router.get('/user/clients/:keyword', client.queryClients);
-router.post('/user/clients/picture/:id', client.profileImage);
+router.post('/user/client/picture/:id', client.profileImage);
 
 router.post('/user/executive', executive.createExecutive);
 router.get('/user/executives', executive.getExecutives);
@@ -52,6 +52,7 @@ router.get('/user/executive/:id', executive.getExecutive);
 router.delete('/user/executive/:id', executive.deleteExecutive);
 router.patch('/user/executive', executive.updateExecutive);
 router.get('/user/executives/:keyword', executive.queryExecutives);
+router.post('/user/executive/picture/:id', executive.profileImage);
 
 
 router.post('/user/mediahouse', mediahouse.createMediahouse);
