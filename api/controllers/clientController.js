@@ -220,3 +220,74 @@ module.exports.updateClient = function(request, response){
 		}	
 	});
 };
+
+module.exports.profileImage = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+		var dirname = __dirname+'/../../public/uploads/'+user.firm +'/Clients/'+request.Name;
+		mkdirp(dirname, function(err){
+			if(err){
+				response.send({
+					success : false,
+					msg : "Directory can not be created " + err
+				})
+			}
+			else{
+				var location;
+				var storage = multer.diskStorage({
+					destination: function(request,file,cb){
+						cb(null,dirname);
+					},
+					filename: function(request, file,cb){
+						location = '/uploads/'+user.firm+'/Clients/'+request.Name+'/'+file.fieldname + '-'+user._id+path.extname(file.originalname);
+						cb(null, file.fieldname + '-'+user._id+path.extname(file.originalname));
+					}
+				});                            
+				var upload = multer({storage : storage}).single('user');
+				upload(request,response,function(err){
+					if(err){
+						response.send({
+							success : false,
+							msg : "error uploading file." + err
+						});
+					}
+					else{
+						user.photo = location;
+						user.save(function(err,doc){
+							if (err) {
+								console.log(err);
+								response.send({
+									success: false,
+									msg: err+""
+								});
+							} 
+							else{
+								response.send({
+									success : true,
+									msg : "File is uploaded.",
+									photo: user.photo
+								});
+							}
+						});
+					}
+				});
+			}
+		});
+				
+	}
+});
+}

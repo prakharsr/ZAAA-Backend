@@ -44,6 +44,7 @@ router.get('/user/client/:id', client.getClient);
 router.delete('/user/client/:id', client.deleteClient);
 router.patch('/user/client', client.updateClient);
 router.get('/user/clients/:keyword', client.queryClients);
+ruter.post('/user/clients/picture', client.profileImage);
 
 router.post('/user/executive', executive.createExecutive);
 router.get('/user/executives', executive.getExecutives);
