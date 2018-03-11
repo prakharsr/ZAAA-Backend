@@ -207,7 +207,7 @@ module.exports.updateMediaHouse = function(request, response){
 			});
 		}
 		else{
-            Client.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouses){
+            MediaHouse.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouses){
                 if(err){
                     console.log(err);
                     response.send({

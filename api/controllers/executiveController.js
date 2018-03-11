@@ -71,7 +71,7 @@ module.exports.getExecutive = function(request,response){
 		}
 		else{
             
-            Client.findById(request.params.id,function(err, executive){
+            Executive.findById(request.params.id,function(err, executive){
                 
                 if(err){
                     console.log("here" +err);
@@ -105,7 +105,7 @@ module.exports.getExecutives = function(request,response){
 		}
 		else{
             
-            Client.find({firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, executives){
+            Executive.find({firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, executives){
                 
                 if(err){
                     console.log("here" +err);
