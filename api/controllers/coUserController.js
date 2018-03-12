@@ -41,7 +41,7 @@ module.exports.createCoUser=function(request,response){
 								email : request.body.email.toLowerCase(),
 								password : password,
 								phone:request.body.phone,
-								isAdmin:false,
+								isAdmin:request.body.isAdmin,
 								designation : request.body.designation,
 								firm : firm._id
 							});
@@ -117,7 +117,7 @@ module.exports.getCoUsers= function(request, response){
 			console.log("5");
 		}
 		else{
-			User.find({firm:user.firm,isAdmin:false}).exec(function (err, co_users) {
+			User.find({firm:user.firm}).exec(function (err, co_users) {
 				if (err||!co_users){
 					if(err){
 						response.json({
@@ -143,132 +143,132 @@ module.exports.getCoUsers= function(request, response){
 	});
 }
 		
-module.exports.createAdmins=function(request,response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:"1"
-			});
-		}
-		else if(!user){
-			console.log("5");
-		}
-		else{
-			var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
-				if(err){
-					console.log("error in finding firm" + err);
-				}
-				if(!firm){
-					console.log("firm does not exist for this admin");
-				}
-				else{
-					var planCreatedOn = firm.plan.planCreatedOn;
+// module.exports.createAdmins=function(request,response){
+// 	var token = userController.getToken(request.headers);
+// 	var user = userController.getUser(token,request,response, function(err, user){
+// 		if(err){
+// 			console.log(err);
+// 			response.send({
+// 				success:false,
+// 				msg:"1"
+// 			});
+// 		}
+// 		else if(!user){
+// 			console.log("5");
+// 		}
+// 		else{
+// 			var firm=	Firm.findById(mongoose.mongo.ObjectId(user.firm),function(err,firm){
+// 				if(err){
+// 					console.log("error in finding firm" + err);
+// 				}
+// 				if(!firm){
+// 					console.log("firm does not exist for this admin");
+// 				}
+// 				else{
+// 					var planCreatedOn = firm.plan.planCreatedOn;
 					
-					var plan = Plan.findById(mongoose.mongo.ObjectId(firm.plan.planID), function(err, plan, planCreatedOn){
-						if((firm.co_users.length +firm.admins.length) < (plan.maxUsers+1)&&(firm.admins.length <plan.maxAdmins)){
-							var newAdmin = new User({
-								createdOn: Date.now(),
-								name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
-								email : request.body.email.toLowerCase(),
-								password : request.body.password,
-								phone:request.body.phone,
-								isAdmin:true,
-								firm : firm._id
-							});
+// 					var plan = Plan.findById(mongoose.mongo.ObjectId(firm.plan.planID), function(err, plan, planCreatedOn){
+// 						if((firm.co_users.length +firm.admins.length) < (plan.maxUsers+1)&&(firm.admins.length <plan.maxAdmins)){
+// 							var newAdmin = new User({
+// 								createdOn: Date.now(),
+// 								name: request.body.name||request.body.email.toLowerCase().substring(0, request.body.email.indexOf("@")),
+// 								email : request.body.email.toLowerCase(),
+// 								password : request.body.password,
+// 								phone:request.body.phone,
+// 								isAdmin:true,
+// 								firm : firm._id
+// 							});
 							
-							firm.admins.push(newAdmin._id);
-							firm.save(function(err, doc) {
-								if (err) {
-									response.send({
-										success: false,
-										msg: err
-									});
-								} else {
-									CoUser.save(function(err, doc){
-										if(err){
-											if(err.code == 11000){
-												console.log(err);
-												response.send({
-													success : false,
-													msg : "User already registered"
-												});
-											}
-											else{
-												console.log(err);	
-												response.send({
-													success : false,
-													msg : err
-												});
-											}
-										}
-										else {
-											response.json({
-												success:true,
-												msg:doc._id
-											});
+// 							firm.admins.push(newAdmin._id);
+// 							firm.save(function(err, doc) {
+// 								if (err) {
+// 									response.send({
+// 										success: false,
+// 										msg: err
+// 									});
+// 								} else {
+// 									CoUser.save(function(err, doc){
+// 										if(err){
+// 											if(err.code == 11000){
+// 												console.log(err);
+// 												response.send({
+// 													success : false,
+// 													msg : "User already registered"
+// 												});
+// 											}
+// 											else{
+// 												console.log(err);	
+// 												response.send({
+// 													success : false,
+// 													msg : err
+// 												});
+// 											}
+// 										}
+// 										else {
+// 											response.json({
+// 												success:true,
+// 												msg:doc._id
+// 											});
 											
-										}
-									});
-								}
-							});
-						}
-						else{
-							response.json({
-								success:false,
-								msg:"Admin limit for plan exceeded"
-							});
-						}
+// 										}
+// 									});
+// 								}
+// 							});
+// 						}
+// 						else{
+// 							response.json({
+// 								success:false,
+// 								msg:"Admin limit for plan exceeded"
+// 							});
+// 						}
 						
-					})
+// 					})
 					
-				}
-			});
-		}
-	});
-}
+// 				}
+// 			});
+// 		}
+// 	});
+// }
 		
-module.exports.getAdmins= function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:"1"
-			});
-		}
-		else if(!user){
-			console.log("5");
-		}
-		else{
-			User.find({firm:user.firm,isAdmin:true}).exec(function (err, admins) {
-				if (err||!co_users){
-					if(err){
-						response.json({
-							success:false,
-							msg: "err in finding admins " + err
-						});
-					}
-					else{
-						response.json({
-							success:false,
-							msg: "no extra admin for this admin/firm" + err
-						});
-					}
-				}
-				else{
-					response.json({
-						success:true,
-						admins: admins,
-					});
-				}
-			});
-		}
-	});
-}
+// module.exports.getAdmins= function(request, response){
+// 	var token = userController.getToken(request.headers);
+// 	var user = userController.getUser(token,request,response, function(err, user){
+// 		if(err){
+// 			console.log(err);
+// 			response.send({
+// 				success:false,
+// 				msg:"1"
+// 			});
+// 		}
+// 		else if(!user){
+// 			console.log("5");
+// 		}
+// 		else{
+// 			User.find({firm:user.firm,isAdmin:true}).exec(function (err, admins) {
+// 				if (err||!co_users){
+// 					if(err){
+// 						response.json({
+// 							success:false,
+// 							msg: "err in finding admins " + err
+// 						});
+// 					}
+// 					else{
+// 						response.json({
+// 							success:false,
+// 							msg: "no extra admin for this admin/firm" + err
+// 						});
+// 					}
+// 				}
+// 				else{
+// 					response.json({
+// 						success:true,
+// 						admins: admins,
+// 					});
+// 				}
+// 			});
+// 		}
+// 	});
+// }
 		
 		
 module.exports.setRole = function(request,response){
