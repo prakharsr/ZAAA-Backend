@@ -7,6 +7,7 @@ var coUser = require('../controllers/coUserController');
 var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
+var ratecard = require('../controllers/ratecardController');
 var bckup = require('../controllers/bckup');
 
 router.post('/user/signup', user.signup);
@@ -63,6 +64,14 @@ router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
 router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
+
+router.post('/user/ratecard', ratecard.createRatecard);
+router.get('/user/ratecards', ratecard.getLocalRatecards);
+router.get('/user/ratecards/global', ratecard.getGlobalRatecards);
+router.get('/user/ratecard/:id', ratecard.getRatecard);
+router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
+router.patch('/user/ratecard', ratecard.updateRatecard);
+router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
 
 
 router.get('/user/mail', bckup.sendMailFromMailgun);
