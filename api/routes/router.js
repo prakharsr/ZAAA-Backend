@@ -16,8 +16,8 @@ router.get('/plans', plan.getPlans);
 router.post('/user/plan', firm.setPlan);
 router.post('/user/co_user', coUser.createCoUser);
 router.get('/user/co_user', coUser.getCoUsers);
-router.post('/user/admins', coUser.createAdmins);
-router.get('/user/admins', coUser.getAdmins);
+// router.post('/user/admins', coUser.createAdmins);
+// router.get('/user/admins', coUser.getAdmins);
 
 router.post('/user/role' , coUser.setRole);
 router.get('/user/role/:id', coUser.getRoles);
