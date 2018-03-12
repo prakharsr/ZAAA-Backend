@@ -7,6 +7,7 @@ var coUser = require('../controllers/coUserController');
 var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
+var bckup = require('../controllers/bckup');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -62,4 +63,7 @@ router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
 router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
+
+
+router.get('/user/mail', bckup.sendMailFromMailgun);
 module.exports = router;
