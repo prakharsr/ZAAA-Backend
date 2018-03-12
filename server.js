@@ -1,3 +1,5 @@
+
+var cors = require('cors');
 var express = require('express');
 var app  = express();
 var mongoose = require('mongoose');
@@ -7,14 +9,14 @@ var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var path = require('path');
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT,PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-        next();
-    
-});
+var corsOptions = {
+    "origin": "*",
+    "responseHeader": "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+    "method": "POST, GET, PUT,PATCH, DELETE, OPTIONS",
+    "maxAgeSeconds": 120
+  }
+
+app.use(cors(corsOptions));
 
 
 var jwt = require('jsonwebtoken');
