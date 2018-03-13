@@ -35,7 +35,6 @@ module.exports.createClient = function(request,response){
                 GSTNo:request.body.gstin,
                 ContactPerson:request.body.contactPerson,
                 firm : user.firm
-                
             });
             client.save(function(err){
                 if(err){
@@ -267,7 +266,7 @@ module.exports.profileImage = function(request,response){
                                     cb(null,dirname);
                                 },
                                 filename: function(request, file,cb){
-                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client._id+path.extname(file.originalname);
+                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client.ContactPerson._id+path.extname(file.originalname);
                                     cb(null, file.fieldname + '-'+client._id+path.extname(file.originalname));
                                 }
                             });                            
