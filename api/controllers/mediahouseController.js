@@ -29,7 +29,7 @@ module.exports.createMediahouse = function(request,response){
                 OrganizationName:request.body.organizationName,
                 PublicationName:request.body.publicationName,
                 NickName:request.body.nickName,
-                Edition:request.body.edition,
+                MediaType:request.body.mediaType,
                 Address:request.body.address,
                 OfficeLandline:request.body.officeLandline,
                 Scheduling:request.body.scheduling,
