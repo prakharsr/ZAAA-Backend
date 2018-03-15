@@ -1,24 +1,20 @@
-deleting co-users
-setting roles
-image uploading
+date format everywhere
+mailgun sendpasswordresetmail
+invoice of payment on razorpay
+capturing payments
+forget password
+sample photos
+changephone change email
 
+search with multiple fields
+ratecard search and filter
+selecting ratecards
+excel creations
+excel data validations
+importing from excel 
+attatchments in mail for excels
+downladable files
 
-templates
-bank details(IFSC)
-edit credentials(
-    change : {
-        password,
-        email,
-        phoneNumber,
-        roles
-    }
-)
-
-
-SMSVerification = function(mobile);
-
-/user/getProfile
-/user/setProfile
 
 
 
