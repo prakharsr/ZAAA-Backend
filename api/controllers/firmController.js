@@ -200,7 +200,7 @@ module.exports.setFirmProfile = function(request, response){
 			if(request.body.twitter)
 			firm.Socials.twitter=request.body.twitter;			
 			if(request.body.other)
-			firm.Socials.other=request.body.other;
+			firm.Socials.Others=request.body.other;
 			
 			firm.save(function(err){
 				if(err){
