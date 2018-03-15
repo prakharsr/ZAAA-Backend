@@ -266,7 +266,7 @@ module.exports.profileImage = function(request,response){
                                     cb(null,dirname);
                                 },
                                 filename: function(request, file,cb){
-                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client.ContactPerson._id+path.extname(file.originalname);
+                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client._id+path.extname(file.originalname);
                                     cb(null, file.fieldname + '-'+client._id+path.extname(file.originalname));
                                 }
                             });                            
@@ -307,3 +307,89 @@ module.exports.profileImage = function(request,response){
         }
     });
 }
+
+module.exports.setContactPersonPhoto = function(request,response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+        }
+        else{
+            Client.find({ '_id': mongoose.mongo.ObjectId(request.params.clientId), 'ContactPerson._id': mongoose.mongo.ObjectId(request.params.contactPersonId) }, function(err,client){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else if(!client){
+                    response.send({
+                        success:false
+                    });
+                }
+                else{
+                    var dirname = __dirname+'/../../public/uploads/'+user.firm+'/Clients/';
+                    mkdirp(dirname, function(err){
+                        if(err){
+                            response.send({
+                                success : false,
+                                msg : "Directory can not be created " + err
+                            })
+                        }
+                        else{
+                            var location;
+                            var storage = multer.diskStorage({
+                                destination: function(request,file,cb){
+                                    cb(null,dirname);
+                                },
+                                filename: function(request, file,cb){
+                                    location = '/uploads/'+user.firm+'/Clients/'+file.fieldname + '-'+client.ContactPerson[0]._id+path.extname(file.originalname);
+                                    cb(null, file.fieldname + '-'+client.ContactPerson[0]._id+path.extname(file.originalname));
+                                }
+                            });                            
+                            var upload = multer({storage : storage}).single('client');
+                            upload(request,response,function(err){
+                                if(err){
+                                    response.send({
+                                        success : false,
+                                        msg : "error uploading file." + err
+                                    });
+                                }
+                                else{
+                                    
+                                    contactPerson.Photo = location;
+                                    client.save(function(err,doc){
+                                        if (err) {
+                                            console.log(err);
+                                            response.send({
+                                                success: false,
+                                                msg: err+""
+                                            });
+                                        } 
+                                        else{
+                                            response.send({
+                                                success : true,
+                                                msg : "File is uploaded.",
+                                                photo: client.ContactPerson[0].photo
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                 }
+            });
+        }
+        })
+        }
