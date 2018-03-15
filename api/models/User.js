@@ -4,7 +4,10 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
-
+var mailgun = require("mailgun-js");
+var api_key = config.api_key;
+var DOMAIN = config.DOMAIN;
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 var UserSchema = new mongoose.Schema({
     isAdmin : {
         type : Boolean,
@@ -114,64 +117,19 @@ UserSchema.methods.verifyAuthyToken = function(otp, cb) {
         cb.call(self, err, response);
     });
 };
-UserSchema.methods.sendVerificationMail = function(cb){
-    var self=this;
-    var mailOptions = {
-    from: "sonumeewa@gmail.com", // sender address
-    to: self.email, // list of receivers
-    subject: "Account Confirmation",// Subject lin
-    text: "Here is the link to confirm your mail", // plaintext body
-    html:  "<p>click <a href='http://3eed0736.ngrok.io/api/user/verify/email/" + self._id + "'>here</a></p>"// html body
-};
-
-// send mail with defined transport object
-transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587, // Gmail Port
-    auth: {
-        user: "sonumeewa@gmail.com", // Gmail id
-        pass: "Vipul@1997"  // Gmail password
-    },
-    secure:false//,proxy: process.env.http_proxy||"" 
-});
-
-transporter.sendMail(mailOptions,cb, function(error, info){
-    if(error){
-        cb.call(err, null);
-    }
-    else{
-
-    console.log('Message sent: ' + info.response);
-    cb.call(null, self);
-
-    }
-});
-
-};
 
 UserSchema.methods.sendPassword = function(password,cb){
-    var self=this;
-    var mailOptions = {
-    from: "sonumeewa@gmail.com", // sender address
-    to: self.email, // list of receivers
+    var self = this;
+
+var data = {
+    from: 'Excited User <postmaster@mom2k18.co.in>',
+    to: self.email,
     subject: "Password",// Subject lin
     text: "Here is the password for your login at AAMAN", // plaintext body
     html:  "<p>"+ password+ "</p>"// html body
-};
-
-// send mail with defined transport object
-transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587, // Gmail Port
-    auth: {
-        user: "sonumeewa@gmail.com", // Gmail id
-        pass: "Vipul@1997"  // Gmail password
-    },
-    secure:false,
-    // proxy: "https://ipg_2016117:7060341350@192.168.1.107:3128"
-});
-
-transporter.sendMail(mailOptions,cb, function(error, info){
+  };
+  
+  mailgun.messages().send(data, cb, function (error, body) {
     if(error){
         cb.call(err, null);
     }
@@ -217,6 +175,7 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 });
 
 };
+
 
 UserSchema.methods.sendMessage = function(message, cb) {
     var self = this;
