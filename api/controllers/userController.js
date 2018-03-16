@@ -642,37 +642,6 @@ module.exports.changePassword=function(request, response){
 	});
 };
 
-module.exports.setNewPassword = function(request, response){
-	User.findById(request.body.id, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			
-			user.password = request.body.newPassword;
-				user.save(function(err){
-					if(err){
-						console.log(err);
-						response.send({
-							success:false,
-							msg : err
-						});
-					}
-					else{
-						response.send({
-							success:true,
-							user:user
-						});
-					}
-				});
-		}
-	});	
-};
-
 module.exports.sendPasswordResetEmail = function(request,response){
 User.findOne({email : request.body.email}, function(err,user){
 	var date = new Date();
