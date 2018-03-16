@@ -643,8 +643,17 @@ module.exports.changePassword=function(request, response){
 };
 
 module.exports.sendPasswordResetEmail = function(request,response){
-User.findOne({email : request.body.email}, function(err,user){
-	var time = Date.now().getTime();
+var user = User.findOne({email : request.body.email.toLowerCase()}, function(err,user){
+	if(err) throw err;
+			if(!user){
+				response.send({
+					success: false,
+					msg: 'Authentication Failed'
+				});
+			}
+			else{
+	var now = new Date();
+	var time = new Date(now).getTime();
 	var token_data = {
 		id: mongoose.mongo.ObjectId(user._id),
 		time: time,
@@ -673,6 +682,7 @@ User.findOne({email : request.body.email}, function(err,user){
 		});
 	}
 	  });
+}
 })
 }
 
