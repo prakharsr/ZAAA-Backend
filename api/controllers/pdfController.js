@@ -45,4 +45,25 @@ pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
         fs.existsSync(pdf.filename);
     }
 })
+var data = {
+    from: 'Excited User <postmaster@mom2k18.co.in>',
+    to: request.body.email,
+    subject: 'Hello',
+    text: 'https://www.mom2k18.co.in/user/reset_password/'+token,
+  };
+mailgun.messages().send(data, function (error, body) {
+    console.log(error,body);
+    if(error){
+    response.send({
+        success:false,
+        msg: error + ""
+    });
+}
+else{
+    response.send({
+        success:true,
+        msg: "sent" + body
+    });
+}
+  });
 }
