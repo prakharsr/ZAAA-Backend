@@ -688,12 +688,13 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 
 module.exports.resetPassword = function(request,response){
 	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
-		var time = Date.now().getTime();
+		var now = new Date();
+		var time = new Date(now).getTime();
 		if(!decoded.reset){
 			response.status(403).send("You are not authorised to view this page");
 		}
 		else if(time - decoded.time > 900000){
-			response.status(403).send("The token is expired");
+			response.status(403).send("The token has expired");
 		}
 		else{
 			User.findById(decoded.id, function(err,user){
