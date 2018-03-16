@@ -656,7 +656,7 @@ User.findOne({email : request.body.email}, function(err,user){
 		from: 'Excited User <postmaster@mom2k18.co.in>',
 		to: request.body.email,
 		subject: 'Hello',
-		text: 'https://www.mom2k18.co.in/user/reset_password/'+token,
+		text: 'https://www.mom2k18.co.in/reset_password/'+token,
 	  };
 	  
 	  mailgun.messages().send(data, function (error, body) {
