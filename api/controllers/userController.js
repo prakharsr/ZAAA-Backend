@@ -644,18 +644,17 @@ module.exports.changePassword=function(request, response){
 
 module.exports.sendPasswordResetEmail = function(request,response){
 User.findOne({email : request.body.email}, function(err,user){
-	var date = new Date();
-	var time = Date.getTime();
+	var time = Date.now();
 	var token_data = {
-		id: mongoose.mongo.ObjectId(doc._id),
+		id: mongoose.mongo.ObjectId(user._id),
 		time: time,
 		reset : true
 	};
 	var token = jwt.sign(token_data, config.SECRET);
 	var data = {
-		from: 'Excited User <postmaster@mom2k18.co.in>',
+		from: 'AAMan <postmaster@mom2k18.co.in>',
 		to: request.body.email,
-		subject: 'Hello',
+		subject: 'Password Reset Link',
 		text: 'https://www.mom2k18.co.in/reset_password/'+token,
 	  };
 	  
@@ -679,8 +678,7 @@ User.findOne({email : request.body.email}, function(err,user){
 
 module.exports.resetPassword = function(request,response){
 	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
-		var date = new Date();
-		var time = Date.getTime();
+		var time = Date.now();
 		if(!decoded.reset){
 			response.status(403).send("You are not authorised to view this page");
 		}
