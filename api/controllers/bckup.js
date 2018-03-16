@@ -11,21 +11,24 @@ module.exports.sendMailFromMailgun = function(request, response){
 		subject: 'Hello',
 		text: 'Testing some Mailgun awesomness!'
 	  };
-	  
-	  mailgun.messages().send(data, function (error, body) {
-		console.log(error,body);
-		if(error){
-		response.send({
-			success:false,
-			msg: error + ""
-		});
-	}
-	else{
-		response.send({
-			success:true,
-			msg: "sent" + body
-		});
-	}
-	  });
-	  
-}
+	  mailgun.validate('test@mail.com', function (err, body) {
+		if(body && body.is_valid){
+		  // do something
+		  mailgun.messages().send(data, function (error, body) {
+			console.log(error,body);
+			if(error){
+			response.send({
+				success:false,
+				msg: error + ""
+			});
+		}
+		else{
+			response.send({
+				success:true,
+				msg: "sent" + body
+			});
+		}
+		  });
+		}
+	})
+};
