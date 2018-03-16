@@ -672,27 +672,68 @@ module.exports.setNewPassword = function(request, response){
 		}
 	});	
 };
+
+module.exports.sendPasswordResetEmail = function(request,response){
+User.findOne({email : request.body.email}, function(err,user){
+	var token_data = {
+		id: mongoose.mongo.ObjectId(doc._id),
+		dateLogOn: new Date()
+	};
+	var token = jwt.sign(token_data, config.SECRET);
+	var data = {
+		from: 'Excited User <postmaster@mom2k18.co.in>',
+		to: request.body.email,
+		subject: 'Hello',
+		text: 'https://b2621ba5.ngrok.io/api/user/forgotpassword/'+token,
+	  };
+	  
+	  mailgun.messages().send(data, function (error, body) {
+		console.log(error,body);
+		if(error){
+		response.send({
+			success:false,
+			msg: error + ""
+		});
+	}
+	else{
+		response.send({
+			success:true,
+			msg: "sent" + body
+		});
+	}
+	  });
+})
+}
+
 module.exports.resetPassword = function(request,response){
-	User.findById(request.params.id, function(err,user){
-		if(err){
-			console.log(err)
-			response.send({
-				success:false,
-				msg:err +" error"
-			});
-		}
-		else if(!user){
-			response.send({
-				success:false,
-				msg:"User not found for this Id",
-			});
-		}
-		else{
-			response.send({
-				success:success,
-				user:user,
-				msg:"user exist"
-			});
-		}
-	})
+	var decoded = jwt.verify(request.params.token, config.SECRET, function(err,decoded){
+		User.findById(decoded.id, function(err,user){
+			if(err){
+				console.log(err)
+				response.send({
+					success:false,
+					msg:err +" error"
+				});
+			}
+			else if(!user){
+				response.send({
+					success:false,
+					msg:"User not found for this Id",
+				});
+			}
+			else{
+				user.password = request.body.password;
+				user.save(function(err){
+					if(err) console.log(err);
+					else{
+						response.send({
+							success : true,
+							msg : 'password successfully changed'
+						})
+					}
+				});
+			}
+		})
+	});
+	
 };
