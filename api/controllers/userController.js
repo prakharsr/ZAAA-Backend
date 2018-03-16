@@ -709,7 +709,7 @@ User.findOne({email : request.body.email}, function(err,user){
 }
 
 module.exports.resetPassword = function(request,response){
-	var decoded = jwt.verify(request.params.token, config.SECRET, function(err,decoded){
+	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
 		var date = new Date();
 		var time = Date.getTime();
 		if(!decoded.reset){
