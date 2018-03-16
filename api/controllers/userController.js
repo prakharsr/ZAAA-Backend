@@ -644,7 +644,7 @@ module.exports.changePassword=function(request, response){
 
 module.exports.sendPasswordResetEmail = function(request,response){
 User.findOne({email : request.body.email}, function(err,user){
-	var time = Date.now();
+	var time = Date.now().getTime();
 	var token_data = {
 		id: mongoose.mongo.ObjectId(user._id),
 		time: time,
@@ -678,7 +678,7 @@ User.findOne({email : request.body.email}, function(err,user){
 
 module.exports.resetPassword = function(request,response){
 	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
-		var time = Date.now();
+		var time = Date.now().getTime();
 		if(!decoded.reset){
 			response.status(403).send("You are not authorised to view this page");
 		}
