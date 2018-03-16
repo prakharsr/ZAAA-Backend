@@ -642,37 +642,6 @@ module.exports.changePassword=function(request, response){
 	});
 };
 
-module.exports.setNewPassword = function(request, response){
-	User.findById(request.body.id, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			
-			user.password = request.body.newPassword;
-				user.save(function(err){
-					if(err){
-						console.log(err);
-						response.send({
-							success:false,
-							msg : err
-						});
-					}
-					else{
-						response.send({
-							success:true,
-							user:user
-						});
-					}
-				});
-		}
-	});	
-};
-
 module.exports.sendPasswordResetEmail = function(request,response){
 User.findOne({email : request.body.email}, function(err,user){
 	var date = new Date();
@@ -687,7 +656,7 @@ User.findOne({email : request.body.email}, function(err,user){
 		from: 'Excited User <postmaster@mom2k18.co.in>',
 		to: request.body.email,
 		subject: 'Hello',
-		text: 'https://b2621ba5.ngrok.io/user/forgotpassword/'+token,
+		text: 'https://www.mom2k18.co.in/reset_password/'+token,
 	  };
 	  
 	  mailgun.messages().send(data, function (error, body) {
