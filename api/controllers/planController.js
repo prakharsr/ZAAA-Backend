@@ -1,6 +1,6 @@
 var config = require('../../config');
 var Plan = require('../models/Plan');
-var userController = require('./users');
+var userController = require('./userController');
 var User = require('../models/User');
 var jwt = require('jsonwebtoken');
 

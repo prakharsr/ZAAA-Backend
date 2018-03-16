@@ -1,6 +1,6 @@
 var config = require('../../config');
 var RateCard = require('../models/Ratecard');
-var userController = require('./users');
+var userController = require('./userController');
 var firmController = require('./firmController');
 var ratecardController = require('./ratecardController');
 var User = require('../models/User');

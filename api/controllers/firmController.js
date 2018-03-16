@@ -6,9 +6,14 @@ var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
-var userController = require('./users');
+var userController = require('./userController');
 var path = require('path');
+var Razorpay = require("razorpay")
 
+var instance = new Razorpay({
+  key_id: 'rzp_test_qIUnr51XOjxMYX',
+  key_secret: 'YyZvGQN9o8YlUSJTuu7KVeIY'
+})
 		
 module.exports.logoImage = function(request,response){
 	var token = userController.getToken(request.headers);
@@ -115,7 +120,17 @@ module.exports.setPlan = function(request,response){
                     firm.plan.CreatedOn = Date.now();
                     firm.FirmName = request.body.firmName;
                     firm.GSTIN = request.body.gstNo;
-                    firm.RegisteredAddress = request.body.billingAddress;
+					firm.RegisteredAddress = request.body.billingAddress;
+					console.log('Gonna capture...')
+					instance.payments.capture(request.body.paymentID, 500000).then((data) => {
+						console.log(request.body.cost)
+						console.log(data);
+						
+						
+
+					}).catch((err) => {
+						console.error(err + "b")
+					})
 					firm.save(function(err, doc) {
 						if (err) {
 							response.send({
