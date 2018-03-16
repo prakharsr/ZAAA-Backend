@@ -1,8 +1,8 @@
 date format everywhere -skip for now
-mailgun sendpasswordresetmail
+mailgun sendpasswordresetmail --done
 invoice of payment on razorpay and emailing
 capturing payments
-forget password0-test
+forget password0-test 
 changephone change email
 
 backend paginations

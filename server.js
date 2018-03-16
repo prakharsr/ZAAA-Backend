@@ -34,7 +34,7 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 app.use('/api', require('./api/routes/router'));
 
-mongoose.connect('mongodb://localhost:12877/zaaaDB', function(err){
+mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){
 		console.log('FAILED TO CONNECT' + err);
 	}
