@@ -15,7 +15,10 @@ var FirmSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     }],
-    LogoURL : String,
+    LogoURL : {
+        type:String,
+        default:'/uploads/logo.png'
+    },
     RegisteredAddress:{
         address:String,
         city:String,
