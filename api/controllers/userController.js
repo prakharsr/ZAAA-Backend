@@ -675,16 +675,19 @@ module.exports.setNewPassword = function(request, response){
 
 module.exports.sendPasswordResetEmail = function(request,response){
 User.findOne({email : request.body.email}, function(err,user){
+	var date = new Date();
+	var time = Date.getTime();
 	var token_data = {
 		id: mongoose.mongo.ObjectId(doc._id),
-		dateLogOn: new Date()
+		time: time,
+		reset : true
 	};
 	var token = jwt.sign(token_data, config.SECRET);
 	var data = {
 		from: 'Excited User <postmaster@mom2k18.co.in>',
 		to: request.body.email,
 		subject: 'Hello',
-		text: 'https://b2621ba5.ngrok.io/api/user/forgotpassword/'+token,
+		text: 'https://b2621ba5.ngrok.io/user/forgotpassword/'+token,
 	  };
 	  
 	  mailgun.messages().send(data, function (error, body) {
@@ -707,7 +710,16 @@ User.findOne({email : request.body.email}, function(err,user){
 
 module.exports.resetPassword = function(request,response){
 	var decoded = jwt.verify(request.params.token, config.SECRET, function(err,decoded){
-		User.findById(decoded.id, function(err,user){
+		var date = new Date();
+		var time = Date.getTime();
+		if(!decoded.reset){
+			response.status(403).send("You are not authorised to view this page");
+		}
+		else if(time - decoded.time > 900000){
+			response.status(403).send("The token is expired");
+		}
+		else{
+			User.findById(decoded.id, function(err,user){
 			if(err){
 				console.log(err)
 				response.send({
@@ -724,16 +736,23 @@ module.exports.resetPassword = function(request,response){
 			else{
 				user.password = request.body.password;
 				user.save(function(err){
-					if(err) console.log(err);
+					if(err) {
+						console.log(err);
+						response.send({
+							success : false,
+							msg : 'Cannot save user, try again later'
+						});
+					}
 					else{
 						response.send({
 							success : true,
 							msg : 'password successfully changed'
-						})
+						});
 					}
 				});
 			}
 		})
+	}
 	});
 	
 };
