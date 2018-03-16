@@ -17,7 +17,7 @@ var FirmSchema = new mongoose.Schema({
     }],
     LogoURL : {
         type:String,
-        default:'/uploads/logo.png'
+        default:'/images/logo.png'
     },
     RegisteredAddress:{
         address:String,

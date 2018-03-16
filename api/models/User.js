@@ -20,11 +20,11 @@ var UserSchema = new mongoose.Schema({
     name :String,
     photo : {
         type:String,
-        default:'/uploads/profile.jpg'
+        default:'/images/profile.jpg'
     },
     signature : {
         type:String,
-        default:'/uploads/sign.png'
+        default:'/images/sign.png'
     },
     designation:String,
     phone : String,
