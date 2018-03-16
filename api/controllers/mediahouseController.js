@@ -133,7 +133,8 @@ module.exports.getGlobalMediahouses = function(request,response){
 
 module.exports.queryMediaHouse = function(request, response){
   
-    MediaHouse.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, mediahouses){
+    MediaHouse.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'EmailId': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName', 1)
+    .limit(5).exec(function(err, mediahouses){
         if(err){
             console.log(err+ "");
             response.send({

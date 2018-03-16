@@ -162,7 +162,8 @@ module.exports.deleteExecutive = function(request, response){
 };
 module.exports.queryExecutives = function(request, response){
   
-    Executive.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, executives){
+    Executive.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'ExecutiveName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName', 1)
+    .limit(5).exec(function(err, executives){
         if(err){
             console.log(err+ "");
             response.send({

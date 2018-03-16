@@ -144,7 +144,8 @@ module.exports.getGlobalRatecards = function(request,response){
 
 module.exports.queryRatecards = function(request, response){
     
-    RateCard.find({OrganizationName:{$regex:request.params.keyword+"",$options: "i"}}).sort({'OrganizationName': 1}).limit(5).exec(function(err, ratecards){
+    RateCard.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'EmailId': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName', 1)
+    .limit(5).exec(function(err, ratecards){
         if(err){
             console.log(err+ "");
             response.send({

@@ -1,10 +1,11 @@
-date format everywhere
+date format everywhere -skip for now
 mailgun sendpasswordresetmail
-invoice of payment on razorpay
+invoice of payment on razorpay and emailing
 capturing payments
-forget password
-sample photos
+forget password0-test
 changephone change email
+
+backend paginations
 
 search with multiple fields
 ratecard search and filter

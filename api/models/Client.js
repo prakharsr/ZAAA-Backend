@@ -29,7 +29,7 @@ var ClientSchema = new mongoose.Schema({
         EmailId:String,
         Photo:{
             type: String,
-            default: '/uploads/profile.jpg'
+            default: '/images/profile.jpg'
         },
         DateOfBirth:Date,
         Anniversary:Date    
