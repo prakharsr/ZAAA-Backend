@@ -8,6 +8,9 @@ var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var bcrypt = require('bcrypt');
+var api_key = config.mailgun_api_key;
+var DOMAIN = config.DOMAIN;
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 var SALT_WORK_FACTOR = 10;
 
 
@@ -718,7 +721,7 @@ module.exports.resetPassword = function(request,response){
 						console.log(err);
 						response.send({
 							success : false,
-							msg : 'Cannot save user, try again later'
+							msg : 'Cannot save user'
 						});
 					}
 					else{
