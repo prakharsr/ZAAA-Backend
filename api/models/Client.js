@@ -27,7 +27,10 @@ var ClientSchema = new mongoose.Schema({
         MobileNo:String,
         Landline:String,
         EmailId:String,
-        Photo:String,
+        Photo:{
+            type: String,
+            default: '/uploads/profile.jpg'
+        },
         DateOfBirth:Date,
         Anniversary:Date    
     }],

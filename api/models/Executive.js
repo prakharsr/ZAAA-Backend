@@ -16,7 +16,10 @@ var ExecutiveSchema = new mongoose.Schema({
     Department:String,
     MobileNo:String,
     EmailId:String, 
-    Photo:String,
+    Photo:{
+        type:String,
+        default:'/images/profile.jpg'
+    },
     DateOfBirth:Date,
     Anniversary:Date,
     firm : {

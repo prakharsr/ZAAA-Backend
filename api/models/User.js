@@ -18,8 +18,14 @@ var UserSchema = new mongoose.Schema({
         unique: true
     },
     name :String,
-    photo : String,
-    signature : String,
+    photo : {
+        type:String,
+        default:'/images/profile.jpg'
+    },
+    signature : {
+        type:String,
+        default:'/images/sign.png'
+    },
     designation:String,
     phone : String,
     authyId:String,
