@@ -6,7 +6,7 @@ var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
-var userController = require('./users');
+var userController = require('./userController');
 var path = require('path');
 
 		
