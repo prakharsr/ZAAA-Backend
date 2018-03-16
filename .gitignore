@@ -2,3 +2,4 @@ zaaaDB
 .env
 node_modules
 public/uploads
+*.pdf

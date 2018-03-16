@@ -8,6 +8,7 @@ var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
 var ratecard = require('../controllers/ratecardController');
+var pdf = require('../controllers/pdfController');
 var bckup = require('../controllers/bckup');
 
 router.post('/user/signup', user.signup);
@@ -72,6 +73,7 @@ router.get('/user/ratecard/:id', ratecard.getRatecard);
 router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
 router.patch('/user/ratecard', ratecard.updateRatecard);
 router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
+router.post('/user/invoice/razorpay', pdf.generateRazorpayInvoice);
 
 
 router.get('/user/mail', bckup.sendMailFromMailgun);
