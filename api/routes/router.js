@@ -36,8 +36,8 @@ router.get('/user', user.getCurrentUser);
 router.get('/firm', firm.getCurrentFirm);
 router.get('/plan', plan.getCurrentPlan);
 router.post('/user/changePassword', user.changePassword);
-router.post('/user/forgotPassword/', user.sendPasswordResetEmail);
-router.post('/user/resetPassword/',user.resetPassword);
+router.post('/user/forgotPassword', user.sendPasswordResetEmail);
+router.post('/user/resetPassword',user.resetPassword);
 router.delete('/user/co_user/:id', user.deleteUser);
 
 router.post('/user/client', client.createClient);
