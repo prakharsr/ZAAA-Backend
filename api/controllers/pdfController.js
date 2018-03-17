@@ -61,19 +61,19 @@ var data = {
     ]
   };
 
-// mailgun.messages().send(data, function (error, body) {
-//     console.log(error,body);
-//     if(error){
-//     response.send({
-//         success:false,
-//         msg: error + ""
-//     });
-// }
-// else{
-//     response.send({
-//         success:true,
-//         msg: "sent" + body
-//     });
-// }
-//   });
+mailgun.messages().send(data, function (error, body) {
+    console.log(error,body);
+    if(error){
+    response.send({
+        success:false,
+        msg: error + ""
+    });
+}
+else{
+    response.send({
+        success:true,
+        msg: "sent" + body
+    });
+}
+  });
 }

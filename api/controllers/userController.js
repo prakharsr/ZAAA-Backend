@@ -663,7 +663,6 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 		reset : true
 	};
 	var token = jwt.sign(token_data, config.SECRET);
-	console.log(token);
 	var data = {
 		from: 'AAMan <postmaster@mom2k18.co.in>',
 		to: request.body.email,
