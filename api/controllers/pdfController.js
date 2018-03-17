@@ -54,7 +54,7 @@ pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
 
 var data = {
     from: 'Excited User <postmaster@mom2k18.co.in>',
-    to: request.body.email,
+    to: 'sonumeewa@gmail.com',
     subject: 'Attachment',
     attachment : [
         {data: data1, filename: 'zaaa-invoice.pdf'}
