@@ -658,7 +658,7 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 	var now = new Date();
 	var time = new Date(now).getTime();
 	var token_data = {
-		id: mongoose.mongo.ObjectId(user._id),
+		id: user._id,
 		time: time,
 		reset : true
 	};
