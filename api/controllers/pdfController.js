@@ -27,10 +27,10 @@ var today = dd+'/'+mm+'/'+yyyy;
 var template = path.join(__dirname,'../../public/templates/invoice.html');
 var filename = template.replace('.html','.pdf');
 var templateHtml = fs.readFileSync(template,'utf8');
-templateHtml = templateHtml.replace('{{firmName}}', request.body.firmname);
-templateHtml = templateHtml.replace('{{paymentId}}', request.body.paymentId);
-templateHtml = templateHtml.replace('{{gstin}}', request.boy.gstin);
-templateHtml = templateHtml.replace('{{registeredAddress}}', request.body.address);
+// templateHtml = templateHtml.replace('{{firmName}}', request.body.firmname);
+// templateHtml = templateHtml.replace('{{paymentId}}', request.body.paymentId);
+// templateHtml = templateHtml.replace('{{gstin}}', request.boy.gstin);
+// templateHtml = templateHtml.replace('{{registeredAddress}}', request.body.address);
 // templateHtml = templateHtml.replace('{{date}}', user.date)
 var options = {
     width: '100mm',
