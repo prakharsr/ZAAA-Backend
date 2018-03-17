@@ -10,6 +10,7 @@ var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 
 
 module.exports.generateRazorpayInvoice = function(request, response){
+    
 var today = new Date();
 var dd = today.getDate();
 var mm = today.getMonth()+1; 
@@ -22,21 +23,14 @@ if(mm<10){
 } 
 var today = dd+'/'+mm+'/'+yyyy;
 
-var user = {
-    'name' : 'Theta',
-    'phone' : '+19275273827',
-    'plan' : 'Silver',
-    'plancost': '5000',
-    'date' : today
-};
 
 var template = path.join(__dirname,'../../public/templates/invoice.html');
 var filename = template.replace('.html','.pdf');
 var templateHtml = fs.readFileSync(template,'utf8');
-// templateHtml = templateHtml.replace('{{user}}', user.name)
-// templateHtml = templateHtml.replace('{{phone}}', user.phone)
-// templateHtml = templateHtml.replace('{{plan}}', user.plan)
-// templateHtml = templateHtml.replace('{{plancost}}', user.plancost)
+templateHtml = templateHtml.replace('{{firmName}}', request.body.firmname);
+templateHtml = templateHtml.replace('{{paymentId}}', request.body.paymentId);
+templateHtml = templateHtml.replace('{{gstin}}', request.boy.gstin);
+templateHtml = templateHtml.replace('{{registeredAddress}}', request.body.address);
 // templateHtml = templateHtml.replace('{{date}}', user.date)
 var options = {
     width: '100mm',
@@ -55,9 +49,10 @@ pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
 var data = {
     from: 'Excited User <postmaster@mom2k18.co.in>',
     to: 'sonumeewa@gmail.com',
-    subject: 'Attachment',
+    subject: 'ZAAA Invoice',
+    text: 'Following is the invoice of the plan you subscribe at ZAAA',
     attachment : [
-        {data: data1, filename: 'zaaa-invoice.pdf'}
+        new mailgun.Attachment({data: data1, filename: 'zaaa-invoice.pdf'})
     ]
   };
 
