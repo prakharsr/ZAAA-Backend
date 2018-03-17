@@ -116,21 +116,22 @@ module.exports.setPlan = function(request,response){
 				}
 				else{
 					firm.plan.planID = request.body.planID;
-					firm.plan.paymentID = request.body.paymentID;
-                    firm.plan.CreatedOn = Date.now();
-                    firm.FirmName = request.body.firmName;
-                    firm.GSTIN = request.body.gstNo;
-					firm.RegisteredAddress = request.body.billingAddress;
-					console.log('Gonna capture...')
-					instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+					firm.plan.CreatedOn = Date.now();
+					
+                    if(request.body.cost != 0){
+						firm.FirmName = request.body.firmName;
+						firm.plan.paymentID = request.body.paymentID;
+						firm.GSTIN = request.body.gstNo;
+						firm.RegisteredAddress = request.body.billingAddress;
+						
+						console.log('Gonna capture...')
+						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
 						console.log(request.body.cost)
 						console.log(data);
-						
-						
-
-					}).catch((err) => {
-						console.error(err + "b")
-					})
+						}).catch((err) => {
+							console.error(err + "b")
+						})
+					}
 					firm.save(function(err, doc) {
 						if (err) {
 							response.send({
@@ -144,6 +145,7 @@ module.exports.setPlan = function(request,response){
 							});
 						}
 					});
+				
 					
 				}
 			});
