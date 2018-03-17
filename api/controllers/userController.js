@@ -658,11 +658,12 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 	var now = new Date();
 	var time = new Date(now).getTime();
 	var token_data = {
-		id: mongoose.mongo.ObjectId(user._id),
+		id: user._id,
 		time: time,
 		reset : true
 	};
 	var token = jwt.sign(token_data, config.SECRET);
+	console.log(token);
 	var data = {
 		from: 'AAMan <postmaster@mom2k18.co.in>',
 		to: request.body.email,
