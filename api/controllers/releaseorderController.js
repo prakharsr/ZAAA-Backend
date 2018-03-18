@@ -23,6 +23,7 @@ module.exports.createRO = function(request, response){
 			});
 		}
 		else{
+        
             var releaseOrder = new ReleaseOrder({
                 date: request.body.date,
                 realeaseOrderNO: request.body.realeaseOrderNO,
@@ -173,7 +174,7 @@ module.exports.queryReleaseOrder = function(request, response){
     
 };
 
-module.exports.deleteRatecard = function(request, response){
+module.exports.deleteReleaseOrder = function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -211,7 +212,7 @@ module.exports.deleteRatecard = function(request, response){
 	});
 };
 
-module.exports.updateRatecard = function(request, response){
+module.exports.updateReleaseOrder = function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
