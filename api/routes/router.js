@@ -7,6 +7,7 @@ var coUser = require('../controllers/coUserController');
 var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
+var releaseOrder= require('../controllers/releaseorderController');
 var ratecard = require('../controllers/ratecardController');
 var pdf = require('../controllers/pdfController');
 
@@ -73,6 +74,14 @@ router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
 router.patch('/user/ratecard', ratecard.updateRatecard);
 router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
 router.post('/user/invoice/razorpay', pdf.generateRazorpayInvoice);
+
+
+router.post('/user/ratecard', releaseOrder.createRO);
+router.get('/user/ratecards', releaseOrder.getReleaseOrders);
+router.get('/user/ratecard/:id', releaseOrder.getReleaseOrder);
+router.delete('/user/ratecard/:id', releaseOrder.deleteReleaseOrder);
+router.patch('/user/ratecard', releaseOrder.updateReleaseOrder);
+router.get('/user/ratecards/:keyword', releaseOrder.queryReleaseOrder);
 
 
 module.exports = router;

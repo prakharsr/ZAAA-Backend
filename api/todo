@@ -21,6 +21,29 @@ change plan
 plan expiry
 razorpay complete integrations
 
+release order Schema
+crud
+pdf 
+mail
+paginations
+Unique Id 
+
+Invoice Schema
+id of release order
+crud
+pdf 
+mail
+paginations
+
+mmultiple payments reciept
+crud
+pdf
+mail
+paginations
+
+
+
+
 
 
 
