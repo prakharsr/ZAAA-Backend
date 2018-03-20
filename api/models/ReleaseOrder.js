@@ -38,7 +38,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adTotalSpace:String,
     adEdition:String,
     adPosition:String,
-    adScheme:StEmailIdring,
+    adScheme:String,
     adTotal:String,
     insertionDate:String,
     adGrossAmount:String,

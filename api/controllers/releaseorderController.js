@@ -26,7 +26,7 @@ module.exports.createRO = function(request, response){
         
             var releaseOrder = new ReleaseOrder({
                 date: request.body.date,
-                realeaseOrderNO: request.body.realeaseOrderNO,
+                releaseOrderNO: request.body.releaseOrderNO,
                 agencyName: request.body.agencyName,
                 agencyGSTIN: request.body.agencyGSTIN,
                 agencyPerson: request.body.agencyPerson,
@@ -119,7 +119,6 @@ module.exports.getReleaseOrder = function(request,response){
 			
 		}
 	});	
-    
 };
 module.exports.getReleaseOrders = function(request, response){
      
@@ -252,3 +251,69 @@ module.exports.updateReleaseOrder = function(request, response){
 		}	
 	});
 };
+
+
+module.exports.generateROPdf = function(request, response) {
+    var template = path.join(__dirname,'../../public/templates/releaseOrder.html');
+    var filename = template.replace('.html','.pdf');
+    var templateHtml = fs.readFileSync(template,'utf8');
+    var options = {
+        width: '100mm',
+        height: '180mm'
+    }
+    pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
+        if(err) console.log(err);
+        else{
+            fs.existsSync(pdf.filename);
+            response.download(pdf.filename, 'ReleaseOrder.pdf',function(err){
+                if(err) throw err
+                else{
+                    response.download(pdf.filename, 'releaseOrder.pdf');
+                }
+            })
+        }
+    })
+}
+
+module.exports.mailpdf = function(request,response,path){
+    var template = path.join(__dirname,'../../public/templates/releaseOrder.html');
+    var filename = template.replace('.html','.pdf');
+    var templateHtml = fs.readFileSync(template,'utf8');
+    var options = {
+        width: '100mm',
+        height: '180mm'
+    }
+    pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
+        if(err) console.log(err);
+        else{
+            fs.existsSync(pdf.filename);
+            var file =fs.readFileSync(pdf.filename);
+            var data = {
+                from: 'Excited User <postmaster@mom2k18.co.in>',
+                to: 'sonumeewa@gmail.com',
+                subject: 'Release Order',
+                text: 'Following is the release order',
+                attachment : [
+                    new mailgun.Attachment({data: file, filename: 'ReleaseOrder.pdf'})
+                ]
+              };
+              
+            mailgun.messages().send(data, function (error, body) {
+            console.log(error,body);
+            if(error){
+            response.send({
+                success:false,
+                msg: error + ""
+            });
+            }
+            else{
+                response.send({
+                    success:true,
+                    msg: "sent" + body
+                });
+            }
+            });
+                }
+            })
+}
+

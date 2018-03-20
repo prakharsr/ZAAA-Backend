@@ -82,6 +82,6 @@ router.get('/user/ratecard/:id', releaseOrder.getReleaseOrder);
 router.delete('/user/ratecard/:id', releaseOrder.deleteReleaseOrder);
 router.patch('/user/ratecard', releaseOrder.updateReleaseOrder);
 router.get('/user/ratecards/:keyword', releaseOrder.queryReleaseOrder);
-
-
+router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
+router.post('/user/releaseorder/email', releaseOrder.mailpdf)
 module.exports = router;
