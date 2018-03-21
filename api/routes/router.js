@@ -76,12 +76,12 @@ router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
 router.post('/user/invoice/razorpay', pdf.generateRazorpayInvoice);
 
 
-router.post('/user/ratecard', releaseOrder.createRO);
-router.get('/user/ratecards', releaseOrder.getReleaseOrders);
-router.get('/user/ratecard/:id', releaseOrder.getReleaseOrder);
-router.delete('/user/ratecard/:id', releaseOrder.deleteReleaseOrder);
-router.patch('/user/ratecard', releaseOrder.updateReleaseOrder);
-router.get('/user/ratecards/:keyword', releaseOrder.queryReleaseOrder);
+router.post('/user/releaseorder', releaseOrder.createRO);
+router.get('/user/releaseorders', releaseOrder.getReleaseOrders);
+router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
+router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
+router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
+router.get('/user/releaseorders/:keyword', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
 router.post('/user/releaseorder/email', releaseOrder.mailpdf)
 module.exports = router;
