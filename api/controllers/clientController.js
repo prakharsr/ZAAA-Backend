@@ -160,7 +160,7 @@ module.exports.deleteClient = function(request, response){
 	});
 };
 module.exports.queryClients = function(request, response){
-    Client.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName', 1)
+    Client.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName')
     .limit(5).exec(function(err, clients){
         if(err){
             console.log(err+ "");

@@ -154,7 +154,7 @@ module.exports.getReleaseOrders = function(request, response){
 
 module.exports.queryReleaseOrder = function(request, response){
     
-    ReleaseOrder.find().or([{ 'agencyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'executiveName': { $regex: request.params.keyword+"", $options:"i" }},{ 'clientName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('publicationName', 1)
+    ReleaseOrder.find().or([{ 'agencyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'executiveName': { $regex: request.params.keyword+"", $options:"i" }},{ 'clientName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('publicationName')
     .limit(5).exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
