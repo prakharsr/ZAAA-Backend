@@ -15,33 +15,43 @@ var path = require('path');
 module.exports.createRO = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
+		if(err){
+			console.log("error in finding user");
 			response.send({
 				success:false,
 				msg:err+""
 			});
-		}
+        }
+        else if(!user)
+        {
+            console.log("User not found");
+            response.send({
+                success:false,
+                msg:" no user"
+        });
+
+        }
 		else{
-            Firm.findByIdAndUpdate(mongoose.mongo.ObjectId(user.firm), function(err, firm){
-				if(err||!user){
-					console.log("User not found");
+            Firm.findById(user.firm, function(err, firm){
+				if(err){
+					console.log("err in finding firm");
 					response.send({
 						success:false,
-						msg:err
+						msg:err + ""
 					});
 				}
 				else{
-                    var sn = firm.ROSerial;
+                    var sn = firm.ROSerial+1;
                     var fname = firm.FirmName;
-                    var shortname = fname.Match(/\b\w/g).join('');
+                    var shortname = fname.match(/\b\w/g).join('');
                     var city = firm.OfficeAddress.city;
-
+                    var rno = shortname + '-'+city +'-'+sn;
+                    console.log(rno);
 
         
                     var releaseOrder = new ReleaseOrder({
                         date: request.body.date,
-                        releaseOrderNO: fname + '-'+city +'-'+sn,
+                        releaseOrderNO: rno,
                         agencyName: firm.FirmName,
                         agencyGSTIN: firm.GSTIN,
                         agencyPerson: user.name,
@@ -79,7 +89,8 @@ module.exports.createRO = function(request, response){
                         paymentDetails:request.body.paymentDetails,
                         executiveName:request.body.executiveName,
                         otherCharges:request.body.otherCharges,
-                        clientPayment:request.body.clientPayment
+                        clientPayment:request.body.clientPayment,
+                        firm:user.firm
                     });
                     releaseOrder.save(function(err){
                         if(err){
@@ -90,10 +101,13 @@ module.exports.createRO = function(request, response){
                             });
                         }
                         else{
-                            firm.ROSerial=sn+1;
-                            response.send({
-                                success : true,
-                                msg : "release order data saved"
+                            firm.ROSerial += 1;
+                            firm.save(function(err){
+                                if(err){console.log(err)}
+                                else{response.send({
+                                    success : true,
+                                    msg : "release order data saved"
+                                });}
                             });
                         }
                     });
@@ -143,27 +157,37 @@ module.exports.getReleaseOrders = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err||!user){
-			console.log("User not found");
+			console.log(err);
 			response.send({
 				success:false,
-				msg:err+""
+				msg: err +""
 			});
 		}
 		else{
-            
-            ReleaseOrder.find({firm:mongoose.mongo.ObjectId(user.firm)},function(err, releaseOrders){
-                
+            console.log(user.firm);
+            ReleaseOrder.find({firm:user.firm},function(err, releaseOrders){
                 if(err){
-                    console.log("here" +err);
+                    console.log("here");
+                    response.send({
+                        success:false,
+                        msg: err + ""
+                    });
+                }
+                else if(!releaseOrders){
+                    console.log("No releaseorder");
+                    response.send({
+                        success:false,
+                        msg:" No release Order"
+                    });
                 }
                 else{
+                    console.log(releaseOrders)
                     response.send({
                         success : true,
-                        releaseOrders : releaseOrders,
+                        releaseOrders : releaseOrders
                     });
                 }
             });
-			
 		}
 	});	
 

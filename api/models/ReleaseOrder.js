@@ -8,7 +8,7 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 var ReleaseOrderSchema = new mongoose.Schema({
     date: String,
-    realeaseOrderNO: {
+    releaseOrderNO: {
         type:String,
         unique:true
     },
