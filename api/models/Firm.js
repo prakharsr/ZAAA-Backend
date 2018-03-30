@@ -37,6 +37,7 @@ var FirmSchema = new mongoose.Schema({
     Website:String,
     PanNo: String,
     GSTIN: String,
+    ROSerial:Number,
     BankDetails:{
         AccountName:String,
         AccountNo:String,

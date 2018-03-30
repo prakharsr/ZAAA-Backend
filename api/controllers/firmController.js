@@ -218,6 +218,7 @@ module.exports.setFirmProfile = function(request, response){
 			firm.Socials.twitter=request.body.twitter;			
 			if(request.body.other)
 			firm.Socials.Others=request.body.other;
+			firm.ROSerial=0;
 			
 			firm.save(function(err){
 				if(err){

@@ -23,65 +23,83 @@ module.exports.createRO = function(request, response){
 			});
 		}
 		else{
+            Firm.findByIdAndUpdate(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err||!user){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+                    var sn = firm.ROSerial;
+                    var fname = firm.FirmName;
+                    var shortname = fname.Match(/\b\w/g).join('');
+                    var city = firm.OfficeAddress.city;
+
+
         
-            var releaseOrder = new ReleaseOrder({
-                date: request.body.date,
-                releaseOrderNO: request.body.releaseOrderNO,
-                agencyName: request.body.agencyName,
-                agencyGSTIN: request.body.agencyGSTIN,
-                agencyPerson: request.body.agencyPerson,
-                signature: request.body.signature,
-                publicationName:request.body.publicationName,
-                publicationEdition:request.body.publicationEdition,
-                publicationAddress:request.body.publicationAddress,
-                publicationCity:request.body.publicationCity,
-                publicationState:request.body.publicationState,
-                publicationGSTIN:request.body.publicationGSTIN,
-                adType:request.body.adType,
-                adCategory1:request.body.adCategory1,
-                adCategory2:request.body.adCategory2,
-                adCategory2:request.body.adCategory3,
-                adCategory2:request.body.adCategory4,
-                adCategory2:request.body.adCategory5,
-                adCategory2:request.body.adCategory6,
-                adHue:request.body.adHue,
-                adSize:request.body.adSize,
-                adTotalSpace:request.body.adTotalSpace,
-                adEdition:request.body.adEdition,
-                adPosition:request.body.adPosition,
-                adScheme:request.body.adScheme,
-                adTotal:request.body.adTotal,
-                insertionDate:request.body.insertionDate,
-                adGrossAmount:request.body.adGrossAmount,
-                publicationDiscount:request.body.publicationDiscount,
-                agencyDiscount1:request.body.agencyDiscount1,
-                agencyDiscount2:request.body.agencyDiscount2,
-                taxAmount:request.body.taxAmount,
-                netAmountFigures:request.body.netAmountFigures,
-                netAmountWords:request.body.netAmountWords,
-                caption:request.body.caption,
-                remark:request.body.remark,
-                paymentDetails:request.body.paymentDetails,
-                executiveName:request.body.executiveName,
-                otherCharges:request.body.otherCharges,
-                clientPayment:request.body.clientPayment
-            });
-            releaseOrder.save(function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success : false,
-                        msg : "cannot save release order data"
+                    var releaseOrder = new ReleaseOrder({
+                        date: request.body.date,
+                        releaseOrderNO: fname + '-'+city +'-'+sn,
+                        agencyName: firm.FirmName,
+                        agencyGSTIN: firm.GSTIN,
+                        agencyPerson: user.name,
+                        signature: user.signature,
+                        publicationName:request.body.publicationName,
+                        publicationEdition:request.body.publicationEdition,
+                        publicationAddress:request.body.publicationAddress,
+                        publicationCity:request.body.publicationCity,
+                        publicationState:request.body.publicationState,
+                        publicationGSTIN:request.body.publicationGSTIN,
+                        adType:request.body.adType,
+                        adCategory1:request.body.adCategory1,
+                        adCategory2:request.body.adCategory2,
+                        adCategory2:request.body.adCategory3,
+                        adCategory2:request.body.adCategory4,
+                        adCategory2:request.body.adCategory5,
+                        adCategory2:request.body.adCategory6,
+                        adHue:request.body.adHue,
+                        adSize:request.body.adSize,
+                        adTotalSpace:request.body.adTotalSpace,
+                        adEdition:request.body.adEdition,
+                        adPosition:request.body.adPosition,
+                        adScheme:request.body.adScheme,
+                        adTotal:request.body.adTotal,
+                        insertionDate:request.body.insertionDate,
+                        adGrossAmount:request.body.adGrossAmount,
+                        publicationDiscount:request.body.publicationDiscount,
+                        agencyDiscount1:request.body.agencyDiscount1,
+                        agencyDiscount2:request.body.agencyDiscount2,
+                        taxAmount:request.body.taxAmount,
+                        netAmountFigures:request.body.netAmountFigures,
+                        netAmountWords:request.body.netAmountWords,
+                        caption:request.body.caption,
+                        remark:request.body.remark,
+                        paymentDetails:request.body.paymentDetails,
+                        executiveName:request.body.executiveName,
+                        otherCharges:request.body.otherCharges,
+                        clientPayment:request.body.clientPayment
                     });
-                }
-                else{
-                    response.send({
-                        success : true,
-                        msg : "release order data saved"
+                    releaseOrder.save(function(err){
+                        if(err){
+                            console.log(err);
+                            response.send({
+                                success : false,
+                                msg : "cannot save release order data"
+                            });
+                        }
+                        else{
+                            firm.ROSerial=sn+1;
+                            response.send({
+                                success : true,
+                                msg : "release order data saved"
+                            });
+                        }
                     });
-                }
-            });
-            
+                    
+				}
+			});
 		}
 	});	
     
