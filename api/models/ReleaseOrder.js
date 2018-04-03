@@ -40,7 +40,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adPosition:String,
     adScheme:String,
     adTotal:String,
-    insertionDate:String,
+    insertions:[{date:String, marked:Boolean, insertion_no:Number}],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,
