@@ -36,13 +36,13 @@ var options = {
     width: '100mm',
     height: '180mm'
 }
-var data1;
+var file;
 pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
     if(err) console.log(err+ "");
     else{
         console.log(pdf.filename);
         fs.existsSync(pdf.filename);
-        data1 = fs.readFileSync(pdf.filename);
+        file = fs.readFileSync(pdf.filename);
     }
 })
 
@@ -51,9 +51,7 @@ var data = {
     to: 'sonumeewa@gmail.com',
     subject: 'ZAAA Invoice',
     text: 'Following is the invoice of the plan you subscribe at ZAAA',
-    attachment : [
-        new mailgun.Attachment({data: data1, filename: 'zaaa-invoice.pdf'})
-    ]
+    attachment : file
   };
 
 mailgun.messages().send(data, function (error, body) {
