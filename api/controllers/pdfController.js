@@ -9,9 +9,9 @@ var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 
 
-module.exports.generateRazorpayInvoice = function(FirmDetails){
+module.exports.generateRazorpayInvoice = function(Details){
     
-var today = new Date();
+var today = new Date(Date.now());
 var dd = today.getDate();
 var mm = today.getMonth()+1; 
 var yyyy = today.getFullYear();
@@ -22,16 +22,21 @@ if(mm<10){
     mm='0'+mm;
 } 
 var today = dd+'/'+mm+'/'+yyyy;
-
-
+var total = Details.price + Details.fee + Details.tax;
+var address = Details.address.address+',<br>'+Details.address.city+','+Details.address.state;
 var template = path.join(__dirname,'../../public/templates/invoice.html');
 var filename = template.replace('.html','.pdf');
 var templateHtml = fs.readFileSync(template,'utf8');
-templateHtml = templateHtml.replace('{{firmName}}', FirmDetails.firmname);
-templateHtml = templateHtml.replace('{{paymentId}}', FirmDetails.paymentId);
-templateHtml = templateHtml.replace('{{gstin}}', FirmDetails.gstin);
-templateHtml = templateHtml.replace('{{registeredAddress}}', FirmDetails.address);
-templateHtml = templateHtml.replace('{{date}}', FirmDetails.date)
+templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
+templateHtml = templateHtml.replace('{{paymentId}}', Details.paymentId);
+templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
+templateHtml = templateHtml.replace('{{registeredAddress}}',address);
+templateHtml = templateHtml.replace('{{date}}', today)
+templateHtml = templateHtml.replace('{{price}}', Details.price)
+templateHtml = templateHtml.replace('{{fee}}', Details.fee)
+templateHtml = templateHtml.replace('{{tax}}', Details.tax)
+templateHtml = templateHtml.replace('{{total}}', total)
+templateHtml = templateHtml.replace('{{method}}', Details.method)
 var options = {
     width: '100mm',
     height: '180mm'

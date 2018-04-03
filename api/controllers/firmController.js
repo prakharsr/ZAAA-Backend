@@ -118,44 +118,50 @@ module.exports.setPlan = function(request,response){
 				else{
 					firm.plan.planID = request.body.planID;
 					firm.plan.CreatedOn = Date.now();
-					
                     if(request.body.cost != 0){
 						firm.FirmName = request.body.firmName;
 						firm.plan.paymentID = request.body.paymentID;
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
 						console.log('Gonna capture...')
-						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+						instance.payments.capture(request.body.paymentID, request.body.cost).then((data) => {
 						console.log(request.body.cost)
 						console.log(data);
-						
-						}).catch((err) => {
-							console.log( err + "")
-						})
-					}
-					firm.save(function(err, doc) {
-						FirmDetails={
+						var Details={
 							firmname:firm.FirmName,
 							paymentId:firm.plan.paymentID,
 							gstin:firm.GSTIN,
-							adress:firm.RegisteredAddress,
-							
+							address:firm.RegisteredAddress,
+							price: data.amount,
+							fee: data.fee,
+							tax: data.tax,
+							date: data.created_at,
+							method:data.method
 						}
-						pdfController.generateRazorpayInvoice(FirmDetails);
-						if (err) {
-							response.send({
-								success: false,
-								msg: err
-							});
-						} else {
-							response.send({
-								success: true,
-								msg:doc._id +"bjhbyhjb  " + doc
-							});
-						}
-					});
-				
+						firm.save(function(err, doc) {
+						
+							pdfController.generateRazorpayInvoice(Details);
+							if (err) {
+								response.send({
+									success: false,
+									msg: err
+								});
+							} else {
+								response.send({
+									success: true,
+									msg:doc._id +"bjhbyhjb  " + doc
+								});
+							}
+						});
 					
+						
+					
+						}).catch((err) => {
+
+							console.log( err + "")
+						})
+					}
+				
 				}
 			});
 		}
