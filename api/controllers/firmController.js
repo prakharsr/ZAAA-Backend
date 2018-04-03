@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var userController = require('./userController');
+var pdfController = require('./pdfController');
 var path = require('path');
 var Razorpay = require("razorpay")
 
@@ -123,16 +124,24 @@ module.exports.setPlan = function(request,response){
 						firm.plan.paymentID = request.body.paymentID;
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
-						
 						console.log('Gonna capture...')
 						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
 						console.log(request.body.cost)
 						console.log(data);
+						
 						}).catch((err) => {
-							console.error(err + "b")
+							console.log( err + "")
 						})
 					}
 					firm.save(function(err, doc) {
+						FirmDetails={
+							firmname:firm.FirmName,
+							paymentId:firm.plan.paymentID,
+							gstin:firm.GSTIN,
+							adress:firm.RegisteredAddress,
+							
+						}
+						pdfController.generateRazorpayInvoice(FirmDetails);
 						if (err) {
 							response.send({
 								success: false,

@@ -34,6 +34,7 @@ module.exports.createMediahouse = function(request,response){
                 OfficeLandline:request.body.officeLandline,
                 Scheduling:request.body.scheduling,
                 global:false,
+                GSTIN:request.body.GSTIN,
                 firm : user.firm
                 
             });

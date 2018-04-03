@@ -73,7 +73,6 @@ router.get('/user/ratecard/:id', ratecard.getRatecard);
 router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
 router.patch('/user/ratecard', ratecard.updateRatecard);
 router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
-router.post('/user/invoice/razorpay', pdf.generateRazorpayInvoice);
 
 
 router.post('/user/releaseorder', releaseOrder.createRO);

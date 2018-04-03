@@ -9,7 +9,7 @@ var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 
 
-module.exports.generateRazorpayInvoice = function(request, response){
+module.exports.generateRazorpayInvoice = function(FirmDetails){
     
 var today = new Date();
 var dd = today.getDate();
@@ -27,18 +27,18 @@ var today = dd+'/'+mm+'/'+yyyy;
 var template = path.join(__dirname,'../../public/templates/invoice.html');
 var filename = template.replace('.html','.pdf');
 var templateHtml = fs.readFileSync(template,'utf8');
-// templateHtml = templateHtml.replace('{{firmName}}', request.body.firmname);
-// templateHtml = templateHtml.replace('{{paymentId}}', request.body.paymentId);
-// templateHtml = templateHtml.replace('{{gstin}}', request.boy.gstin);
-// templateHtml = templateHtml.replace('{{registeredAddress}}', request.body.address);
-// templateHtml = templateHtml.replace('{{date}}', user.date)
+templateHtml = templateHtml.replace('{{firmName}}', FirmDetails.firmname);
+templateHtml = templateHtml.replace('{{paymentId}}', FirmDetails.paymentId);
+templateHtml = templateHtml.replace('{{gstin}}', FirmDetails.gstin);
+templateHtml = templateHtml.replace('{{registeredAddress}}', FirmDetails.address);
+templateHtml = templateHtml.replace('{{date}}', FirmDetails.date)
 var options = {
     width: '100mm',
     height: '180mm'
 }
 var data1;
 pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
-    if(err) console.log(err);
+    if(err) console.log(err+ "");
     else{
         console.log(pdf.filename);
         fs.existsSync(pdf.filename);
@@ -59,13 +59,13 @@ var data = {
 mailgun.messages().send(data, function (error, body) {
     console.log(error,body);
     if(error){
-    response.send({
+    console.log({
         success:false,
         msg: error + ""
     });
 }
 else{
-    response.send({
+    console.log({
         success:true,
         msg: "sent" + body
     });

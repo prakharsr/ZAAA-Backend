@@ -26,6 +26,7 @@ Address:{
     state:String
 },
 OfficeLandline:String,
+GSTIN:String,
 Scheduling:[scheduling],
 
 firm : {
