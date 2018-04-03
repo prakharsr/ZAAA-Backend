@@ -41,11 +41,15 @@ module.exports.createRO = function(request, response){
 					});
 				}
 				else{
+                    var date = Date.now()
                     var sn = firm.ROSerial+1;
                     var fname = firm.FirmName;
                     var shortname = fname.match(/\b\w/g).join('');
                     var city = firm.OfficeAddress.city;
-                    var rno = shortname + '-'+city +'-'+sn;
+                    var GSTIN = firm.GSTIN;
+                    gstin = GSTIN.substring(0,1);
+                    var year = date.getFullYear();
+                    var rno = year+'-'+gstin +'-'+shortname + '-'+city +'-'+sn;
                     console.log(rno);
 
         
@@ -80,7 +84,6 @@ module.exports.createRO = function(request, response){
                         adPosition:request.body.adPosition,
                         adScheme:request.body.adScheme,
                         adTotal:request.body.adTotal,
-                        insertionDate:request.body.insertionDate,
                         adGrossAmount:request.body.adGrossAmount,
                         publicationDiscount:request.body.publicationDiscount,
                         agencyDiscount1:request.body.agencyDiscount1,
@@ -94,7 +97,8 @@ module.exports.createRO = function(request, response){
                         executiveName:request.body.executiveName,
                         otherCharges:request.body.otherCharges,
                         clientPayment:request.body.clientPayment,
-                        firm:user.firm
+                        firm:user.firm,
+                        insertions:request.body.insertions,
                     });
                     releaseOrder.save(function(err){
                         if(err){
@@ -200,7 +204,7 @@ module.exports.getReleaseOrders = function(request, response){
 
 module.exports.queryReleaseOrder = function(request, response){
     
-    ReleaseOrder.find().or([{ 'agencyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'executiveName': { $regex: request.params.keyword+"", $options:"i" }},{ 'clientName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('publicationName')
+    ReleaseOrder.find().or([{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }},{ 'agencyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'executiveName': { $regex: request.params.keyword+"", $options:"i" }},{ 'clientName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('publicationName')
     .limit(5).exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
@@ -248,7 +252,7 @@ module.exports.deleteReleaseOrder = function(request, response){
                 else{
                     response.send({
                         success:true,
-                        msg: "Ratecard deleted"
+                        msg: "Release Order deleted"
                     });
                 }
                 
