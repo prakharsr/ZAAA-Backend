@@ -36,37 +36,35 @@ var options = {
     width: '100mm',
     height: '180mm'
 }
-var file;
 pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
     if(err) console.log(err+ "");
     else{
         console.log(pdf.filename);
         fs.existsSync(pdf.filename);
-        file = fs.readFileSync(pdf.filename);
+        var file = fs.readFileSync(pdf.filename);
+        var data = {
+            from: 'Excited User <postmaster@mom2k18.co.in>',
+            to: 'sonumeewa@gmail.com',
+            subject: 'ZAAA Invoice',
+            text: 'Following is the invoice of the plan you subscribe at ZAAA',
+            attachment : file
+          };
+        
+        mailgun.messages().send(data, function (error, body) {
+            console.log(error,body);
+            if(error){
+            console.log({
+                success:false,
+                msg: error + ""
+            });
+        }
+        else{
+            console.log({
+                success:true,
+                msg: "sent" + body
+            });
+        }
+          });
     }
 })
-
-var data = {
-    from: 'Excited User <postmaster@mom2k18.co.in>',
-    to: 'sonumeewa@gmail.com',
-    subject: 'ZAAA Invoice',
-    text: 'Following is the invoice of the plan you subscribe at ZAAA',
-    attachment : file
-  };
-
-mailgun.messages().send(data, function (error, body) {
-    console.log(error,body);
-    if(error){
-    console.log({
-        success:false,
-        msg: error + ""
-    });
-}
-else{
-    console.log({
-        success:true,
-        msg: "sent" + body
-    });
-}
-  });
 }
