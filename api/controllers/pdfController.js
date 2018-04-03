@@ -39,9 +39,9 @@ var options = {
 pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
     if(err) console.log(err+ "");
     else{
-        console.log(pdf.filename);
-        fs.existsSync(pdf.filename);
-        var file = fs.readFileSync(pdf.filename);
+        var file = pdf.filename;
+        console.log(file);
+        fs.existsSync(file);
         var data = {
             from: 'Excited User <postmaster@mom2k18.co.in>',
             to: 'sonumeewa@gmail.com',
