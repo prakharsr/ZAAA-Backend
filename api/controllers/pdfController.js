@@ -24,7 +24,7 @@ if(mm<10){
 var today = dd+'/'+mm+'/'+yyyy;
 var total = Details.price + Details.fee + Details.tax;
 var address = Details.address.address+',<br>'+Details.address.city+','+Details.address.state;
-var template = path.join(__dirname,'../../public/templates/invoice.html');
+var template = '/templates/invoice.html';
 var filename = template.replace('.html','.pdf');
 var templateHtml = fs.readFileSync(template,'utf8');
 templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
