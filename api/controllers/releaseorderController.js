@@ -41,7 +41,7 @@ module.exports.createRO = function(request, response){
 					});
 				}
 				else{
-                    var date = Date.now()
+                    var date = new Date()
                     var sn = firm.ROSerial+1;
                     var fname = firm.FirmName;
                     var shortname = fname.match(/\b\w/g).join('');
