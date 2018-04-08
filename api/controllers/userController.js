@@ -483,7 +483,7 @@ var token = getToken(request.headers);
 								response.send({
 									success : true,
 									msg : "File is uploaded.",
-									photo: location
+									sign: user.sign
 								});
 							}
 						});
@@ -524,7 +524,7 @@ module.exports.deleteSignature = function(request,response){
 								response.send({
 									success : true,
 									msg : "File is uploaded.",
-									photo: user.photo
+									sign: user.sign
 								});
 							}
 						});				

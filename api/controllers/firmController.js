@@ -95,6 +95,56 @@ module.exports.logoImage = function(request,response){
 		}
 	});
 }    
+module.exports.deleteLogoImage = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+		
+				firm.LogoURL = location;
+				firm.save(function(err,doc){
+					if (err) {
+						console.log(err);
+						response.send({
+							success: false,
+							msg: err
+						});
+					} 
+					else{
+						response.send({
+							success : true,
+							msg : "File is uploaded.",
+							logo: firm.LogoURL
+						});
+					}
+				});		
+
+			});
+		}
+
+});
+}
+
 
 		
 module.exports.setPlan = function(request,response){
