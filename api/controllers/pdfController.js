@@ -77,7 +77,7 @@ module.exports.generateRazorpayInvoice = function(request, response){
                         else{
                             var file = pdf.filename;
                             fs.existsSync(file);
-                            mailController.mail(file,user.email, request.body.cc, request.body.bcc,'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
+                            mailController.mail(file,user.email, [], [],'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
                         }1
                     })
                     })
