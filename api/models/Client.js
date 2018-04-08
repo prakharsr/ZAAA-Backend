@@ -12,7 +12,7 @@ var ClientSchema = new mongoose.Schema({
     NickName:String,
     CategoryType:String,
     Address:{
-        pin:String,
+        pincode:String,
         address:String,
         city:String,
         state:String

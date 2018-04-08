@@ -20,13 +20,16 @@ PublicationName:String,
 NickName:String,
 MediaType:String,
 Address:{
-    pin:String,
+    pincode:String,
     edition:String,
     address:String,
     city:String,
     state:String
 },
-OfficeLandline:String,
+OfficeLandline:{
+    std: String,
+    phone:String
+},
 GSTIN:String,
 Scheduling:[scheduling],
 
