@@ -20,6 +20,7 @@ PublicationName:String,
 NickName:String,
 MediaType:String,
 Address:{
+    pin:String,
     edition:String,
     address:String,
     city:String,
