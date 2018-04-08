@@ -32,6 +32,7 @@ module.exports.createMediahouse = function(request,response){
                 MediaType:request.body.mediaType,
                 Address:request.body.address,
                 OfficeLandline:request.body.officeLandline,
+                officeStdNo:request.body.officeStdNo,
                 Scheduling:request.body.scheduling,
                 global:false,
                 GSTIN:request.body.GSTIN,

@@ -236,6 +236,8 @@ module.exports.setFirmProfile = function(request, response){
 			firm.Email = request.body.email;
 			if(request.body.landline)
 			firm.Landline = request.body.landline;
+			if(request.body.stdNo)
+			firm.stdNo = request.body.stdNo;
 			if(request.body.website)
 			firm.Website = request.body.website;
 			if(request.body.pan)
