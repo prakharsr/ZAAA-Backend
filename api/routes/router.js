@@ -26,6 +26,8 @@ router.post('/user/role' , coUser.setRole);
 router.get('/user/role/:id', coUser.getRoles);
 
 router.post('/user/image', user.profileImage);
+router.delete('/user/image', user.deleteProfileImage);
+router.delete('/user/sign', user.deleteSignature);
 
 router.post('/user/sign', user.signature);
 router.get('/user/profile', user.getUserProfile);

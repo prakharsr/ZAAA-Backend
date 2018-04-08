@@ -391,6 +391,45 @@ module.exports.profileImage = function(request,response){
 	}
 });
 }
+module.exports.deleteProfileImage = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+		
+						user.photo = '/images/profile.jpg' ;
+						user.save(function(err,doc){
+							if (err) {
+								console.log(err);
+								response.send({
+									success: false,
+									msg: err+"gy"
+								});
+							} 
+							else{
+								response.send({
+									success : true,
+									msg : "File is uploaded.",
+									photo: user.photo
+								});
+							}
+						});				
+	}
+});
+}
+
    
 		
 module.exports.signature = function(request,response){
@@ -454,6 +493,45 @@ var token = getToken(request.headers);
 		});
 	});
 }
+module.exports.deleteSignature = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+		
+						user.signature = '/images/sign.png' ;
+						user.save(function(err,doc){
+							if (err) {
+								console.log(err);
+								response.send({
+									success: false,
+									msg: err+"gy"
+								});
+							} 
+							else{
+								response.send({
+									success : true,
+									msg : "File is uploaded.",
+									photo: user.photo
+								});
+							}
+						});				
+	}
+});
+}
+
 
 function removeA(arr) {
 	var what, a = arguments, L = a.length, ax;
