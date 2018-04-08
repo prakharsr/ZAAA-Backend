@@ -118,28 +118,49 @@ module.exports.setPlan = function(request,response){
 				else{
 					firm.plan.planID = request.body.planID;
 					firm.plan.CreatedOn = Date.now();
-					
                     if(request.body.cost != 0){
 						firm.FirmName = request.body.firmName;
 						firm.plan.paymentID = request.body.paymentID;
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
-					}
-					firm.save(function(err, doc) {
-						if (err) {
-							response.send({
-								success: false,
-								msg: err
-							});
-						} else {
-							response.send({
-								success: true,
-								msg:doc._id +"bjhbyhjb  " + doc
-							});
-						}
+						console.log('Gonna capture...')
+						instance.payments.capture(request.body.paymentID, 5000).then((data) => {
+						console.log(request.body.cost)
+						console.log("add"+data);
+						firm.save(function(err, doc) {
+						
+							pdfController.generateRazorpayInvoice(Details);
+							if (err) {
+								response.send({
+									success: false,
+									msg: err
+								});
+							} else {
+								response.send({
+									success: true,
+									msg:doc._id +"bjhbyhjb  " + doc
+								});
+							}
+						});
+					}).catch((err) => {
+
+						console.log( err + "erroororor")
 					});
+						// var Details={
+						// 	firmname:firm.FirmName,
+						// 	paymentId:firm.plan.paymentID,
+						// 	gstin:firm.GSTIN,
+						// 	add:firm.RegisteredAddress.address,
+						// 	city: firm.RegisteredAddress.city,
+						// 	state:firm.RegisteredAddress.state
+						// 	// price: data.amount,
+						// 	// fee: data.fee,
+						// 	// tax: data.tax,
+						// 	// date: data.created_at,
+						// 	// method:data.method
+						// }						
+					}
 				
-					
 				}
 			});
 		}
