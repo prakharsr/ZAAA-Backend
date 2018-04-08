@@ -20,14 +20,14 @@ var FirmSchema = new mongoose.Schema({
         default:'/images/logo.png'
     },
     RegisteredAddress:{
-        pin:String,
+        pincode:String,
         address:String,
         city:String,
         state:String
     },
     IncorporationDate: Date,
     OfficeAddress:{
-        pin:String,
+        pincode:String,
         address:String,
         city:String,
         state:String
@@ -35,10 +35,8 @@ var FirmSchema = new mongoose.Schema({
     Fax:String,
     Mobile: String,
     Email:String,
-    Landline: {
-        std:String,
-        phone:String
-    },
+    Landline: String,
+    stdNo:String,
     Website:String,
     PanNo: String,
     GSTIN: String,

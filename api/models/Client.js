@@ -12,15 +12,13 @@ var ClientSchema = new mongoose.Schema({
     NickName:String,
     CategoryType:String,
     Address:{
-        pin:String,
+        pincode:String,
         address:String,
         city:String,
         state:String
     },
-    Landline:{
-        std: String,
-        phone:String
-    },
+    stdNo:String,
+    Landline:String,
     Website:String,
     PanNO:String,
     GSTNo:String,
@@ -29,6 +27,7 @@ var ClientSchema = new mongoose.Schema({
         Designation:String,
         Department:String,
         MobileNo:String,
+        stdNo:String,
         Landline:String,
         EmailId:String,
         Photo:{

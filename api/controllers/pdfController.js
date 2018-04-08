@@ -2,12 +2,19 @@ var pdf = require('html-pdf');
 var fs = require('fs');
 var path = require('path');
 var User = require('../models/User');
-var config =  require('../../config');
-var usercontroller = require('./userController');
 var api_key = config.mailgun_api_key;
 var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 var ReleaseOrder = require('../models/ReleaseOrder');
+var Firm = require('../models/Firm');
+var mailController = require('./mailController');
+var config =  require('../../config');
+var userController = require('./userController');
+var Razorpay = require('razorpay');
+var instance = new Razorpay({
+    key_id: "rzp_test_86QLf2LFy65g2j",
+    key_secret: "xtGWMVp65bw8bGdXg04TEPMg"
+  })
 
 module.exports.generateRazorpayInvoice = function(Details){
     

@@ -12,8 +12,8 @@ var path = require('path');
 var Razorpay = require("razorpay")
 
 var instance = new Razorpay({
-  key_id: 'rzp_test_qIUnr51XOjxMYX',
-  key_secret: 'YyZvGQN9o8YlUSJTuu7KVeIY'
+  key_id: 'rzp_test_86QLf2LFy65g2j',
+  key_secret: 'xtGWMVp65bw8bGdXg04TEPMg'
 })
 		
 module.exports.logoImage = function(request,response){
@@ -95,6 +95,56 @@ module.exports.logoImage = function(request,response){
 		}
 	});
 }    
+module.exports.deleteLogoImage = function(request,response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}  
+		else if(!user){
+			response.send({
+				success:false,
+				msg:"user not found"
+			});
+		}
+		else{
+			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err){
+					console.log(err);
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+		
+				firm.LogoURL = location;
+				firm.save(function(err,doc){
+					if (err) {
+						console.log(err);
+						response.send({
+							success: false,
+							msg: err
+						});
+					} 
+					else{
+						response.send({
+							success : true,
+							msg : "File is uploaded.",
+							logo: firm.LogoURL
+						});
+					}
+				});		
+
+			});
+		}
+
+});
+}
+
 
 		
 module.exports.setPlan = function(request,response){
@@ -123,43 +173,30 @@ module.exports.setPlan = function(request,response){
 						firm.plan.paymentID = request.body.paymentID;
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
-						console.log('Gonna capture...')
-						instance.payments.capture(request.body.paymentID, 5000).then((data) => {
-						console.log(request.body.cost)
-						console.log("add"+data);
-						firm.save(function(err, doc) {
-						
-							pdfController.generateRazorpayInvoice(Details);
-							if (err) {
-								response.send({
-									success: false,
-									msg: err
-								});
-							} else {
-								response.send({
-									success: true,
-									msg:doc._id +"bjhbyhjb  " + doc
-								});
-							}
-						});
-					}).catch((err) => {
-
-						console.log( err + "erroororor")
-					});
-						// var Details={
-						// 	firmname:firm.FirmName,
-						// 	paymentId:firm.plan.paymentID,
-						// 	gstin:firm.GSTIN,
-						// 	add:firm.RegisteredAddress.address,
-						// 	city: firm.RegisteredAddress.city,
-						// 	state:firm.RegisteredAddress.state
-						// 	// price: data.amount,
-						// 	// fee: data.fee,
-						// 	// tax: data.tax,
-						// 	// date: data.created_at,
-						// 	// method:data.method
-						// }						
 					}
+						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+						console.log(request.body.cost)
+						console.log(data);
+						
+						
+
+					}).catch((err) => {
+						console.error(err + "b")
+					})
+					firm.save(function(err, doc) {
+						if (err) {
+							response.send({
+								success: false,
+								msg: err
+							});
+						} else {
+							response.send({
+								success: true,
+								msg:doc._id +"bjhbyhjb  " + doc
+							});
+						}
+					});
+
 				
 				}
 			});
@@ -207,6 +244,8 @@ module.exports.setFirmProfile = function(request, response){
 			firm.Email = request.body.email;
 			if(request.body.landline)
 			firm.Landline = request.body.landline;
+			if(request.body.stdNo)
+			firm.stdNo = request.body.stdNo;
 			if(request.body.website)
 			firm.Website = request.body.website;
 			if(request.body.pan)
