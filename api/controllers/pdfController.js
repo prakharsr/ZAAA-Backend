@@ -8,9 +8,9 @@ var config =  require('../../config');
 var userController = require('./userController');
 var Razorpay = require('razorpay');
 var instance = new Razorpay({
-    key_id: 'rzp_test_qIUnr51XOjxMYX',
-    key_secret: 'YyZvGQN9o8YlUSJTuu7KVeIY'
-  });
+    key_id: "rzp_test_86QLf2LFy65g2j",
+    key_secret: "xtGWMVp65bw8bGdXg04TEPMg"
+  })
 
 module.exports.generateRazorpayInvoice = function(request, response){
     var token = userController.getToken(request.headers);
@@ -32,63 +32,68 @@ module.exports.generateRazorpayInvoice = function(request, response){
 				}
                 else{
                     console.log(firm.plan.paymentID);
-                    instance.payments.fetch(firm.plan.paymentID).then((data) => {
-                    // var Details={
-                    //     firmname:firm.FirmName,
-                    //     paymentId:firm.plan.paymentID,
-                    //     gstin:firm.GSTIN,
-                    //     address:firm.RegisteredAddress,
-                    //     price: data.amount,
-                    //     fee: data.fee,
-                    //     tax: data.tax,
-                    //     date: data.created_at,
-                    //     method:data.method
+                    var id = firm.plan.paymentID
+                    instance.payments.capture(id,500000)
+                    .then(
+                        function (response) {
+                            response.send(response);
+                          }
+                    //(data) => {
+                    // // var Details={
+                    // //     firmname:firm.FirmName,
+                    // //     paymentId:firm.plan.paymentID,
+                    // //     gstin:firm.GSTIN,
+                    // //     address:firm.RegisteredAddress,
+                    // //     price: data.amount,
+                    // //     fee: data.fee,
+                    // //     tax: data.tax,
+                    // //     date: data.created_at,
+                    // //     method:data.method
+                    // // }
+                    // // var today = new Date(Date.now());
+                    // // var dd = today.getDate();
+                    // // var mm = today.getMonth()+1; 
+                    // // var yyyy = today.getFullYear();
+                    // // if(dd<10){
+                    // //     dd='0'+dd;
+                    // // } 
+                    // // if(mm<10){
+                    // //     mm='0'+mm;
+                    // // } 
+                    // // var today = dd+'/'+mm+'/'+yyyy;
+                    // // var total = Details.price + Details.fee + Details.tax;
+                    // // var address = Details.address.address+',<br>'+Details.address.city+','+Details.address.state;
+                    // // var template = '/templates/invoice.html';
+                    // // var filename = template.replace('.html','.pdf');
+                    // // var templateHtml = fs.readFileSync(template,'utf8');
+                    // // templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
+                    // // templateHtml = templateHtml.replace('{{paymentId}}', Details.paymentId);
+                    // // templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
+                    // // templateHtml = templateHtml.replace('{{registeredAddress}}',address);
+                    // // templateHtml = templateHtml.replace('{{date}}', today)
+                    // // templateHtml = templateHtml.replace('{{price}}', Details.price)
+                    // // templateHtml = templateHtml.replace('{{fee}}', Details.fee)
+                    // // templateHtml = templateHtml.replace('{{tax}}', Details.tax)
+                    // // templateHtml = templateHtml.replace('{{total}}', total)
+                    // // templateHtml = templateHtml.replace('{{method}}', Details.method)
+                    // // var options = {
+                    // //     width: '100mm',
+                    // //     height: '180mm'
+                    // // }
+                    // // pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
+                    // //     if(err) console.log(err+ "");
+                    // //     else{
+                    // //         var file = pdf.filename;
+                    // //         fs.existsSync(file);
+                    // //         mailController.mail(file,user.email, [], [],'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
+                    // //     }1
+                    // // })
+                   
                     // }
-                    // var today = new Date(Date.now());
-                    // var dd = today.getDate();
-                    // var mm = today.getMonth()+1; 
-                    // var yyyy = today.getFullYear();
-                    // if(dd<10){
-                    //     dd='0'+dd;
-                    // } 
-                    // if(mm<10){
-                    //     mm='0'+mm;
-                    // } 
-                    // var today = dd+'/'+mm+'/'+yyyy;
-                    // var total = Details.price + Details.fee + Details.tax;
-                    // var address = Details.address.address+',<br>'+Details.address.city+','+Details.address.state;
-                    // var template = '/templates/invoice.html';
-                    // var filename = template.replace('.html','.pdf');
-                    // var templateHtml = fs.readFileSync(template,'utf8');
-                    // templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
-                    // templateHtml = templateHtml.replace('{{paymentId}}', Details.paymentId);
-                    // templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-                    // templateHtml = templateHtml.replace('{{registeredAddress}}',address);
-                    // templateHtml = templateHtml.replace('{{date}}', today)
-                    // templateHtml = templateHtml.replace('{{price}}', Details.price)
-                    // templateHtml = templateHtml.replace('{{fee}}', Details.fee)
-                    // templateHtml = templateHtml.replace('{{tax}}', Details.tax)
-                    // templateHtml = templateHtml.replace('{{total}}', total)
-                    // templateHtml = templateHtml.replace('{{method}}', Details.method)
-                    // var options = {
-                    //     width: '100mm',
-                    //     height: '180mm'
-                    // }
-                    // pdf.create(templateHtml, options).toFile(filename, function(err,pdf){
-                    //     if(err) console.log(err+ "");
-                    //     else{
-                    //         var file = pdf.filename;
-                    //         fs.existsSync(file);
-                    //         mailController.mail(file,user.email, [], [],'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
-                    //     }1
-                    // })
-                    })
+                )
                     .catch((err) => {
-                        console.log("error in capturing payment");
-                        response.send({
-                            success:false,
-                            msg: err + ""
-                        });
+                        console.error(err);
+                        response.status(500).send(err);
                     });
                 }
             });

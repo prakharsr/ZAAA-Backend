@@ -42,6 +42,8 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adHue:String,
     adSizeL:String,
     adSizeW:String,
+    adSizeCustom:Boolean,
+    adSizeAmount:String,
     adTime:String,
     adTotalSpace:String,
     adEdition:String,
@@ -50,7 +52,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemeFree:String,
     adTotal:String,
     
-    insertions:[{date:String, time:String, marked:Boolean, insertion_no:Number}],
+    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,

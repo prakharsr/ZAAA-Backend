@@ -12,8 +12,8 @@ var path = require('path');
 var Razorpay = require("razorpay")
 
 var instance = new Razorpay({
-  key_id: 'rzp_test_qIUnr51XOjxMYX',
-  key_secret: 'YyZvGQN9o8YlUSJTuu7KVeIY'
+  key_id: 'rzp_test_86QLf2LFy65g2j',
+  key_secret: 'xtGWMVp65bw8bGdXg04TEPMg'
 })
 		
 module.exports.logoImage = function(request,response){
@@ -175,6 +175,15 @@ module.exports.setPlan = function(request,response){
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
 					}
+						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+						console.log(request.body.cost)
+						console.log(data);
+						
+						
+
+					}).catch((err) => {
+						console.error(err + "b")
+					})
 					firm.save(function(err, doc) {
 						if (err) {
 							response.send({
@@ -188,6 +197,7 @@ module.exports.setPlan = function(request,response){
 							});
 						}
 					});
+
 				
 					
 				}

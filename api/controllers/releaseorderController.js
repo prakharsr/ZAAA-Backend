@@ -81,6 +81,8 @@ module.exports.createRO = function(request, response){
                         adSizeL:request.body.adSizeL,
                         adSizeW:request.body.adSizeW,
                         adTime:request.body.Time,
+                        adSizeCustom:request.body.adSizeCustom,
+                        adSizeAmount:request.body.adSizeAmount,
                         adTotalSpace:request.body.adTotalSpace,
                         adEdition:request.body.adEdition,
                         adPosition:request.body.adPosition,
