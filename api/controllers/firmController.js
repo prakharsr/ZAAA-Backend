@@ -124,14 +124,6 @@ module.exports.setPlan = function(request,response){
 						firm.plan.paymentID = request.body.paymentID;
 						firm.GSTIN = request.body.gstNo;
 						firm.RegisteredAddress = request.body.billingAddress;
-						
-						console.log('Gonna capture...')
-						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
-						console.log(request.body.cost)
-						console.log(data);
-						}).catch((err) => {
-							console.error(err + "b")
-						})
 					}
 					firm.save(function(err, doc) {
 						if (err) {

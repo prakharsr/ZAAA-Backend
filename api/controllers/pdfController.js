@@ -5,6 +5,7 @@ var User = require('../models/User');
 var mailController = require('./mailController');
 var config =  require('../../config');
 var usercontroller = require('./userController');
+var Razorpay = require('razorpay');
 var instance = new Razorpay({
     key_id: 'rzp_test_qIUnr51XOjxMYX',
     key_secret: 'YyZvGQN9o8YlUSJTuu7KVeIY'
@@ -29,7 +30,7 @@ module.exports.generateRazorpayInvoice = function(request, response){
 					console.log("firm does not exist for this admin");
 				}
                 else{
-                    instance.payments.capture(request.body.paymentID, request.body.cost).then((data) => {
+                    instance.payments.capture(firm.plan.paymentID, firm.plan.cost).then((data) => {
                     var Details={
                         firmname:firm.FirmName,
                         paymentId:firm.plan.paymentID,
@@ -76,7 +77,7 @@ module.exports.generateRazorpayInvoice = function(request, response){
                         else{
                             var file = pdf.filename;
                             fs.existsSync(file);
-                            mailController.mail(file,request.body.to, request.body.cc, request.body.bcc,'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
+                            mailController.mail(file,user.email, request.body.cc, request.body.bcc,'ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA')
                         }1
                     })
                     })
