@@ -18,14 +18,17 @@ var ReleaseOrderSchema = new mongoose.Schema({
     agencyState:String,
     agencyPerson: String,
     signature: String,
+
     publicationName:String,
     publicationEdition:String,
     mediaType:String,
     publicationState:String,
     publicationGSTIN:String,
+    
     clientName:String,
     clientState:String,
     clientGSTIN:String,
+    
     adType:String,
     rate:String,
     unit:String,
@@ -45,6 +48,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemePaid:String,
     adSchemeFree:String,
     adTotal:String,
+    
     insertions:[{date:String, time:String, marked:Boolean, insertion_no:Number}],
     adGrossAmount:String,
     publicationDiscount:String,
@@ -67,8 +71,9 @@ var ReleaseOrderSchema = new mongoose.Schema({
     executiveOrg:String,
     otherCharges:String,
     otherChargesType:String,
-    clientPayment:String,
     remark:String,
+    FinalAmount:String,
+    FinalTaxAmount:String,
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
