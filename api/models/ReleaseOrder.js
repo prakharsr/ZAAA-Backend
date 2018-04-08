@@ -57,7 +57,10 @@ var ReleaseOrderSchema = new mongoose.Schema({
     publicationDiscount:String,
     agencyDiscount1:String,
     agencyDiscount2:String,
-    taxAmount:String,
+    taxAmount:{
+        primary:String,
+        secondary:String
+    },
     taxIncluded:Boolean,
     netAmountFigures:String,
     netAmountWords:String,
