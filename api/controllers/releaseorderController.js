@@ -80,6 +80,8 @@ module.exports.createRO = function(request, response){
                         adHue:request.body.adHue,
                         adSizeL:request.body.adSizeL,
                         adSizeW:request.body.adSizeW,
+                        adWords:request.body.adWords,
+                        adWordsMax:request.body.adWordsMax,
                         adTime:request.body.Time,
                         adSizeCustom:request.body.adSizeCustom,
                         adSizeAmount:request.body.adSizeAmount,
@@ -108,7 +110,7 @@ module.exports.createRO = function(request, response){
                         executiveName:request.body.executiveName,
                         executiveOrg:request.body.executiveOrg,
                         otherCharges:request.body.otherCharges,
-                        otherChargesType:request.body.otherChargesType,
+                        otherRemark:request.body.otherRemark,
                         firm:user.firm,
                         insertions:request.body.insertions,
                         // if (taxIncluded){

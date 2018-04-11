@@ -6,7 +6,8 @@ var PlanSchema = new mongoose.Schema({
     name : String,
     maxUsers : Number,
     maxAdmins : Number,
-    description : String 
+    description : String,
+    validAgain: Boolean
 });
 
 module.exports = mongoose.model('Plan', PlanSchema);

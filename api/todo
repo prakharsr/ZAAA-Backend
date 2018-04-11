@@ -41,6 +41,35 @@ pdf
 mail
 paginations
 
+1. Ad detail-- free and paid in total ads to be displayed in scheme 
+2. remarks field in --other details
+3. other charges multiple
+4. other charges will be added to client payment details
+5. additional taxes will be added in invoice 
+6. hue default b/w
+7. size in text will have max, words and length bredth will be chaged to words
+8. premium multiple in text and single in display and display classified to be added in release order.
+9. extra words column 
+10. premium amount will be calculated only on paid ads only.
+11. email id websie extra words can be multiple in premiums.
+12. rate card type by default local
+13. media house pull house multiple in directory, pull out choose drop down in rate card 
+14. frequency will come along with pullout name in media house
+15. frequency will be removed from rate card.
+16. selected categoris will be freezed while created release order in rate card, and serach will be for sub categories.
+17. on selection of custom size, the dropdowns will not be visible
+18. Total no. of paid ads will be displayed , editable, 
+19. total no. of ads will be displayed only, total no. of paid ads will determine total no. of ads and , total no. of paid ads should be a multiple of scheme.
+20. premium will come before discounts
+21. gross amount needs not be displayed.
+22. net amount will be defaulted  in client payment.
+23. display and display classified , premium will be text field and in percentage. will be single.
+24. premium will have always an option for indicating percentage or amount.
+25. electronic scroll will be similar to text classified in release order and rate cards.
+26. printing via google cloud.
+27. preview of documents.
+28. taxation will not be shown in release order document.
+
 
 
 

@@ -30,7 +30,6 @@ module.exports.createRatecard = function(request,response){
                 AdType:request.body.adType,
                 RateCardType:request.body.rateCardType,
                 BookingCenter:request.body.bookingCenter,
-                Frequency:request.body.frequency,
                 Category:request.body.categories,
                 Rate:request.body.rate,
                 Position:request.body.position,

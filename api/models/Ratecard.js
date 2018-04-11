@@ -14,10 +14,7 @@ BookingCenter:{
     Edition:String,
     PulloutName:String
 },
-Frequency:{
-    Period:String,
-    Remark:String
-},
+
 Category:{
     Main:String,
     SubCategory1:String,

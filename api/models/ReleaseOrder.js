@@ -40,6 +40,8 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adCategory5:String,
     adCategory6:String,
     adHue:String,
+    adWords:String,
+    adWordsMax:String,
     adSizeL:String,
     adSizeW:String,
     adSizeCustom:Boolean,
@@ -72,12 +74,15 @@ var ReleaseOrderSchema = new mongoose.Schema({
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
-
+    otherCharges:[
+    {
+        amount:String,
+        type:String,
+    }
+    ],
     executiveName:String,
     executiveOrg:String,
-    otherCharges:String,
-    otherChargesType:String,
-    remark:String,
+    otherRemark:String,
     FinalAmount:String,
     FinalTaxAmount:String,
     firm : {

@@ -19,6 +19,10 @@ OrganizationName:String,
 PublicationName:String,
 NickName:String,
 MediaType:String,
+Frequency:{
+    Period:String,
+    Remark:String
+},
 Address:{
     pincode:String,
     edition:String,
@@ -32,6 +36,7 @@ OfficeLandline:{
 },
 GSTIN:String,
 Scheduling:[scheduling],
+pullouts:[String],
 
 firm : {
     type:mongoose.Schema.Types.ObjectId,

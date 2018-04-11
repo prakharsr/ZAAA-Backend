@@ -121,7 +121,7 @@ module.exports.deleteLogoImage = function(request,response){
 					});
 				}
 		
-				firm.LogoURL = location;
+				firm.LogoURL = 'images/logo.png';
 				firm.save(function(err,doc){
 					if (err) {
 						console.log(err);
@@ -133,7 +133,7 @@ module.exports.deleteLogoImage = function(request,response){
 					else{
 						response.send({
 							success : true,
-							msg : "File is uploaded.",
+							msg : "Logo Removed.",
 							logo: firm.LogoURL
 						});
 					}
@@ -168,6 +168,7 @@ module.exports.setPlan = function(request,response){
 				else{
 					firm.plan.planID = request.body.planID;
 					firm.plan.CreatedOn = Date.now();
+					firm.plan.validAgain=false;
                     if(request.body.cost != 0){
 						firm.FirmName = request.body.firmName;
 						firm.plan.paymentID = request.body.paymentID;
@@ -179,6 +180,7 @@ module.exports.setPlan = function(request,response){
 						}).catch((err) => {
 							console.error(err + "b")
 						})
+						firm.plan.validAgain=true;
 					}
 					firm.save(function(err, doc) {
 						if (err) {
@@ -189,7 +191,7 @@ module.exports.setPlan = function(request,response){
 						} else {
 							response.send({
 								success: true,
-								msg:doc._id +"bjhbyhjb  " + doc
+								msg:doc._id +"   " + doc
 							});
 						}
 					});

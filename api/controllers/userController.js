@@ -421,7 +421,7 @@ module.exports.deleteProfileImage = function(request,response){
 							else{
 								response.send({
 									success : true,
-									msg : "File is uploaded.",
+									msg : "Profile photo removed.",
 									photo: user.photo
 								});
 							}
