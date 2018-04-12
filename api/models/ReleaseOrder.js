@@ -77,7 +77,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     otherCharges:[
     {
         amount:String,
-        type:String,
+        chargeType:String,
     }
     ],
     executiveName:String,
