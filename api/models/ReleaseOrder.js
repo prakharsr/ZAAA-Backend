@@ -59,7 +59,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     },
     PremiumExtraWords:{
         Amount:Number,
-        Quanity:Number,
+        Quantity:Number,
         Included:Boolean
     },
 
