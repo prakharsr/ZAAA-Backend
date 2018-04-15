@@ -49,11 +49,18 @@ var FirmSchema = new mongoose.Schema({
         BranchAddress:String,
         AccountType:String  
     },
-    
-    templates : [{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Template"
-    }],
+    ROTemplate:{
+        type:String,
+        default:"images/ReleaseOrder-1.jpg"
+    },
+    INTemplate:{
+        type:String,
+        default:"images/Invoice-1.jpg"
+    },
+    PRTemplate:{
+        type:String,
+        default:"images/PaymentReceipt-1.jpg"
+    },
     plan : {
         createdOn: Date,
         paymentID : String,

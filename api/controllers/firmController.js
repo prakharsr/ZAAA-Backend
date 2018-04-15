@@ -349,7 +349,7 @@ module.exports.getCurrentFirm=function(request, response){
 		}
 		else{
 			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
-				if(err||!user){
+				if(err||!firm){
 					console.log("User not found");
 					response.send({
 						success:false,
@@ -361,6 +361,39 @@ module.exports.getCurrentFirm=function(request, response){
 						success:true,
 						user:user,
 						firm:firm
+					})
+					
+				}
+			});
+			
+		}
+	});
+};
+module.exports.getTemplates = function(request, response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+				if(err||!firm){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					response.send({
+						success:true,
+						ROTemplate:firm.ROTemplate,
+						INTemplate:firm.INTemplate,
+						PRTemplate:firm.PRTemplate,
 					})
 					
 				}

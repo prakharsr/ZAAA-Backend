@@ -8,6 +8,9 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var RatecardSchema = new mongoose.Schema({
 MediaType:String,
 AdType:String,
+AdWords:String,
+AdWordsMax:String,
+AdTime:String,
 RateCardType:String,
 BookingCenter:{
     MediaHouseName:String,

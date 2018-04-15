@@ -36,6 +36,7 @@ router.post('/user/profile', user.setUserProfile);
 router.get('/firm/profile', firm.getFirmProfile);
 router.post('/firm/profile', firm.setFirmProfile);
 router.post('/firm/logo', firm.logoImage);
+router.delete('/firm/logo', firm.deleteLogoImage);
 router.get('/user', user.getCurrentUser);
 router.get('/firm', firm.getCurrentFirm);
 router.get('/plan', plan.getCurrentPlan);
