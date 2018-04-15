@@ -71,9 +71,14 @@ paginations
 28. taxation will not be shown in release order document.
 
 
-
-
-
-
-
-
+INVOICE.
+1. media house name and edition of ad only from mediahouse,
+2. client name, city , state, Address, GSTIN- dropdown (1. registered without composite, 2. composite registered, 3. unregistered)
+    if unregistered- no gstin no.
+    if registered - gstin number is to be flled compulsary.
+3. Ad details- edition, pullout name if selected, do insertions, hue colour, categories, 
+4. agency discount, publication discount,
+5. if gstin
+    IF AGENCY STATE= STATE STATE (SGST + CGST) - HALF HALF OF TOTAL TAX,
+    IF AGENCY STATE!= STATE STATE (IGST)- FULL OF TAX)
+    ADDITION CHARGES- BEFORE TAX- SAME DROPDOWN AS BEFORE AND TO BE FETHCHED FOR AUTO FILL UP IN

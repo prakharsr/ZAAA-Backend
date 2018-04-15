@@ -6,7 +6,7 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
 
-var ReleaseOrderSchema = new mongoose.Schema({
+var InvoiceSchema = new mongoose.Schema({
     date: String,
     invoiceNO: {
         type:String,
@@ -57,6 +57,6 @@ var ReleaseOrderSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
-    module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
+    module.exports = mongoose.model('Invoice', InvoiceSchema);
     
 
