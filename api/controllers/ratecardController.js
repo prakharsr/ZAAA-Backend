@@ -47,6 +47,14 @@ module.exports.createRatecard = function(request,response){
                 ValidTill:request.body.validTill,
                 Covered:request.body.covered,
                 Remarks:request.body.remarks,
+                PremiumCustom:request.body.PremiumCustom,
+                PremiumBox:request.body.PremiumBox,
+                PremiumBaseColour:request.body.PremiumBaseColour,
+                PremiumCheckMark:request.body.PremiumCheckMark,
+                PremiumEmailId:request.body.PremiumEmailId,
+                PremiumWebsite:request.body.PremiumWebsite,
+                PremiumExtraWords:request.body.PremiumWebsite,
+
                 firm :user.firm,
                 global:false
             });

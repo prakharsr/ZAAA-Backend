@@ -44,7 +44,7 @@ MinSizeLimit: {
 },
 FixSize:[{Width:String,Length:String,Amount:String}],
 Scheme:[{paid:String, Free:String, TimeLimit:String}],
-Premium:[{Type:String, Amount:String}],
+Premium:[{Type:String, Amount:String, Percentage:String, Unit:String}],
 Tax:[{ Included:Boolean, TaxRate:String}],
 ValidFrom:Date,
 ValidTill:Date,
