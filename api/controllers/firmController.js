@@ -96,8 +96,8 @@ module.exports.logoImage = function(request,response){
 	});
 }    
 module.exports.deleteLogoImage = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
 			console.log(err);
 			response.send({
