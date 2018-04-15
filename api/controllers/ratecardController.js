@@ -30,7 +30,7 @@ module.exports.createRatecard = function(request,response){
                 AdType:request.body.adType,
                 AdWords:request.body.AdWords,
                 AdWordsMax:request.body.AdWordsMax,
-                AdTime:request.bosy.AdTime,
+                AdTime:request.body.AdTime,
                 RateCardType:request.body.rateCardType,
                 BookingCenter:request.body.bookingCenter,
                 Category:request.body.categories,

@@ -392,5 +392,5 @@ module.exports.setContactPersonPhoto = function(request,response){
                  }
             });
         }
-        })
-        }
+    })
+}
