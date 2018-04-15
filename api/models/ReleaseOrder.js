@@ -29,7 +29,40 @@ var ReleaseOrderSchema = new mongoose.Schema({
     clientName:String,
     clientState:String,
     clientGSTIN:String,
-    
+
+    PremiumCustom:{
+        Amount:Number,
+        Percentage:Boolean,
+        PremiumType:String
+    },
+    PremiumBox:{
+        Amount:Number,
+        Included:Boolean
+    },
+    PremiumBaseColour:{
+        Amount:Number,
+        Included:Boolean
+    },
+    PremiumEmailId:{
+        Amount:Number,
+        Quantity:Number,
+        Included:Boolean
+    },
+    PremiumCheckMark:{
+        Amount:Number,
+        Included:Boolean
+    },
+    PremiumWebsite:{
+        Amount:Number,
+        Quantity:Number,
+        Included:Boolean
+    },
+    PremiumExtraWords:{
+        Amount:Number,
+        Quanity:Number,
+        Included:Boolean
+    },
+
     adType:String,
     rate:String,
     unit:String,

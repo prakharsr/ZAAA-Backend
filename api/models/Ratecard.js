@@ -44,7 +44,7 @@ MinSizeLimit: {
 },
 FixSize:[{Width:String,Length:String,Amount:String}],
 Scheme:[{paid:String, Free:String, TimeLimit:String}],
-PremiumCustom:{Type:String, Amount:String, Percentage:Boolean, Unit:String},
+PremiumCustom:{PremiumType:String, Amount:String, Percentage:Boolean},
 PremiumBox: Number,
 PremiumBaseColour: Number,
 PremiumCheckMark:Number,

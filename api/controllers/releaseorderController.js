@@ -93,6 +93,15 @@ module.exports.createRO = function(request, response){
                         adSchemeFree:request.body.adSchemeFree,
                         adTotal:request.body.adTotal,
                         adGrossAmount:request.body.adGrossAmount,
+
+                        PremiumCustom:request.body.PremiumCustom,
+                        PremiumBox:request.body.PremiumBox,
+                        PremiumBaseColour:request.Body.PremiumBaseColour,
+                        PremiumEmailId:request.body.PremiumEmailId,
+                        PremiumCheckMark:request.body.PremiumCheckMark,
+                        PremiumWebsite:request.body.PremiumWebsite,
+                        PremiumExtraWords:request.body.PremiumExtraWords,
+
                         publicationDiscount:request.body.publicationDiscount,
                         agencyDiscount1:request.body.agencyDiscount1,
                         agencyDiscount2:request.body.agencyDiscount2,
