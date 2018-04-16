@@ -96,7 +96,7 @@ module.exports.createRO = function(request, response){
 
                         PremiumCustom:request.body.PremiumCustom,
                         PremiumBox:request.body.PremiumBox,
-                        PremiumBaseColour:request.Body.PremiumBaseColour,
+                        PremiumBaseColour:request.body.PremiumBaseColour,
                         PremiumEmailId:request.body.PremiumEmailId,
                         PremiumCheckMark:request.body.PremiumCheckMark,
                         PremiumWebsite:request.body.PremiumWebsite,
