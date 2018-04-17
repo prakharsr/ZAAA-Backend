@@ -61,7 +61,7 @@ module.exports.createRO = function(request, response){
                         agencyPerson: user.name,
                         signature: user.signature,
                         clientName:request.body.clientName,
-                        clientAddress:request.body.clientGSTIN,
+                        clientGSTIN:request.body.clientGSTIN,
                         clientState:request.body.clientState,
                         publicationName:request.body.publicationName,
                         publicationEdition:request.body.publicationEdition,
