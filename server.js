@@ -8,6 +8,7 @@ var port = config.PORT;
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var path = require('path');
+var pdx = require('./api/controllers/pdf');
 
 var corsOptions = {
     "origin": "*",
@@ -46,8 +47,7 @@ mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 app.get('*', function(req,res){
 	res.sendFile(path.join(__dirname + '/public/app/views/index.html'));
 });
-
-
+pdx.do();
 app.listen(port, function(){
 	console.log('listening on port ' + port);
 })
