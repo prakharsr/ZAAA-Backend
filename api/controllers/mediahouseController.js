@@ -17,13 +17,29 @@ var path = require('path');
 module.exports.createMediahouse = function(request,response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
+		if(err){
+            console.log("Error in creating MediaHouse");
+            if(err.CODE == "110000")
+            {
 			response.send({
+				success:false,
+				msg:"Mediahouse details needs to be unique."
+            });
+            }
+            else{
+                response.send({
+                    success:false,
+                    msg:err+ ""
+                })
+            }
+        }
+        else if(!user){
+            console.log("User not found");
+            response.send({
 				success:false,
 				msg:err+""
 			});
-		}
+        }
 		else{
             var mediahouse = new MediaHouse({
                 OrganizationName:request.body.organizationName,
@@ -154,7 +170,7 @@ module.exports.queryMediaHouse = function(request, response){
 		}
 		else{
             MediaHouse.find({
-                $and : [{firm:mongoose.mongo.ObjectId(user.firm)}, {$or:[{ 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'Edition': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
+                $and : [{firm:mongoose.mongo.ObjectId(user.firm)}, {$or:[{ 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'Address.edition': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
             })
             .sort('OrganizationName')
             .limit(5).exec(function(err, mediahouses){

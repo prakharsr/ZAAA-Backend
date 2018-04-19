@@ -47,4 +47,5 @@ global:{
     default:false
 }
 });
+MediahouseSchema.index({firm:1,PublicationName: 1, "Address.edition":1 }, {unique: true});
 module.exports = mongoose.model('MediaHouse', MediahouseSchema);
