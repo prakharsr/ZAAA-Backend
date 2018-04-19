@@ -29,6 +29,7 @@ module.exports.createClient = function(request,response){
                 NickName:request.body.nickName,
                 CategoryType:request.body.categoryType,
                 SubCategoryType:request.body.SubCategoryType,
+                IncorporationDate:request.body.IncorporationDate,
                 Address:request.body.address,
                 stdNo:request.body.stdNo,
                 Landline:request.body.landline,

@@ -393,9 +393,10 @@ module.exports.getTemplates = function(request, response){
 				else{
 					response.send({
 						success:true,
-						ROTemplate:firm.ROTemplate,
-						INTemplate:firm.INTemplate,
-						PRTemplate:firm.PRTemplate,
+						AllTemplates:['images/ReleaseOrder-1.jpg','images/Invoice-1.jpg','images/PaymentReceipt-1.jpg'],
+						ROTemplate:AllTemplates.indexOf(firm.ROTemplate),
+						INTemplate:AllTemplates.indexOf(firm.INTemplate),
+						PRTemplate:AllTemplates.indexOf(firm.PRTemplate),
 					})
 					
 				}

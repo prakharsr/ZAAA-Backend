@@ -22,6 +22,7 @@ var ClientSchema = new mongoose.Schema({
     Landline:String,
     Website:String,
     PanNO:String,
+    IncorporationDate:Date,
     GSTIN:{
         GSTType:String,
         GSTNo:String
