@@ -11,6 +11,7 @@ var ClientSchema = new mongoose.Schema({
     CompanyName:String,
     NickName:String,
     CategoryType:String,
+    SubCategoryType:String,
     Address:{
         pincode:String,
         address:String,
