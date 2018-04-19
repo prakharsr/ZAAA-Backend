@@ -6,9 +6,6 @@ forget password0-test
 changephone change email
 
 backend paginations
-
-search with multiple fields-done 
-ratecard search and filter
 selecting ratecards
 excel creations
 excel data validations
@@ -21,21 +18,8 @@ change plan
 plan expiry
 razorpay complete integrations
 
-release order Schema
-crud
-pdf 
-mail
-paginations
-Unique Id 
 
-Invoice Schema
-id of release order
-crud
-pdf 
-mail
-paginations
-
-mmultiple payments reciept
+multiple payments reciept
 crud
 pdf
 mail
@@ -56,7 +40,7 @@ paginations
 13. media house pull house multiple in directory, pull out choose drop down in rate card 
 14. frequency will come along with pullout name in media house
 15. frequency will be removed from rate card.
-16. selected categoris will be freezed while created release order in rate card, and serach will be for sub categories.
+16. selected categoris will be freezed while created release order in rate card, and search will be for sub categories.
 17. on selection of custom size, the dropdowns will not be visible
 18. Total no. of paid ads will be displayed , editable, 
 19. total no. of ads will be displayed only, total no. of paid ads will determine total no. of ads and , total no. of paid ads should be a multiple of scheme.
@@ -82,3 +66,61 @@ INVOICE.
     IF AGENCY STATE= STATE STATE (SGST + CGST) - HALF HALF OF TOTAL TAX,
     IF AGENCY STATE!= STATE STATE (IGST)- FULL OF TAX)
     ADDITION CHARGES- BEFORE TAX- SAME DROPDOWN AS BEFORE AND TO BE FETHCHED FOR AUTO FILL UP IN
+6. tax in Urd and Crd will be zero
+
+
+User Profile
+1. name - admin
+2. designation editable
+
+Firm Profile
+1. Mobile - one more 
+2. button for same email as user email in 
+3. office Address 
+4. Hint 
+5. GSTIN - URD, RD, CRD.
+6. Account name - same as company Name.
+
+Directory
+Media House-
+1. Publication name to be compulsory and Organization Name to be mandatory. Organization name should have same as above.
+2. Periodicly and remark and language to be shown in each pullout in print.
+3. Air and Electronic will not have pullout name and periodicity- will have only language and a remark field.
+4. Address is option , Edition and state is mandatory.
+5. Scheduling will be not be shown by default.
+6. in general Remark field.
+7. GSTIN - to be compulsary.
+
+Client-
+1. Client name compulsory.
+2. Company name to be option or a button to show same as above.
+3. Category, Sub-Cateogry of client.
+4. Address-optional , city state -mandatory.
+5. Remark.
+6. Incorporation Date optional.
+
+Executive-
+1. Executive name to be on Top.
+2. company name to be removed, Organization name to be same as firm name by default.
+3. mobile number number compulsary. , email to be optional.
+4. Remark field.
+
+RateCard
+1. Words or lines to be selected and added in rate card and quanitity of words or lines to be filled in a textbox.
+2. PullOut name me other
+3. maximum words (not compulsory) will not be used so set by default it to zero.
+4. validation of validity from rate card.
+5. while creating release order from rate card validity to be check and pop-up to be shown with continue or escape and don't show me again option.
+6. if validity is changed then go to pre save of the release order and reset the don't show me again.
+7. time limit to have numeric validations.
+8. extra words to be extra words/lines. 
+9. covered to copy data from above.
+10. Premium to be optional.
+11. media house is always registered and tax is always calculated, gstin optional, bcz khi bharne wale ko nhi pta ho.
+12. media house gstin field in invoice.
+13. media house uniqueness - name + edition + client 
+
+Release order - 
+1. Edition needs to be auto complete.
+2. GSTIN.
+3. 

@@ -136,23 +136,45 @@ module.exports.getGlobalMediahouses = function(request,response){
 };
 
 module.exports.queryMediaHouse = function(request, response){
-  
-    MediaHouse.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'EmailId': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName')
-    .limit(5).exec(function(err, mediahouses){
-        if(err){
-            console.log(err+ "");
-            response.send({
-                success:false,
-                msg: err +""
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            MediaHouse.find({
+                $and : [{firm:mongoose.mongo.ObjectId(user.firm)}, {$or:[{ 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'Edition': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
+            })
+            .sort('OrganizationName')
+            .limit(5).exec(function(err, mediahouses){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        mediahouses: mediahouses
+                    });
+                }
             });
-        }
-        else{
-            response.send({
-                success:true,
-                mediahouses: mediahouses
-            });
-        }
-    });
+            
+		}	
+	});
     
 };
 
