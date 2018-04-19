@@ -34,6 +34,7 @@ var FirmSchema = new mongoose.Schema({
     },
     Fax:String,
     Mobile: String,
+    OtherMobile:String,
     Email:String,
     Landline: String,
     stdNo:String,

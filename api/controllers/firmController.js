@@ -239,6 +239,8 @@ module.exports.setFirmProfile = function(request, response){
 			firm.Fax = request.body.fax;
 			if(request.body.mobile)
 			firm.Mobile = request.body.mobile;
+			if(request.body.OtherMobile)
+			firm.OtherMobile = request.body.OtherMobile;
 			if(request.body.email)
 			firm.Email = request.body.email;
 			if(request.body.landline)
