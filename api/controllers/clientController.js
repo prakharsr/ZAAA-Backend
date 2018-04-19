@@ -33,7 +33,7 @@ module.exports.createClient = function(request,response){
                 Landline:request.body.landline,
                 Website:request.body.website,
                 PanNO:request.body.panNo,
-                GSTNo:request.body.gstin,
+                GSTIN:request.body.gstin,
                 ContactPerson:request.body.contactPerson,
                 firm : user.firm
             });

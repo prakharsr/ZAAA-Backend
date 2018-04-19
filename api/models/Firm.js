@@ -39,7 +39,10 @@ var FirmSchema = new mongoose.Schema({
     stdNo:String,
     Website:String,
     PanNo: String,
-    GSTIN: String,
+    GSTIN: {   
+        GSTType:String,
+        GSTNo:String
+    },
     ROSerial:Number,
     BankDetails:{
         AccountName:String,

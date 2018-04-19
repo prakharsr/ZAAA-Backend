@@ -24,11 +24,16 @@ var ReleaseOrderSchema = new mongoose.Schema({
     publicationEdition:String,
     mediaType:String,
     publicationState:String,
-    publicationGSTIN:String,
-    
+    publicationGSTIN:{
+        GSTType:String,
+        GSTNo:String
+    },    
     clientName:String,
     clientState:String,
-    clientGSTIN:String,
+    clientGSTIN:{
+        GSTType:String,
+        GSTNo:String
+    },
 
     PremiumCustom:{
         Amount:Number,

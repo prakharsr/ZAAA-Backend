@@ -34,7 +34,10 @@ OfficeLandline:{
     std: String,
     phone:String
 },
-GSTIN:String,
+GSTIN:{
+    GSTType:String,
+    GSTNo:String
+},
 Scheduling:[scheduling],
 pullouts:[String],
 
