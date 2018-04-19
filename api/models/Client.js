@@ -40,6 +40,7 @@ var ClientSchema = new mongoose.Schema({
         DateOfBirth:Date,
         Anniversary:Date    
     }],
+    Remark:String,
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"

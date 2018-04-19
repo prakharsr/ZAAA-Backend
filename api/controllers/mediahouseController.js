@@ -53,6 +53,7 @@ module.exports.createMediahouse = function(request,response){
                 global:false,
                 pullouts:request.body.pullouts,
                 GSTIN:request.body.GSTIN,
+                Remark:request.body.Remark,
                 firm : user.firm
                 
             });

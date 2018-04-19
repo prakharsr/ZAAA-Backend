@@ -35,6 +35,7 @@ module.exports.createClient = function(request,response){
                 PanNO:request.body.panNo,
                 GSTIN:request.body.gstin,
                 ContactPerson:request.body.contactPerson,
+                Remark:request.body.Remark,
                 firm : user.firm
             });
             client.save(function(err){

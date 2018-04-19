@@ -33,7 +33,8 @@ module.exports.createExecutive = function(request,response){
                 EmailId:request.body.email,
                 Photo:request.body.photo,
                 DateOfBirth:request.body.dob,
-                Anniversary:request.body.anniversary,    
+                Anniversary:request.body.anniversary,
+                Remark:request.body.Remark,    
                 firm : user.firm
                 
             });

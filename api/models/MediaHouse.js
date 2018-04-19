@@ -38,6 +38,7 @@ GSTIN:{
     GSTNo:String
 },
 Scheduling:[scheduling],
+Remark:String,
 
 firm : {
     type:mongoose.Schema.Types.ObjectId,
