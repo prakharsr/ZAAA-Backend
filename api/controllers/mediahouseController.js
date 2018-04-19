@@ -46,7 +46,6 @@ module.exports.createMediahouse = function(request,response){
                 PublicationName:request.body.publicationName,
                 NickName:request.body.nickName,
                 MediaType:request.body.mediaType,
-                Frequency:request.body.frequency,
                 Address:request.body.address,
                 OfficeLandline:request.body.officeLandline,
                 officeStdNo:request.body.officeStdNo,

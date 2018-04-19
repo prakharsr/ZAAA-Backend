@@ -19,10 +19,9 @@ OrganizationName:String,
 PublicationName:String,
 NickName:String,
 MediaType:String,
-Frequency:{
-    Period:String,
-    Remark:String
-},
+
+pullouts:[{Name:String, Language:String, Frequency:String, Remark:String}],
+
 Address:{
     pincode:String,
     edition:String,
@@ -39,7 +38,6 @@ GSTIN:{
     GSTNo:String
 },
 Scheduling:[scheduling],
-pullouts:[String],
 
 firm : {
     type:mongoose.Schema.Types.ObjectId,
