@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var userController = require('./userController');
-var pdfController = require('./pdfController');
+var pdf = require('./pdf');
 var path = require('path');
 var Razorpay = require("razorpay")
 
@@ -177,6 +177,20 @@ module.exports.setPlan = function(request,response){
 						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
 							console.log(request.body.cost)
 							console.log(data);
+							var Details={
+								firmname:firm.FirmName,
+								paymentId:firm.plan.paymentID,
+								gstin:firm.GSTIN.GSTNo,
+								add:firm.RegisteredAddress.address,
+								city: firm.RegisteredAddress.city,
+								state:firm.RegisteredAddress.state,
+								price: data.amount,
+								fee: data.fee,
+								tax: data.tax,
+								date: data.created_at,
+								method:data.method
+							}					
+							pdf.generateInvoice(Details);
 						}).catch((err) => {
 							console.error(err + "b")
 						})
@@ -194,9 +208,7 @@ module.exports.setPlan = function(request,response){
 								msg:doc._id +"   " + doc
 							});
 						}
-					});
-
-				
+					});				
 				}
 			});
 		}
