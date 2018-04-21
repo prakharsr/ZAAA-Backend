@@ -617,6 +617,9 @@ module.exports.setUserProfile = function(request, response){
 			if(request.body.name)
 			user.name = request.body.name;
 
+			if (request.body.designation)
+			  user.designation = request.body.designation;
+
 			user.save(function(){
 				if(err){
 					console.log(err);
