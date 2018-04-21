@@ -60,6 +60,89 @@ module.exports.createClient = function(request,response){
 	});	
     
 };
+module.exports.createClientFromRO = function(request,response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+            console.log("Error in creating Client");
+            if(err.CODE == "110000")
+            {
+			response.send({
+				success:false,
+				msg:"Client details needs to be unique."
+            });
+            }
+            else{
+                response.send({
+                    success:false,
+                    msg:err+ ""
+                })
+            }
+        }
+        else if(!user){
+            console.log("User not found");
+            response.send({
+				success:false,
+				msg:err+""
+			});
+        }
+		else{
+            Client.find({$and: [{OrganizationName:request.body.organizationName},{"Address.state":request.body.address.state},{GSTIN:request.body.gstin},{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}]}, function(err, client){
+                if(err){
+                    console.log("Error in searching for existence of Client.");
+                    response.send({
+                        success:false,
+                        msg: err + ""
+                    });
+                }
+                else if (!client){
+                    var client = new Client({
+                        OrganizationName:request.body.organizationName,
+                        CompanyName:request.body.companyName,
+                        NickName:request.body.nickName,
+                        CategoryType:request.body.categoryType,
+                        SubCategoryType:request.body.SubCategoryType,
+                        IncorporationDate:request.body.IncorporationDate,
+                        Address:request.body.address,
+                        stdNo:request.body.stdNo,
+                        Landline:request.body.landline,
+                        Website:request.body.website,
+                        PanNO:request.body.panNo,
+                        GSTIN:request.body.gstin,
+                        ContactPerson:request.body.contactPerson,
+                        Remark:request.body.Remark,
+                        firm : user.firm
+                    });
+                    client.save(function(err){
+                        if(err){
+                            console.log(err);
+                            response.send({
+                                success : false,
+                                msg : "cannot save client data"
+                            })
+                        }
+                        else{
+                            response.send({
+                                success : true,
+                                msg : "client data saved"
+                            })
+                        }
+                    });                    
+                }
+                else{
+                    response.send({
+                        success:false,
+                        msg: "Client exist already."
+                    })
+                }
+
+            })
+
+		}
+	});	
+    
+};
+
 
 module.exports.getClient = function(request,response){
     
@@ -164,7 +247,10 @@ module.exports.deleteClient = function(request, response){
 	});
 };
 module.exports.queryClients = function(request, response){
-    Client.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName')
+    Client.find({
+        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]}]
+    })
+    .sort('OrganizationName')
     .limit(5).exec(function(err, clients){
         if(err){
             console.log(err+ "");
