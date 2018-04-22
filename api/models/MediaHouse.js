@@ -19,6 +19,7 @@ OrganizationName:String,
 PublicationName:String,
 NickName:String,
 MediaType:String,
+Language:String,
 
 pullouts:[{Name:String, Language:String, Frequency:String, Remark:String}],
 
