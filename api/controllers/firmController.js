@@ -263,8 +263,8 @@ module.exports.setFirmProfile = function(request, response){
 			firm.Website = request.body.website;
 			if(request.body.pan)
 			firm.PanNo = request.body.pan;
-			if(request.body.gst)
-			firm.GSTIN = request.body.gst;
+			if(request.body.GSTIN)
+			firm.GSTIN = request.body.GSTIN;
 			if(request.body.accountName)
 			firm.BankDetails.AccountName = request.body.accountName;
 			if(request.body.accountNo)
