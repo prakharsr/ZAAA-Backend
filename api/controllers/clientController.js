@@ -108,7 +108,7 @@ module.exports.createClientFromRO = function(request,response){
                         Landline:request.body.landline,
                         Website:request.body.website,
                         PanNO:request.body.panNo,
-                        GSTIN:request.body.gstin,
+                        GSTIN:request.body.GSTIN,
                         ContactPerson:request.body.contactPerson,
                         Remark:request.body.Remark,
                         firm : user.firm
