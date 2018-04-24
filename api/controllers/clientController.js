@@ -87,7 +87,13 @@ module.exports.createClientFromRO = function(request,response){
 			});
         }
 		else{
-            Client.find({$and: [{OrganizationName:request.body.organizationName},{"Address.state":request.body.address.state},{GSTIN:request.body.gstin},{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}]}, function(err, client){
+            Client.find(
+                {
+                    $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ Address: { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
+                })
+                .sort('OrganizationName')
+                .limti(5)            
+                .exec(function(err, client){
                 if(err){
                     console.log("Error in searching for existence of Client.");
                     response.send({
@@ -247,27 +253,48 @@ module.exports.deleteClient = function(request, response){
 	});
 };
 module.exports.queryClients = function(request, response){
-    Client.find({
-        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]}]
-    })
-    .sort('OrganizationName')
-    .limit(5).exec(function(err, clients){
-        if(err){
-            console.log(err+ "");
-            response.send({
-                success:false,
-                msg: err +""
-            });
-        }
-        else{
-            response.send({
-                success:true,
-                clients: clients
-            });
-        }
-    });
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            Client.find({
+            $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }},{ 'CategoryType': { $regex: request.params.keyword+"", $options:"i" }}]}]
+        })
+        .sort('OrganizationName')
+        .limit(5).exec(function(err, clients){
+            if(err){
+                console.log(err+ "");
+                response.send({
+                    success:false,
+                    msg: err +""
+                });
+            }
+            else{
+                response.send({
+                    success:true,
+                    clients: clients
+                });
+            }
+        });
+		}	
+	});
     
 };
+
+
 
 module.exports.updateClient = function(request, response){
 	var token = userController.getToken(request.headers);
