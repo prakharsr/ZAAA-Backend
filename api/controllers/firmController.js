@@ -172,7 +172,7 @@ module.exports.setPlan = function(request,response){
                     if(request.body.cost != 0){
 						firm.FirmName = request.body.firmName;
 						firm.plan.paymentID = request.body.paymentID;
-						firm.GSTIN = request.body.gstNo;
+						firm.GSTIN = request.body.GSTIN;
 						firm.RegisteredAddress = request.body.billingAddress;
 						instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
 							console.log(request.body.cost)
