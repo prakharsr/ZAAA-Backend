@@ -87,7 +87,13 @@ module.exports.createClientFromRO = function(request,response){
 			});
         }
 		else{
-            Client.find({$and: [{OrganizationName:request.body.organizationName},{"Address.state":request.body.address.state},{GSTIN:request.body.gstin},{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}]}, function(err, client){
+            Client.find(
+                {
+                    $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ Address: { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
+                })
+                .sort('OrganizationName')
+                .limti(5)            
+                .exec(function(err, client){
                 if(err){
                     console.log("Error in searching for existence of Client.");
                     response.send({
