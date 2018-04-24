@@ -45,6 +45,7 @@ MinSizeLimit: {
 FixSize:[{Width:String,Length:String,Amount:String}],
 Scheme:[{paid:String, Free:String, TimeLimit:String}],
 PremiumCustom:{PremiumType:String, Amount:String, Percentage:Boolean},
+ValidityPrompt:Boolean,
 PremiumBox: Number,
 PremiumBaseColour: Number,
 PremiumCheckMark:Number,
@@ -67,4 +68,16 @@ global:{
     default:false
 }
 });
+
+RatecardSchema.pre('save', function(next) {
+    var self = this;
+    if (!self.isModified('ValidTill')){
+        return next();
+    }
+    else{
+        self.ValidityPrompt = true;
+        return next();
+    }
+});
+
 module.exports = mongoose.model('RateCard', RatecardSchema);

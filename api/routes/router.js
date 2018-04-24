@@ -63,12 +63,14 @@ router.post('/user/executive/picture/:id', executive.profileImage);
 
 
 router.post('/user/mediahouse', mediahouse.createMediahouse);
+router.post('/user/mediahouseInRO', mediahouse.createMediahouseFromRO);
 router.get('/user/mediahouses', mediahouse.getLocalMediahouses);
 router.get('/user/mediahouses/global', mediahouse.getGlobalMediahouses);
 router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
 router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
+router.get('/user/mediahouses/:PublicationName/:keyword', mediahouse.queryMediaHouseEdition);
 
 router.post('/user/ratecard', ratecard.createRatecard);
 router.get('/user/ratecards', ratecard.getLocalRatecards);
