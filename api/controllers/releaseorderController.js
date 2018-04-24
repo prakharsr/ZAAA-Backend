@@ -47,7 +47,7 @@ module.exports.createRO = function(request, response){
                     var shortname = fname.match(/\b\w/g).join('');
                     var city = firm.OfficeAddress.city;
                     var GSTIN = firm.GSTIN;
-                    gstin = GSTIN.GSTNO.substring(0,1);
+                    gstin = GSTIN.GSTNo.substring(0,1);
                     var year = date.getFullYear();
                     var rno = year+'-'+gstin +'-'+shortname + '-'+city +'-'+sn;
                     console.log(rno);
