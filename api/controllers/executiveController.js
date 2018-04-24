@@ -243,29 +243,52 @@ module.exports.deleteExecutive = function(request, response){
 		}	
 	});
 };
+
+
+
 module.exports.queryExecutives = function(request, response){
-  
-    Executive.find({
-        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'ExecutiveName': { $regex: request.params.keyword+"", $options:"i" }}]}]
-    })
-    .sort('OrganizationName')
-    .limit(5).exec(function(err, executives){
-        if(err){
-            console.log(err+ "");
-            response.send({
-                success:false,
-                msg: err +""
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            Executive.find({
+                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'ExecutiveName': { $regex: request.params.keyword+"", $options:"i" }}]}]
+            })
+            .sort('OrganizationName')
+            .limit(5).exec(function(err, executives){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        executives: executives
+                    });
+                }
             });
-        }
-        else{
-            response.send({
-                success:true,
-                executives: executives
-            });
-        }
-    });
+		}	
+	});
     
 };
+
+
 
 module.exports.updateExecutive = function(request, response){
 	var token = userController.getToken(request.headers);
