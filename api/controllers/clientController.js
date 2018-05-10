@@ -92,7 +92,7 @@ module.exports.createClientFromRO = function(request,response){
                     $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }},{ Address: { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]}]
                 })
                 .sort('OrganizationName')
-                .limti(5)            
+                .limit(5)            
                 .exec(function(err, client){
                 if(err){
                     console.log("Error in searching for existence of Client.");
