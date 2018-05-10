@@ -10,7 +10,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
-
+var perPage=20;
 
 
 //http://localhost:8000/api/get/plans
@@ -210,16 +210,25 @@ function findMediaHouses(request,response, global){
 		}
 		else{
             
-            MediaHouse.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, mediahouses){
+            MediaHouse.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
+            .exec(function(err, mediahouses){
                 
                 if(err){
                     console.log("here" +err);
                 }
                 else{
+                    Mediahouse.count(global?{global:global}:{firm:mongoose.mongo.ObjectId(user.firm)}).exec( function(err, count)
+                {
                     response.send({
                         success : true,
                         mediahouses : mediahouses,
-                    }); 
+                        perPage:perPage,
+                        page:request.body.page,
+                        pageCount: Math.floor(count/perPage)
+                    });
+                });
                 }
             });
 			

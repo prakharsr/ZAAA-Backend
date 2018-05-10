@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
+var perPage=20;
 
 //http://localhost:8000/api/get/plans
 module.exports.createClient = function(request,response){
@@ -197,16 +198,29 @@ module.exports.getClients = function(request,response){
 		}
 		else{
             
-            Client.find({firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, clients){
+            Client.find({firm:mongoose.mongo.ObjectId(user.firm)})
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
+            .exec(function(err, clients, count)
+            {
                 
                 if(err){
                     console.log("here" +err);
                 }
                 else{
-                    response.send({
-                        success : true,
-                        clients : clients,
-                    }); 
+                    Client.count().exec(
+                        function(err, count)
+                        {
+                            response.send({
+                                success : true,
+                                clients : clients,
+                                perPage:perPage,
+                                page:request.body.page,
+                                pageCount: Math.floor(count/perPage)
+                            });
+                        }
+                    )
+                     
                 }
             });
 			

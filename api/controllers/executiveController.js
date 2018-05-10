@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
+var perPage=20;
 
 //http://localhost:8000/api/get/plans
 module.exports.createExecutive = function(request,response){
@@ -188,16 +189,25 @@ module.exports.getExecutives = function(request,response){
 		}
 		else{
             
-            Executive.find({firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, executives){
+            Executive.find({firm:mongoose.mongo.ObjectId(user.firm)})
+            .limit(perPage)
+            .skip((perPage*request.body.page) - perPage)
+            .exec(function(err, executives){
                 
                 if(err){
                     console.log("here" +err);
                 }
                 else{
+                    Executive.count().exec(function(err, count)
+                {
                     response.send({
                         success : true,
                         executives : executives,
-                    }); 
+                        perPage: perPage,
+                        page:request.body.page,
+                        pageCount: Math.floor(count/perPage)
+                    });
+                });
                 }
             });
 			
