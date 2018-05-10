@@ -124,6 +124,9 @@ var ReleaseOrderSchema = new mongoose.Schema({
     otherRemark:String,
     FinalAmount:String,
     FinalTaxAmount:String,
+    mediahouseID: String,
+    executiveID: String,
+    clientID: String,
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"

@@ -41,6 +41,7 @@ module.exports.createRO = function(request, response){
 					});
 				}
 				else{
+                    var mediahouseID, clientID,executiveID;
                     var date = new Date()
                     var sn = firm.ROSerial+1;
                     var fname = firm.FirmName;
@@ -50,9 +51,9 @@ module.exports.createRO = function(request, response){
                     gstin = GSTIN.GSTNo.substring(0,1);
                     var year = date.getFullYear();
                     var rno = year+'-'+gstin +'-'+shortname + '-'+city +'-'+sn;
-                    console.log(rno);
 
-        
+                    var ids = getIDsZoku(request);
+
                     var releaseOrder = new ReleaseOrder({
                         date: request.body.date,
                         releaseOrderNO: rno,
@@ -122,6 +123,9 @@ module.exports.createRO = function(request, response){
                         otherCharges:request.body.otherCharges,
                         otherRemark:request.body.otherRemark,
                         firm:user.firm,
+                        mediahouseID : ids[0],
+                        clientID: ids[1],
+                        executiveID: ids[2],
                         insertions:request.body.insertions,
                         // if (taxIncluded){
                         //     FinalAmount = (adGrossAmount/(100+taxAmount))*100;
@@ -151,9 +155,146 @@ module.exports.createRO = function(request, response){
 				}
 			});
 		}
-	});	
-    
+	});	  
 };
+
+async function getIDsZoku(request){
+
+    var mediahouseID, clientID, executiveID;
+
+    var mediaHousePromise = MediaHouse.find({
+        $and: [
+            {OrganizationName:request.body.organizationName},
+            {PublicationName:request.body.publicationName},
+            {"Address.edition":request.body.address.edition},
+            {GSTIN:request.body.GSTIN}
+        ]
+    })
+    .exec()
+    .catch(err => {
+        console.log("Error in searching for existence of mediahouse.");
+        console.log({
+            success:false,
+            msg: err + ""
+        });
+    })
+    .then(async mediahouse => {
+        if (!mediahouse){
+            var mediahouse = new MediaHouse({
+                OrganizationName:request.body.organizationName,
+                PublicationName:request.body.publicationName,
+                NickName:request.body.nickName,
+                MediaType:request.body.mediaType,
+                Address:request.body.address,
+                OfficeLandline:request.body.officeLandline,
+                officeStdNo:request.body.officeStdNo,
+                Scheduling:request.body.scheduling,
+                global:false,
+                pullouts:request.body.pullouts,
+                GSTIN:request.body.GSTIN,
+                Remark:request.body.Remark,
+                firm : user.firm
+            });
+
+            return await mediahouse.save().exec()
+               .then(mediahouseID = doc._id)
+               .catch(err => console.log(err));
+        }
+        else {
+            mediahouseID = mediahouse._id;
+        }
+    });
+
+    var clientPromise = Client.find({
+        $and: [
+            {$or:[
+                 {firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
+                ,{$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}
+                ,{'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}
+                ,{Address: { $regex: request.params.keyword+"", $options:"i" }}
+                ,{'NickName': { $regex: request.params.keyword+"", $options:"i" }}]
+            }]
+    }).exec()
+    .catch(err => {
+        console.log("Error in searching for existence of Client.");
+        console.log({
+            success:false,
+            msg: err + ""
+        });
+    })
+    .then(async client => {
+        if(!client){
+            var client = new Client({
+                OrganizationName:request.body.organizationName,
+                CompanyName:request.body.companyName,
+                NickName:request.body.nickName,
+                CategoryType:request.body.categoryType,
+                SubCategoryType:request.body.SubCategoryType,
+                IncorporationDate:request.body.IncorporationDate,
+                Address:request.body.address,
+                stdNo:request.body.stdNo,
+                Landline:request.body.landline,
+                Website:request.body.website,
+                PanNO:request.body.panNo,
+                GSTIN:request.body.GSTIN,
+                ContactPerson:request.body.contactPerson,
+                Remark:request.body.Remark,
+                firm : user.firm
+            });
+            return await client.save().exec()
+            .then(clientID = doc._id)
+            .catch(err => console.log(err));
+        }
+        else{
+            clientID = client._id;
+        }
+    });
+    var executivePromise = Executive.find({
+        $and: [
+            {OrganizationName:request.body.organizationName},
+            {PublicationName:request.body.publicationName},
+            {"Address.edition":request.body.address.edition},
+            {GSTIN:request.body.GSTIN}
+        ]
+    }).exec()
+    .catch(err => {
+        console.log("Error in searching for existence of Executive.");
+        console.log({
+            success:false,
+            msg: err + ""
+        });
+    })
+    .then(async executive => {
+        if(!executive){
+            var executive = new Executive({
+                OrganizationName:request.body.organizationName,
+                CompanyName:request.body.companyName,
+                NickName:request.body.nickName,
+                CategoryType:request.body.categoryType,
+                SubCategoryType:request.body.SubCategoryType,
+                IncorporationDate:request.body.IncorporationDate,
+                Address:request.body.address,
+                stdNo:request.body.stdNo,
+                Landline:request.body.landline,
+                Website:request.body.website,
+                PanNO:request.body.panNo,
+                GSTIN:request.body.GSTIN,
+                ContactPerson:request.body.contactPerson,
+                Remark:request.body.Remark,
+                firm : user.firm
+            });
+            return await executive.save().exec()
+            .then(executiveID = doc._id)
+            .catch(err => console.log(err));
+        }
+        else{
+            executiveID = executive._id;
+        }
+    });
+    await Promise.all(mediaHousePromise,clientPromise,executivePromise);
+    var array = [mediahouseID,clientID,executiveID];
+    return array;
+    }
 
 module.exports.getReleaseOrder = function(request,response){
      
