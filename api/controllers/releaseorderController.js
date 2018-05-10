@@ -231,9 +231,16 @@ module.exports.getReleaseOrders = function(request, response){
 
 
 module.exports.queryReleaseOrder = function(request, response){
+
+    var mediahouseID =(request.body.mediahouseID)?(request.body.mediahouseID):null;
+    var clientID = (request.body.clientID)?(request.body.clientID):null;
+    var executiveID = (request.body.executiveID)?(request.body.executiveID):null;
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
     
-    ReleaseOrder.find().or([{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }},{ 'agencyName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'executiveName': { $regex: request.params.keyword+"", $options:"i" }},{ 'clientName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('publicationName')
-    .limit(5).exec(function(err, releaseOrders){
+    ReleaseOrder.find().or([{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}])
+    .exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
             response.send({
