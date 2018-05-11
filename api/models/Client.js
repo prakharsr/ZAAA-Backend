@@ -48,4 +48,5 @@ var ClientSchema = new mongoose.Schema({
         ref:"Firm"
     },
 });
+ClientSchema.index({firm:1,CompanyName:1}, {unique: true});
 module.exports = mongoose.model('Client', ClientSchema);
