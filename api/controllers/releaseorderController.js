@@ -624,7 +624,7 @@ module.exports.queryReleaseOrder = function(request, response){
         }
     });
     
-};dd
+};
 
 module.exports.deleteReleaseOrder = function(request, response){
 	var token = userController.getToken(request.headers);
