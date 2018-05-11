@@ -127,16 +127,26 @@ function findRatecards(request,response, global){
 		}
 		else{
             
-            RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)},null,function(err, ratecards){
+            RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
+            .exec(function(err, ratecards){
                 
                 if(err){
                     console.log("here" +err);
                 }
                 else{
-                    response.send({
-                        success : true,
-                        ratecards : ratecards,
-                    }); 
+                    RateCard.count(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
+                    .exec(function(err, count){
+                        response.send({
+                            success : true,
+                            ratecards : ratecards,
+                            perPage:perPage,
+                            page: request.body.page,
+                            pageCount: Math.floor(count/perPage)
+                        });
+                    })
+                     
                 }
             });
 			
