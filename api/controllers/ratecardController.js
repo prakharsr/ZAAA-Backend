@@ -4,6 +4,7 @@ var userController = require('./userController');
 var firmController = require('./firmController');
 var User = require('../models/User');
 var jwt = require('jsonwebtoken');
+var MediaHouse = require('../models/MediaHouse');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
 var mongoose = require('mongoose');
@@ -11,7 +12,99 @@ var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
 
+function getMediahouseID(request, response, user){
+    return new Promise((resolve, reject) => {
+        MediaHouse.find({$and: [
+            {PublicationName:request.body.BookingCenter.MediaHouseName},
+            {"Address.edition":request.body.BookingCenter.Edition}
+        ]}).exec( function(err, mediahouse){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (mediahouse.length == 0)
+            {
+                console.log('no mediahouse found');
+                var newMediahouse = new MediaHouse({
+                    OrganizationName:request.body.organizationName,
+                    PublicationName:request.body.publicationName,
+                    Address:request.body.address,
+                    global:false,
+                    GSTIN:request.body.GSTIN,
+                    firm : user.firm
+                });
+    
+                newMediahouse.save(function(err, doc){
+                    console.log('mediahouse saved');
+                    mediahouseID = newMediahouse._id;
+                    resolve(mediahouseID)
+                })
+            }
+            if(mediahouse.length!==0){
+                console.log("mediahouse found");
+                console.log(mediahouse)
+                mediahouseID =  mediahouse[0]._id;
+                resolve(mediahouseID)
+            }
+        });
+    })
+}
+async function f(request, response, user)
+{
 
+    var mediaHouseID = await getMediahouseID(request,response,user);
+    var ratecard = new RateCard({
+        MediaType:request.body.mediaType,
+        AdType:request.body.adType,
+        AdWords:request.body.AdWords,
+        AdWordsMax:request.body.AdWordsMax,
+        AdTime:request.body.AdTime,
+        RateCardType:request.body.rateCardType,
+        mediahouseID:mediahouseID,
+        Category:request.body.categories,
+        Rate:request.body.rate,
+        Position:request.body.position,
+        Hue:request.body.hue,
+        MaxSizeLimit: request.body.maxSizeLimit,
+        MinSizeLimit:request.body.minSizeLimit,
+        FixSize:request.body.fixSize,
+        Scheme:request.body.scheme,
+        Premium:request.body.premium,
+        Tax:request.body.tax,
+        ValidFrom:request.body.validFrom,
+        ValidTill:request.body.validTill,
+        Covered:request.body.covered,
+        Remarks:request.body.remarks,
+        PremiumCustom:request.body.PremiumCustom,
+        PremiumBox:request.body.PremiumBox,
+        PremiumBaseColour:request.body.PremiumBaseColour,
+        PremiumCheckMark:request.body.PremiumCheckMark,
+        PremiumEmailId:request.body.PremiumEmailId,
+        PremiumWebsite:request.body.PremiumWebsite,
+        PremiumExtraWords:request.body.PremiumWebsite,
+
+        firm :user.firm,
+        global:false
+    });
+    ratecard.save(function(err){
+        if(err){
+            console.log(err);
+            response.send({
+                success : false,
+                msg : "cannot save ratecard data"
+            })
+        }
+        else{
+            response.send({
+                success : true,
+                msg : "ratecard data saved"
+            })
+        }
+    });
+    
+}
 
 //http://localhost:8000/api/get/plans
 module.exports.createRatecard = function(request,response){
@@ -25,54 +118,6 @@ module.exports.createRatecard = function(request,response){
 			});
 		}
 		else{
-            var ratecard = new RateCard({
-                MediaType:request.body.mediaType,
-                AdType:request.body.adType,
-                AdWords:request.body.AdWords,
-                AdWordsMax:request.body.AdWordsMax,
-                AdTime:request.body.AdTime,
-                RateCardType:request.body.rateCardType,
-                BookingCenter:request.body.bookingCenter,
-                Category:request.body.categories,
-                Rate:request.body.rate,
-                Position:request.body.position,
-                Hue:request.body.hue,
-                MaxSizeLimit: request.body.maxSizeLimit,
-                MinSizeLimit:request.body.minSizeLimit,
-                FixSize:request.body.fixSize,
-                Scheme:request.body.scheme,
-                Premium:request.body.premium,
-                Tax:request.body.tax,
-                ValidFrom:request.body.validFrom,
-                ValidTill:request.body.validTill,
-                Covered:request.body.covered,
-                Remarks:request.body.remarks,
-                PremiumCustom:request.body.PremiumCustom,
-                PremiumBox:request.body.PremiumBox,
-                PremiumBaseColour:request.body.PremiumBaseColour,
-                PremiumCheckMark:request.body.PremiumCheckMark,
-                PremiumEmailId:request.body.PremiumEmailId,
-                PremiumWebsite:request.body.PremiumWebsite,
-                PremiumExtraWords:request.body.PremiumWebsite,
-
-                firm :user.firm,
-                global:false
-            });
-            ratecard.save(function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success : false,
-                        msg : "cannot save ratecard data"
-                    })
-                }
-                else{
-                    response.send({
-                        success : true,
-                        msg : "ratecard data saved"
-                    })
-                }
-            });
             
 		}
 	});	
@@ -91,27 +136,25 @@ module.exports.getRatecard = function(request,response){
 			});
 		}
 		else{
-            
-            RateCard.findById(request.params.id,function(err, ratecard){
-                
-                if(err){
+            RateCard.findById(request.params.id,async function(err, ratecard){
+                try{
+                    var mediahouse = await MediaHouse.find(ratecard.mediahouseID);
+                    response.send({
+                        success : true,
+                        ratecard : ratecard,
+                        mediahouse: mediahouse
+                    }); 
+                }
+                catch(err){
                     console.log("here" +err);
                     response.send({
                         success:false,
                         msg: err+"",
                     });
                 }
-                else{
-                    response.send({
-                        success : true,
-                        ratecard : ratecard
-                    }); 
-                }
             });
-			
 		}
 	});	
-    
 };
 
 function findRatecards(request,response, global){

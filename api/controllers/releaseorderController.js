@@ -332,6 +332,7 @@ module.exports.getReleaseOrders = function(request, response){
             ReleaseOrder.find({firm:user.firm})
             .limit(perPage)
             .skip((perPage*request.body.page) - perPage)
+            .sort(-'date')
             .exec(function(err, releaseOrders){
                 if(err){
                     console.log("here");

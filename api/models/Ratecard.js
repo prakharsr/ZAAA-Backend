@@ -63,6 +63,10 @@ firm : {
     type:mongoose.Schema.Types.ObjectId,
     ref:"Firm"
 },
+mediaHouseID:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"MediaHouse"
+},
 global:{
     type:Boolean,
     default:false
