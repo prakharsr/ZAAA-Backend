@@ -503,18 +503,29 @@ module.exports.generateROPdf = function(request, response) {
                     })
                 }
                 else{
-                    var Details = {
-                        publisher :releaseOrder.publicationName,
-                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                        cname :releaseOrder.clientName,
-                        cgstin :releaseOrder.clientGSTIN.GSTNo,
-                        rno :releaseOrder.releaseOrderNo,
-                        date :releaseOrder.date,
-                        gstin :releaseOrder.agencyGSTIN,
-                        Scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                        gamount :releaseOrder.adGrossAmount,
-                        
-                    }
+                    releaseOrder.generated=true;
+                    releaseOrder.save(function(err){
+                        if(err)
+                        respons.send({
+                            success:false,
+                            msg: err
+                        });
+                        else{
+                            var Details = {
+                                publisher :releaseOrder.publicationName,
+                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                                cname :releaseOrder.clientName,
+                                cgstin :releaseOrder.clientGSTIN.GSTNo,
+                                rno :releaseOrder.releaseOrderNo,
+                                date :releaseOrder.date,
+                                gstin :releaseOrder.agencyGSTIN,
+                                Scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                                gamount :releaseOrder.adGrossAmount,
+                                
+                            }
+                        }
+                    })
+                    
                 }
             })
         }

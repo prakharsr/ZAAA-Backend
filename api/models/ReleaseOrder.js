@@ -140,6 +140,10 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
     },
+    generated:{
+        type: Boolean,
+        default: false
+    },
     });
 
     ReleaseOrderSchema.pre('save', function(next){
