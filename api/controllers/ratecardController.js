@@ -186,7 +186,7 @@ function findRatecards(request,response, global){
                             ratecards : ratecards,
                             perPage:perPage,
                             page: request.params.page,
-                            pageCount: Math.floor(count/perPage)
+                            pageCount: Math.ceil(count/perPage)
                         });
                     })
                      

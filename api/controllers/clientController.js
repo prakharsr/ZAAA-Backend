@@ -216,7 +216,7 @@ module.exports.getClients = function(request,response){
                                 clients : clients,
                                 perPage:perPage,
                                 page:request.params.page,
-                                pageCount: Math.floor(count/perPage)
+                                pageCount: Math.ceil(count/perPage)
                             });
                         }
                     )

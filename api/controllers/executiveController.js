@@ -205,7 +205,7 @@ module.exports.getExecutives = function(request,response){
                         executives : executives,
                         perPage: perPage,
                         page:request.params.page,
-                        pageCount: Math.floor(count/perPage)
+                        pageCount: Math.ceil(count/perPage)
                     });
                 });
                 }

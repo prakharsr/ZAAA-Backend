@@ -355,7 +355,7 @@ module.exports.getReleaseOrders = function(request, response){
                             releaseOrders : releaseOrders,
                             perPage:perPage,
                             page: request.params.page,
-                            pageCount : Math.floor(count/perPage)
+                            pageCount : Math.ceil(count/perPage)
                            
                         });
                     })
@@ -394,7 +394,7 @@ module.exports.queryReleaseOrder = function(request, response){
                     releaseOrders: releaseOrders,
                     perPage:perPage,
                     page: request.params.page,
-                    pageCount : Math.floor(count / perPage)
+                    pageCount : Math.ceil(count / perPage)
                 });
             })
 
