@@ -306,9 +306,10 @@ async function getIDsSan(request, user, firm, rno,response){
                 {$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
             ]
         }).exec();
-        console.log(mediahouse);
-
-        if (!mediahouse){
+        mediahouseID = mediahouse[0]._id;
+    }
+    catch (err) {
+        if(err.code != 11000){
             var media = new MediaHouse({
                 OrganizationName:request.body.organizationName,
                 PublicationName:request.body.publicationName,
@@ -319,22 +320,23 @@ async function getIDsSan(request, user, firm, rno,response){
             });
 
             try {
-                mediahouseID = (await media.save().exec())._id;
+                media.save(function(err,doc){
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        mediahouseID = doc._id;
+                    }
+                })
             }
             catch (err) {
                 console.log(err);
             }
         }
-        else {
-            mediahouseID = mediahouse._id;
+        else{
+            console.log("The details provided for the media house matches a previous value");
         }
-    }
-    catch (err) {
         console.log("Error in searching for existence of mediahouse.");
-        console.log({
-            success:false,
-            msg: err + ""
-        });
     }
 
     try {
@@ -349,24 +351,31 @@ async function getIDsSan(request, user, firm, rno,response){
             ] 
         }).exec();
 
-        if (!client){
-           var cli = new Client({
-               CompanyName:request.body.clientName,
-               firm : user.firm
-           });
-
-            try {
-                clientID = (await cli.save().exec())._id;
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-        else {
-            clientID = client._id;
-        }
+            clientID = client[0]._id;
     }
     catch (err) {
+        if(err.code != 11000){
+            var cli = new Client({
+                CompanyName:request.body.clientName,
+                firm : user.firm
+            });
+             try {
+                cli.save(function(err,doc){
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        clientID = doc._id;
+                    }
+                })
+             }
+             catch (err) {
+                 console.log(err);
+             }
+        }
+        else{
+            console.log("The details provided for the client matches a previous value");
+        }
         console.log("Error in searching for existence of client.");
         console.log({
             success:false,
@@ -383,35 +392,43 @@ async function getIDsSan(request, user, firm, rno,response){
         }).exec();
 
         if (!executive){
-           var exec = new Executive({
-               OrganizationName:request.body.executiveOrg,
-               ExecutiveName:request.body.executiveName,
-               firm : user.firm
-           });
-
-            try {
-                executiveID = (await executive.save().exec())._id;
-            }
-            catch (err) {
-                console.log(err);
-            }
+           
         }
         else {
-            executiveID = executive._id;
+            executiveID = executive[0]._id;
         }
     }
     catch (err) {
-        console.log("Error in searching for existence of client.");
-        console.log({
-            success:false,
-            msg: err + ""
-        });
+        if(err.code != 11000){
+            var exec = new Executive({
+                OrganizationName:request.body.executiveOrg,
+                ExecutiveName:request.body.executiveName,
+                firm : user.firm
+            });
+ 
+             try {
+                exec.save(function(err,doc){
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        executiveID = doc._id;
+                    }
+                })
+             }
+             catch (err) {
+                 console.log(err);
+             }
+        }
+        else{
+            console.log("The details provided for the executive matches a previous value");
+        }
     }
     console.log({executiveID, mediahouseID, clientID});
 
     var releaseOrder = new ReleaseOrder({
         date: request.body.date,
-        // releaseOrderNO: '20',
+        releaseOrderNO: rno,
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
@@ -554,8 +571,6 @@ module.exports.getReleaseOrders = function(request, response){
 		else{
             console.log(user.firm);
             ReleaseOrder.find({firm:user.firm})
-            .limit(perPage)
-            .skip((perPage * request.body.page - perPage))
             .exec(function(err, releaseOrders){
                 if(err){
                     console.log("here");
@@ -576,10 +591,7 @@ module.exports.getReleaseOrders = function(request, response){
                         response.send({
                             success : true,
                             releaseOrders : releaseOrders,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount : Math.floor(count/perPage)
-
+                           
                         });
                     })
                 }
@@ -600,8 +612,7 @@ module.exports.queryReleaseOrder = function(request, response){
     var adCategory2 = request.body.adCategory2;
     
     ReleaseOrder.find().or([{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}])
-    .limit(perPage)
-    .skip((perPage * request.body.page)- perPage)
+ 
     .exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
@@ -614,10 +625,7 @@ module.exports.queryReleaseOrder = function(request, response){
             ReleaseOrder.count({$or:[{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]}, function(err, count){
                 response.send({
                     success:true,
-                    releaseOrders: releaseOrders.slice(perPage*request.body.page,perPage*request.body.page + perPage) ,
-                    perPage: perPage,
-                    page : request.body.page,
-                    pageCount : Math.floor(count/perPage)
+                    releaseOrders: releaseOrders
                 });
             })
 
