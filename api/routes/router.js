@@ -73,8 +73,8 @@ router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
 router.get('/user/mediahouses/:PublicationName/:keyword', mediahouse.queryMediaHouseEdition);
 
 router.post('/user/ratecard', ratecard.createRatecard);
-router.get('/user/ratecards/:page', ratecard.getLocalRatecards);
 router.get('/user/ratecards/global/:page', ratecard.getGlobalRatecards);
+router.get('/user/ratecards/:page', ratecard.getLocalRatecards);
 router.get('/user/ratecard/:id', ratecard.getRatecard);
 router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
 router.patch('/user/ratecard', ratecard.updateRatecard);
