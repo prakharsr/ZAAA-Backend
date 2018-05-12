@@ -39,7 +39,7 @@ function getExecutiveID(request, response, user){
                     firm : user.firm
                 });
                 newExecutive.save(function(err, doc){
-                    executive = newExecutive._id;
+                    executiveID = newExecutive._id;
                     resolve(executiveID);
                 })
             }
