@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
+var perPage=20;
 
 function getMediahouseID(request, response, user){
     return new Promise((resolve, reject) => {
