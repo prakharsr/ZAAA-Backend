@@ -16,8 +16,8 @@ var perPage=20;
 function getMediahouseID(request, response, user){
     return new Promise((resolve, reject) => {
         MediaHouse.find({$and: [
-            {PublicationName:request.body.BookingCenter.MediaHouseName},
-            {"Address.edition":request.body.BookingCenter.Edition}
+            {PublicationName:request.body.bookingCenter.MediaHouseName},
+            {"Address.edition":request.body.bookingCenter.Edition}
         ]}).exec( function(err, mediahouse){
             if(err)
             {
@@ -63,6 +63,7 @@ async function f(request, response, user)
         AdWordsMax:request.body.AdWordsMax,
         AdTime:request.body.AdTime,
         RateCardType:request.body.rateCardType,
+        BookingCenter:request.body.bookingCenter,
         mediahouseID:mediahouseID,
         Category:request.body.categories,
         Rate:request.body.rate,
@@ -119,7 +120,7 @@ module.exports.createRatecard = function(request,response){
 			});
 		}
 		else{
-            
+            f(request, response, user);
 		}
 	});	
     
