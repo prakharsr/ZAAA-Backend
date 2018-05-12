@@ -283,8 +283,7 @@ module.exports.getReleaseOrder = function(request,response){
 		}
 		else{
             
-            ReleaseOrder.findById(request.params.id,function(err, releaseOrder){
-                
+            ReleaseOrder.findById(request.params.id,async function(err, releaseOrder){
                 if(err){
                     console.log("here" +err);
                     response.send({
@@ -293,10 +292,24 @@ module.exports.getReleaseOrder = function(request,response){
                     });
                 }
                 else{
-                    response.send({
-                        success : true,
-                        releaseOrder : releaseOrder
-                    }); 
+                    try{
+                        var mediahouse = await MediaHouse.findById(releaseOrder.mediahouse);
+                        var executive = await Executive.findById(releaseOrder.executive);
+                        var client = await Client.findById(releaseOrder.client);
+                        response.send({
+                            mediahouse: mediahouse,
+                            client: client,
+                            executive: executive,
+                            success : true,
+                            releaseOrder : releaseOrder
+                        }); 
+                    }
+                    catch(err){
+                        response.send({
+                            success: false,
+                            msg: "Can't fetch releaseOrder"
+                        });
+                    }
                 }
             });
 			
