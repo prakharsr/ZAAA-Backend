@@ -219,8 +219,9 @@ function findMediaHouses(request,response, global){
                     console.log("here" +err);
                 }
                 else{
-                    Mediahouse.count(global?{global:global}:{firm:mongoose.mongo.ObjectId(user.firm)}).exec( function(err, count)
+                    MediaHouse.count(global?{global:global}:{firm:mongoose.mongo.ObjectId(user.firm)}).exec( function(err, count)
                 {
+                    console.log(mediahouses)
                     response.send({
                         success : true,
                         mediahouses : mediahouses,
