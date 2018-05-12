@@ -172,7 +172,7 @@ function findRatecards(request,response, global){
             
             RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
             .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
+            .skip((perPage * request.params.page) - perPage)
             .exec(function(err, ratecards){
                 
                 if(err){
@@ -185,7 +185,7 @@ function findRatecards(request,response, global){
                             success : true,
                             ratecards : ratecards,
                             perPage:perPage,
-                            page: request.body.page,
+                            page: request.params.page,
                             pageCount: Math.floor(count/perPage)
                         });
                     })

@@ -200,7 +200,7 @@ module.exports.getClients = function(request,response){
             
             Client.find({firm:mongoose.mongo.ObjectId(user.firm)})
             .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
+            .skip((perPage * request.params.page) - perPage)
             .exec(function(err, clients, count)
             {
                 
@@ -215,7 +215,7 @@ module.exports.getClients = function(request,response){
                                 success : true,
                                 clients : clients,
                                 perPage:perPage,
-                                page:request.body.page,
+                                page:request.params.page,
                                 pageCount: Math.floor(count/perPage)
                             });
                         }

@@ -212,7 +212,7 @@ function findMediaHouses(request,response, global){
             
             MediaHouse.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
             .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
+            .skip((perPage * request.params.page) - perPage)
             .exec(function(err, mediahouses){
                 
                 if(err){
@@ -225,7 +225,7 @@ function findMediaHouses(request,response, global){
                         success : true,
                         mediahouses : mediahouses,
                         perPage:perPage,
-                        page:request.body.page,
+                        page:request.params.page,
                         pageCount: Math.floor(count/perPage)
                     });
                 });

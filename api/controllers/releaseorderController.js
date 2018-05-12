@@ -331,7 +331,7 @@ module.exports.getReleaseOrders = function(request, response){
             console.log(user.firm);
             ReleaseOrder.find({firm:user.firm})
             .limit(perPage)
-            .skip((perPage*request.body.page) - perPage)
+            .skip((perPage*request.params.page) - perPage)
             .sort(-'date')
             .exec(function(err, releaseOrders){
                 if(err){
@@ -354,7 +354,7 @@ module.exports.getReleaseOrders = function(request, response){
                             success : true,
                             releaseOrders : releaseOrders,
                             perPage:perPage,
-                            page: request.body.page,
+                            page: request.params.page,
                             pageCount : Math.floor(count/perPage)
                            
                         });
@@ -378,7 +378,7 @@ module.exports.queryReleaseOrder = function(request, response){
     
     ReleaseOrder.find().or([{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}])
     .limit(perPage)
-    .skip((perPage * request.body.page) - perPage)
+    .skip((perPage * request.params.page) - perPage)
     .exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
@@ -393,7 +393,7 @@ module.exports.queryReleaseOrder = function(request, response){
                     success:true,
                     releaseOrders: releaseOrders,
                     perPage:perPage,
-                    page: request.body.page,
+                    page: request.params.page,
                     pageCount : Math.floor(count / perPage)
                 });
             })
