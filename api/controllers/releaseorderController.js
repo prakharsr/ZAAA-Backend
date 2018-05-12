@@ -16,9 +16,6 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
 
-
-
-
 function getExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
         Executive.find({$and: [
@@ -48,22 +45,21 @@ function getExecutiveID(request, response, user){
                 resolve(executiveID);
             }
         })
-        
-
-
     })
 }
 
 function getClientID(request, response, user){
     return new Promise((resolve, reject) => {
-        Client.find({$and: [
-            {$or:[
-                 {firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
-                ,{$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}
-                ,{'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}
-                ,{Address: { $regex: request.params.keyword+"", $options:"i" }}
-                ,{'NickName': { $regex: request.params.keyword+"", $options:"i" }}]
-            }]}).exec(function(err, client){
+        Client.find(
+            {$and: [
+                {$or:[
+                    {firm:mongoose.mongo.ObjectId(user.firm)},
+                    {global:true}
+                ]},
+                {'CompanyName': request.body.clientName},
+                {'Address.state': request.body.clientState}
+            ]}
+        ).exec(function(err, client){
             if(err)
             {
                 console.log(err);
@@ -87,18 +83,14 @@ function getClientID(request, response, user){
                 resolve(clientID);
             }
         });
-    
-
-
-    })
+    });
 }
 function getMediahouseID(request, response, user){
     return new Promise((resolve, reject) => {
         MediaHouse.find({$and: [
-            {OrganizationName:request.body.organizationName},
-            {PublicationName:request.body.publicationName},
             {"Address.edition":request.body.publicationEdition},
-            {GSTIN:request.body.GSTIN}
+            {PublicationName:request.body.publicationName},
+            {$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
         ]}).exec( function(err, mediahouse){
             if(err)
             {
@@ -117,7 +109,7 @@ function getMediahouseID(request, response, user){
                     GSTIN:request.body.GSTIN,
                     firm : user.firm
                 });
-    
+                
                 newMediahouse.save(function(err, doc){
                     console.log('mediahouse saved');
                     mediahouseID = newMediahouse._id;
@@ -131,115 +123,111 @@ function getMediahouseID(request, response, user){
                 resolve(mediahouseID)
             }
         });
-
-
     })
 }
 
 
 
 async function f (request, response, user){
+    var firm = await Firm.findById(mongoose.mongo.ObjectId(user.firm));
     var mediahouseID = await getMediahouseID(request, response, user);
-    console.log(mediahouseID+ "a");
     var clientID = await getClientID(request, response, user);
-    console.log(clientID + "b");
     var executiveID = await getExecutiveID(request, response, user);
-
+    
     console.log(mediahouseID, clientID, executiveID);
-                var releaseOrder = new ReleaseOrder({
-                    date: request.body.date,
-                    // // releaseOrderNO: '20',
-                    // agencyName: firm.FirmName,
-                    // agencyGSTIN: firm.GSTIN,
-                    agencyPerson: user.name,
-                    signature: user.signature,
-                    clientName:request.body.clientName,
-                    clientGSTIN:request.body.clientGSTIN,
-                    clientState:request.body.clientState,
-                    publicationName:request.body.publicationName,
-                    publicationEdition:request.body.publicationEdition,
-                    mediaType:request.body.mediaType,
-                    publicationState:request.body.publicationState,
-                    publicationGSTIN:request.body.publicationGSTIN,
-                    adType:request.body.adType,
-                    rate:request.body.rate,
-                    unit:request.body.unit,
-                    adCategory1:request.body.adCategory1,
-                    adCategory2:request.body.adCategory2,
-                    adCategory3:request.body.adCategory3,
-                    adCategory4:request.body.adCategory4,
-                    adCategory5:request.body.adCategory5,
-                    adCategory6:request.body.adCategory6,
-                    adHue:request.body.adHue,
-                    adSizeL:request.body.adSizeL,
-                    adSizeW:request.body.adSizeW,
-                    AdWords:request.body.AdWords,
-                    AdWordsMax:request.body.AdWordsMax,
-                    adTime:request.body.adTime,
-                    AdDuration:request.body.AdDuration,
-                    adSizeCustom:request.body.adSizeCustom,
-                    adSizeAmount:request.body.adSizeAmount,
-                    adTotalSpace:request.body.adTotalSpace,
-                    adEdition:request.body.adEdition,
-                    adPosition:request.body.adPosition,
-                    adSchemePaid:request.body.adSchemePaid,
-                    adSchemeFree:request.body.adSchemeFree,
-                    adTotal:request.body.adTotal,
-                    adGrossAmount:request.body.adGrossAmount,
-            
-                    PremiumCustom:request.body.PremiumCustom,
-                    PremiumBox:request.body.PremiumBox,
-                    PremiumBaseColour:request.body.PremiumBaseColour,
-                    PremiumEmailId:request.body.PremiumEmailId,
-                    PremiumCheckMark:request.body.PremiumCheckMark,
-                    PremiumWebsite:request.body.PremiumWebsite,
-                    PremiumExtraWords:request.body.PremiumExtraWords,
-            
-                    publicationDiscount:request.body.publicationDiscount,
-                    agencyDiscount1:request.body.agencyDiscount1,
-                    agencyDiscount2:request.body.agencyDiscount2,
-                    taxAmount:request.body.taxAmount,
-                    taxIncluded:request.body.taxIncluded,
-                    netAmountFigures:request.body.netAmountFigures,
-                    netAmountWords:request.body.netAmountWords,
-                    caption:request.body.caption,
-                    remark:request.body.remark,
-                    paymentType:request.body.paymentType,
-                    paymentDate:request.body.paymentDate,
-                    paymentNo:request.body.paymentNo,
-                    paymentAmount:request.body.paymentAmount,
-                    paymentBankName:request.body.paymentBankName,
-                    
-                    executiveName:request.body.executiveName,
-                    executiveOrg:request.body.executiveOrg,
-                    otherCharges:request.body.otherCharges,
-                    otherRemark:request.body.otherRemark,
-
-                    firm:user.firm,
-                    mediahouseID : mediahouseID,
-                    clientID: clientID,
-                    executiveID: executiveID,
-                });
-
-                releaseOrder.save( function(err, doc){
-                    if(err)
-                    {
-                        console.log(err)
-                        response.send({
-                            success:false,
-                            msg: "error in saving release order"
-
-                        });
-                    }
-                    else{
-                        console.log(doc);
-                        response.send({
-                            success:true,
-                            msg: doc._id
-                        })
-                    }
-                })
-
+    var releaseOrder = new ReleaseOrder({
+        date: request.body.date,
+        // releaseOrderNO: '20',
+        agencyName: firm.FirmName,
+        agencyGSTIN: firm.GSTIN,
+        agencyPerson: user.name,
+        signature: user.signature,
+        clientName:request.body.clientName,
+        clientGSTIN:request.body.clientGSTIN,
+        clientState:request.body.clientState,
+        publicationName:request.body.publicationName,
+        publicationEdition:request.body.publicationEdition,
+        mediaType:request.body.mediaType,
+        publicationState:request.body.publicationState,
+        publicationGSTIN:request.body.publicationGSTIN,
+        adType:request.body.adType,
+        rate:request.body.rate,
+        unit:request.body.unit,
+        adCategory1:request.body.adCategory1,
+        adCategory2:request.body.adCategory2,
+        adCategory3:request.body.adCategory3,
+        adCategory4:request.body.adCategory4,
+        adCategory5:request.body.adCategory5,
+        adCategory6:request.body.adCategory6,
+        adHue:request.body.adHue,
+        adSizeL:request.body.adSizeL,
+        adSizeW:request.body.adSizeW,
+        AdWords:request.body.AdWords,
+        AdWordsMax:request.body.AdWordsMax,
+        adTime:request.body.adTime,
+        AdDuration:request.body.AdDuration,
+        adSizeCustom:request.body.adSizeCustom,
+        adSizeAmount:request.body.adSizeAmount,
+        adTotalSpace:request.body.adTotalSpace,
+        adEdition:request.body.adEdition,
+        adPosition:request.body.adPosition,
+        adSchemePaid:request.body.adSchemePaid,
+        adSchemeFree:request.body.adSchemeFree,
+        adTotal:request.body.adTotal,
+        adGrossAmount:request.body.adGrossAmount,
+        
+        PremiumCustom:request.body.PremiumCustom,
+        PremiumBox:request.body.PremiumBox,
+        PremiumBaseColour:request.body.PremiumBaseColour,
+        PremiumEmailId:request.body.PremiumEmailId,
+        PremiumCheckMark:request.body.PremiumCheckMark,
+        PremiumWebsite:request.body.PremiumWebsite,
+        PremiumExtraWords:request.body.PremiumExtraWords,
+        
+        publicationDiscount:request.body.publicationDiscount,
+        agencyDiscount1:request.body.agencyDiscount1,
+        agencyDiscount2:request.body.agencyDiscount2,
+        taxAmount:request.body.taxAmount,
+        taxIncluded:request.body.taxIncluded,
+        netAmountFigures:request.body.netAmountFigures,
+        netAmountWords:request.body.netAmountWords,
+        caption:request.body.caption,
+        remark:request.body.remark,
+        paymentType:request.body.paymentType,
+        paymentDate:request.body.paymentDate,
+        paymentNo:request.body.paymentNo,
+        paymentAmount:request.body.paymentAmount,
+        paymentBankName:request.body.paymentBankName,
+        insertions: request.body.insertions,
+        executiveName:request.body.executiveName,
+        executiveOrg:request.body.executiveOrg,
+        otherCharges:request.body.otherCharges,
+        otherRemark:request.body.otherRemark,
+        
+        firm:user.firm,
+        mediahouseID : mediahouseID,
+        clientID: clientID,
+        executiveID: executiveID,
+    });
+    
+    releaseOrder.save( function(err, doc){
+        if(err)
+        {
+            console.log(err)
+            response.send({
+                success:false,
+                msg: "error in saving release order"
+                
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                msg: doc._id
+            })
+        }
+    })
+    
     
 }
 
@@ -260,18 +248,18 @@ module.exports.createRO = function(request, response){
             response.send({
                 success:false,
                 msg:" no user"
-        });
-
+            });
+            
         }
 		else if(user){
             f(request, response, user)
             
-
+            
         }
-});
+    });
 }
 module.exports.getReleaseOrder = function(request,response){
-     
+    
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err||!user){
@@ -317,7 +305,7 @@ module.exports.getReleaseOrder = function(request,response){
 	});	
 };
 module.exports.getReleaseOrders = function(request, response){
-     
+    
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err||!user){
@@ -356,19 +344,18 @@ module.exports.getReleaseOrders = function(request, response){
                             perPage:perPage,
                             page: request.params.page,
                             pageCount : Math.ceil(count/perPage)
-                           
+                            
                         });
                     })
                 }
             });
 		}
 	});	
-
+    
 };
 
 
 module.exports.queryReleaseOrder = function(request, response){
-
     var mediahouseID =(request.body.mediahouseID)?(request.body.mediahouseID):null;
     var clientID = (request.body.clientID)?(request.body.clientID):null;
     var executiveID = (request.body.executiveID)?(request.body.executiveID):null;
@@ -397,7 +384,7 @@ module.exports.queryReleaseOrder = function(request, response){
                     pageCount : Math.ceil(count / perPage)
                 });
             })
-
+            
         }
     });
     

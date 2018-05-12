@@ -93,7 +93,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemeFree:String,
     adTotal:String,
     
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
+    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean, ISODate: String}],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,
@@ -141,5 +141,18 @@ var ReleaseOrderSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
+
+    ReleaseOrderSchema.pre('save', function(next){
+        var self = this;
+        var insertions = self.insertions;
+        insertions.forEach(element => {
+            var date = element.date;
+            var event = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
+            element.ISODate = event.toISOString();
+            next();
+        });
+
+    });
+
     module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
     
