@@ -14,6 +14,235 @@ var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
+var perPage=20;
+
+
+
+
+function getExecutiveID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Executive.find({$and: [
+            {ExecutiveName:request.body.executiveName},
+            {OrganizationName:request.body.executiveOrg}
+        ]}).exec(function(err, executive){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (executive.length===0)
+            {
+                var newExecutive = new Executive({
+                    OrganizationName:request.body.executiveOrg,
+                    ExecutiveName:request.body.executiveName,
+                    firm : user.firm
+                });
+                newExecutive.save(function(err, doc){
+                    executive = newExecutive._id;
+                    resolve(executiveID);
+                })
+            }
+            if(executive.length!==0){
+                executiveID =  executive[0]._id;
+                resolve(executiveID);
+            }
+        })
+        
+
+
+    })
+}
+
+function getClientID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Client.find({$and: [
+            {$or:[
+                 {firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
+                ,{$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}
+                ,{'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}
+                ,{Address: { $regex: request.params.keyword+"", $options:"i" }}
+                ,{'NickName': { $regex: request.params.keyword+"", $options:"i" }}]
+            }]}).exec(function(err, client){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (client.length===0)
+            {
+                var newClient = new Client({
+                    CompanyName:request.body.clientName,
+                    firm : user.firm
+                });
+                newClient.save(function(err, doc){
+                    clientID = newClient._id;
+                    resolve(clientID);
+                })
+            }
+            if(client.length!==0){
+                console.log(client)
+                clientID =  client[0]._id;
+                resolve(clientID);
+            }
+        });
+    
+
+
+    })
+}
+function getMediahouseID(request, response, user){
+    return new Promise((resolve, reject) => {
+        MediaHouse.find({$and: [
+            {OrganizationName:request.body.organizationName},
+            {PublicationName:request.body.publicationName},
+            {"Address.edition":request.body.publicationEdition},
+            {GSTIN:request.body.GSTIN}
+        ]}).exec( function(err, mediahouse){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (mediahouse.length == 0)
+            {
+                console.log('no mediahouse found');
+                var newMediahouse = new MediaHouse({
+                    OrganizationName:request.body.organizationName,
+                    PublicationName:request.body.publicationName,
+                    Address:request.body.address,
+                    global:false,
+                    GSTIN:request.body.GSTIN,
+                    firm : user.firm
+                });
+    
+                newMediahouse.save(function(err, doc){
+                    console.log('mediahouse saved');
+                    mediahouseID = newMediahouse._id;
+                    resolve(mediahouseID)
+                })
+            }
+            if(mediahouse.length!==0){
+                console.log("mediahouse found");
+                console.log(mediahouse)
+                mediahouseID =  mediahouse[0]._id;
+                resolve(mediahouseID)
+            }
+        });
+
+
+    })
+}
+
+
+
+async function f (request, response, user){
+    var mediahouseID = await getMediahouseID(request, response, user);
+    console.log(mediahouseID+ "a");
+    var clientID = await getClientID(request, response, user);
+    console.log(clientID + "b");
+    var executiveID = await getExecutiveID(request, response, user);
+
+    console.log(mediahouseID, clientID, executiveID);
+                var releaseOrder = new ReleaseOrder({
+                    date: request.body.date,
+                    // // releaseOrderNO: '20',
+                    // agencyName: firm.FirmName,
+                    // agencyGSTIN: firm.GSTIN,
+                    agencyPerson: user.name,
+                    signature: user.signature,
+                    clientName:request.body.clientName,
+                    clientGSTIN:request.body.clientGSTIN,
+                    clientState:request.body.clientState,
+                    publicationName:request.body.publicationName,
+                    publicationEdition:request.body.publicationEdition,
+                    mediaType:request.body.mediaType,
+                    publicationState:request.body.publicationState,
+                    publicationGSTIN:request.body.publicationGSTIN,
+                    adType:request.body.adType,
+                    rate:request.body.rate,
+                    unit:request.body.unit,
+                    adCategory1:request.body.adCategory1,
+                    adCategory2:request.body.adCategory2,
+                    adCategory3:request.body.adCategory3,
+                    adCategory4:request.body.adCategory4,
+                    adCategory5:request.body.adCategory5,
+                    adCategory6:request.body.adCategory6,
+                    adHue:request.body.adHue,
+                    adSizeL:request.body.adSizeL,
+                    adSizeW:request.body.adSizeW,
+                    AdWords:request.body.AdWords,
+                    AdWordsMax:request.body.AdWordsMax,
+                    adTime:request.body.adTime,
+                    AdDuration:request.body.AdDuration,
+                    adSizeCustom:request.body.adSizeCustom,
+                    adSizeAmount:request.body.adSizeAmount,
+                    adTotalSpace:request.body.adTotalSpace,
+                    adEdition:request.body.adEdition,
+                    adPosition:request.body.adPosition,
+                    adSchemePaid:request.body.adSchemePaid,
+                    adSchemeFree:request.body.adSchemeFree,
+                    adTotal:request.body.adTotal,
+                    adGrossAmount:request.body.adGrossAmount,
+            
+                    PremiumCustom:request.body.PremiumCustom,
+                    PremiumBox:request.body.PremiumBox,
+                    PremiumBaseColour:request.body.PremiumBaseColour,
+                    PremiumEmailId:request.body.PremiumEmailId,
+                    PremiumCheckMark:request.body.PremiumCheckMark,
+                    PremiumWebsite:request.body.PremiumWebsite,
+                    PremiumExtraWords:request.body.PremiumExtraWords,
+            
+                    publicationDiscount:request.body.publicationDiscount,
+                    agencyDiscount1:request.body.agencyDiscount1,
+                    agencyDiscount2:request.body.agencyDiscount2,
+                    taxAmount:request.body.taxAmount,
+                    taxIncluded:request.body.taxIncluded,
+                    netAmountFigures:request.body.netAmountFigures,
+                    netAmountWords:request.body.netAmountWords,
+                    caption:request.body.caption,
+                    remark:request.body.remark,
+                    paymentType:request.body.paymentType,
+                    paymentDate:request.body.paymentDate,
+                    paymentNo:request.body.paymentNo,
+                    paymentAmount:request.body.paymentAmount,
+                    paymentBankName:request.body.paymentBankName,
+                    
+                    executiveName:request.body.executiveName,
+                    executiveOrg:request.body.executiveOrg,
+                    otherCharges:request.body.otherCharges,
+                    otherRemark:request.body.otherRemark,
+
+                    firm:user.firm,
+                    mediahouseID : mediahouseID,
+                    clientID: clientID,
+                    executiveID: executiveID,
+                });
+
+                releaseOrder.save( function(err, doc){
+                    if(err)
+                    {
+                        console.log(err)
+                        response.send({
+                            success:false,
+                            msg: "error in saving release order"
+
+                        });
+                    }
+                    else{
+                        console.log(doc);
+                        response.send({
+                            success:true,
+                            msg: doc._id
+                        })
+                    }
+                })
+
+    
+}
+
 
 module.exports.createRO = function(request, response){
     var token = userController.getToken(request.headers);
@@ -34,479 +263,13 @@ module.exports.createRO = function(request, response){
         });
 
         }
-		else{
-            Firm.findById(user.firm, async function(err, firm){
-				if(err){
-					console.log("err in finding firm");
-					response.send({
-						success:false,
-						msg:err + ""
-					});
-				}
-				else{
-                    var date = new Date()
-                    var sn = firm.ROSerial+1;
-                    var fname = firm.FirmName;
-                    var shortname = fname.match(/\b\w/g).join('');
-                    var city = firm.OfficeAddress.city;
-                    var GSTIN = firm.GSTIN;
-                    var gstin = GSTIN.GSTNo.substring(0,1);
-                    var year = date.getFullYear();
-                    var rno = year+'-'+gstin +'-'+shortname + '-'+city +'-'+sn;
-                    console.log(rno);
+		else if(user){
+            f(request, response, user)
+            
 
-                    await getIDsSan(request, user, firm,rno,response);
-				}
-			});
-		}
-	});	  
-};
-
-// async function getIDsZoku(request, user, firm){
-
-//     var mediahouseID, clientID, executiveID;
-//     var mediaHousePromise = MediaHouse.find({
-//         $and: [
-//             {OrganizationName:request.body.organizationName},
-//             {PublicationName:request.body.publicationName},
-//             {GSTIN:request.body.GSTIN}
-//         ]
-//     })
-//     .exec()
-//     .then(async function(mediahouse) {
-//         if (!mediahouse){
-//             var mediahouse = new MediaHouse({
-//                 OrganizationName:request.body.organizationName,
-//                 PublicationName:request.body.publicationName,
-//                 NickName:request.body.nickName,
-//                 MediaType:request.body.mediaType,
-//                 Address:request.body.address,
-//                 OfficeLandline:request.body.officeLandline,
-//                 officeStdNo:request.body.officeStdNo,
-//                 Scheduling:request.body.scheduling,
-//                 global:false,
-//                 pullouts:request.body.pullouts,
-//                 GSTIN:request.body.GSTIN,
-//                 Remark:request.body.Remark,
-//                 firm : user.firm
-//             });
-
-//             await mediahouse.save().exec()
-//                .then(() => mediahouseID = doc._id)
-//                .catch(err => console.log(err));
-//         }
-//         else {
-//             mediahouseID = mediahouse._id;
-//         }
-//     })
-//     .catch(err => {
-//         console.log("Error in searching for existence of mediahouse.");
-//         console.log({
-//             success:false,
-//             msg: err + ""
-//         });
-//     });
-
-//     var clientPromise = Client.find({
-//         $and: [
-//             {$or:[
-//                  {firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
-//                 ,{$or:[{ 'CompanyName': { $regex: request.params.keyword+"", $options:"i" }}
-//                 ,{'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}
-//                 ,{Address: { $regex: request.params.keyword+"", $options:"i" }}
-//                 ,{'NickName': { $regex: request.params.keyword+"", $options:"i" }}]
-//             }]
-//     }).exec()
-//     .then(async function(client) {
-//         if(!client){
-//             var client = new Client({
-//                 OrganizationName:request.body.organizationName,
-//                 CompanyName:request.body.companyName,
-//                 NickName:request.body.nickName,
-//                 CategoryType:request.body.categoryType,
-//                 SubCategoryType:request.body.SubCategoryType,
-//                 IncorporationDate:request.body.IncorporationDate,
-//                 Address:request.body.address,
-//                 stdNo:request.body.stdNo,
-//                 Landline:request.body.landline,
-//                 Website:request.body.website,
-//                 PanNO:request.body.panNo,
-//                 GSTIN:request.body.GSTIN,
-//                 ContactPerson:request.body.contactPerson,
-//                 Remark:request.body.Remark,
-//                 firm : user.firm
-//             });
-//              await client.save().exec()
-//             .then(() => clientID = doc._id)
-//             .catch(err => console.log(err));
-//         }
-//         else{
-//             clientID = client._id;
-//         }
-//     })
-//     .catch(err => {
-//         console.log("Error in searching for existence of Client.");
-//         console.log({
-//             success:false,
-//             msg: err + ""
-//         });
-//     });
-
-//     var executivePromise = Executive.find({
-//         $and: [
-//             {OrganizationName:request.body.organizationName},
-//             {PublicationName:request.body.publicationName},
-//             {GSTIN:request.body.GSTIN}
-//         ]
-//     }).exec()
-//     .then(async function(executive) {
-//         if(!executive){
-//             var executive = new Executive({
-//                 OrganizationName:request.body.organizationName,
-//                 CompanyName:request.body.companyName,
-//                 NickName:request.body.nickName,
-//                 CategoryType:request.body.categoryType,
-//                 SubCategoryType:request.body.SubCategoryType,
-//                 IncorporationDate:request.body.IncorporationDate,
-//                 Address:request.body.address,
-//                 stdNo:request.body.stdNo,
-//                 Landline:request.body.landline,
-//                 Website:request.body.website,
-//                 PanNO:request.body.panNo,
-//                 GSTIN:request.body.GSTIN,
-//                 ContactPerson:request.body.contactPerson,
-//                 Remark:request.body.Remark,
-//                 firm : user.firm
-//             });
-//              await executive.save().exec()
-//             .then(() => executiveID = doc._id)
-//             .catch(err => console.log(err));
-//         }
-//         else{
-//             executiveID = executive._id;
-//         }
-//     })
-//     .catch(err => {
-//         console.log("Error in searching for existence of Executive.");
-//         console.log({
-//             success:false,
-//             msg: err + ""
-//         });
-//     });
-//     await Promise.all(mediaHousePromise,clientPromise,executivePromise);
-
-//     console.log({executiveID, mediahouseID, clientID});
-
-//     // var releaseOrder = new ReleaseOrder({
-//     //     date: request.body.date,
-//     //     releaseOrderNO: rno,
-//     //     agencyName: firm.FirmName,
-//     //     agencyGSTIN: firm.GSTIN,
-//     //     agencyPerson: user.name,
-//     //     signature: user.signature,
-//     //     clientName:request.body.clientName,
-//     //     clientGSTIN:request.body.clientGSTIN,
-//     //     clientState:request.body.clientState,
-//     //     publicationName:request.body.publicationName,
-//     //     publicationEdition:request.body.publicationEdition,
-//     //     mediaType:request.body.mediaType,
-//     //     publicationState:request.body.publicationState,
-//     //     publicationGSTIN:request.body.publicationGSTIN,
-//     //     adType:request.body.adType,
-//     //     rate:request.body.rate,
-//     //     unit:request.body.unit,
-//     //     adCategory1:request.body.adCategory1,
-//     //     adCategory2:request.body.adCategory2,
-//     //     adCategory3:request.body.adCategory3,
-//     //     adCategory4:request.body.adCategory4,
-//     //     adCategory5:request.body.adCategory5,
-//     //     adCategory6:request.body.adCategory6,
-//     //     adHue:request.body.adHue,
-//     //     adSizeL:request.body.adSizeL,
-//     //     adSizeW:request.body.adSizeW,
-//     //     AdWords:request.body.AdWords,
-//     //     AdWordsMax:request.body.AdWordsMax,
-//     //     adTime:request.body.adTime,
-//     //     AdDuration:request.body.AdDuration,
-//     //     adSizeCustom:request.body.adSizeCustom,
-//     //     adSizeAmount:request.body.adSizeAmount,
-//     //     adTotalSpace:request.body.adTotalSpace,
-//     //     adEdition:request.body.adEdition,
-//     //     adPosition:request.body.adPosition,
-//     //     adSchemePaid:request.body.adSchemePaid,
-//     //     adSchemeFree:request.body.adSchemeFree,
-//     //     adTotal:request.body.adTotal,
-//     //     adGrossAmount:request.body.adGrossAmount,
-
-//     //     PremiumCustom:request.body.PremiumCustom,
-//     //     PremiumBox:request.body.PremiumBox,
-//     //     PremiumBaseColour:request.body.PremiumBaseColour,
-//     //     PremiumEmailId:request.body.PremiumEmailId,
-//     //     PremiumCheckMark:request.body.PremiumCheckMark,
-//     //     PremiumWebsite:request.body.PremiumWebsite,
-//     //     PremiumExtraWords:request.body.PremiumExtraWords,
-
-//     //     publicationDiscount:request.body.publicationDiscount,
-//     //     agencyDiscount1:request.body.agencyDiscount1,
-//     //     agencyDiscount2:request.body.agencyDiscount2,
-//     //     taxAmount:request.body.taxAmount,
-//     //     taxIncluded:request.body.taxIncluded,
-//     //     netAmountFigures:request.body.netAmountFigures,
-//     //     netAmountWords:request.body.netAmountWords,
-//     //     caption:request.body.caption,
-//     //     remark:request.body.remark,
-//     //     paymentType:request.body.paymentType,
-//     //     paymentDate:request.body.paymentDate,
-//     //     paymentNo:request.body.paymentNo,
-//     //     paymentAmount:request.body.paymentAmount,
-//     //     paymentBankName:request.body.paymentBankName,
-        
-//     //     executiveName:request.body.executiveName,
-//     //     executiveOrg:request.body.executiveOrg,
-//     //     otherCharges:request.body.otherCharges,
-//     //     otherRemark:request.body.otherRemark,
-//     //     firm:user.firm,
-//     //     mediahouseID : mediahouseID,
-//     //     clientID: clientID,
-//     //     executiveID: executiveID,
-//     //     insertions:request.body.insertions,
-//     //     // if (taxIncluded){
-//     //     //     FinalAmount = (adGrossAmount/(100+taxAmount))*100;
-//     //     //     FinalTaxAmount = (adGrossAmount/(100+taxAmount))*taxAmount
-//     //     // }
-//     // });
-
-//     // await releaseOrder.save().exec()
-//     // .then(() => { 
-//     //     firm.ROSerial += 1;
-//     //     firm.save().exec()
-//     //     .then(() => response.send({
-//     //         success : true,
-//     //         msg : "release order data saved"
-//     //     }))
-//     //     .catch(err => console.log(err))
-//     // })
-//     // .catch(err => {
-//     //     console.log(err);
-//     //     response.send({
-//     //         success : false,
-//     //         msg : "cannot save release order data"
-//     //     });
-//     // });
-// }
-
-async function getIDsSan(request, user, firm, rno,response){
-    var mediahouseID, clientID, executiveID;
-
-    try {
-       var mediahouse = await MediaHouse.find({
-            $and: [
-                {"Address.edition":request.body.publicationEdition},
-                {PublicationName:request.body.publicationName},
-                {$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
-            ]
-        }).exec();
-        console.log(mediahouse);
-
-        if (!mediahouse){
-            var media = new MediaHouse({
-                OrganizationName:request.body.organizationName,
-                PublicationName:request.body.publicationName,
-                MediaType:request.body.mediaType,
-                Address:request.body.address,
-                global:false,
-                firm : user.firm
-            });
-
-            try {
-                mediahouseID = (await media.save().exec())._id;
-            }
-            catch (err) {
-                console.log(err);
-            }
         }
-        else {
-            mediahouseID = mediahouse._id;
-        }
-    }
-    catch (err) {
-        console.log("Error in searching for existence of mediahouse.");
-        console.log({
-            success:false,
-            msg: err + ""
-        });
-    }
-
-    try {
-        var client = await Client.find({
-            $and: [
-                {$or:[
-                    {firm:mongoose.mongo.ObjectId(user.firm)},
-                    {global:true}
-                ]},
-                {'CompanyName': request.body.clientName},
-                {'Address.state': request.body.clientState}
-            ] 
-        }).exec();
-
-        if (!client){
-           var cli = new Client({
-               CompanyName:request.body.clientName,
-               firm : user.firm
-           });
-
-            try {
-                clientID = (await cli.save().exec())._id;
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-        else {
-            clientID = client._id;
-        }
-    }
-    catch (err) {
-        console.log("Error in searching for existence of client.");
-        console.log({
-            success:false,
-            msg: err + ""
-        });
-    }
-
-    try {
-        var executive = await Executive.find({
-            $and: [
-                {ExecutiveName:request.body.executiveName},
-                {OrganizationName:request.body.executiveOrg}
-            ]
-        }).exec();
-
-        if (!executive){
-           var exec = new Executive({
-               OrganizationName:request.body.executiveOrg,
-               ExecutiveName:request.body.executiveName,
-               firm : user.firm
-           });
-
-            try {
-                executiveID = (await executive.save().exec())._id;
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-        else {
-            executiveID = executive._id;
-        }
-    }
-    catch (err) {
-        console.log("Error in searching for existence of client.");
-        console.log({
-            success:false,
-            msg: err + ""
-        });
-    }
-    console.log({executiveID, mediahouseID, clientID});
-
-    var releaseOrder = new ReleaseOrder({
-        date: request.body.date,
-        // releaseOrderNO: '20',
-        agencyName: firm.FirmName,
-        agencyGSTIN: firm.GSTIN,
-        agencyPerson: user.name,
-        signature: user.signature,
-        clientName:request.body.clientName,
-        clientGSTIN:request.body.clientGSTIN,
-        clientState:request.body.clientState,
-        publicationName:request.body.publicationName,
-        publicationEdition:request.body.publicationEdition,
-        mediaType:request.body.mediaType,
-        publicationState:request.body.publicationState,
-        publicationGSTIN:request.body.publicationGSTIN,
-        adType:request.body.adType,
-        rate:request.body.rate,
-        unit:request.body.unit,
-        adCategory1:request.body.adCategory1,
-        adCategory2:request.body.adCategory2,
-        adCategory3:request.body.adCategory3,
-        adCategory4:request.body.adCategory4,
-        adCategory5:request.body.adCategory5,
-        adCategory6:request.body.adCategory6,
-        adHue:request.body.adHue,
-        adSizeL:request.body.adSizeL,
-        adSizeW:request.body.adSizeW,
-        AdWords:request.body.AdWords,
-        AdWordsMax:request.body.AdWordsMax,
-        adTime:request.body.adTime,
-        AdDuration:request.body.AdDuration,
-        adSizeCustom:request.body.adSizeCustom,
-        adSizeAmount:request.body.adSizeAmount,
-        adTotalSpace:request.body.adTotalSpace,
-        adEdition:request.body.adEdition,
-        adPosition:request.body.adPosition,
-        adSchemePaid:request.body.adSchemePaid,
-        adSchemeFree:request.body.adSchemeFree,
-        adTotal:request.body.adTotal,
-        adGrossAmount:request.body.adGrossAmount,
-
-        PremiumCustom:request.body.PremiumCustom,
-        PremiumBox:request.body.PremiumBox,
-        PremiumBaseColour:request.body.PremiumBaseColour,
-        PremiumEmailId:request.body.PremiumEmailId,
-        PremiumCheckMark:request.body.PremiumCheckMark,
-        PremiumWebsite:request.body.PremiumWebsite,
-        PremiumExtraWords:request.body.PremiumExtraWords,
-
-        publicationDiscount:request.body.publicationDiscount,
-        agencyDiscount1:request.body.agencyDiscount1,
-        agencyDiscount2:request.body.agencyDiscount2,
-        taxAmount:request.body.taxAmount,
-        taxIncluded:request.body.taxIncluded,
-        netAmountFigures:request.body.netAmountFigures,
-        netAmountWords:request.body.netAmountWords,
-        caption:request.body.caption,
-        remark:request.body.remark,
-        paymentType:request.body.paymentType,
-        paymentDate:request.body.paymentDate,
-        paymentNo:request.body.paymentNo,
-        paymentAmount:request.body.paymentAmount,
-        paymentBankName:request.body.paymentBankName,
-        
-        executiveName:request.body.executiveName,
-        executiveOrg:request.body.executiveOrg,
-        otherCharges:request.body.otherCharges,
-        otherRemark:request.body.otherRemark,
-        firm:user.firm,
-        mediahouseID : mediahouseID,
-        clientID: clientID,
-        executiveID: executiveID,
-        insertions:request.body.insertions,
-        // if (taxIncluded){
-        //     FinalAmount = (adGrossAmount/(100+taxAmount))*100;
-        //     FinalTaxAmount = (adGrossAmount/(100+taxAmount))*taxAmount
-        // }
-    });
-
-    await releaseOrder.save()
-    .then(() => { 
-        firm.ROSerial += 1;
-        firm.save()
-        .then(() => response.send({
-            success : true,
-            msg : "release order data saved"
-        }))
-        .catch(err => console.log(err))
-    })
-    .catch(err => {
-        console.log(err);
-        response.send({
-            success : false,
-            msg : "cannot save release order data"
-        });
-    });
+});
 }
-
 module.exports.getReleaseOrder = function(request,response){
      
     var token = userController.getToken(request.headers);
