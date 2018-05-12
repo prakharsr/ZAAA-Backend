@@ -497,23 +497,34 @@ module.exports.generateROPdf = async function(request, response) {
                     });
                 }
                 else{
-                    var insData;
-                    var insertions = releaseOrder.insertions;
-                    insertions.forEach(object =>{
-                        
-                    });
-                    var Details = {
-                        publisher :releaseOrder.publicationName,
-                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                        cname :releaseOrder.clientName,
-                        cgstin :releaseOrder.clientGSTIN.GSTNo,
-                        rno :releaseOrder.releaseOrderNo,
-                        date :releaseOrder.date,
-                        gstin :releaseOrder.agencyGSTIN,
-                        Scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                        gamount :releaseOrder.adGrossAmount,
-                        
-                    }
+                    releaseOrder.generated=true;
+                    releaseOrder.save(function(err){
+                        if(err)
+                        response.send({
+                            success:false,
+                            msg: err
+                        });
+                        else{
+                            var insData;
+                            var insertions = releaseOrder.insertions;
+                            insertions.forEach(object =>{
+                                
+                            });
+                            var Details = {
+                                publisher :releaseOrder.publicationName,
+                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                                cname :releaseOrder.clientName,
+                                cgstin :releaseOrder.clientGSTIN.GSTNo,
+                                rno :releaseOrder.releaseOrderNo,
+                                date :releaseOrder.date,
+                                gstin :releaseOrder.agencyGSTIN,
+                                Scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                                gamount :releaseOrder.adGrossAmount,
+                                
+                            }
+                        }
+                    })
+                    
                 }
             })
         }
