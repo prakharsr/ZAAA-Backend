@@ -64,8 +64,8 @@ router.post('/user/executive/picture/:id', executive.profileImage);
 
 router.post('/user/mediahouse', mediahouse.createMediahouse);
 router.post('/user/mediahouseInRO', mediahouse.createMediahouseFromRO);
-router.get('/user/mediahouses/:page', mediahouse.getLocalMediahouses);
 router.get('/user/mediahouses/global/:page', mediahouse.getGlobalMediahouses);
+router.get('/user/mediahouses/:page', mediahouse.getLocalMediahouses);
 router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
