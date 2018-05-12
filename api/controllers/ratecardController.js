@@ -63,6 +63,7 @@ async function f(request, response, user)
         AdWordsMax:request.body.AdWordsMax,
         AdTime:request.body.AdTime,
         RateCardType:request.body.rateCardType,
+        BookingCenter:request.body.bookingCenter,
         mediahouseID:mediahouseID,
         Category:request.body.categories,
         Rate:request.body.rate,
