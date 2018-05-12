@@ -8,10 +8,10 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 var ReleaseOrderSchema = new mongoose.Schema({
     date: String,
-    releaseOrderNO: {
-        type:String,
-        unique:true
-    },
+    // releaseOrderNO: {
+    //     type:String,
+    //     unique:true
+    // },
     agencyName: String,
     agencyGSTIN: String,
     agencyPin:String,
@@ -124,9 +124,18 @@ var ReleaseOrderSchema = new mongoose.Schema({
     otherRemark:String,
     FinalAmount:String,
     FinalTaxAmount:String,
-    mediahouseID: String,
-    executiveID: String,
-    clientID: String,
+    mediahouseID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"MediaHouse"
+    },
+    executiveID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Executive"
+    },
+    clientID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Client"
+    },
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"

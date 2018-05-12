@@ -330,6 +330,8 @@ module.exports.getReleaseOrders = function(request, response){
 		else{
             console.log(user.firm);
             ReleaseOrder.find({firm:user.firm})
+            .limit(perPage)
+            .skip((perPage*request.body.page) - perPage)
             .exec(function(err, releaseOrders){
                 if(err){
                     console.log("here");
@@ -350,6 +352,9 @@ module.exports.getReleaseOrders = function(request, response){
                         response.send({
                             success : true,
                             releaseOrders : releaseOrders,
+                            perPage:perPage,
+                            page: request.body.page,
+                            pageCount : Math.floor(count/perPage)
                            
                         });
                     })
@@ -371,7 +376,8 @@ module.exports.queryReleaseOrder = function(request, response){
     var adCategory2 = request.body.adCategory2;
     
     ReleaseOrder.find().or([{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}])
- 
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
     .exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");
@@ -384,7 +390,10 @@ module.exports.queryReleaseOrder = function(request, response){
             ReleaseOrder.count({$or:[{date:date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]}, function(err, count){
                 response.send({
                     success:true,
-                    releaseOrders: releaseOrders
+                    releaseOrders: releaseOrders,
+                    perPage:perPage,
+                    page: request.body.page,
+                    pageCount : Math.floor(count / perPage)
                 });
             })
 
