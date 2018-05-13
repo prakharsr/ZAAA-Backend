@@ -208,8 +208,25 @@ module.exports.getGlobalRatecards = function(request,response){
 };
 
 module.exports.queryRatecards = function(request, response){
-    
-    RateCard.find().or([{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}, { 'PublicationName': { $regex: request.params.keyword+"", $options:"i" }},{ 'EmailId': { $regex: request.params.keyword+"", $options:"i" }},{ 'NickName': { $regex: request.params.keyword+"", $options:"i" }}]).sort('OrganizationName')
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+             
+    RateCard.find().and([{$or:[{global:true},{firm:user.firm}]},{$or:[{ 'BookingCenter.MediaHouseName': { $regex: request.params.keyword+"", $options:"i" }}, { 'BookingCenter.Edition': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.Main': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.Main': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.SubCategory1': { $regex: request.params.keyword+"", $options:"i" }}]}])
     .limit(5).exec(function(err, ratecards){
         if(err){
             console.log(err+ "");
@@ -225,8 +242,12 @@ module.exports.queryRatecards = function(request, response){
             });
         }
     });
-    
+
+		}	
+	});
 };
+    
+
 
 module.exports.deleteRatecard = function(request, response){
 	var token = userController.getToken(request.headers);
