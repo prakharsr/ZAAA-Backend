@@ -28,8 +28,6 @@
                         <p>GSTIN:{{cgstin}} </p>
                     </th>
                     <th colspan="4">
-                        <p>Heading: </p>                        
-                        <p>Mode: </p>
                         <p>Scheme: {{scheme}}</p>
                     </th>
                 </tr>
@@ -42,75 +40,23 @@
                     <td>Position</td>
                     <td>Size</td>
                     <td>Total space</td>
-                    <td>Rate</td>
                     <td>Amount</td>
                 </tr>
                 {{insertions}}
                 <tr>
-                    <td colspan="6"></td>
+                    <td colspan="5"></td>
                     <td>Gross Amount</td>
-                    <td></td>
+                    <td>{{gamount}}</td>
                 </tr>
                 <tr>
-                    <td colspan="6"> Discount %:</td>
+                    <td colspan="5"> Discount %: {{dper}}</td>
                     <td>Discount Amount</td>
-                    <td></td>
+                    <td>{{damount}}</td>
                 </tr>
                 <tr>
-                    <td colspan="2">Taxable Amount: </td>
-                    <td>IGST%:</td>
-                    <td>CGST%:</td>
-                    <td>SGST%:</td>
-                    <td>GST%:</td>
-                    <td>GST Amount</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td>Amount</td>
-                    <td>Amount</td>
-                    <td>Amount</td>
-                    <td>Amount</td>
+                    <td colspan="5"></td>
                     <td>Net Amount</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="8">Payment Details</td>
-                </tr>
-                <tr>
-                    <td>S.no</td>
-                    <td>Chq. No.</td>
-                    <td>Chq. Date</td>
-                    <td>Chq. Amount</td>
-                    <td colspan="3">Bank Name</td>
-                    <td>Remark</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td colspan="3"></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="8"></td>
+                    <td>{{namount}}</td>
                 </tr>
             </tbody>
         </table>

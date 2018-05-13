@@ -2,6 +2,7 @@ var config = require('../../config');
 var RateCard = require('../models/Ratecard');
 var userController = require('./userController');
 var firmController = require('./firmController');
+var pdf = require('./pdf');
 var User = require('../models/User');
 var ReleaseOrder = require('../models/ReleaseOrder');
 var jwt = require('jsonwebtoken');
@@ -200,7 +201,7 @@ async function f (request, response, user){
         executiveOrg:request.body.executiveOrg,
         otherCharges:request.body.otherCharges,
         otherRemark:request.body.otherRemark,
-        
+        template: firm.ROTemplate,
         firm:user.firm,
         mediahouseID : mediahouseID,
         clientID: clientID,
@@ -464,7 +465,7 @@ module.exports.updateReleaseOrder = function(request, response){
 };
 
 
-module.exports.generateROPdf = async function(request, response) {
+module.exports.mailROPdf = function(request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -482,7 +483,7 @@ module.exports.generateROPdf = async function(request, response) {
 			});
         }
         else {
-            ReleaseOrder.findById(request.body.id, function(err, releaseOrder){
+            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
                 if(err){
                     console.log(err);
                     response.send({
@@ -497,6 +498,7 @@ module.exports.generateROPdf = async function(request, response) {
                     });
                 }
                 else{
+                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
                     releaseOrder.generated=true;
                     releaseOrder.save(function(err){
                         if(err)
@@ -505,23 +507,31 @@ module.exports.generateROPdf = async function(request, response) {
                             msg: err
                         });
                         else{
-                            var insData;
+                            var date = releaseOrder.date
+                            var insData="";
                             var insertions = releaseOrder.insertions;
+                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                            var namount = releaseOrder.adGrossAmount - damount ;
                             insertions.forEach(object =>{
-                                
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.day+'-'+object.month+'-'+object.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
-                                publisher :releaseOrder.publicationName,
+                                mediahouse :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                rno :releaseOrder.releaseOrderNo,
-                                date :releaseOrder.date,
+                                date :date.day+'-'+date.month+'-'+date.year,
                                 gstin :releaseOrder.agencyGSTIN,
-                                Scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
-                                
+                                insertions :insData,
+                                dper :releaseOrder.publicationDiscount+'+'+agencyDiscount1+'+'+agencyDiscount2,
+                                damount :damount,
+                                namount :namount,
+                                logo: firm.LogoURL
                             }
+                            pdf.generateReleaseOrder(request,response,Details);
                         }
                     })
                     
