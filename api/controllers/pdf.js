@@ -96,7 +96,7 @@ module.exports.generateInvoice = function(Details) {
 }
 
 
-module.exports.generateReleaseOrder = function(Details,request,response) {
+module.exports.mailReleaseOrder = function(Details,request,response) {
     var req = http.request('http://www.mom2k18.co.in/templates/releaseOrder.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
@@ -152,5 +152,67 @@ module.exports.generateReleaseOrder = function(Details,request,response) {
     
 }
 
+module.exports.generateReleaseOrder =  function(Details,request,response) {
+    var req = http.request('http://www.mom2k18.co.in/templates/releaseOrder.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            var image = http.request('http://www.mom2k18.co.in/'+Details.logo, resp => {
+                var img = "";
+                resp.on('data', chunk => {
+                    img += chunk;
+                })
+                resp.on('end', ()=> {
+                    var filename = path.basename(Details.logo);
+                    var imgPath = __dirname+''+filename;
+                    templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
+                    templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
+                    templateHtml = templateHtml.replace('{{cname}}', Details.cname);
+                    templateHtml = templateHtml.replace('{{cgstin}}',Details.cgstin);
+                    templateHtml = templateHtml.replace('{{date}}', Details.date);
+                    templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
+                    templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
+                    templateHtml = templateHtml.replace('{{gmaount}}', Details.gamount);
+                    templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+                    templateHtml = templateHtml.replace('{{dper}}', Details.dper);
+                    templateHtml = templateHtml.replace('{{damonut}}', Details.damount);
+                    templateHtml = templateHtml.replace('{{namount}}', Details.namount);
+                    templateHtml = templateHtml.replace('{{logoimage}}', imgPath);
+                    var options = {
+                        width: '100mm',
+                        height: '180mm'
+                    }
+                    pdf.create(templateHtml, options).toBuffer(function (err, data) {
+                        if (err) {
+                            console.log(err);
+                            response.send({
+                                success :false,
+                                msg :"cannot create pdf"
+                            });
+                        }
+                        else {
+                            response.writeHead(200, {
+                                'Content-Type': 'application/pdf',
+                                'Content-Disposition': 'inline; filename=releaseOrder.pdf',
+                                'Content-Length': data.length
+                              });
+                              response.send({
+                                success: true,
+                                pdf: data
+                              });
+                        }
+                    });
+                });
+                resp.on('error', e=> console.log(e));
+            });
+        });
+    });
 
+    req.on('error', e => console.log(e));
+
+    req.end();
+    
+}
             

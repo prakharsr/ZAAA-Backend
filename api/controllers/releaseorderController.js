@@ -531,6 +531,82 @@ module.exports.mailROPdf = function(request, response) {
                                 namount :namount,
                                 logo: firm.LogoURL
                             }
+                            pdf.mailReleaseOrder(request,response,Details);
+                        }
+                    })
+                    
+                }
+            })
+        }
+    });
+}
+
+module.exports.generateROPdf = function(request, response) {
+    var token = userController.getToken(request.headers);
+    var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err + ""
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "Please Login"
+			});
+        }
+        else {
+            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+                if(err){
+                    console.log(err);
+                    response.send({
+                        success :false,
+                        msg: err 
+                    });
+                }
+                else if(!releaseOrder){
+                    response.send({
+                        success :false,
+                        msg: 'Release order not found' 
+                    });
+                }
+                else{
+                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+                    releaseOrder.generated=true;
+                    releaseOrder.save(function(err){
+                        if(err)
+                        response.send({
+                            success:false,
+                            msg: err
+                        });
+                        else{
+                            var date = releaseOrder.date
+                            var insData="";
+                            var insertions = releaseOrder.insertions;
+                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                            var namount = releaseOrder.adGrossAmount - damount ;
+                            insertions.forEach(object =>{
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.day+'-'+object.month+'-'+object.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                            });
+                            var Details = {
+                                mediahouse :releaseOrder.publicationName,
+                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                                cname :releaseOrder.clientName,
+                                cgstin :releaseOrder.clientGSTIN.GSTNo,
+                                date :date.day+'-'+date.month+'-'+date.year,
+                                gstin :releaseOrder.agencyGSTIN,
+                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                                gamount :releaseOrder.adGrossAmount,
+                                insertions :insData,
+                                dper :releaseOrder.publicationDiscount+'+'+agencyDiscount1+'+'+agencyDiscount2,
+                                damount :damount,
+                                namount :namount,
+                                logo: firm.LogoURL
+                            }
                             pdf.generateReleaseOrder(request,response,Details);
                         }
                     })
