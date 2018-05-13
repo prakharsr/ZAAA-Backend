@@ -23,7 +23,6 @@ var mailFile=function (buffer, filename, from, to, cc, bcc, subject, text){
         text: text,
         attachment: attach
     };
-    
     mailgun.messages().send(data, function (error, body) {
         console.log(error, body);
         if (error) {
@@ -85,13 +84,10 @@ module.exports.generateInvoice = function(Details) {
                 else {
                     mailFile(buffer, 'invoice.pdf', request.body.from, request.body.to ,'','','ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA');
                 }
-                
             });
         });
     });
-
     req.on('error', e => console.log(e));
-
     req.end();
 }
 
@@ -141,15 +137,13 @@ module.exports.mailReleaseOrder = function(Details,request,response) {
                         }
                     });
                 });
-                resp.on('error', e=> console.log(e));
+                image.on('error', e=> console.log(e));
+                image.end();
             });
         });
     });
-
     req.on('error', e => console.log(e));
-
     req.end();
-    
 }
 
 module.exports.generateReleaseOrder =  function(Details,request,response) {
@@ -205,14 +199,12 @@ module.exports.generateReleaseOrder =  function(Details,request,response) {
                         }
                     });
                 });
-                resp.on('error', e=> console.log(e));
+                image.on('error', e=> console.log(e));
+                image.end();
             });
         });
     });
-
     req.on('error', e => console.log(e));
-
     req.end();
-    
 }
             
