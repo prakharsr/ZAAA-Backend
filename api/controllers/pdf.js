@@ -136,9 +136,8 @@ module.exports.generateReleaseOrder = function(Details) {
                     console.log(err);
                 }
                 else {
-                   
+                    
                 }
-                
             });
         });
     });
