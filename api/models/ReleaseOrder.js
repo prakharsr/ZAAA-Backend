@@ -149,13 +149,17 @@ var ReleaseOrderSchema = new mongoose.Schema({
     ReleaseOrderSchema.pre('save', function(next){
         var self = this;
         var insertions = self.insertions;
-        insertions.forEach(element => {
-            var date = element.date;
-            var event = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-            element.ISODate = event.toISOString();
-            next();
-        });
-
+        if(insertions.length == 0){
+            return next(new Error('Please select insertions'));
+        }
+        else{
+            insertions.forEach(element => {
+                var date = element.date;
+                var event = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
+                element.ISODate = event.toISOString();
+                next();
+            });
+        }
     });
 
     module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);

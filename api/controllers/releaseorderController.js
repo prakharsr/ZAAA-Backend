@@ -78,7 +78,6 @@ function getClientID(request, response, user){
                 })
             }
             if(client.length!==0){
-                console.log(client)
                 clientID =  client[0]._id;
                 resolve(clientID);
             }
@@ -118,7 +117,6 @@ function getMediahouseID(request, response, user){
             }
             if(mediahouse.length!==0){
                 console.log("mediahouse found");
-                console.log(mediahouse)
                 mediahouseID =  mediahouse[0]._id;
                 resolve(mediahouseID)
             }
@@ -134,7 +132,6 @@ async function f (request, response, user){
     var clientID = await getClientID(request, response, user);
     var executiveID = await getExecutiveID(request, response, user);
     
-    console.log(mediahouseID, clientID, executiveID);
     var releaseOrder = new ReleaseOrder({
         date: request.body.date,
         // releaseOrderNO: '20',
@@ -213,11 +210,9 @@ async function f (request, response, user){
     releaseOrder.save( function(err, doc){
         if(err)
         {
-            console.log(err)
             response.send({
                 success:false,
-                msg: "error in saving release order"
-                
+                msg: err.message
             });
         }
         else{
@@ -316,7 +311,6 @@ module.exports.getReleaseOrders = function(request, response){
 			});
 		}
 		else{
-            console.log(user.firm);
             ReleaseOrder.find({firm:user.firm})
             .limit(perPage)
             .skip((perPage*request.params.page) - perPage)
@@ -470,9 +464,9 @@ module.exports.updateReleaseOrder = function(request, response){
 };
 
 
-module.exports.generateROPdf = function(request, response) {
+module.exports.generateROPdf = async function(request, response) {
     var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
+    var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
 			console.log(err);
 			response.send({
@@ -484,7 +478,7 @@ module.exports.generateROPdf = function(request, response) {
 			console.log("User not found");
 			response.send({
 				success:false,
-				msg : "User not found, Please Login"
+				msg : "Please Login"
 			});
         }
         else {
@@ -494,23 +488,28 @@ module.exports.generateROPdf = function(request, response) {
                     response.send({
                         success :false,
                         msg: err 
-                    })
+                    });
                 }
                 else if(!releaseOrder){
                     response.send({
                         success :false,
                         msg: 'Release order not found' 
-                    })
+                    });
                 }
                 else{
                     releaseOrder.generated=true;
                     releaseOrder.save(function(err){
                         if(err)
-                        respons.send({
+                        response.send({
                             success:false,
                             msg: err
                         });
                         else{
+                            var insData;
+                            var insertions = releaseOrder.insertions;
+                            insertions.forEach(object =>{
+                                
+                            });
                             var Details = {
                                 publisher :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,

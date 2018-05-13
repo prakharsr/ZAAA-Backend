@@ -291,14 +291,12 @@ module.exports.verifyMobile = function(request, response) {
 	}
 		
 function getUser(token,req,res, cb){
-	console.log(token);
 	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
 		User.findById(decoded.id, function(err, doc) {
 			if (err || !doc) {
 				return  cb(err,null);
 			}
 			else{
-				console.log(doc);
 				return cb(null, doc);
 			}
 		});
