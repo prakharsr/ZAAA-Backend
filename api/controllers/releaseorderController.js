@@ -459,7 +459,7 @@ module.exports.queryReleaseOrder = async function(request, response){
                     var adCategory1 = request.body.adCategory1;
                     var adCategory2 = request.body.adCategory2;
                     
-                    ReleaseOrder.find().and({firm:user.firm},{$or:[{'date':date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]})
+                    ReleaseOrder.find().and({firm:mongoose.mongo.ObjectId(user.firm)},{$or:[{'date':date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]})
                     .limit(perPage)
                     .skip((perPage * request.params.page) - perPage)
                     .exec(function(err, releaseOrders){
@@ -471,7 +471,7 @@ module.exports.queryReleaseOrder = async function(request, response){
                             });
                         }
                         else{
-                            ReleaseOrder.count({$and:[{firm:user.firm},{$or:[{'date':date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]}]}, function(err, count){
+                            ReleaseOrder.count({$and:[{firm:mongoose.mongo.ObjectId(user.firm)},{$or:[{'date':date},{'adCategory1':{ $ifnull : [{adCategory1, $regex:""}]}},{'adCategory2':{ $ifnull : [{adCategory2, $regex:""}]}}, {$and:[{mediahouseID: {$ifnull : [{mediahouseID, $regex:""}]}}, {clientID: {$ifnull : [{clientID, $regex:""}]}},{executiveID: {$ifnull : [{executiveID, $regex:""}]}}]}]}]}, function(err, count){
                                 response.send({
                                     success:true,
                                     releaseOrders: releaseOrders,
