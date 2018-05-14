@@ -60,9 +60,8 @@ router.delete('/user/executive/:id', executive.deleteExecutive);
 router.patch('/user/executive', executive.updateExecutive);
 router.get('/user/executives/:keyword', executive.queryExecutives);
 router.post('/user/executive/picture/:id', executive.profileImage);
-router.get('/user/mediahouses/:PublicationName/:keyword', executive.queryExecutiveOrganization);
+router.get('/user/executives/:ExecutiveName/:keyword', executive.queryExecutiveOrganization);
 
-queryExecutiveOrganization
 router.post('/user/mediahouse', mediahouse.createMediahouse);
 router.post('/user/mediahouseInRO', mediahouse.createMediahouseFromRO);
 router.get('/user/mediahouses/global/:page', mediahouse.getGlobalMediahouses);
