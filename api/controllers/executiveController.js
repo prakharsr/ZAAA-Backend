@@ -318,7 +318,7 @@ module.exports.updateExecutive = function(request, response){
 			});
 		}
 		else{
-            Client.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, executive){
+            Executive.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, executive){
                 if(err){
                     console.log(err);
                     response.send({
