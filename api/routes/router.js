@@ -60,8 +60,9 @@ router.delete('/user/executive/:id', executive.deleteExecutive);
 router.patch('/user/executive', executive.updateExecutive);
 router.get('/user/executives/:keyword', executive.queryExecutives);
 router.post('/user/executive/picture/:id', executive.profileImage);
+router.get('/user/mediahouses/:PublicationName/:keyword', executive.queryExecutiveOrganization);
 
-
+queryExecutiveOrganization
 router.post('/user/mediahouse', mediahouse.createMediahouse);
 router.post('/user/mediahouseInRO', mediahouse.createMediahouseFromRO);
 router.get('/user/mediahouses/global/:page', mediahouse.getGlobalMediahouses);
@@ -86,7 +87,7 @@ router.get('/user/releaseorders/:page', releaseOrder.getReleaseOrders);
 router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
 router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
 router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
-router.get('/user/releaseorders/:keyword/:page', releaseOrder.queryReleaseOrder);
+router.post('/user/releaseorders/search', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
 router.post('/user/releaseorder/email', releaseOrder.mailROPdf);
 module.exports = router;
