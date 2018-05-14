@@ -105,13 +105,24 @@ module.exports.mailReleaseOrder = function(Details,request,response) {
                     img += chunk;
                 })
                 resp.on('end', ()=> {
+                    var today = new Date(Date.now());
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; 
+                    var yyyy = today.getFullYear();
+                    if(dd<10){
+                        dd='0'+dd;
+                    } 
+                    if(mm<10){
+                        mm='0'+mm;
+                    } 
+                    var today = dd+'/'+mm+'/'+yyyy;
                     var filename = path.basename(Details.logo);
                     var imgPath = __dirname+''+filename;
                     templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
                     templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
                     templateHtml = templateHtml.replace('{{cname}}', Details.cname);
                     templateHtml = templateHtml.replace('{{cgstin}}',Details.cgstin);
-                    templateHtml = templateHtml.replace('{{date}}', Details.date);
+                    templateHtml = templateHtml.replace('{{date}}', today);
                     templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
                     templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
                     templateHtml = templateHtml.replace('{{gmaount}}', Details.gamount);
@@ -159,13 +170,24 @@ module.exports.generateReleaseOrder =  function(Details,request,response) {
                     img += chunk;
                 })
                 resp.on('end', ()=> {
+                    var today = new Date(Date.now());
+                    var dd = today.getDate();
+                    var mm = today.getMonth()+1; 
+                    var yyyy = today.getFullYear();
+                    if(dd<10){
+                        dd='0'+dd;
+                    } 
+                    if(mm<10){
+                        mm='0'+mm;
+                    } 
+                    var today = dd+'/'+mm+'/'+yyyy;
                     var filename = path.basename(Details.logo);
                     var imgPath = __dirname+''+filename;
                     templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
                     templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
                     templateHtml = templateHtml.replace('{{cname}}', Details.cname);
                     templateHtml = templateHtml.replace('{{cgstin}}',Details.cgstin);
-                    templateHtml = templateHtml.replace('{{date}}', Details.date);
+                    templateHtml = templateHtml.replace('{{date}}', today);
                     templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
                     templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
                     templateHtml = templateHtml.replace('{{gmaount}}', Details.gamount);

@@ -507,7 +507,6 @@ module.exports.mailROPdf = function(request, response) {
                             msg: err
                         });
                         else{
-                            var date = releaseOrder.date
                             var insData="";
                             var insertions = releaseOrder.insertions;
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
@@ -521,7 +520,6 @@ module.exports.mailROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                date :date.day+'-'+date.month+'-'+date.year,
                                 gstin :releaseOrder.agencyGSTIN,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
@@ -583,7 +581,6 @@ module.exports.generateROPdf = function(request, response) {
                             msg: err
                         });
                         else{
-                            var date = releaseOrder.date
                             var insData="";
                             var insertions = releaseOrder.insertions;
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
@@ -597,12 +594,11 @@ module.exports.generateROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                date :date.day+'-'+date.month+'-'+date.year,
                                 gstin :releaseOrder.agencyGSTIN,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+agencyDiscount1+'+'+agencyDiscount2,
+                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
                                 damount :damount,
                                 namount :namount,
                                 logo: firm.LogoURL
