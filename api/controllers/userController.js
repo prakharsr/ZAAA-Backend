@@ -282,9 +282,6 @@ module.exports.verifyMobile = function(request, response) {
 						msg: message
 					});
 				}
-				
-				
-				
 			}
 		});
 		
@@ -407,25 +404,25 @@ module.exports.deleteProfileImage = function(request,response){
 		}
 		else{
 		
-						user.photo = '/images/profile.jpg' ;
-						user.save(function(err,doc){
-							if (err) {
-								console.log(err);
-								response.send({
-									success: false,
-									msg: err+"gy"
-								});
-							} 
-							else{
-								response.send({
-									success : true,
-									msg : "Profile photo removed.",
-									photo: user.photo
-								});
-							}
-						});				
-	}
-});
+			user.photo = '/images/profile.jpg' ;
+			user.save(function(err,doc){
+				if (err) {
+					console.log(err);
+					response.send({
+						success: false,
+						msg: err+"gy"
+					});
+				} 
+				else{
+					response.send({
+						success : true,
+						msg : "Profile photo removed.",
+						photo: user.photo
+					});
+				}
+			});				
+		}
+	});
 }
 
    

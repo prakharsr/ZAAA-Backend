@@ -510,12 +510,13 @@ module.exports.mailROPdf = function(request, response) {
                             var insData="";
                             var insertions = releaseOrder.insertions;
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
+                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount/10000;
+                            var namount = releaseOrder.netAmountFigures;
                             insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.day+'-'+object.month+'-'+object.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
+                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
                                 mediahouse :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
@@ -524,10 +525,11 @@ module.exports.mailROPdf = function(request, response) {
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+agencyDiscount1+'+'+agencyDiscount2,
+                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
                                 damount :damount,
                                 namount :namount,
-                                logo: firm.LogoURL
+                                logo: firm.LogoURL,
+                                email: user.email
                             }
                             pdf.mailReleaseOrder(request,response,Details);
                         }
@@ -590,6 +592,7 @@ module.exports.generateROPdf = function(request, response) {
                                 insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.day+'-'+object.month+'-'+object.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
+                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
                                 mediahouse :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
