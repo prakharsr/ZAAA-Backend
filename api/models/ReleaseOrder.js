@@ -96,7 +96,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemeFree:String,
     adTotal:String,
     
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean, ISODate: Date}],
+    insertions:[{date:{day:String,month:String,year:String}, marked:{type:Boolean, default: false}, state:{type:Number, default: 0}, ISODate: Date}],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,

@@ -229,7 +229,7 @@ async function f (request, response, user){
     })
     
     
-}
+};
 
 
 module.exports.createRO = function(request, response){
@@ -257,7 +257,7 @@ module.exports.createRO = function(request, response){
             
         }
     });
-}
+};
 module.exports.getReleaseOrder = function(request,response){
     
     var token = userController.getToken(request.headers);
@@ -366,11 +366,13 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 			});
 		}
 		else{
-            ReleaseOrder.find({$and:[{"insertions":{}},{firm:user.firm}]})
-            .limit(perPage)
-            .skip((perPage*request.params.page) - perPage)
-            .sort(-'date')
-            .exec(function(err, releaseOrders){
+            ReleaseOrder
+            .aggregate([{$unwind: "$insertions"}, 
+                {$project: {"insertions.date": 1, "insertions.marked": 1,"insertions.state": 1,"insertions.ISODate": 1, "_id": 1}},
+                {$limit: perPage},
+                {$skip:(perPage * request.params.page) - perPage}
+            ])
+            .exec(function(err, insertions){
                 if(err){
                     console.log("here");
                     response.send({
@@ -378,7 +380,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
                         msg: err + ""
                     });
                 }
-                else if(!releaseOrders){
+                else if(!insertions){
                     console.log("No releaseorder");
                     response.send({
                         success:false,
@@ -389,7 +391,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
                     ReleaseOrder.count({}, function(err, count){    
                         response.send({
                             success : true,
-                            releaseOrders : releaseOrders,
+                            insertions : insertions,
                             perPage:perPage,
                             page: request.params.page,
                             pageCount : Math.ceil(count/perPage)
