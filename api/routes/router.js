@@ -50,7 +50,7 @@ router.get('/user/clients/:page', client.getClients);
 router.get('/user/client/:id', client.getClient);
 router.delete('/user/client/:id', client.deleteClient);
 router.patch('/user/client', client.updateClient);
-router.get('/user/clients/:keyword', client.queryClients);
+router.get('/user/clients/search/:keyword', client.queryClients);
 router.post('/user/client/picture/:id', client.profileImage);
 
 router.post('/user/executive', executive.createExecutive);
@@ -58,9 +58,9 @@ router.get('/user/executives/:page', executive.getExecutives);
 router.get('/user/executive/:id', executive.getExecutive);
 router.delete('/user/executive/:id', executive.deleteExecutive);
 router.patch('/user/executive', executive.updateExecutive);
-router.get('/user/executives/:keyword', executive.queryExecutives);
+router.get('/user/executives/search/:keyword', executive.queryExecutives);
 router.post('/user/executive/picture/:id', executive.profileImage);
-
+router.get('/user/executives/search/:ExecutiveName/:keyword', executive.queryExecutiveOrganization);
 
 router.post('/user/mediahouse', mediahouse.createMediahouse);
 router.post('/user/mediahouseInRO', mediahouse.createMediahouseFromRO);
@@ -69,8 +69,8 @@ router.get('/user/mediahouses/:page', mediahouse.getLocalMediahouses);
 router.get('/user/mediahouse/:id', mediahouse.getMediaHouse);
 router.delete('/user/mediahouse/:id', mediahouse.deleteMediahouse);
 router.patch('/user/mediahouse', mediahouse.updateMediaHouse);
-router.get('/user/mediahouses/:keyword', mediahouse.queryMediaHouse);
-router.get('/user/mediahouses/:PublicationName/:keyword', mediahouse.queryMediaHouseEdition);
+router.get('/user/mediahouses/search/:keyword', mediahouse.queryMediaHouse);
+router.get('/user/mediahouses/search/:PublicationName/:keyword', mediahouse.queryMediaHouseEdition);
 
 router.post('/user/ratecard', ratecard.createRatecard);
 router.get('/user/ratecards/global/:page', ratecard.getGlobalRatecards);
@@ -78,7 +78,7 @@ router.get('/user/ratecards/:page', ratecard.getLocalRatecards);
 router.get('/user/ratecard/:id', ratecard.getRatecard);
 router.delete('/user/ratecard/:id', ratecard.deleteRatecard);
 router.patch('/user/ratecard', ratecard.updateRatecard);
-router.get('/user/ratecards/:keyword', ratecard.queryRatecards);
+router.get('/user/ratecards/search/:keyword', ratecard.queryRatecards);
 
 
 router.post('/user/releaseorder', releaseOrder.createRO);
@@ -86,7 +86,7 @@ router.get('/user/releaseorders/:page', releaseOrder.getReleaseOrders);
 router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
 router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
 router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
-router.get('/user/releaseorders/:keyword/:page', releaseOrder.queryReleaseOrder);
+router.post('/user/releaseorders/search', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
 router.post('/user/releaseorders/email', releaseOrder.mailROPdf);
 module.exports = router;
