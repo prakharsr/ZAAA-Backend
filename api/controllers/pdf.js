@@ -46,7 +46,7 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
 };
 
 module.exports.generateInvoice = function(request,response,Details) {
-    var req = http.request('http://localhost:8080/templates/invoice.html', res => {
+    var req = http.request('http://www.mom2k18.co.in/templates/invoice.html', res => {
         var templateHtml = "";
 
         res.on('data', chunk => {
@@ -196,7 +196,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
                 else {
                     response.writeHead(200, {
                         'Content-Type': 'application/pdf',
-                        'Content-Disposition': 'attachment; filename="theta.pdf"'
+                        'Content-Disposition': 'attachment; filename="ReleaseOrder.pdf"'
                     });
                     data.pipe(response);
                 }
