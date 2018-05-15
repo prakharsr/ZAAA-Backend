@@ -57,7 +57,7 @@ function getClientID(request, response, user){
                     {firm:mongoose.mongo.ObjectId(user.firm)},
                     {global:true}
                 ]},
-                {'CompanyName': request.body.clientName},
+                {'OrganizationName': request.body.clientName},
                 {'Address.state': request.body.clientState}
             ]}
         ).exec(function(err, client){
@@ -70,7 +70,7 @@ function getClientID(request, response, user){
             else if (client.length===0)
             {
                 var newClient = new Client({
-                    CompanyName:request.body.clientName,
+                    OrganizationName:request.body.clientName,
                     firm : user.firm
                 });
                 newClient.save(function(err, doc){
@@ -101,10 +101,14 @@ function getMediahouseID(request, response, user){
             else if (mediahouse.length == 0)
             {
                 console.log('no mediahouse found');
+                console.log(request.body)
                 var newMediahouse = new MediaHouse({
                     OrganizationName:request.body.organizationName,
                     PublicationName:request.body.publicationName,
                     'Address.edition':request.body.publicationEdition,
+                    MediaType:request.body.mediaType,
+                    'Address.state':request.body.publicationState,
+                    GSTIN:request.body.publicationGSTIN,
                     global:false,
                     GSTIN:request.body.GSTIN,
                     firm : user.firm
@@ -134,7 +138,7 @@ async function f (request, response, user){
     var executiveID = await getExecutiveID(request, response, user);
     
     var releaseOrder = new ReleaseOrder({
-        date: request.body.date,
+        
         // releaseOrderNO: '20',
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
@@ -384,7 +388,7 @@ function searchClientID(request, response, user){
                     {firm:mongoose.mongo.ObjectId(user.firm)},
                     {global:true}
                 ]},
-                {'CompanyName': request.body.clientName},
+                {'OrganizationName': request.body.clientName},
                 {'Address.state': request.body.clientState}
             ]}
         ).exec(function(err, client){
@@ -442,18 +446,14 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     query['clientID'] = mongoose.mongo.ObjectId(clientID);
     if(executiveID)
     query['executiveID']=mongoose.mongo.ObjectId(executiveID);
-    if(date)
-    query.date=date;
-    if(adCategory1)
-    query['adCategory1']=request.body.adCategory1;
-    if(adCategory2)
-    query['adCategory2']=request.body.adCategory2;
-    if(adCategory1)
-    query['adCategory1']=request.body.adCategory1;
-    console.log(query)
-    // if(request.body.period){
-    //     query[]
-    // }
+    if(request.body.creationPeriod)
+    var to =new Date();
+    var from = new Date(to.getFullYear(),to.getMonth(),to.getDate()-request.body.creationPeriod)
+    {
+        console.log(to,from)
+        query['date']={$gte: from, $lte:to} 
+        console.log(query)
+    }
     resolve(query);
         
     })
@@ -486,12 +486,14 @@ module.exports.queryReleaseOrder = async function(request, response){
                     var adCategory1 = request.body.adCategory1;
                     var adCategory2 = request.body.adCategory2;
                     
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user);
+                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
                     console.log(request.body)
                     console.log(query)
                     console.log(request.body)
                     
                     ReleaseOrder.find(query)
+                    .limit(perPage)
+                    .skip((perPage * request.body.page) - perPage)
                     .exec(function(err, releaseOrders){
                         if(err){
                             console.log(err+ "");
@@ -506,6 +508,9 @@ module.exports.queryReleaseOrder = async function(request, response){
                                 response.send({
                                     success:true,
                                     releaseOrders: releaseOrders,
+                                    page: request.body.page,
+                                    perPage:perPage,
+                                    pageCount: Math.ceil(count/perPage)
                                 });
                             })
                             

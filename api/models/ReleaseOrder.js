@@ -7,7 +7,10 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
 var ReleaseOrderSchema = new mongoose.Schema({
-    date: String,
+    date: {
+        type:Date,
+        default:new Date()
+    },
     // releaseOrderNO: {
     //     type:String,
     //     unique:true
@@ -157,7 +160,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
             insertions.forEach(element => {
                 var date = element.date;
                 var event = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-                element.ISODate = event.toISOString();
+                element.ISODate = event.toUTCString();
                 next();
             });
         }
