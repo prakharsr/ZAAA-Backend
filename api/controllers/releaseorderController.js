@@ -447,9 +447,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(executiveID)
     query['executiveID']=mongoose.mongo.ObjectId(executiveID);
     if(request.body.creationPeriod)
-    var to =new Date();
-    var from = new Date(to.getFullYear(),to.getMonth(),to.getDate()-request.body.creationPeriod)
     {
+        var to =new Date();
+        var from = new Date(to.getFullYear(),to.getMonth(),to.getDate()-request.body.creationPeriod)
         console.log(to,from)
         query['date']={$gte: from, $lte:to} 
         console.log(query)
