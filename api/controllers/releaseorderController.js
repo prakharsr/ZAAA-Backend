@@ -418,6 +418,48 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 	});	
     
 };
+module.exports.setInsertionChecks = function(request, response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err + ""
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            ReleaseOrder.updateMany(
+                { $and: [{firm:user.firm}, {"insertions._id":{$in:[request.body.ids]}}]
+                },
+                { $set: { "insertions.$.state": request.body.state }}
+            )
+            .exec(function(err){
+                if(err){
+                    console.log(err);
+                    response.send({
+                        success:false,
+                        msg: err + ""
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        msg: "ReleaseOrder Insertions Updated"
+                    });
+                }
+                
+            })
+		}	
+	});
+};
 
 
 
@@ -664,9 +706,10 @@ module.exports.queryInsertions = function(request, response){
                             });
                         }	
 	});
-
-
 }
+
+
+
 
 module.exports.deleteReleaseOrder = function(request, response){
 	var token = userController.getToken(request.headers);
