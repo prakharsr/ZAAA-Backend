@@ -227,10 +227,7 @@ async function f (request, response, user){
             })
         }
     })
-    
-    
 };
-
 
 module.exports.createRO = function(request, response){
     var token = userController.getToken(request.headers);
@@ -258,6 +255,7 @@ module.exports.createRO = function(request, response){
         }
     });
 };
+
 module.exports.getReleaseOrder = function(request,response){
     
     var token = userController.getToken(request.headers);
@@ -416,11 +414,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
             });
 		}
 	});	
-    
 };
-
-
-
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -869,7 +863,7 @@ module.exports.generateROPdf = function(request, response) {
                             var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
                             var namount = releaseOrder.adGrossAmount - damount ;
                             insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.day+'-'+object.month+'-'+object.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
                                 image : 'http://www.mom2k18.co.in/'+firm.LogoURL,

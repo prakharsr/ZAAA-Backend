@@ -46,7 +46,7 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
 };
 
 module.exports.generateInvoice = function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/invoice.html', res => {
+    var req = http.request('http://localhost:8080/templates/invoice.html', res => {
         var templateHtml = "";
 
         res.on('data', chunk => {
@@ -176,16 +176,16 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{date}}', today);
             templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
             templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
-            templateHtml = templateHtml.replace('{{gmaount}}', Details.gamount);
+            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{dper}}', Details.dper);
-            templateHtml = templateHtml.replace('{{damonut}}', Details.damount);
+            templateHtml = templateHtml.replace('{{damount}}', Details.damount);
             templateHtml = templateHtml.replace('{{namount}}', Details.namount);
             var options = {
                 width: '600mm',
                 height: '400mm'
             }
-            pdf.create(templateHtml, options).toBuffer(function (err, data) {
+            pdf.create(templateHtml, options).toStream(function (err, data) {
                 if (err) {
                     console.log(err);
                     response.send({
@@ -194,10 +194,11 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
                     });
                 }
                 else {
-                response.send({
-                    success: true,
-                    pdf: data
-                });
+                    response.writeHead(200, {
+                        'Content-Type': 'application/pdf',
+                        'Content-Disposition': 'attachment; filename="theta.pdf"'
+                    });
+                    data.pipe(response);
                 }
             });
         });
