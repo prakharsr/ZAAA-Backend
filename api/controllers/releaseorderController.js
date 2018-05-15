@@ -368,7 +368,21 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 		else{
             ReleaseOrder
             .aggregate([{$unwind: "$insertions"}, 
-                {$project: {"insertions.date": 1, "insertions.marked": 1,"insertions.state": 1,"insertions.ISODate": 1, "_id": 1}},
+                {$match:{firm:user.firm} },
+                {$project: {
+                    "_id":1,
+                    "publicationName":1,
+                    "publicationEdition":1, 
+                    "clientName":1,
+                    "insertions.date": 1, 
+                    "insertions.marked": 1,
+                    "insertions.state": 1,
+                    "insertions.ISODate": 1, 
+                    "insertions._id": 1,
+                    "executiveName":1,
+                    "executiveOrg":1,
+                }
+                },
                 {$limit: perPage},
                 {$skip:(perPage * request.params.page) - perPage}
             ])
@@ -606,37 +620,49 @@ module.exports.queryInsertions = function(request, response){
                     console.log(query)
                     console.log(request.body)
                     
-                    ReleaseOrder.find(query)
-                    .populate({
-                        path: 'insertions',
-                        match: { ISODate: { $gte: from, $lte:to }}
-                      
-                    })
-                    .limit(perPage)
-                    .skip((perPage * request.body.page) - perPage)
+                    ReleaseOrder
+                    .aggregate([{$unwind: "$insertions"}, 
+                    {$match:query },
+                    {$project: {
+                        "_id":1,
+                        "publicationName":1,
+                        "publicationEdition":1, 
+                        "clientName":1,
+                        "insertions.date": 1, 
+                        "insertions.marked": 1,
+                        "insertions.state": 1,
+                        "insertions.ISODate": 1, 
+                        "insertions._id": 1,
+                        "executiveName":1,
+                        "executiveOrg":1,
+                    }
+                    },
+                    {$limit: perPage},
+                    {$skip:(perPage * request.params.page) - perPage}
+                    ])
                     .exec(function(err, releaseOrders){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
+                                if(err){
+                                    console.log(err+ "");
+                                    response.send({
+                                        success:false,
+                                        msg: err +""
+                                    });
+                                }
+                                else{
+                                    ReleaseOrder.count(query, function(err, count){
+                                        console.log(releaseOrders, count)
+                                        response.send({
+                                            success:true,
+                                            releaseOrders: releaseOrders,
+                                            page: request.body.page,
+                                            perPage:perPage,
+                                            pageCount: Math.ceil(count/perPage)
+                                        });
+                                    })
+                                    
+                                }
                             });
-                        }
-                        else{
-                            ReleaseOrder.count(query, function(err, count){
-                                console.log(releaseOrders, count)
-                                response.send({
-                                    success:true,
-                                    releaseOrders: releaseOrders,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
-                            
-                        }
-                    });
-                }	
+                        }	
 	});
 
 
