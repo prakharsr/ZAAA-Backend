@@ -88,5 +88,5 @@ router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
 router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
 router.post('/user/releaseorders/search', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
-router.post('/user/releaseorder/email', releaseOrder.mailROPdf);
+router.post('/user/releaseorders/email', releaseOrder.mailROPdf);
 module.exports = router;

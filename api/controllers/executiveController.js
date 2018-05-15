@@ -68,7 +68,7 @@ module.exports.createExecutiveFromRO = function(request,response){
             {
 			response.send({
 				success:false,
-				msg:"Exwcutive details needs to be unique."
+				msg:"Executive details needs to be unique."
             });
             }
             else{

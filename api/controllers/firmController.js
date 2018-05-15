@@ -178,6 +178,7 @@ module.exports.setPlan = function(request,response){
 							console.log(request.body.cost)
 							console.log(data);
 							var Details={
+								email: user.email,
 								firmname:firm.FirmName,
 								paymentId:firm.plan.paymentID,
 								gstin:firm.GSTIN.GSTNo,
@@ -190,7 +191,7 @@ module.exports.setPlan = function(request,response){
 								date: data.created_at,
 								method:data.method
 							}					
-							pdf.generateInvoice(Details);
+							pdf.generateInvoice(request,response,Details);
 						}).catch((err) => {
 							console.error(err + "b")
 						})
