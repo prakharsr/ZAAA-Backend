@@ -304,6 +304,7 @@ module.exports.getReleaseOrder = function(request,response){
 		}
 	});	
 };
+
 module.exports.getReleaseOrders = function(request, response){
     
     var token = userController.getToken(request.headers);
@@ -352,6 +353,56 @@ module.exports.getReleaseOrders = function(request, response){
 	});	
     
 };
+
+module.exports.getReleaseOrderInsertions = function(request, response){
+    
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log(err);
+			response.send({
+				success:false,
+				msg: err +""
+			});
+		}
+		else{
+            ReleaseOrder.find({$and:[{"insertions":{}},{firm:user.firm}]})
+            .limit(perPage)
+            .skip((perPage*request.params.page) - perPage)
+            .sort(-'date')
+            .exec(function(err, releaseOrders){
+                if(err){
+                    console.log("here");
+                    response.send({
+                        success:false,
+                        msg: err + ""
+                    });
+                }
+                else if(!releaseOrders){
+                    console.log("No releaseorder");
+                    response.send({
+                        success:false,
+                        msg:" No release Order"
+                    });
+                }
+                else{
+                    ReleaseOrder.count({}, function(err, count){    
+                        response.send({
+                            success : true,
+                            releaseOrders : releaseOrders,
+                            perPage:perPage,
+                            page: request.params.page,
+                            pageCount : Math.ceil(count/perPage)
+                            
+                        });
+                    })
+                }
+            });
+		}
+	});	
+    
+};
+
 
 
 
