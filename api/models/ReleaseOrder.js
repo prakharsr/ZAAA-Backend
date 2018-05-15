@@ -96,7 +96,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemeFree:String,
     adTotal:String,
     
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean, ISODate: String}],
+    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean, ISODate: Date}],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,
@@ -159,8 +159,8 @@ var ReleaseOrderSchema = new mongoose.Schema({
         else{
             insertions.forEach(element => {
                 var date = element.date;
-                var event = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-                element.ISODate = event.toUTCString();
+                element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
+                
                 next();
             });
         }
