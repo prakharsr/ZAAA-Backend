@@ -393,10 +393,10 @@ module.exports.getReleaseOrderInsertions = function(request, response){
                     });
                 }
                 else if(!insertions){
-                    console.log("No releaseorder");
+                    console.log("No insertions");
                     response.send({
                         success:false,
-                        msg:" No release Order"
+                        msg:" No inseryions"
                     });
                 }
                 else{
@@ -433,12 +433,6 @@ module.exports.setInsertionChecks = function(request, response){
 			});
 		}
 		else{
-            // function makeObjectIds(ids){
-            //     return new Promise((resolve, reject)=>{
-            //         resolve(ids.map(id => mongoose.mongo.ObjectId(id)));
-            //     }); 
-            // }
-            // var ids = await makeObjectIds(request.body.ids)
             ReleaseOrder.updateMany(
                 { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
                 },
