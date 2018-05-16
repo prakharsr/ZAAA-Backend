@@ -417,7 +417,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 };
 module.exports.setInsertionChecks = function(request, response){
 	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
+	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
 			console.log(err);
 			response.send({
@@ -433,14 +433,14 @@ module.exports.setInsertionChecks = function(request, response){
 			});
 		}
 		else{
-            function makeObjectIds(ids){
-                return new Promise((resolve, reject)=>{
-                    resolve(ids.map(ids => mongoose.mongo.ObjectId(ids)));
-                }); 
-            }
-            var ids = await makeObjectIds(request.body.ids)
+            // function makeObjectIds(ids){
+            //     return new Promise((resolve, reject)=>{
+            //         resolve(ids.map(id => mongoose.mongo.ObjectId(id)));
+            //     }); 
+            // }
+            // var ids = await makeObjectIds(request.body.ids)
             ReleaseOrder.updateMany(
-                { $and: [{firm:user.firm}, {"insertions._id":{$in:[ids]}}]
+                { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
                 },
                 { $set: { "insertions.$.state": request.body.state }}
             )
