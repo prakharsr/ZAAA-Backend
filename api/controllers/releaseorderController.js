@@ -166,7 +166,7 @@ async function f (request, response, user){
         adSizeW:request.body.adSizeW,
         AdWords:request.body.AdWords,
         AdWordsMax:request.body.AdWordsMax,
-        adTime:request.body.adTime,
+        AdTime:request.body.AdTime,
         AdDuration:request.body.AdDuration,
         adSizeCustom:request.body.adSizeCustom,
         adSizeAmount:request.body.adSizeAmount,
