@@ -433,8 +433,14 @@ module.exports.setInsertionChecks = function(request, response){
 			});
 		}
 		else{
+            function makeObjectIds(ids){
+                return new Promise((resolve, reject)=>{
+                    resolve(ids.map(ids => mongoose.mongo.ObjectId(ids)));
+                }); 
+            }
+            var ids = await makeObjectIds(request.body.ids)
             ReleaseOrder.updateMany(
-                { $and: [{firm:user.firm}, {"insertions._id":{$in:[request.body.ids]}}]
+                { $and: [{firm:user.firm}, {"insertions._id":{$in:[ids]}}]
                 },
                 { $set: { "insertions.$.state": request.body.state }}
             )
