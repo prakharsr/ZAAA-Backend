@@ -316,8 +316,9 @@ module.exports.queryExecutiveOrganization = function(request, response){
 			});
 		}
 		else{
+            console.log(request.params)
             Executive.find({
-                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, { 'ExecutiveName': request.body.ExecutiveName}]
+                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, { 'ExecutiveName': request.params.ExecutiveName},{ 'OrganizationName': { $regex: request.params.keyword+"", $options:"i" }}]
             })
             .sort('OrganizationName')
             .limit(5).exec(function(err, executives){
