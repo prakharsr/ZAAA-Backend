@@ -551,11 +551,14 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     query['executiveID']=mongoose.mongo.ObjectId(executiveID);
     if(request.body.creationPeriod)
     {
-        var to =new Date();
-        var from = new Date(to.getFullYear(),to.getMonth(),to.getDate()-request.body.creationPeriod)
-        console.log(to,from)
+            var to = new Date()
+            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
+            query['date']={$gte: from, $lte:to} 
+    }
+    else{
+        var to = new Date()
+        var from = new Date(1);
         query['date']={$gte: from, $lte:to} 
-        console.log(query)
     }
     resolve(query);
         
@@ -648,13 +651,16 @@ module.exports.queryInsertions = function(request, response){
                     var date = (request.body.date)?(request.body.date):null;
                     var adCategory1 = request.body.adCategory1;
                     var adCategory2 = request.body.adCategory2;
-                    var to = new Date()
-                    var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-                    
+                    if(request.body.insertionPeriod){
+                        var to = new Date()
+                        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+                    }
+                    else{
+                        var to = new Date()
+                        var from = new Date(1);
+                    }
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-                    console.log(request.body)
-                    console.log(query)
-                    console.log(request.body)
+
                     
                     ReleaseOrder
                     .aggregate([{$unwind: "$insertions"}, 
@@ -674,9 +680,9 @@ module.exports.queryInsertions = function(request, response){
                     }
                     },
                     {$limit: perPage},
-                    {$skip:(perPage * request.params.page) - perPage}
+                    {$skip:(perPage * request.body.page) - perPage}
                     ])
-                    .exec(function(err, releaseOrders){
+                    .exec(function(err, insertions){
                                 if(err){
                                     console.log(err+ "");
                                     response.send({
@@ -686,10 +692,10 @@ module.exports.queryInsertions = function(request, response){
                                 }
                                 else{
                                     ReleaseOrder.count(query, function(err, count){
-                                        console.log(releaseOrders, count)
+                                        console.log(insertions, count)
                                         response.send({
                                             success:true,
-                                            releaseOrders: releaseOrders,
+                                            insertions: insertions,
                                             page: request.body.page,
                                             perPage:perPage,
                                             pageCount: Math.ceil(count/perPage)
