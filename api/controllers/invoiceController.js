@@ -100,7 +100,7 @@ async function f(request, response, user){
 
     var invoice = new Invoice({
                 
-        releaseOrderNO: '20',
+        InvoiceNO: '20',
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
@@ -108,11 +108,11 @@ async function f(request, response, user){
         clientName:client.OrganizationName,
         clientGSTIN:client.GSTIN,
         clientState:client.Address.state,
-        publicationName:request.body.publicationName,
-        publicationEdition:request.body.publicationEdition,
-        mediaType:request.body.mediaType,
-        publicationState:request.body.publicationState,
-        publicationGSTIN:request.body.publicationGSTIN,
+        publicationName:mediahouse.PublicationName,
+        publicationEdition:mediahouse.Address.edition,
+        mediaType:mediahouse.MediaType,
+        publicationState:mediahouse.Address.state,
+        publicationGSTIN:mediahouse.GSTIN,
         
         adGrossAmount:request.body.adGrossAmount,
         publicationDiscount:request.body.publicationDiscount,
@@ -127,15 +127,16 @@ async function f(request, response, user){
 
         caption:request.body.caption,
         remark:request.body.remark,
-        insertions: request.body.insertions,
-        executiveName:request.body.executiveName,
-        executiveOrg:request.body.executiveOrg,
         otherRemark:request.body.otherRemark,
+        insertions: releaseOrder.insertions,
+        executiveName:executive.ExecutiveName,
+        executiveOrg:executive.OrganizationName,
+
         template: firm.ROTemplate,
         firm:user.firm,
-        mediahouseID : mediahouseID,
-        clientID: clientID,
-        executiveID: executiveID,
+        mediahouseID : releaseOrder.mediahouseID,
+        clientID: releaseOrder.clientID,
+        executiveID: releaseOrder.executiveID,
 
     })
 
