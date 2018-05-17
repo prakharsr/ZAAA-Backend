@@ -33,7 +33,10 @@ var InvoiceSchema = new mongoose.Schema({
     
     clientName:String,
     clientState:String,
-    clientGSTIN:String,
+    clientGSTIN:{
+        GSTType: String,
+        GSTNo:String
+    },
     executiveName:String,
     executiveOrg:String,
 

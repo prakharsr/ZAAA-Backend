@@ -130,7 +130,7 @@ catch(err){
         agencyPerson: user.name,
         signature: user.signature,
         clientName:client.OrganizationName,
-        clientGSTIN:client.GSTIN,
+        clientGSTIN:request.body.GSTIN,
         clientState:client.Address.state,
         publicationName:mediahouse.PublicationName,
         publicationEdition:mediahouse.Address.edition,
