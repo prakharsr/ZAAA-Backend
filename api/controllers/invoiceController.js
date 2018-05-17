@@ -174,6 +174,23 @@ async function f(request, response, user){
 
     })
 
+    invoice.save(function(err, doc){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: "Error! in saving Invoice" + err
+            })
+        }
+        else{
+            response.send({
+                success:true,
+                msg:"Invoice saved.",
+                invoice:doc 
+            })
+        }
+    })
+
 }
 
 module.exports.createInvoice = function(request, response){
