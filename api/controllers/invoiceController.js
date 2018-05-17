@@ -19,29 +19,30 @@ var path = require('path');
 var perPage=20;
 
 
-function findReleaseOrderInsertions(request, response, user){
+function findReleaseOrder(request, response, user){
 return new Promise((resolve, reject)=>{
-    ReleaseOrder.find({
-        firm:user.firm,
-        "_id":request.body.releaseOrderId,
-        "insertion._id":{$in:request.body.ids}
-    }, function(err, releaseOrder){
+    ReleaseOrder.findOne({
+        $and:[
+            {firm:user.firm},
+            {"_id":mongoose.mongo.ObjectID(request.body.releaseOrderId)},
+            {"insertions._id":{$in:request.body.ids}}
+        ]
+    
+    }).exec( function(err, releaseOrder){
         if(err){
             console.log(err)
             reject(err)
         }
-        else if(releaseOrders.length == 0){
-            resolve(null);
-        }
         else{
-            resolve(releaseOrders);
+            console.log(releaseOrder);
+            resolve(releaseOrder);
         }
     })
 })
 }
 
 function findExecutive(id){
-    return new Promise((resolve, reject => {
+    return new Promise((resolve, reject) => {
         Executive.findById(mongoose.mongo.ObjectID(id), function(err, executive){
             if(err){
                 console.log(err)
@@ -55,11 +56,11 @@ function findExecutive(id){
                 resolve(executive);
             }
         })
-    }))
+    })
 }
 function findClient(id){
-    return new Promise((resolve, reject => {
-        MediaHouse.findById(mongoose.mongo.ObjectID(id), function(err, client){
+    return new Promise((resolve, reject) => {
+        Client.findById(mongoose.mongo.ObjectID(id), function(err, client){
             if(err){
                 console.log(err)
                 reject(err)
@@ -72,11 +73,29 @@ function findClient(id){
                 resolve(client);
             }
         })
-    }))
+    })
+}
+function findFirm(id){
+    return new Promise((resolve, reject) => {
+        Firm.findById(mongoose.mongo.ObjectID(id), function(err, firm){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(!firm)
+            {
+                resolve(null);
+            }
+            else{
+                resolve(firm);
+            }
+        })
+    })
 }
 function findMediahouse(id){
-    return new Promise((resolve, reject => {
-        MediaHouse.findById(mongoose.mongo.ObjectID(id), function(err, mediahouse){
+    return new Promise((resolve, reject) => {
+        console.log(id)
+        MediaHouse.findById(mongoose.mongo.ObjectId(id), function(err, mediahouse){
             if(err){
                 console.log(err)
                 reject(err)
@@ -89,17 +108,22 @@ function findMediahouse(id){
                 resolve(mediahouse);
             }
         })
-    }))
+    })
 }
 async function f(request, response, user){
-    var releaseOrder = await findReleaseOrderInsertions(request, response, user);
-    var firm = await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-    var mediahouse = await findMediahouse(request.body.mediahouseID);
-    var client = await findClient(request.body.clientID);
-    var executive = await findExecutive(request.body.executiveID);
-
+try {
+    var releaseOrder = await findReleaseOrder(request, response, user)
+    var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
+    var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
+    var client = await findClient(releaseOrder.clientID);
+    var executive = await findExecutive(releaseOrder.executiveID);
+}
+catch(err){
+    console.log(err);
+}
     var invoice = new Invoice({
-                
+        
+        releaseOrderId :request.body.releaseOrderId,
         InvoiceNO: '20',
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
@@ -159,13 +183,30 @@ async function f(request, response, user){
                 })
             }
         })
-
-
-        response.send({
-            success:true,
-            msg:"Invoice saved.",
-            invoice:doc 
+        ReleaseOrder.updateMany(
+            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
+            },
+            { $set: { "insertions.$.marked": true }}
+        )
+        .exec(function(err){
+            if(err){
+                console.log(err);
+                response.send({
+                    success:false,
+                    msg: err + ""
+                });
+            }
+            else{
+        
+                response.send({
+                    success:true,
+                    msg:"Invoice saved.",
+                    invoice:doc 
+                })
+            }
+            
         })
+
         }
     })
 }
@@ -220,10 +261,10 @@ module.exports.getInvoice = function(request,response){
                 }
                 else{
                     try{
-                        var mediahouse = await MediaHouse.findMediahouse(invoice.mediahouseID);
-                        var executive = await Executive.findExecutive(invoice.executiveID);
-                        var client = await Client.findClient(invoice.clientID);
-                        var releaseOrder = await findReleaseOrderInsertions(request, response, user);
+                        var mediahouse = await findMediahouse(invoice.mediahouseID);
+                        var executive = await findExecutive(invoice.executiveID);
+                        var client = await findClient(invoice.clientID);
+                        var releaseOrder = await ReleaseOrder.findById(invoice.releaseOrderId);
                         response.send({
                             mediahouse: mediahouse,
                             client: client,
@@ -236,7 +277,7 @@ module.exports.getInvoice = function(request,response){
                     catch(err){
                         response.send({
                             success: false,
-                            msg: "Can't fetch Invoice"
+                            msg: "Can't fetch Invoice" + err
                         });
                     }
                 }
