@@ -92,6 +92,7 @@ var InvoiceSchema = new mongoose.Schema({
     
     insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
     adGrossAmount:String,
+    extraCharges:String,
     publicationDiscount:String,
     agencyDiscount1:String,
     agencyDiscount2:String,
@@ -102,6 +103,12 @@ var InvoiceSchema = new mongoose.Schema({
     taxIncluded:Boolean,
     netAmountFigures:String,
     netAmountWords:String,
+    otherCharges:[
+        {
+            amount:String,
+            chargeType:String,
+        }
+        ],
     caption:String,
     remark:String,
 
@@ -110,12 +117,7 @@ var InvoiceSchema = new mongoose.Schema({
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
-    otherCharges:[
-    {
-        amount:String,
-        chargeType:String,
-    }
-    ],
+    
     executiveName:String,
     executiveOrg:String,
     otherRemark:String,
