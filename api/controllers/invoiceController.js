@@ -183,11 +183,23 @@ async function f(request, response, user){
             })
         }
         else{
-            response.send({
-                success:true,
-                msg:"Invoice saved.",
-                invoice:doc 
-            })
+            Client.update({ $and: [{firm:user.firm}, {"_id":doc.clientID}]
+        },
+        { $set: { "GSTIN": doc.clientGSTIN }}).exec(err,function(){
+            if(err){
+                response.send({
+                    success:false,
+                    msg:"Error in updating client GST number"
+                })
+            }
+        })
+
+
+        response.send({
+            success:true,
+            msg:"Invoice saved.",
+            invoice:doc 
+        })
         }
     })
 
