@@ -9,12 +9,11 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var InvoiceSchema = new mongoose.Schema({
     
     InvoiceNo:String,
-    releaseOrderId:String,
-    date: String,
-    releaseOrderNO: {
-        type:String,
-        unique:true
+    releaseOrderId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"ReleaseOrder"
     },
+    date: String,
     agencyName: String,
     agencyGSTIN: String,
     agencyPin:String,
