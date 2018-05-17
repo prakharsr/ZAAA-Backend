@@ -5,13 +5,12 @@ var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
-
-var InvoiceSchema = new mongoose.Schema({
+var ReceiptSchema = new mongoose.Schema({
     
-    InvoiceNo:String,
-    releaseOrderId:{
+    ReceiptNo:String,
+    invoiceId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"ReleaseOrder"
+        ref:"Invoice"
     },
     date: {
         type: Date,
@@ -33,13 +32,9 @@ var InvoiceSchema = new mongoose.Schema({
     
     clientName:String,
     clientState:String,
-    clientGSTIN:{
-        GSTType: String,
-        GSTNo:String
-    },
+    clientGSTIN:String,
     executiveName:String,
     executiveOrg:String,
-
 
     /*fields of release order to come */
     adGrossAmount:String,
@@ -60,32 +55,15 @@ var InvoiceSchema = new mongoose.Schema({
 
     /*fields of Invoice, which are to be filled on invoice creation,
      to be filled by default with values of respective feilds in release Order*/
-    extraCharges:{
-        amount:Number,
-        percentage : Boolean
-    },
-    publicationDiscount:{
-        amount : Number,
-        percentage:Boolean
-    },
-    agencyDiscount1:
-    {
-        amount:Number,
-        percentage: Boolean
-    },
-    // agencyDiscount2:
-    // {
-    //     amount:Number,
-    //     percentage: Boolean
-    // },
-    additionalCharges:{
-        amount:Number,
-        percentage:Boolean
-    },
+    extraCharges:String,
+    publicationDiscount:String,
+    agencyDiscount1:String,
+    agencyDiscount2:String,
+    additionalCharges:String,
 
     /*upto here */
     
-    // additionalTax:String,
+    additionalTax:String,
     
     caption:String,
     remark:String,
@@ -95,16 +73,6 @@ var InvoiceSchema = new mongoose.Schema({
     netAmountFigures:String,
     netAmountWords:String,
 
-
-    /*for payment reciept */
-    clearedAmount:Number,
-    pendingAmount:Number,
-    /*          */
-    
-    /* only marked insertions , kept for date purpose for invoice*/
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
-
- 
 
     /*may be omitted, not discussed yet */
     paymentType:String,
@@ -131,5 +99,5 @@ var InvoiceSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
-    module.exports = mongoose.model('Invoice', InvoiceSchema);
+    module.exports = mongoose.model('Receipt', ReceiptSchema);
     
