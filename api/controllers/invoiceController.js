@@ -113,40 +113,8 @@ async function f(request, response, user){
         mediaType:request.body.mediaType,
         publicationState:request.body.publicationState,
         publicationGSTIN:request.body.publicationGSTIN,
-        adType:request.body.adType,
-        rate:request.body.rate,
-        unit:request.body.unit,
-        adCategory1:request.body.adCategory1,
-        adCategory2:request.body.adCategory2,
-        adCategory3:request.body.adCategory3,
-        adCategory4:request.body.adCategory4,
-        adCategory5:request.body.adCategory5,
-        adCategory6:request.body.adCategory6,
-        adHue:request.body.adHue,
-        adSizeL:request.body.adSizeL,
-        adSizeW:request.body.adSizeW,
-        AdWords:request.body.AdWords,
-        AdWordsMax:request.body.AdWordsMax,
-        AdTime:request.body.AdTime,
-        AdDuration:request.body.AdDuration,
-        adSizeCustom:request.body.adSizeCustom,
-        adSizeAmount:request.body.adSizeAmount,
-        adTotalSpace:request.body.adTotalSpace,
-        adEdition:request.body.adEdition,
-        adPosition:request.body.adPosition,
-        adSchemePaid:request.body.adSchemePaid,
-        adSchemeFree:request.body.adSchemeFree,
-        adTotal:request.body.adTotal,
+        
         adGrossAmount:request.body.adGrossAmount,
-        
-        PremiumCustom:request.body.PremiumCustom,
-        PremiumBox:request.body.PremiumBox,
-        PremiumBaseColour:request.body.PremiumBaseColour,
-        PremiumEmailId:request.body.PremiumEmailId,
-        PremiumCheckMark:request.body.PremiumCheckMark,
-        PremiumWebsite:request.body.PremiumWebsite,
-        PremiumExtraWords:request.body.PremiumExtraWords,
-        
         publicationDiscount:request.body.publicationDiscount,
         agencyDiscount1:request.body.agencyDiscount1,
         agencyDiscount2:request.body.agencyDiscount2,
@@ -154,17 +122,14 @@ async function f(request, response, user){
         taxIncluded:request.body.taxIncluded,
         netAmountFigures:request.body.netAmountFigures,
         netAmountWords:request.body.netAmountWords,
+        otherCharges:request.body.otherCharges,
+        extraCharges:request.body.extraCharges,
+
         caption:request.body.caption,
         remark:request.body.remark,
-        paymentType:request.body.paymentType,
-        paymentDate:request.body.paymentDate,
-        paymentNo:request.body.paymentNo,
-        paymentAmount:request.body.paymentAmount,
-        paymentBankName:request.body.paymentBankName,
         insertions: request.body.insertions,
         executiveName:request.body.executiveName,
         executiveOrg:request.body.executiveOrg,
-        otherCharges:request.body.otherCharges,
         otherRemark:request.body.otherRemark,
         template: firm.ROTemplate,
         firm:user.firm,
@@ -202,7 +167,6 @@ async function f(request, response, user){
         })
         }
     })
-
 }
 
 module.exports.createInvoice = function(request, response){
@@ -235,7 +199,7 @@ module.exports.createInvoice = function(request, response){
 module.exports.getInvoice = function(request,response){
     
     var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
+	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err||!user){
 			console.log("User not found");
 			response.send({
@@ -258,11 +222,13 @@ module.exports.getInvoice = function(request,response){
                         var mediahouse = await MediaHouse.findMediahouse(invoice.mediahouseID);
                         var executive = await Executive.findExecutive(invoice.executiveID);
                         var client = await Client.findClient(invoice.clientID);
+                        var releaseOrder = await findReleaseOrderInsertions(request, response, user);
                         response.send({
                             mediahouse: mediahouse,
                             client: client,
                             executive: executive,
                             success : true,
+                            releaseOrder: releaseOrder,
                             invoice : invoice
                         }); 
                     }
@@ -760,7 +726,7 @@ module.exports.updateInvoice = function(request, response){
 			});
 		}
 		else{
-            Invoice.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, releaseOrder){
+            Invoice.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, invoice){
                 if(err){
                     console.log(err);
                     response.send({
@@ -771,7 +737,7 @@ module.exports.updateInvoice = function(request, response){
                 else{
                     response.send({
                         success:true,
-                        msg: "ReleaseOrder Updated"
+                        msg: "invoice Updated"
                     });
                 }
                 

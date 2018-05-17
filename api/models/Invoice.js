@@ -13,7 +13,10 @@ var InvoiceSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"ReleaseOrder"
     },
-    date: String,
+    date: {
+        type: Date,
+        default: new Date()
+    },
     agencyName: String,
     agencyGSTIN: String,
     agencyPin:String,
@@ -31,106 +34,69 @@ var InvoiceSchema = new mongoose.Schema({
     clientName:String,
     clientState:String,
     clientGSTIN:String,
+    executiveName:String,
+    executiveOrg:String,
 
-    PremiumCustom:{
-        Amount:Number,
-        Percentage:Boolean,
-        PremiumType:String
-    },
-    PremiumBox:{
-        Amount:Number,
-        Included:Boolean
-    },
-    PremiumBaseColour:{
-        Amount:Number,
-        Included:Boolean
-    },
-    PremiumEmailId:{
-        Amount:Number,
-        Quantity:Number,
-        Included:Boolean
-    },
-    PremiumCheckMark:{
-        Amount:Number,
-        Included:Boolean
-    },
-    PremiumWebsite:{
-        Amount:Number,
-        Quantity:Number,
-        Included:Boolean
-    },
-    PremiumExtraWords:{
-        Amount:Number,
-        Quantity:Number,
-        Included:Boolean
-    },
 
-    adType:String,
-    rate:String,
-    unit:String,
-    adCategory1:String,
-    adCategory2:String,
-    adCategory3:String,
-    adCategory4:String,
-    adCategory5:String,
-    adCategory6:String,
-    adHue:String,
-    AdWords:String,
-    AdWordsMax:String,
-    AdDuration:String,
-    adSizeL:String,
-    adSizeW:String,
-    adSizeCustom:Boolean,
-    adSizeAmount:String,
-    AdTime:String,
-    adTotalSpace:String,
-    adEdition:String,
-    adPosition:String,
-    adSchemePaid:String,
-    adSchemeFree:String,
-    adTotal:String,
-    
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
+    /*fields of release order to come */
     adGrossAmount:String,
-    extraCharges:String,
-    publicationDiscount:String,
-    agencyDiscount1:String,
-    agencyDiscount2:String,
+    taxType:String,
     taxAmount:{
         primary:String,
         secondary:String
     },
     taxIncluded:Boolean,
-    netAmountFigures:String,
-    netAmountWords:String,
     otherCharges:[
         {
             amount:String,
             chargeType:String,
         }
-        ],
+    ],
+    /* upto here */
+
+
+    /*fields of Invoice, which are to be filled on invoice creation,
+     to be filled by default with values of respective feilds in release Order*/
+    extraCharges:String,
+    publicationDiscount:String,
+    agencyDiscount1:String,
+    agencyDiscount2:String,
+    additionalCharges:String,
+
+    /*upto here */
+    
+    additionalTax:String,
+    
     caption:String,
     remark:String,
+    otherRemark:String,
+    FinalAmount:String,
+    FinalTaxAmount:String,
+    netAmountFigures:String,
+    netAmountWords:String,
 
+
+    /*for payment reciept */
+    clearedAmount:String,
+    pendingAmount:String,
+    receipts:[{
+        recieptType: String,
+        amount: String
+    }],
+    /*          */
+    
+    /* only marked insertions , kept for date purpose for invoice*/
+    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
+
+ 
+
+    /*may be omitted, not discussed yet */
     paymentType:String,
     paymentDate:String,
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
     
-    executiveName:String,
-    executiveOrg:String,
-    otherRemark:String,
-    FinalAmount:String,
-    FinalTaxAmount:String,
-
-    additionalCharges:String,
-    additionalTax:String,
-    taxType:String,
-    
-
-
-
     firm : {
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
