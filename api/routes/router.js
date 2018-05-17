@@ -99,7 +99,7 @@ router.post('/user/invoice', invoice.createInvoice);
 router.get('/user/invoices/:page', invoice.getInvoices);
 router.get('/user/invoice/:id', invoice.getInvoice);
 router.delete('/user/invoice/:id', invoice.deleteInvoice);
-router.patch('/user/invoice', invoice.updateInvoice);
+router.patch('/user/invoice/:id', invoice.updateInvoice);
 router.post('/user/invoice/search/', invoice.queryInvoice);
 
 module.exports = router;

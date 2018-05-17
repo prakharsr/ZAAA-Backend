@@ -96,6 +96,19 @@ var InvoiceSchema = new mongoose.Schema({
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
+
+    mediahouseID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"MediaHouse"
+    },
+    executiveID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Executive"
+    },
+    clientID: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Client"
+    },
     
     firm : {
         type:mongoose.Schema.Types.ObjectId,
