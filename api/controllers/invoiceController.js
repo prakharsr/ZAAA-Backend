@@ -19,7 +19,164 @@ var path = require('path');
 var perPage=20;
 
 
-module.exports.createRO = function(request, response){
+function findReleaseOrderInsertions(request, response, user){
+return new Promise((resolve, reject)=>{
+    ReleaseOrder.find({
+        firm:user.firm,
+        "_id":request.body.releaseOrderId,
+        "insertion._id":{$in:request.body.ids}
+    }, function(err, releaseOrder){
+        if(err){
+            console.log(err)
+            reject(err)
+        }
+        else if(releaseOrders.length == 0){
+            resolve(null);
+        }
+        else{
+            resolve(releaseOrders);
+        }
+    })
+})
+}
+
+function findExecutive(id){
+    return new Promise((resolve, reject => {
+        Executive.findById(mongoose.mongo.ObjectID(id), function(err, executive){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(!executive)
+            {
+                resolve(null);
+            }
+            else{
+                resolve(executive);
+            }
+        })
+    }))
+}
+function findClient(id){
+    return new Promise((resolve, reject => {
+        MediaHouse.findById(mongoose.mongo.ObjectID(id), function(err, client){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(!client)
+            {
+                resolve(null);
+            }
+            else{
+                resolve(client);
+            }
+        })
+    }))
+}
+function findMediahouse(id){
+    return new Promise((resolve, reject => {
+        MediaHouse.findById(mongoose.mongo.ObjectID(id), function(err, mediahouse){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(!mediahouse)
+            {
+                resolve(null);
+            }
+            else{
+                resolve(mediahouse);
+            }
+        })
+    }))
+}
+async function f(request, response, user){
+    var releaseOrder = await findReleaseOrderInsertions(request, response, user);
+    var firm = await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+    var mediahouse = await findMediahouse(request.body.mediahouseID);
+    var client = await findClient(request.body.clientID);
+    var executive = await findExecutive(request.body.executiveID);
+
+    var invoice = new Invoice({
+                
+        releaseOrderNO: '20',
+        agencyName: firm.FirmName,
+        agencyGSTIN: firm.GSTIN,
+        agencyPerson: user.name,
+        signature: user.signature,
+        clientName:request.body.clientName,
+        clientGSTIN:request.body.clientGSTIN,
+        clientState:request.body.clientState,
+        publicationName:request.body.publicationName,
+        publicationEdition:request.body.publicationEdition,
+        mediaType:request.body.mediaType,
+        publicationState:request.body.publicationState,
+        publicationGSTIN:request.body.publicationGSTIN,
+        adType:request.body.adType,
+        rate:request.body.rate,
+        unit:request.body.unit,
+        adCategory1:request.body.adCategory1,
+        adCategory2:request.body.adCategory2,
+        adCategory3:request.body.adCategory3,
+        adCategory4:request.body.adCategory4,
+        adCategory5:request.body.adCategory5,
+        adCategory6:request.body.adCategory6,
+        adHue:request.body.adHue,
+        adSizeL:request.body.adSizeL,
+        adSizeW:request.body.adSizeW,
+        AdWords:request.body.AdWords,
+        AdWordsMax:request.body.AdWordsMax,
+        AdTime:request.body.AdTime,
+        AdDuration:request.body.AdDuration,
+        adSizeCustom:request.body.adSizeCustom,
+        adSizeAmount:request.body.adSizeAmount,
+        adTotalSpace:request.body.adTotalSpace,
+        adEdition:request.body.adEdition,
+        adPosition:request.body.adPosition,
+        adSchemePaid:request.body.adSchemePaid,
+        adSchemeFree:request.body.adSchemeFree,
+        adTotal:request.body.adTotal,
+        adGrossAmount:request.body.adGrossAmount,
+        
+        PremiumCustom:request.body.PremiumCustom,
+        PremiumBox:request.body.PremiumBox,
+        PremiumBaseColour:request.body.PremiumBaseColour,
+        PremiumEmailId:request.body.PremiumEmailId,
+        PremiumCheckMark:request.body.PremiumCheckMark,
+        PremiumWebsite:request.body.PremiumWebsite,
+        PremiumExtraWords:request.body.PremiumExtraWords,
+        
+        publicationDiscount:request.body.publicationDiscount,
+        agencyDiscount1:request.body.agencyDiscount1,
+        agencyDiscount2:request.body.agencyDiscount2,
+        taxAmount:request.body.taxAmount,
+        taxIncluded:request.body.taxIncluded,
+        netAmountFigures:request.body.netAmountFigures,
+        netAmountWords:request.body.netAmountWords,
+        caption:request.body.caption,
+        remark:request.body.remark,
+        paymentType:request.body.paymentType,
+        paymentDate:request.body.paymentDate,
+        paymentNo:request.body.paymentNo,
+        paymentAmount:request.body.paymentAmount,
+        paymentBankName:request.body.paymentBankName,
+        insertions: request.body.insertions,
+        executiveName:request.body.executiveName,
+        executiveOrg:request.body.executiveOrg,
+        otherCharges:request.body.otherCharges,
+        otherRemark:request.body.otherRemark,
+        template: firm.ROTemplate,
+        firm:user.firm,
+        mediahouseID : mediahouseID,
+        clientID: clientID,
+        executiveID: executiveID,
+
+    })
+
+}
+
+module.exports.createInvoice = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
