@@ -255,9 +255,9 @@ module.exports.getInvoice = function(request,response){
                 }
                 else{
                     try{
-                        var mediahouse = await MediaHouse.findById(releaseOrder.mediahouse);
-                        var executive = await Executive.findById(releaseOrder.executive);
-                        var client = await Client.findById(releaseOrder.client);
+                        var mediahouse = await MediaHouse.findMediahouse(invoice.mediahouseID);
+                        var executive = await Executive.findExecutive(invoice.executiveID);
+                        var client = await Client.findClient(invoice.clientID);
                         response.send({
                             mediahouse: mediahouse,
                             client: client,
@@ -269,7 +269,7 @@ module.exports.getInvoice = function(request,response){
                     catch(err){
                         response.send({
                             success: false,
-                            msg: "Can't fetch releaseOrder"
+                            msg: "Can't fetch Invoice"
                         });
                     }
                 }
