@@ -279,9 +279,9 @@ module.exports.getReleaseOrder = function(request,response){
                 }
                 else{
                     try{
-                        var mediahouse = await MediaHouse.findById(releaseOrder.mediahouse);
-                        var executive = await Executive.findById(releaseOrder.executive);
-                        var client = await Client.findById(releaseOrder.client);
+                        var mediahouse = await MediaHouse.findById(releaseOrder.mediahouseID);
+                        var executive = await Executive.findById(releaseOrder.executiveID);
+                        var client = await Client.findById(releaseOrder.clientID);
                         response.send({
                             mediahouse: mediahouse,
                             client: client,
