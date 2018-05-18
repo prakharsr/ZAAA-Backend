@@ -25,7 +25,7 @@ return new Promise((resolve, reject)=>{
         $and:[
             {firm:user.firm},
             {"_id":mongoose.mongo.ObjectID(request.body.releaseOrderId)},
-            {"insertions._id":{$in:request.body.ids}}
+            {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}
         ]
     
     }).exec( function(err, releaseOrder){
@@ -152,7 +152,7 @@ catch(err){
         caption:request.body.caption,
         remark:request.body.remark,
         otherRemark:request.body.otherRemark,
-        insertions: releaseOrder.insertions,
+        insertions: request.body.insertions,
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
 
@@ -184,7 +184,7 @@ catch(err){
             }
         })
         ReleaseOrder.updateMany(
-            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
+            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}]
             },
             { $set: { "insertions.$.marked": true }}
         )
