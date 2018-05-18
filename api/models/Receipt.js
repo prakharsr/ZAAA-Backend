@@ -8,7 +8,7 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var ReceiptSchema = new mongoose.Schema({
     
     ReceiptNo:String,
-    invoiceId:{
+    invoiceID:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Invoice"
     },
@@ -70,7 +70,7 @@ var ReceiptSchema = new mongoose.Schema({
     otherRemark:String,
     FinalAmount:String,
     FinalTaxAmount:String,
-    netAmountFigures:String,
+    netAmountFigures:Number,
     netAmountWords:String,
 
 
