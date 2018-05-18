@@ -11,6 +11,7 @@ var releaseOrder= require('../controllers/releaseorderController');
 var ratecard = require('../controllers/ratecardController');
 var pdf = require('../controllers/pdfController');
 var invoice = require('../controllers/invoiceController');
+var receipt = require('../controllers/receiptController');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -101,5 +102,13 @@ router.get('/user/invoice/:id', invoice.getInvoice);
 router.delete('/user/invoice/:id', invoice.deleteInvoice);
 router.patch('/user/invoice/:id', invoice.updateInvoice);
 router.post('/user/invoice/search/', invoice.queryInvoice);
+
+router.post('/user/receipt', receipt.createReceipt);
+router.get('/user/receipts/:page', receipt.getReceipts);
+router.get('/user/receipt/:id', receipt.getReceipt);
+router.delete('/user/receipt/:id', receipt.deleteReceipt);
+router.patch('/user/receipt/:id', receipt.updateReceipt);
+router.post('/user/receipt/search/', receipt.queryReceipt);
+
 
 module.exports = router;
