@@ -60,15 +60,32 @@ var InvoiceSchema = new mongoose.Schema({
 
     /*fields of Invoice, which are to be filled on invoice creation,
      to be filled by default with values of respective feilds in release Order*/
-    extraCharges:String,
-    publicationDiscount:String,
-    agencyDiscount1:String,
-    agencyDiscount2:String,
-    additionalCharges:String,
+    extraCharges:{
+        amount:Number,
+        percentage : Boolean
+    },
+    publicationDiscount:{
+        amount : Number,
+        percentage:Boolean
+    },
+    agencyDiscount1:
+    {
+        amount:Number,
+        percentage: Boolean
+    },
+    // agencyDiscount2:
+    // {
+    //     amount:Number,
+    //     percentage: Boolean
+    // },
+    additionalCharges:{
+        amount:Number,
+        percentage:Boolean
+    },
 
     /*upto here */
     
-    additionalTax:String,
+    // additionalTax:String,
     
     caption:String,
     remark:String,
