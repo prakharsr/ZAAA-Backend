@@ -399,48 +399,6 @@ module.exports.getInvoiceInsertions = function(request, response){
 		}
 	});	
 };
-module.exports.setInsertionChecks = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            ReleaseOrder.updateMany(
-                { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-                },
-                { $set: { "insertions.$.state": request.body.state }}
-            )
-            .exec(function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "ReleaseOrder Insertions Updated"
-                    });
-                }
-                
-            })
-		}	
-	});
-};
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -573,8 +531,6 @@ module.exports.queryInvoice = async function(request, response){
                     var clientID = await searchClientID(request, response, user);
                     var executiveID = await searchExecutiveID(request, response, user);
                     var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
                     
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
                     console.log(request.body)
@@ -594,7 +550,7 @@ module.exports.queryInvoice = async function(request, response){
                         }
                         else{
                             Invoice.count(query, function(err, count){
-                                console.log(releaseOrders, count)
+                                console.log(invoice, count)
                                 response.send({
                                     success:true,
                                     invoice: invoice,
