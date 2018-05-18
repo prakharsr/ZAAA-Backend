@@ -567,86 +567,84 @@ module.exports.queryInvoice = async function(request, response){
 
 };
 
-module.exports.queryInsertions = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
-                    if(request.body.insertionPeriod){
-                        var to = new Date()
-                        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-                    }
-                    else{
-                        var to = new Date()
-                        var from = new Date(1);
-                    }
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+// module.exports.queryInsertions = function(request, response){
+//     var token = userController.getToken(request.headers);
+// 	var user = userController.getUser(token,request,response, async function(err, user){
+// 		if(err){
+// 			console.log(err);
+// 			response.send({
+// 				success:false,
+// 				msg:err
+// 			});
+// 		}
+// 		else if(!user){
+// 			console.log("User not found");
+// 			response.send({
+// 				success:false,
+// 				msg : "User not found, Please Login"
+// 			});
+// 		}
+// 		else{
+//                     var mediahouseID =await searchMediahouseID(request, response, user);
+//                     var clientID = await searchClientID(request, response, user);
+//                     var executiveID = await searchExecutiveID(request, response, user);
+//                     var date = (request.body.date)?(request.body.date):null;
+//                     if(request.body.insertionPeriod){
+//                         var to = new Date()
+//                         var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+//                     }
+//                     else{
+//                         var to = new Date()
+//                         var from = new Date(1);
+//                     }
+//                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
 
                     
-                    Invoice
-                    .aggregate([{$unwind: "$insertions"}, 
-                    {$match:query },
-                    {$project: {
-                        "_id":1,
-                        "publicationName":1,
-                        "publicationEdition":1, 
-                        "clientName":1,
-                        "insertions.date": 1, 
-                        "insertions.marked": 1,
-                        "insertions.state": 1,
-                        "insertions.ISODate": 1, 
-                        "insertions._id": 1,
-                        "executiveName":1,
-                        "executiveOrg":1,
-                    }
-                    },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                    ])
-                    .exec(function(err, insertions){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    Invoice.count(query, function(err, count){
-                                        console.log(insertions, count)
-                                        response.send({
-                                            success:true,
-                                            insertions: insertions,
-                                            page: request.body.page,
-                                            perPage:perPage,
-                                            pageCount: Math.ceil(count/perPage)
-                                        });
-                                    })
+//                     Invoice
+//                     .aggregate([{$unwind: "$insertions"}, 
+//                     {$match:query },
+//                     {$project: {
+//                         "_id":1,
+//                         "publicationName":1,
+//                         "publicationEdition":1, 
+//                         "clientName":1,
+//                         "insertions.date": 1, 
+//                         "insertions.marked": 1,
+//                         "insertions.state": 1,
+//                         "insertions.ISODate": 1, 
+//                         "insertions._id": 1,
+//                         "executiveName":1,
+//                         "executiveOrg":1,
+//                     }
+//                     },
+//                     {$limit: perPage},
+//                     {$skip:(perPage * request.body.page) - perPage}
+//                     ])
+//                     .exec(function(err, insertions){
+//                                 if(err){
+//                                     console.log(err+ "");
+//                                     response.send({
+//                                         success:false,
+//                                         msg: err +""
+//                                     });
+//                                 }
+//                                 else{
+//                                     Invoice.count(query, function(err, count){
+//                                         console.log(insertions, count)
+//                                         response.send({
+//                                             success:true,
+//                                             insertions: insertions,
+//                                             page: request.body.page,
+//                                             perPage:perPage,
+//                                             pageCount: Math.ceil(count/perPage)
+//                                         });
+//                                     })
                                     
-                                }
-                            });
-                        }	
-	});
-}
+//                                 }
+//                             });
+//                         }	
+// 	});
+// }
 
 
 
