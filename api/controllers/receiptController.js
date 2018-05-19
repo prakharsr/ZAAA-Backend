@@ -280,35 +280,35 @@ async function f(request, response, user){
     })
     
     
-        receipt.save(function(err, doc){
+    receipt.save(function(err, doc){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: "Error! in saving Receipt" + err
+            })
+        }
+        else{
+            Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
+            { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
+            "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
+        }}).exec(err,function(){
             if(err){
-                console.log(err);
                 response.send({
                     success:false,
-                    msg: "Error! in saving Receipt" + err
-                })
+                    msg:"Error in updating invoice details"
+                });
             }
             else{
-                Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-                { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
-                "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
-            }}).exec(err,function(){
-                if(err){
-                    response.send({
-                        success:false,
-                        msg:"Error in updating invoice details"
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg:"Receipt saved.",
-                        receipt: receipt
-                    });
-                }
-            });
-        }
-    });
+                response.send({
+                    success:true,
+                    msg:"Receipt saved.",
+                    receipt: receipt
+                });
+            }
+        });
+    }
+});
 }
 
 module.exports.createReceipt = function(request, response){
@@ -439,48 +439,48 @@ module.exports.linkRecieptToInvoice = function(request,response){
                 else{
                     if(receipt.paymentAmount > invoice.pendingAmount){
                         Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-                            { $set: { "clearedAmount": invoice.clearedAmount+invoice.pendingAmount,
-                                    "pendingAmount": 0,
-                                    "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
-                                    }}).exec(err,function(){
-                                if(err){
-                                response.send({
-                                    success:false,
-                                    msg:"Error in updating invoice details"
-                                });
-                                }
-                                else{
-                                    response.send({
-                                        success:true,
-                                        msg:"Receipt saved.",
-                                        receipt: receipt
-                                    });
-                                }
-                            });
-                    }
-                    else{
-                        Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-                            { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
-                                    "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
-                                    }}).exec(err,function(){
-                                if(err){
-                                response.send({
-                                    success:false,
-                                    msg:"Error in updating invoice details"
-                                });
-                                }
-                                else{
-                                    response.send({
-                                        success:true,
-                                        msg:"Receipt saved.",
-                                        receipt: receipt
-                                    });
-                                }
+                        { $set: { "clearedAmount": invoice.clearedAmount+invoice.pendingAmount,
+                        "pendingAmount": 0,
+                        "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
+                    }}).exec(err,function(){
+                        if(err){
+                            response.send({
+                                success:false,
+                                msg:"Error in updating invoice details"
                             });
                         }
+                        else{
+                            response.send({
+                                success:true,
+                                msg:"Receipt saved.",
+                                receipt: receipt
+                            });
+                        }
+                    });
+                }
+                else{
+                    Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
+                    { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
+                    "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
+                }}).exec(err,function(){
+                    if(err){
+                        response.send({
+                            success:false,
+                            msg:"Error in updating invoice details"
+                        });
                     }
-        });
-    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg:"Receipt saved.",
+                            receipt: receipt
+                        });
+                    }
+                });
+            }
+        }
+    });
+}
 });
 }
 
