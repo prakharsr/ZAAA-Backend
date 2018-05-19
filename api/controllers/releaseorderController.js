@@ -71,10 +71,17 @@ function getClientID(request, response, user){
             {
                 var newClient = new Client({
                     OrganizationName:request.body.clientName,
-                    firm : user.firm
+                    firm : user.firm,
+                    "Address.state" : request.body.clientState,
+                    "GSTIN" : request.body.clientGSTIN
                 });
                 newClient.save(function(err, doc){
+                    if(err)
+                    {
+                        console.log(err)
+                    }
                     clientID = newClient._id;
+                    
                     resolve(clientID);
                 })
             }
@@ -132,7 +139,7 @@ function getMediahouseID(request, response, user){
 
 
 async function f (request, response, user){
-    var firm = await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+    var firm = await Firm.findById(user.firm);
     var mediahouseID = await getMediahouseID(request, response, user);
     var clientID = await getClientID(request, response, user);
     var executiveID = await getExecutiveID(request, response, user);
@@ -200,7 +207,12 @@ async function f (request, response, user){
         paymentNo:request.body.paymentNo,
         paymentAmount:request.body.paymentAmount,
         paymentBankName:request.body.paymentBankName,
-        insertions: request.body.insertions,
+        insertions: request.body.insertions.map(function(insertion) {
+            return {
+                ...insertion,
+                _id: undefined
+            }
+        }),
         executiveName:request.body.executiveName,
         executiveOrg:request.body.executiveOrg,
         otherCharges:request.body.otherCharges,

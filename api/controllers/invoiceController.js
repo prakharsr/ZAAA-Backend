@@ -21,6 +21,7 @@ var perPage=20;
 
 function findReleaseOrder(request, response, user){
 return new Promise((resolve, reject)=>{
+    console.log(request.body)
     ReleaseOrder.findOne({
         $and:[
             {firm:user.firm},
@@ -148,6 +149,7 @@ catch(err){
         netAmountWords:request.body.netAmountWords,
         otherCharges:request.body.otherCharges,
         extraCharges:request.body.extraCharges,
+        pendingAmount:request.body.pendingAmount,
 
         caption:request.body.caption,
         remark:request.body.remark,
