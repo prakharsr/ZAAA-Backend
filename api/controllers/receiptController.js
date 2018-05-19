@@ -25,7 +25,7 @@ function findInvoice(request, response, user){
         Invoice.findOne({
             $and:[
                 {firm:user.firm},
-                {"_id":mongoose.mongo.ObjectID(request.body.invoiceId)},
+                {"_id":mongoose.mongo.ObjectID(request.body.invoiceID)},
             ]
         }).exec( function(err, invoice){
             if(err){
@@ -111,17 +111,17 @@ function findMediahouse(id){
 }
 async function f(request, response, user){
     try {
-        var invoice = await findInvoice(request, response, user)
+        var invoice = await findInvoice(request, response, user);
         var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
-        var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
-        var client = await findClient(releaseOrder.clientID);
-        var executive = await findExecutive(releaseOrder.executiveID);
+        var mediahouse = await findMediahouse(invoice.mediahouseID);
+        var client = await findClient(invoice.clientID);
+        var executive = await findExecutive(invoice.executiveID);
     }
     catch(err){
         console.log(err);
     }
     var receipt = new Receipt({
-        invoiceID :invoice._id,
+        invoiceID :request.body.invoiceID,
         ReceiptNO: '20',
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
@@ -155,9 +155,9 @@ async function f(request, response, user){
         
         template: firm.ROTemplate,
         firm:user.firm,
-        mediahouseID : releaseOrder.mediahouseID,
-        clientID: releaseOrder.clientID,
-        executiveID: releaseOrder.executiveID,  
+        mediahouseID : invoice.mediahouseID,
+        clientID: invoice.clientID,
+        executiveID: invoice.executiveID,  
     })
     
     receipt.save(function(err, doc){
@@ -170,8 +170,8 @@ async function f(request, response, user){
         }
         else{
             Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-            { $set: { "clearedAmount": clearedAmount+(+request.body.netAmountFigures),
-            "pendingAmount": pendingAmount-(+request.body.netAmountFigures)
+            { $set: { "clearedAmount": invoice.clearedAmount+request.body.netAmountFigures,
+            "pendingAmount": invoice.pendingAmount-request.body.netAmountFigures
             }}).exec(err,function(){
                 if(err){
                     response.send({
@@ -183,7 +183,7 @@ async function f(request, response, user){
                     response.send({
                         success:true,
                         msg:"Receipt saved.",
-                        invoice:doc 
+                        receipt: receipt
                     });
                 }
             });
@@ -240,9 +240,9 @@ module.exports.getReceipt = function(request,response){
                 }
                 else{
                     try{
-                        var mediahouse = await findMediahouse(invoice.mediahouseID);
-                        var executive = await findExecutive(invoice.executiveID);
-                        var client = await findClient(invoice.clientID);
+                        var mediahouse = await findMediahouse(receipt.mediahouseID);
+                        var executive = await findExecutive(receipt.executiveID);
+                        var client = await findClient(receipt.clientID);
                         var invoice = await Invoice.findById(receipt.invoiceID);
                         response.send({
                             mediahouse: mediahouse,
@@ -500,11 +500,12 @@ module.exports.deleteReceipt = function(request, response){
 		}
 		else{
             var receipt = await Receipt.findById(request.params.id);
+            var invoice = await Invoice.findById(receipt.invoiceID);
             Invoice.update(
                 { $and: [{firm:user.firm}, { _id : receipt.invoiceID }]
             },
-            { $set: {"clearedAmount": clearedAmount-(+receipt.netAmountFigures),
-            "pendingAmount": pendingAmount-(+receipt.netAmountFigures)  }}
+            { $set: {"clearedAmount": invoice.clearedAmount-receipt.netAmountFigures,
+            "pendingAmount": invoice.pendingAmount+receipt.netAmountFigures }}
         )
         .exec(function(err){
             if(err){
@@ -555,7 +556,7 @@ module.exports.updateReceipt = function(request, response){
 			});
 		}
 		else{
-            Receipt.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, receipt){
+            Receipt.findByIdAndUpdate(request.params.id,{$set:request.body},function(err, receipt){
                 if(err){
                     console.log(err);
                     response.send({
