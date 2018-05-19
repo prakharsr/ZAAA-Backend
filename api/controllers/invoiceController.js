@@ -777,19 +777,20 @@ module.exports.mailInvoicePdf = function(request, response) {
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var releaseorder = await Invoice.findById(invoice.releaseOrderId);
+                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
                     var client = await Client.findById(invoice.clientID);
                     var executive = await Client.findById(invoice.executiveID);
                     var mediahouse = await Client.findById(invoice.mediaHouseID);
-                    var pan = client.GSTIN.GSTNo.substr(2,11);
-                    var insertions = client.insertions;
-                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                    var pan = client.PanNO;
+                    var insertions = invoice.insertions;
+                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
                     var count = 0;
+                    var insData="";
                     var total= size*releaseorder.rate;
                     var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
                     var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
                     insertions.forEach(object =>{
-                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.adSizeL+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td><td>'+total+'</td></tr>';
+                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
                     });
 
                     var Details={
@@ -861,19 +862,20 @@ module.exports.generateInvoicePdf = function(request, response) {
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var releaseorder = await Invoice.findById(invoice.releaseOrderId);
+                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
                     var client = await Client.findById(invoice.clientID);
                     var executive = await Client.findById(invoice.executiveID);
                     var mediahouse = await Client.findById(invoice.mediaHouseID);
-                    var pan = client.GSTIN.GSTNo.substr(2,11);
-                    var insertions = client.insertions;
-                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                    var pan = client.PanNO;
+                    var insertions = invoice.insertions;
+                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
                     var count = 0;
+                    var insData="";
                     var total= size*releaseorder.rate;
                     var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
                     var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
                     insertions.forEach(object =>{
-                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.adSizeL+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td><td>'+total+'</td></tr>';
+                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
                     });
 
                     var Details={
