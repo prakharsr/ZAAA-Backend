@@ -97,20 +97,22 @@ router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
 
 
 router.post('/user/invoice', invoice.createInvoice);
+router.post('/user/invoice/search/', invoice.queryInvoice);
+router.post('/user/invoice/download', invoice.generateInvoicePdf);
+router.post('/user/invoice/email', invoice.mailInvoicePdf);
 router.get('/user/invoices/:page', invoice.getInvoices);
 router.get('/user/invoice/:id', invoice.getInvoice);
 router.delete('/user/invoice/:id', invoice.deleteInvoice);
 router.patch('/user/invoice/:id', invoice.updateInvoice);
-router.post('/user/invoice/search/', invoice.queryInvoice);
-router.post('/user/invoice/download', invoice.generateInvoicePdf);
-router.post('/user/invoice/email', invoice.mailInvoicePdf);
 
 router.post('/user/receipt', receipt.createReceipt);
+router.post('/user/receipt/search/', receipt.queryReceipt);
+router.post('/user/receipt/advanced', receipt.createAdvancedReciept);
+router.post('/user/receipt/advanced/link', receipt.linkRecieptToInvoice);
 router.get('/user/receipts/:page', receipt.getReceipts);
 router.get('/user/receipt/:id', receipt.getReceipt);
 router.delete('/user/receipt/:id', receipt.deleteReceipt);
 router.patch('/user/receipt/:id', receipt.updateReceipt);
-router.post('/user/receipt/search/', receipt.queryReceipt);
 
 
 module.exports = router;

@@ -169,6 +169,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
                 mm='0'+mm;
             } 
             var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
             templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
             templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
             templateHtml = templateHtml.replace('{{cname}}', Details.cname);
@@ -227,6 +228,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
                 mm='0'+mm;
             } 
             var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
             templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
             templateHtml = templateHtml.replace('{{address}}', Details.address);
             templateHtml = templateHtml.replace('{{state}}', Details.state);
@@ -298,6 +300,7 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
                 mm='0'+mm;
             } 
             var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
             templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
             templateHtml = templateHtml.replace('{{address}}', Details.address);
             templateHtml = templateHtml.replace('{{state}}', Details.state);

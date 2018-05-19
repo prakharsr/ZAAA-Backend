@@ -20,6 +20,119 @@ var path = require('path');
 var perPage=20;
 
 
+function getExecutiveID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Executive.find({$and: [
+            {'ExecutiveName':request.body.executiveName},
+            {'OrganizationName':request.body.executiveOrg}
+        ]}).exec(function(err, executive){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (executive.length===0)
+            {
+                var newExecutive = new Executive({
+                    OrganizationName:request.body.executiveOrg,
+                    ExecutiveName:request.body.executiveName,
+                    firm : user.firm
+                });
+                newExecutive.save(function(err, doc){
+                    executiveID = newExecutive._id;
+                    resolve(executiveID);
+                })
+            }
+            if(executive.length!==0){
+                executiveID =  executive[0]._id;
+                resolve(executiveID);
+            }
+        })
+    })
+}
+
+function getClientID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Client.find(
+            {$and: [
+                {$or:[
+                    {firm:mongoose.mongo.ObjectId(user.firm)},
+                    {global:true}
+                ]},
+                {'OrganizationName': request.body.clientName},
+                {'Address.state': request.body.clientState}
+            ]}
+        ).exec(function(err, client){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (client.length===0)
+            {
+                var newClient = new Client({
+                    OrganizationName:request.body.clientName,
+                    firm : user.firm
+                });
+                newClient.save(function(err, doc){
+                    clientID = newClient._id;
+                    resolve(clientID);
+                })
+            }
+            if(client.length!==0){
+                clientID =  client[0]._id;
+                resolve(clientID);
+            }
+        });
+    });
+}
+function getMediahouseID(request, response, user){
+    return new Promise((resolve, reject) => {
+        MediaHouse.find({$and: [
+            {"Address.edition":request.body.publicationEdition},
+            {PublicationName:request.body.publicationName},
+            {$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}
+        ]}).exec( function(err, mediahouse){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (mediahouse.length == 0)
+            {
+                console.log('no mediahouse found');
+                console.log(request.body)
+                var newMediahouse = new MediaHouse({
+                    OrganizationName:request.body.organizationName,
+                    PublicationName:request.body.publicationName,
+                    'Address.edition':request.body.publicationEdition,
+                    MediaType:request.body.mediaType,
+                    'Address.state':request.body.publicationState,
+                    GSTIN:request.body.publicationGSTIN,
+                    global:false,
+                    GSTIN:request.body.GSTIN,
+                    firm : user.firm
+                });
+                
+                newMediahouse.save(function(err, doc){
+                    console.log('mediahouse saved');
+                    mediahouseID = newMediahouse._id;
+                    resolve(mediahouseID)
+                })
+            }
+            if(mediahouse.length!==0){
+                console.log("mediahouse found");
+                mediahouseID =  mediahouse[0]._id;
+                resolve(mediahouseID)
+            }
+        });
+    })
+}
+
+
 function findInvoice(request, response, user){
     return new Promise((resolve, reject)=>{
         Invoice.findOne({
@@ -94,7 +207,7 @@ function findFirm(id){
 function findMediahouse(id){
     return new Promise((resolve, reject) => {
         console.log(id)
-        MediaHouse.findById(mongoose.mongo.ObjectId(id), function(err, mediahouse){
+        MediaHouse.findById(mongoose.mongo.ObjectId(id),async function(err, mediahouse){
             if(err){
                 console.log(err)
                 reject(err)
@@ -121,6 +234,14 @@ async function f(request, response, user){
         console.log(err);
     }
     var receipt = new Receipt({
+        advanced: false,
+        paymentType:request.body.paymentType,
+        paymentDate:request.body.paymentDate,
+        paymentNo:request.body.paymentNo,
+        paymentAmount:request.body.paymentAmount,
+        paymentBankName:request.body.paymentBankName,
+        paymentAmountWords:request.body.paymentAmountWords,
+        
         invoiceID :request.body.invoiceID,
         ReceiptNO: '20',
         agencyName: firm.FirmName,
@@ -136,22 +257,20 @@ async function f(request, response, user){
         publicationState:mediahouse.Address.state,
         publicationGSTIN:mediahouse.GSTIN,
         
-        adGrossAmount:request.body.adGrossAmount,
-        publicationDiscount:request.body.publicationDiscount,
-        agencyDiscount1:request.body.agencyDiscount1,
-        agencyDiscount2:request.body.agencyDiscount2,
-        taxAmount:request.body.taxAmount,
-        taxIncluded:request.body.taxIncluded,
-        netAmountFigures:request.body.netAmountFigures,
-        netAmountWords:request.body.netAmountWords,
-        otherCharges:request.body.otherCharges,
-        extraCharges:request.body.extraCharges,
+        adGrossAmount:invoice.adGrossAmount,
+        publicationDiscount:invoice.publicationDiscount,
+        agencyDiscount1:invoice.agencyDiscount1,
+        taxAmount:invoice.taxAmount,
+        taxIncluded:invoice.taxIncluded,
+        otherCharges:invoice.otherCharges,
+        extraCharges:invoice.extraCharges,
         
-        caption:request.body.caption,
-        remark:request.body.remark,
-        otherRemark:request.body.otherRemark,
+        caption:invoice.caption,
+        remark:invoice.remark,
+        otherRemark:invoice.otherRemark,
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
+        exceedingAmount:0,
         
         template: firm.ROTemplate,
         firm:user.firm,
@@ -160,18 +279,19 @@ async function f(request, response, user){
         executiveID: invoice.executiveID,  
     })
     
-    receipt.save(function(err, doc){
-        if(err){
-            console.log(err);
-            response.send({
-                success:false,
-                msg: "Error! in saving Receipt" + err
-            })
-        }
-        else{
-            Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-            { $set: { "clearedAmount": invoice.clearedAmount+request.body.netAmountFigures,
-            "pendingAmount": invoice.pendingAmount-request.body.netAmountFigures
+    
+        receipt.save(function(err, doc){
+            if(err){
+                console.log(err);
+                response.send({
+                    success:false,
+                    msg: "Error! in saving Receipt" + err
+                })
+            }
+            else{
+                Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
+                { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
+                "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
             }}).exec(err,function(){
                 if(err){
                     response.send({
@@ -217,6 +337,152 @@ module.exports.createReceipt = function(request, response){
         }
     });
 };
+
+module.exports.createAdvancedReciept = function(request,response){
+    var token = userController.getToken(request.headers);
+    var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log("error in finding user");
+			response.send({
+				success:false,
+				msg:err+""
+			});
+        }
+        else if(!user)
+        {
+            console.log("User not found");
+            response.send({
+                success:false,
+                msg:" no user"
+            });
+            
+        }
+		else {
+            var firm = await Firm.findById(user.firm);
+            var client = await getClientID(request,response,user);
+            var executive = await getExecutiveID(request,response,user);
+            var mediahouse = await getMediahouseID(request,response,user);
+            
+            var receipt = new Receipt({
+                advanced: true,
+                paymentType:request.body.paymentType,
+                paymentDate:request.body.paymentDate,
+                paymentNo:request.body.paymentNo,
+                paymentAmount:request.body.paymentAmount,
+                paymentBankName:request.body.paymentBankName,
+                paymentAmountWords:request.body.paymentAmountWords,
+                
+                ReceiptNO: '20',
+                agencyName: firm.FirmName,
+                agencyGSTIN: firm.GSTIN,
+                agencyPerson: user.name,
+                signature: user.signature,
+                clientName:client.OrganizationName,
+                clientGSTIN:client.GSTIN,
+                clientState:client.Address.state,
+                publicationName:mediahouse.PublicationName,
+                publicationEdition:mediahouse.Address.edition,
+                mediaType:mediahouse.MediaType,
+                publicationState:mediahouse.Address.state,
+                publicationGSTIN:mediahouse.GSTIN,
+                executiveName:executive.ExecutiveName,
+                executiveOrg:executive.OrganizationName,
+                exceedingAmount: 0,
+                
+                template: firm.ROTemplate,
+                firm:user.firm,
+                mediahouseID : invoice.mediahouseID,
+                clientID: invoice.clientID,
+                executiveID: invoice.executiveID
+            });
+            receipt.save((err,doc) => {
+                if(err){
+                    response.send({
+                        success:false,
+                        msg:'Cannot save receipt data'
+                    })
+                }
+                else{
+                    response.send({
+                        success:true,
+                        msg:'saved receipt data'
+                    })
+                }
+            })
+        }
+    });  
+}
+
+module.exports.linkRecieptToInvoice = function(request,response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err+""
+			});
+		}
+		else{
+            var receipt = await Reciept.findById(request.body.receiptID);
+            var invoice = await Invoice.findById(request.body.invoiceID);
+            
+            receipt.invoiceID = request.body.invoiceID;
+            receipt.save((err,doc) => {
+                if(err){
+                    console.log(err);
+                    response.send({
+                        success:false,
+                        msg: "Error! in saving Receipt" + err
+                    })
+                }
+                else{
+                    if(receipt.paymentAmount > invoice.pendingAmount){
+                        Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
+                            { $set: { "clearedAmount": invoice.clearedAmount+invoice.pendingAmount,
+                                    "pendingAmount": 0,
+                                    "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
+                                    }}).exec(err,function(){
+                                if(err){
+                                response.send({
+                                    success:false,
+                                    msg:"Error in updating invoice details"
+                                });
+                                }
+                                else{
+                                    response.send({
+                                        success:true,
+                                        msg:"Receipt saved.",
+                                        receipt: receipt
+                                    });
+                                }
+                            });
+                    }
+                    else{
+                        Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
+                            { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
+                                    "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
+                                    }}).exec(err,function(){
+                                if(err){
+                                response.send({
+                                    success:false,
+                                    msg:"Error in updating invoice details"
+                                });
+                                }
+                                else{
+                                    response.send({
+                                        success:true,
+                                        msg:"Receipt saved.",
+                                        receipt: receipt
+                                    });
+                                }
+                            });
+                        }
+                    }
+        });
+    }
+});
+}
 
 module.exports.getReceipt = function(request,response){
     

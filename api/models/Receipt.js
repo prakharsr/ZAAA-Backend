@@ -7,6 +7,7 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 var ReceiptSchema = new mongoose.Schema({
     
+    advanced:Boolean,
     ReceiptNo:String,
     invoiceID:{
         type:mongoose.Schema.Types.ObjectId,
@@ -51,6 +52,7 @@ var ReceiptSchema = new mongoose.Schema({
         }
     ],
     /* upto here */
+    exceedingAmount:Number,
 
 
     /*fields of Invoice, which are to be filled on invoice creation,
@@ -80,6 +82,7 @@ var ReceiptSchema = new mongoose.Schema({
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
+    paymentAmountWords:String,
 
     mediahouseID: {
         type:mongoose.Schema.Types.ObjectId,

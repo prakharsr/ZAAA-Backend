@@ -794,7 +794,8 @@ module.exports.mailInvoicePdf = function(request, response) {
                     });
 
                     var Details={
-                        clientname : client.OrganizationName,
+                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
+                        clientname: client.OrganizationName,
                         address: client.Address.address,
                         state: client.Address.state,
                         pan: pan,
@@ -879,6 +880,7 @@ module.exports.generateInvoicePdf = function(request, response) {
                     });
 
                     var Details={
+                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
                         clientname : client.OrganizationName,
                         address: client.Address.address,
                         state: client.Address.state,
