@@ -1,0 +1,164 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Release Order</title>
+    <style>
+        hr.rule1{
+            border: 0;
+            height: 3px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+        }
+        th {
+            color: rgb(0, 0, 150);
+        }
+        b {
+            color: rgb(0, 9, 128);
+        }
+
+    </style>
+</head>
+<body>
+    <img src="{{logoimage}}">
+    <h3 style="text-align:center">Tax Invoice</h3>
+    <hr class="rule1">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table>
+                    <tr>
+                        <td><b>Client</b></td>
+                        <td><b>:&nbsp;</b></td>
+                        <td>{{clientname}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Address</b></td>
+                        <td><b>:</b></td>
+                        <td>{{address}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>State</b></td>
+                        <td><b>:</b></td>
+                        <td>{{state}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>PAN</b></td>
+                        <td><b>:</b></td>
+                        <td>{{PAN}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col">
+                <table>
+                        <tr>
+                            <td><b>Invoice No.</b></td>
+                            <td><b>:&nbsp;</b></td>
+                            <td>{{ino}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Invoice Date</b></td>
+                            <td><b>:</b></td>
+                            <td>{{date}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>GSTIN</b></td>
+                            <td><b>:</b></td>
+                            <td>{{gstin}}</td>
+                        </tr>
+                    </table>
+            </div>
+        </div>
+        <table class="table table-bordered table">
+            <tr>
+                <th rowspan="2">
+                    Sr. No.
+                </th>
+                <th rowspan="2">
+                    Publication
+                </th>
+                <th rowspan="2">
+                    Edition
+                </th>
+                <th rowspan="2">
+                    Date of Ins
+                </th>
+                <th rowspan="2">
+                    Position
+                </th>
+                <th colspan="2">
+                    Size (cms)
+                </th>
+                <th rowspan="2">
+                    Total Space
+                </th>
+                <th rowspan="2">
+                    Rate <br> Rs/Sq Cms
+                </th>
+                <th rowspan="2">
+                    Total
+                </th>
+            </tr>
+            <tr>
+                <th>Width</th>
+                <th>Height</th>
+            </tr>
+            {{insertions}}
+            <tr>
+                <td rowspan="4" colspan="6">
+                    <b>Terms & Conditions</b>
+                    {{TnC}}
+                </td>
+                <td colspan="3"><b>Gross Amount:</b></td>
+                <td>{{gamount}}</td>
+            </tr>
+            <tr>
+                <td colspan="3"><b>Discount</b></td>
+                <td>{{disc}}</td>
+            </tr>
+            <tr>
+                <td colspan="3"><b>CGST{{cgstper}}</b></td>
+                <td>{{cgst}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">SGST{{sgstper}}</td>
+                <td>{{sgst}}</td>
+            </tr>
+            <tr>
+                <td rowspan="2" colspan="6">
+                    <b>Remark</b>
+                </td>
+                <td colspan="3">IGST{{igstper}}</td>
+                <td>{{igst}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">E.charges</td>
+                <td>{{echarges}}</td>
+            </tr>
+            <tr>
+                <td colspan="6">
+                    <b>In words: </b>{{amtwords}}
+                </td>
+                <td colspan="3"><b>Net Amount:</b></td>
+                <td>{{amtfig}}</td>
+            </tr>
+            <tr>
+                <td colspan="6">Bank Details</td>
+            </tr>
+            <tr>
+                <td colspan="3">A/c Name: {{aname}}</td>
+                <td colspan="3">A/c Type: {{atype}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">Bank: {{bank}}</td>
+                <td colspan="3">A/c No. : {{ano}}</td>
+            </tr>
+            <tr>
+                <td colspan="3">Branch: {{branch}}</td>
+                <td colspan="3">IFSC No. : {{ifsc}}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+
+
+
