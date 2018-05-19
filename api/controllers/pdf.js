@@ -210,7 +210,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
 
 
 module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://localhost:8080/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -268,7 +268,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
                 else {
                     response.writeHead(200, {
                         'Content-Type': 'application/pdf',
-                        'Content-Disposition': 'attachment; filename="ReleaseOrder.pdf"'
+                        'Content-Disposition': 'attachment; filename="invoice.pdf"'
                     });
                     data.pipe(response);
                 }
@@ -281,7 +281,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
 
 
 module.exports.mailPaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://localhost:8080/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -328,7 +328,7 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
                 width: '600mm',
                 height: '400mm'
             }
-            pdf.create(templateHtml, options).toStream(function (err, data) {
+            pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {
                     console.log(err);
                     response.send({
