@@ -745,7 +745,7 @@ module.exports.updateInvoice = function(request, response){
 };
 
 
-module.exports.mailROPdf = function(request, response) {
+module.exports.mailInvoicePdf = function(request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -763,7 +763,7 @@ module.exports.mailROPdf = function(request, response) {
 			});
         }
         else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+            Invoice.findById(request.body.id, async function(err, invoice){
                 if(err){
                     console.log(err);
                     response.send({
@@ -771,57 +771,67 @@ module.exports.mailROPdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!releaseOrder){
+                else if(!invoice){
                     response.send({
                         success :false,
-                        msg: 'Release order not found' 
+                        msg: 'Invoice not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var insertions = releaseOrder.insertions;
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount/10000;
-                            var namount = releaseOrder.netAmountFigures;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL,
-                                email: user.email
-                            }
-                            pdf.mailReleaseOrder(request,response,Details);
-                        }
-                    })
+                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
+                    var client = await Client.findById(invoice.clientID);
+                    var executive = await Client.findById(invoice.executiveID);
+                    var mediahouse = await Client.findById(invoice.mediaHouseID);
+                    var pan = client.PanNO;
+                    var insertions = invoice.insertions;
+                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
+                    var count = 0;
+                    var insData="";
+                    var total= size*releaseorder.rate;
+                    var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
+                    var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
+                    insertions.forEach(object =>{
+                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
+                    });
+
+                    var Details={
+                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
+                        clientname: client.OrganizationName,
+                        address: client.Address.address,
+                        state: client.Address.state,
+                        pan: pan,
+                        ino: 'dummy',
+                        gstin:client.GSTIN.GSTNo,
+                        insertions: insData,
+                        tnc: '',
+                        gamount: invoice.adGrossAmount,
+                        disc: disc,
+                        cgst:'',
+                        igst:'',
+                        sgst:'',
+                        cgstper:'',
+                        igstper:'',
+                        sgstper:'',
+                        echarges: echarges,
+                        amtwords: invoice.netAmountWords,
+                        amtfig:invoice.netAmountFigures,
+                        aname: request.body.accountname,
+                        atype: request.body.accounttype,
+                        bank: request.body.bank,
+                        ano: request.body.accountno,
+                        branch: request.body.branch,
+                        ifsc: request.body.ifsc
+                    }
                     
+                    pdf.mailPaymentInvoice(request,response,Details);
                 }
             })
         }
     });
 }
 
-module.exports.generateROPdf = function(request, response) {
+module.exports.generateInvoicePdf = function(request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -839,7 +849,7 @@ module.exports.generateROPdf = function(request, response) {
 			});
         }
         else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+            Invoice.findById(request.body.id, async function(err, invoice){
                 if(err){
                     console.log(err);
                     response.send({
@@ -847,49 +857,60 @@ module.exports.generateROPdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!releaseOrder){
+                else if(!invoice){
                     response.send({
                         success :false,
-                        msg: 'Release order not found' 
+                        msg: 'Invoice not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var insertions = releaseOrder.insertions;
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL
-                            }
-                            pdf.generateReleaseOrder(request,response,Details);
-                        }
-                    })
+                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
+                    var client = await Client.findById(invoice.clientID);
+                    var executive = await Client.findById(invoice.executiveID);
+                    var mediahouse = await Client.findById(invoice.mediaHouseID);
+                    var pan = client.PanNO;
+                    var insertions = invoice.insertions;
+                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
+                    var count = 0;
+                    var insData="";
+                    var total= size*releaseorder.rate;
+                    var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
+                    var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
+                    insertions.forEach(object =>{
+                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
+                    });
+
+                    var Details={
+                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
+                        clientname : client.OrganizationName,
+                        address: client.Address.address,
+                        state: client.Address.state,
+                        pan: pan,
+                        ino: 'dummy',
+                        gstin:client.GSTIN.GSTNo,
+                        insertions: insData,
+                        tnc: '',
+                        gamount: invoice.adGrossAmount,
+                        disc: disc,
+                        cgst:'',
+                        igst:'',
+                        sgst:'',
+                        cgstper:'',
+                        igstper:'',
+                        sgstper:'',
+                        echarges: echarges,
+                        amtwords: invoice.netAmountWords,
+                        amtfig:invoice.netAmountFigures,
+                        aname: request.body.accountname,
+                        atype: request.body.accounttype,
+                        bank: request.body.bank,
+                        ano: request.body.accountno,
+                        branch: request.body.branch,
+                        ifsc: request.body.ifsc
+                    }
                     
+                    pdf.generatePaymentInvoice(request,response,Details);
                 }
             })
         }
