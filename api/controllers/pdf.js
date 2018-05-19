@@ -210,7 +210,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
 
 
 module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://localhost:8080/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -281,7 +281,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
 
 
 module.exports.mailPaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://localhost:8080/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
