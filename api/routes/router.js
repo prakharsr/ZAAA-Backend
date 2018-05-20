@@ -8,6 +8,7 @@ var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
 var releaseOrder= require('../controllers/releaseorderController');
+var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var receipt = require('../controllers/receiptController');
