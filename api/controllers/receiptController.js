@@ -460,8 +460,8 @@ module.exports.linkRecieptToInvoice = function(request,response){
                 }
                 else{
                     Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-                    { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
-                    "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
+                    { $set: { "clearedAmount": invoice.clearedAmount + receipt.paymentAmount,
+                    "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
                 }}).exec(err,function(){
                     if(err){
                         response.send({
