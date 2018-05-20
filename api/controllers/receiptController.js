@@ -661,7 +661,7 @@ function searchMediahouseID(request, response, user){
     })
 }
 
-function formQuery(mediahouseID, clientID, executiveID, date, user, request){
+function formQuery(mediahouseID, clientID, executiveID, date, user, request, advanced){
     return new Promise((resolve, reject) => {
         var query = {'firm':user.firm};
         if(mediahouseID)
@@ -681,6 +681,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
             var from = new Date(1);
             query['date']={$gte: from, $lte:to} 
         }
+        if(advanced)
+        query['advanced']=advanced;
         resolve(query);
         
     })
@@ -713,7 +715,67 @@ module.exports.queryReceipt = async function(request, response){
             var adCategory1 = request.body.adCategory1;
             var adCategory2 = request.body.adCategory2;
             
-            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, false);
+            console.log(request.body)
+            console.log(query)
+            console.log(request.body)
+            
+            Receipt.find(query)
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
+            .exec(function(err, receipt){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    Receipt.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            receipt: receipt,
+                            page: request.body.page,
+                            perPage:perPage,
+                            pageCount: Math.ceil(count/perPage)
+                        });
+                    })
+                    
+                }
+            });
+        }	
+	});
+    
+};
+
+
+module.exports.queryAdvancedReceipt = async function(request, response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            var mediahouseID =await searchMediahouseID(request, response, user);
+            var clientID = await searchClientID(request, response, user);
+            var executiveID = await searchExecutiveID(request, response, user);
+            var date = (request.body.date)?(request.body.date):null;
+            var adCategory1 = request.body.adCategory1;
+            var adCategory2 = request.body.adCategory2;
+            
+            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, true);
             console.log(request.body)
             console.log(query)
             console.log(request.body)
@@ -843,7 +905,7 @@ module.exports.updateReceipt = function(request, response){
 };
 
 
-module.exports.mailROPdf = function(request, response) {
+module.exports.mailReceiptPdf = function(request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
@@ -919,7 +981,7 @@ module.exports.mailROPdf = function(request, response) {
     });
 }
 
-module.exports.generateROPdf = function(request, response) {
+module.exports.generateReceiptPdf = function(request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token,request,response, function(err, user){
 		if(err){
