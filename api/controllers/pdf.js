@@ -249,12 +249,12 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{bank}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{branch}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{atype}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ano}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.cgst);
+            templateHtml = templateHtml.replace('{{aname}}', Details.aname);
+            templateHtml = templateHtml.replace('{{bank}}', Details.bank);
+            templateHtml = templateHtml.replace('{{branch}}', Details.branch);
+            templateHtml = templateHtml.replace('{{atype}}', Details.atype);
+            templateHtml = templateHtml.replace('{{ano}}', Details.ano);
+            templateHtml = templateHtml.replace('{{ifsc}}', Details.ifsc);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -321,12 +321,12 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{bank}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{branch}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{atype}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ano}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.cgst);
+            templateHtml = templateHtml.replace('{{aname}}', Details.aname);
+            templateHtml = templateHtml.replace('{{bank}}', Details.bank);
+            templateHtml = templateHtml.replace('{{branch}}', Details.branch);
+            templateHtml = templateHtml.replace('{{atype}}', Details.atype);
+            templateHtml = templateHtml.replace('{{ano}}', Details.ano);
+            templateHtml = templateHtml.replace('{{ifsc}}', Details.ifsc);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -350,7 +350,7 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
 }
 
 module.exports.generatePaymentReceipt =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -367,33 +367,18 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
                 mm='0'+mm;
             } 
             var today = dd+'/'+mm+'/'+yyyy;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
-            templateHtml = templateHtml.replace('{{address}}', Details.address);
-            templateHtml = templateHtml.replace('{{state}}', Details.state);
-            templateHtml = templateHtml.replace('{{PAN}}',Details.pan);
             templateHtml = templateHtml.replace('{{date}}', today);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{ino}}', Details.ino);
-            templateHtml = templateHtml.replace('{{TnC}}', Details.tnc);
-            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
-            templateHtml = templateHtml.replace('{{disc}}', Details.disc);
-            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
-            templateHtml = templateHtml.replace('{{cgstper}}', Details.cgstper);
-            templateHtml = templateHtml.replace('{{sgstper}}', Details.sgstper);
-            templateHtml = templateHtml.replace('{{igstper}}', Details.igstper);
-            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
-            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
-            templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
-            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{faddress}}', Details.faddress);
+            templateHtml = templateHtml.replace('{{signature}}', Details.sign);
+            templateHtml = templateHtml.replace('{{fcdetails}}', Details.fcdetails);
+            templateHtml = templateHtml.replace('{{cname}}', Details.cname);
+            templateHtml = templateHtml.replace('{{address}}', Details.address);
+            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{bank}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{branch}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{atype}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ano}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.cgst);
+            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+            templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -409,7 +394,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
                 else {
                     response.writeHead(200, {
                         'Content-Type': 'application/pdf',
-                        'Content-Disposition': 'attachment; filename="invoice.pdf"'
+                        'Content-Disposition': 'attachment; filename="receipt.pdf"'
                     });
                     data.pipe(response);
                 }
@@ -422,7 +407,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
 
 
 module.exports.mailPaymentReceipt =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -439,33 +424,18 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
                 mm='0'+mm;
             } 
             var today = dd+'/'+mm+'/'+yyyy;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
-            templateHtml = templateHtml.replace('{{address}}', Details.address);
-            templateHtml = templateHtml.replace('{{state}}', Details.state);
-            templateHtml = templateHtml.replace('{{PAN}}',Details.pan);
             templateHtml = templateHtml.replace('{{date}}', today);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{ino}}', Details.ino);
-            templateHtml = templateHtml.replace('{{TnC}}', Details.tnc);
-            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
-            templateHtml = templateHtml.replace('{{disc}}', Details.disc);
-            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
-            templateHtml = templateHtml.replace('{{cgstper}}', Details.cgstper);
-            templateHtml = templateHtml.replace('{{sgstper}}', Details.sgstper);
-            templateHtml = templateHtml.replace('{{igstper}}', Details.igstper);
-            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
-            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
-            templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
-            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{faddress}}', Details.faddress);
+            templateHtml = templateHtml.replace('{{signature}}', Details.sign);
+            templateHtml = templateHtml.replace('{{fcdetails}}', Details.fcdetails);
+            templateHtml = templateHtml.replace('{{cname}}', Details.cname);
+            templateHtml = templateHtml.replace('{{address}}', Details.address);
+            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{bank}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{branch}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{atype}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ano}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.cgst);
+            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+            templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -479,7 +449,7 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
                     });
                 }
                 else {
-                     mailFile(request, response, buffer, 'invoice.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'invoice','Following is the tax invoice');
+                     mailFile(request, response, buffer, 'receipt.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'invoice','Following is the tax invoice');
                 }
             });
         });

@@ -923,7 +923,7 @@ module.exports.mailReceiptPdf = function(request, response) {
 			});
         }
         else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+            Receipt.findById(request.body.id, async function(err, receipt){
                 if(err){
                     console.log(err);
                     response.send({
@@ -931,50 +931,51 @@ module.exports.mailReceiptPdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!releaseOrder){
+                else if(!receipt){
                     response.send({
                         success :false,
-                        msg: 'Release order not found' 
+                        msg: 'Receipt not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var insertions = releaseOrder.insertions;
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount/10000;
-                            var namount = releaseOrder.netAmountFigures;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL,
-                                email: user.email
-                            }
-                            pdf.mailReleaseOrder(request,response,Details);
-                        }
-                    })
+                    var client = await Client.findById(receipt.clientID);
+                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    var Add = firm.OfficeAddress;
+                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+                    var Add = client.Address;
+                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+                    var cdetails = '';
+                    var details='';
+                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+                    if(firm.Email) cdetails += ' '+firm.Email;
+                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
+                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
+                    if(receipt.paymentType == 'NEFT'){
+                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
+                    }
+                    else if(receipt.paymentType == 'Cheque'){
+                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
+                    }
+                    else{
+                        details+='<p> Payment Date :'+receipt.paymentDate;
+                    }
                     
+                    var Details = {
+                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
+                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        faddress : Address,
+                        fcdetails : cdetails,
+                        cname : client.OrganizationName,
+                        address :address,
+                        rno :receipt.ReceiptNo,
+                        amtwords :receipt.paymentAmountWords,
+                        amtfig: receipt.paymentAmount,
+                        insertions : insertions,
+                        details : details
+                    }
+                    pdf.mailPaymentReceipt(request,response,Details);
                 }
             })
         }
@@ -999,7 +1000,7 @@ module.exports.generateReceiptPdf = function(request, response) {
 			});
         }
         else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+            Receipt.findById(request.body.id, async function(err, receipt){
                 if(err){
                     console.log(err);
                     response.send({
@@ -1007,51 +1008,54 @@ module.exports.generateReceiptPdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!releaseOrder){
+                else if(!receipt){
                     response.send({
                         success :false,
-                        msg: 'Release order not found' 
+                        msg: 'Receipt not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var insertions = releaseOrder.insertions;
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL
-                            }
-                            pdf.generateReleaseOrder(request,response,Details);
-                        }
-                    })
+                    var client = await Client.findById(receipt.clientID);
+                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    var Add = firm.OfficeAddress;
+                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+                    var Add = client.Address;
+                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+                    var cdetails = '';
+                    var details='';
+                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+                    if(firm.Email) cdetails += ' '+firm.Email;
+                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
+                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
+                    if(receipt.paymentType == 'NEFT'){
+                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
+                    }
+                    else if(receipt.paymentType == 'Cheque'){
+                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
+                    }
+                    else{
+                        details+='<p> Payment Date :'+receipt.paymentDate;
+                    }
                     
+                    var Details = {
+                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
+                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        faddress : Address,
+                        fcdetails : cdetails,
+                        cname : client.OrganizationName,
+                        address :address,
+                        rno :receipt.ReceiptNo,
+                        amtwords :receipt.paymentAmountWords,
+                        amtfig: receipt.paymentAmount,
+                        insertions : insertions,
+                        details : details
+                    }
+                    pdf.generatePaymentReceipt(request,response,Details);
                 }
             })
+            
         }
-    });
+    })
 }
