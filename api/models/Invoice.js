@@ -97,7 +97,10 @@ var InvoiceSchema = new mongoose.Schema({
 
 
     /*for payment reciept */
-    clearedAmount:Number,
+    clearedAmount:{
+        type: Number,
+        default: 0
+    },
     pendingAmount:Number,
     /*          */
     
