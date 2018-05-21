@@ -34,15 +34,12 @@ function getExecutiveID(request, response, user){
             }
             else if (executive.length===0)
             {
-
-                console.log("notfound")
                 var newExecutive = new Executive({
                     OrganizationName:request.body.executiveOrg,
                     ExecutiveName:request.body.executiveName,
                     firm : user.firm
                 });
                 newExecutive.save(function(err, doc){
-                    console.log("saved")
                     executiveID = newExecutive._id;
                     resolve(executiveID);
                 })
@@ -64,7 +61,6 @@ function getClientID(request, response, user){
                     {'Address.state': request.body.clientState}
             ]}
         ).exec(function(err, client){
-            console.log(client);
             if(err)
             {
                 console.log(err);
@@ -73,7 +69,6 @@ function getClientID(request, response, user){
             }
             else if (client.length == 0)
             {
-                console.log("not found")
                 var newClient = new Client({
                     OrganizationName:request.body.clientName,
                     "Address.state" : request.body.clientState,
@@ -81,13 +76,11 @@ function getClientID(request, response, user){
                     firm : user.firm
                 });
                 newClient.save(function(err, doc){
-                    console.log("client saved")
                     var clientID = newClient._id;
                     resolve(clientID);
                 })
             }
             else{
-                console.log("found")
                 var clientID =  client[0]._id;
                 resolve(clientID);
             }
@@ -188,7 +181,6 @@ function findExecutive(id){
                 resolve(null);
             }
             else{
-                console.log(executive)
                 resolve(executive);
             }
         })
@@ -206,7 +198,6 @@ function findClient(id){
                 resolve(null);
             }
             else{
-                console.log(client)
                 resolve(client);
             }
         })
@@ -226,7 +217,6 @@ function findMediahouse(id){
                 resolve(null);
             }
             else{
-                console.log(mediahouse)
                 resolve(mediahouse);
             }
         })
@@ -243,8 +233,6 @@ async function f(request, response, user){
     catch(err){
         console.log(err);
     }
-    console.log(client)
-    console.log(mediahouse)
     var receipt = new Receipt({
         advanced: false,
         paymentType:request.body.paymentType,
@@ -378,8 +366,6 @@ module.exports.createAdvancedReciept = function(request,response){
                 var mediahouse = await findMediahouse(mediahouseID)
                 var client = await findClient(clientID);
                 var executive = await findExecutive(executiveID);
-                console.log(executive);
-          
             
             var receipt = new Receipt({
                 advanced: true,
@@ -412,7 +398,6 @@ module.exports.createAdvancedReciept = function(request,response){
                 clientID: clientID,
                 executiveID: executiveID
             });
-            console.log('mallu')
             receipt.save(function(err,doc){
                 if(err){
                     response.send({
@@ -448,7 +433,6 @@ module.exports.linkRecieptToInvoice = function(request,response){
             receipt.invoiceID = request.body.invoiceID;
             receipt.save((err,doc) => {
                 if(err){
-                    console.log("1");
                     console.log(err);
                     response.send({
                         success:false,
@@ -456,23 +440,19 @@ module.exports.linkRecieptToInvoice = function(request,response){
                     })
                 }
                 else{
-                    console.log("2");
                     if(receipt.paymentAmount > invoice.pendingAmount){
-                        console.log("3");
                         Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
                         { $set: { "clearedAmount": invoice.clearedAmount+invoice.pendingAmount,
                         "pendingAmount": 0,
                         "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
                     }}).exec(err,function(){
                         if(err){
-                            console.log("4")
                             response.send({
                                 success:false,
                                 msg:"Error in updating invoice details"
                             });
                         }
                         else{
-                            console.log("5");
                             response.send({
                                 success:true,
                                 msg:"Receipt saved.",
@@ -482,20 +462,17 @@ module.exports.linkRecieptToInvoice = function(request,response){
                     });
                     }
                     else{
-                        console.log(invoice);
                         Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
                         { $set: { "clearedAmount": invoice.clearedAmount + receipt.paymentAmount,
                         "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
                     }}).exec(err,function(){
                         if(err){
-                            console.log("7");
                             response.send({
                                 success:false,
                                 msg:"Error in updating invoice details"
                             });
                         }
                         else{
-                            console.log("8");
                             response.send({
                                 success:true,
                                 msg:"Receipt saved.",
