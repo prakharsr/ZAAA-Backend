@@ -815,13 +815,7 @@ module.exports.mailInvoicePdf = function(request, response) {
                         sgstper:'',
                         echarges: echarges,
                         amtwords: invoice.netAmountWords,
-                        amtfig:invoice.netAmountFigures,
-                        aname: request.body.accountname,
-                        atype: request.body.accounttype,
-                        bank: request.body.bank,
-                        ano: request.body.accountno,
-                        branch: request.body.branch,
-                        ifsc: request.body.ifsc
+                        amtfig:invoice.netAmountFigures
                     }
                     
                     pdf.mailPaymentInvoice(request,response,Details);
@@ -901,13 +895,7 @@ module.exports.generateInvoicePdf = function(request, response) {
                         sgstper:'',
                         echarges: echarges,
                         amtwords: invoice.netAmountWords,
-                        amtfig:invoice.netAmountFigures,
-                        aname: request.body.accountname,
-                        atype: request.body.accounttype,
-                        bank: request.body.bank,
-                        ano: request.body.accountno,
-                        branch: request.body.branch,
-                        ifsc: request.body.ifsc
+                        amtfig:invoice.netAmountFigures
                     }
                     
                     pdf.generatePaymentInvoice(request,response,Details);

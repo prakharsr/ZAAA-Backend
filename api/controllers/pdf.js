@@ -249,12 +249,6 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.aname);
-            templateHtml = templateHtml.replace('{{bank}}', Details.bank);
-            templateHtml = templateHtml.replace('{{branch}}', Details.branch);
-            templateHtml = templateHtml.replace('{{atype}}', Details.atype);
-            templateHtml = templateHtml.replace('{{ano}}', Details.ano);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.ifsc);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -321,12 +315,6 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            templateHtml = templateHtml.replace('{{aname}}', Details.aname);
-            templateHtml = templateHtml.replace('{{bank}}', Details.bank);
-            templateHtml = templateHtml.replace('{{branch}}', Details.branch);
-            templateHtml = templateHtml.replace('{{atype}}', Details.atype);
-            templateHtml = templateHtml.replace('{{ano}}', Details.ano);
-            templateHtml = templateHtml.replace('{{ifsc}}', Details.ifsc);
             var options = {
                 width: '600mm',
                 height: '400mm'
@@ -380,7 +368,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
-                width: '600mm',
+                width: '200mm',
                 height: '400mm'
             }
             pdf.create(templateHtml, options).toStream(function (err, data) {
@@ -437,8 +425,8 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
-                width: '600mm',
-                height: '400mm'
+                width: '200mm',
+                height: '4000mm'
             }
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {

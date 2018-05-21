@@ -779,7 +779,13 @@ module.exports.updateReleaseOrder = function(request, response){
 			});
 		}
 		else{
-            ReleaseOrder.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, releaseOrder){
+             request.body.insertions = request.body.insertions.map(function(insertion) {
+                return {
+                    ...insertion,
+                    _id: undefined
+                }
+            })
+            ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){
                 if(err){
                     console.log(err);
                     response.send({

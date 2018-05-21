@@ -1,7 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Release Order</title>
+    <title>Receipt</title>
     <style>
         hr.rule1{
             border: 0;
@@ -14,15 +14,17 @@
         b {
             color: rgb(0, 9, 128);
         }
-
+        img{
+            height: 100px;
+            width: 100px;
+        }
     </style>
 </head>
 <body>
     <img src="{{logoimage}}">
     <hr class="rule1"> 
-    <p>{{faddress}}</p>
-    <br>
-    <p>{{fcdetails}}</p>
+    <p style="text-align:center">{{faddress}}</p>
+    <p style="text-align:center">{{fcdetails}}</p>
     <hr>
     <h3 style="text-align:center"><u>Payment Receipt</u></h3>
     <hr class="rule1">
