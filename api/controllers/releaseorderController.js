@@ -605,9 +605,7 @@ module.exports.queryReleaseOrder = async function(request, response){
                     var adCategory2 = request.body.adCategory2;
                     
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-                    console.log(request.body)
-                    console.log(query)
-                    console.log(request.body)
+
                     
                     ReleaseOrder.find(query)
                     .limit(perPage)
@@ -622,7 +620,6 @@ module.exports.queryReleaseOrder = async function(request, response){
                         }
                         else{
                             ReleaseOrder.count(query, function(err, count){
-                                console.log(releaseOrders, count)
                                 response.send({
                                     success:true,
                                     releaseOrders: releaseOrders,
@@ -665,7 +662,7 @@ module.exports.queryInsertions = function(request, response){
                     var adCategory2 = request.body.adCategory2;
                     if(request.body.insertionPeriod){
                         var to = new Date()
-                        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+                        var from = new Date();
                     }
                     else{
                         var to = new Date()

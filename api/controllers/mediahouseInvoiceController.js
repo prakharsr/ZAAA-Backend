@@ -1,0 +1,276 @@
+var config = require('../../config');
+var RateCard = require('../models/Ratecard');
+var userController = require('./userController');
+var firmController = require('./firmController');
+var pdf = require('./pdf');
+var User = require('../models/User');
+var ReleaseOrder = require('../models/ReleaseOrder');
+var jwt = require('jsonwebtoken');
+var Firm = require('../models/Firm');
+var Plan = require('../models/Plan');
+var MediaHouse = require('../models/MediaHouse');
+var Executive = require('../models/Executive');
+var Client = require('../models/Client');
+var mongoose = require('mongoose');
+var multer = require('multer');
+var mkdirp = require('mkdirp');
+var path = require('path');
+var perPage=20;
+
+
+function searchExecutiveID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Executive.find({$and: [
+            {'ExecutiveName':request.body.executiveName},
+            {'OrganizationName':request.body.executiveOrg}
+        ]}).exec(function(err, executive){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (executive.length===0)
+            {
+                    resolve(null);
+            
+            }
+            if(executive.length!==0){
+                executiveID =  executive[0]._id;
+                resolve(executiveID);
+            }
+        })
+    })
+}
+
+function searchClientID(request, response, user){
+    return new Promise((resolve, reject) => {
+        Client.find(
+            {$and: [
+                {$or:[
+                    {firm:mongoose.mongo.ObjectId(user.firm)},
+                    {global:true}
+                ]},
+                {'OrganizationName': request.body.clientName},
+            ]}
+        ).exec(function(err, client){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (client.length===0)
+            {
+                
+                resolve(null);
+            
+            }
+            if(client.length!==0){
+                clientID =  client[0]._id;
+                resolve(clientID);
+            }
+        });
+    });
+}
+function searchMediahouseID(request, response, user){
+    return new Promise((resolve, reject) => {
+        MediaHouse.find({$and: [
+            {'PublicationName':request.body.publicationName},
+            {"Address.edition":request.body.publicationEdition},
+            {$or:[{'firm':mongoose.mongo.ObjectId(user.firm)},{global:true}]}
+        ]}).exec( function(err, mediahouse){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (mediahouse.length == 0)
+            {
+                resolve(null)
+            }
+            if(mediahouse.length!==0){
+                console.log("mediahouse found");
+                mediahouseID =  mediahouse[0]._id;
+                resolve(mediahouseID)
+            }
+        });
+    })
+}
+
+function formQuery(mediahouseID, clientID, executiveID, date, user, request){
+    return new Promise((resolve, reject) => {
+        var query = {'firm':user.firm};
+        console.log(query)
+        console.log(mediahouseID, clientID, executiveID, date, user)
+    if(mediahouseID)
+    query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
+    if(clientID)
+    query['clientID'] = mongoose.mongo.ObjectId(clientID);
+    if(executiveID)
+    query['executiveID']=mongoose.mongo.ObjectId(executiveID);
+    if(request.body.releaseOrderNo){
+        query['releaseOrderNo']=request.body.releaseOrderNo
+    }
+    console.log(query)
+    resolve(query);
+        
+    })
+    
+    
+}
+
+module.exports.queryReleaseOrder = async function(request, response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+                    var mediahouseID =await searchMediahouseID(request, response, user);
+                    var clientID = await searchClientID(request, response, user);
+                    var executiveID = await searchExecutiveID(request, response, user);
+                    var date = (request.body.date)?(request.body.date):null;
+                    var adCategory1 = request.body.adCategory1;
+                    var adCategory2 = request.body.adCategory2;
+                    
+                    
+                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+                    console.log(request.body)
+                    console.log(query)
+                    console.log(request.body)
+                    
+                    ReleaseOrder.find(query)
+                    .limit(perPage)
+                    .skip((perPage * request.body.page) - perPage)
+                    .exec(function(err, releaseOrders){
+                        if(err){
+                            console.log(err+ "");
+                            response.send({
+                                success:false,
+                                msg: err +""
+                            });
+                        }
+                        else{
+                            ReleaseOrder.count(query, function(err, count){
+                                console.log(releaseOrders, count)
+                                response.send({
+                                    success:true,
+                                    releaseOrders: releaseOrders,
+                                    page: request.body.page,
+                                    perPage:perPage,
+                                    pageCount: Math.ceil(count/perPage)
+                                });
+                            })
+                            
+                        }
+                    });
+                }	
+	});
+
+};
+
+module.exports.queryInsertions = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+                    var mediahouseID =await searchMediahouseID(request, response, user);
+                    var clientID = await searchClientID(request, response, user);
+                    var executiveID = await searchExecutiveID(request, response, user);
+                    var date = (request.body.date)?(request.body.date):null;
+                    var adCategory1 = request.body.adCategory1;
+                    var adCategory2 = request.body.adCategory2;
+                    var to;
+                    var from;
+                    if(request.body.insertionPeriod){
+                        to = new Date()
+                        from =  new Date( to.getFullYear(), to.getMonth(), parseInt(to.getDay() - parseInt(request.body.insertionPeriod)));
+                    }
+                    else{
+                        to = new Date()
+                        from = new Date(1);
+                    }
+                    console.log(to, from);
+                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+
+                    
+                    ReleaseOrder
+                    .aggregate([{$unwind: "$insertions"}, 
+                    {$match:{$and:[query, {"insertions.ISODate":{$lte:to, $gte:from}}] }},
+                    { $group : { 
+                        _id: "$_id",
+                        count: {$sum: 1},
+                        entries: { $push:  
+                        {"publicationName":"$publicationName",
+                        "publicationEdition":"$publicationEdition", 
+                        "clientName":"$clientName",
+                        "executiveName":"$executiveName",
+                        "executiveOrg":"$executiveOrg",
+                        "insertions":{
+                            "date": "$insertions.date", 
+                            "marked": "$insertions.marked",
+                            "state": "$insertions.state",
+                            "ISODate": "$insertions.ISODate",
+                            "Amount":"$insertions.Amount",
+                            "MHID":"$insertions.MHID",
+                            "_id": "$insertions._id",
+                        }
+                    } }
+                     } },
+                    {$limit: perPage},
+                    {$skip:(perPage * request.body.page) - perPage}
+                    ])
+                    .exec(function(err, insertions){
+                                if(err){
+                                    console.log(err+ "");
+                                    response.send({
+                                        success:false,
+                                        msg: err +""
+                                    });
+                                }
+                                else{
+                                    ReleaseOrder.count(query, function(err, count){
+                                        response.send({
+                                            success:true,
+                                            insertions: insertions,
+                                            page: request.body.page,
+                                            perPage:perPage,
+                                            pageCount: Math.ceil(count/perPage)
+                                        });
+                                    })
+                                    
+                                }
+                            });
+                        }	
+	});
+}
+
+
+
+
