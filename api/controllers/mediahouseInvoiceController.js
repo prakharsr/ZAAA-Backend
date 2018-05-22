@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
+var MediaHouseInvoice = require('../models/MediaHouseInvoice');
 var Executive = require('../models/Executive');
 var Client = require('../models/Client');
 var mongoose = require('mongoose');
@@ -133,66 +134,6 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     
 }
 
-module.exports.queryReleaseOrder = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
-                    
-                    
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-                    console.log(request.body)
-                    console.log(query)
-                    console.log(request.body)
-                    
-                    ReleaseOrder.find(query)
-                    .limit(perPage)
-                    .skip((perPage * request.body.page) - perPage)
-                    .exec(function(err, releaseOrders){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
-                            });
-                        }
-                        else{
-                            ReleaseOrder.count(query, function(err, count){
-                                console.log(releaseOrders, count)
-                                response.send({
-                                    success:true,
-                                    releaseOrders: releaseOrders,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
-                            
-                        }
-                    });
-                }	
-	});
-
-};
 
 module.exports.queryInsertions = function(request, response){
     var token = userController.getToken(request.headers);

@@ -210,7 +210,8 @@ async function f (request, response, user){
         insertions: request.body.insertions.map(function(insertion) {
             return {
                 ...insertion,
-                _id: undefined
+                _id: undefined,
+                Amount: (request.body.adGrossAmount + request.body.taxAmount * (!request.body.taxIncluded))
             }
         }),
         executiveName:request.body.executiveName,
@@ -564,7 +565,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(request.body.creationPeriod)
     {
             var to = new Date()
-            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
+            var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
             query['date']={$gte: from, $lte:to} 
     }
     else{
@@ -572,6 +573,18 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         var from = new Date(1);
         query['date']={$gte: from, $lte:to} 
     }
+    if(request.body.insertionPeriod)
+    {
+            var to = new Date()
+            var from = new Date( to.getTime()- request.body.insertionPeriod *24*60*60*1000);
+            query['insertions.ISODate']={$gte: from, $lte:to} 
+    }
+    else{
+        var to = new Date()
+        var from = new Date(1);
+        query['insertions.ISODate']={$gte: from, $lte:to} 
+    }
+    
     resolve(query);
         
     })
@@ -605,7 +618,9 @@ module.exports.queryReleaseOrder = async function(request, response){
                     var adCategory2 = request.body.adCategory2;
                     
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
+                    console.log(request.body)
+                    console.log(query)
+                    console.log(request.body)
                     
                     ReleaseOrder.find(query)
                     .limit(perPage)
@@ -620,6 +635,7 @@ module.exports.queryReleaseOrder = async function(request, response){
                         }
                         else{
                             ReleaseOrder.count(query, function(err, count){
+                                console.log(releaseOrders, count)
                                 response.send({
                                     success:true,
                                     releaseOrders: releaseOrders,
@@ -660,14 +676,6 @@ module.exports.queryInsertions = function(request, response){
                     var date = (request.body.date)?(request.body.date):null;
                     var adCategory1 = request.body.adCategory1;
                     var adCategory2 = request.body.adCategory2;
-                    if(request.body.insertionPeriod){
-                        var to = new Date()
-                        var from = new Date();
-                    }
-                    else{
-                        var to = new Date()
-                        var from = new Date(1);
-                    }
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
 
                     
@@ -859,7 +867,7 @@ module.exports.mailROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN.GSTNo,
+                                gstin :releaseOrder.agencyGSTIN,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,
@@ -924,10 +932,10 @@ module.exports.generateROPdf = function(request, response) {
                             var insData="";
                             var insertions = releaseOrder.insertions;
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = ((releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount)/10000;
-                            var namount = releaseOrder.netAmountFigures;
+                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                            var namount = releaseOrder.adGrossAmount - damount ;
                             insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
                                 image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
@@ -935,7 +943,7 @@ module.exports.generateROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN.GSTNo,
+                                gstin :releaseOrder.agencyGSTIN,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,

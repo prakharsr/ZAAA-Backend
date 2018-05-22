@@ -51,5 +51,5 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
-    module.exports = mongoose.model('Receipt', ReceiptSchema);
+    module.exports = mongoose.model('MediaHouseInvoice', MediaHouseInvoiceSchema);
     
