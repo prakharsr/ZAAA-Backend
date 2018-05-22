@@ -154,7 +154,12 @@ catch(err){
         caption:request.body.caption,
         remark:request.body.remark,
         otherRemark:request.body.otherRemark,
-        insertions: request.body.insertions,
+        insertions: request.body.insertions.map(function(insertion) {
+            return {
+                ...insertion,
+                _id: undefined
+            }
+        }),
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
 
