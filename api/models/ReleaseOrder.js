@@ -96,7 +96,19 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adSchemeFree:String,
     adTotal:String,
     
-    insertions:[{date:{day:String,month:String,year:String}, marked:{type:Boolean, default: false}, state:{type:Number, default: 0}, ISODate: Date}],
+    insertions:[
+    {
+        date:{day:String,month:String,year:String},
+        marked:{type:Boolean, default: false},
+        state:{type:Number, default: 0},
+        Amount:{
+            type:Number,
+            default:0
+        },
+        ISODate: Date, 
+        MHID:{type:mongoose.Schema.Types.ObjectId, ref:"MediaHouseInvoice"}
+    }
+    ],
     adGrossAmount:String,
     publicationDiscount:String,
     agencyDiscount1:String,
@@ -160,7 +172,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
             insertions.forEach(element => {
                 var date = element.date;
                 element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-                
+                element.Amount = (+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded) ;
                 next();
             });
         }

@@ -8,11 +8,13 @@ var client = require('../controllers/clientController');
 var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
 var releaseOrder= require('../controllers/releaseorderController');
+var mediahouseInvoice= require('../controllers/mediahouseInvoiceController');
 var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var receipt = require('../controllers/receiptController');
 
+router.post('/user/mediahouseinvoice/list', mediahouseInvoice.queryInsertions);
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
 router.post('/user/mobile', user.setMobile);
