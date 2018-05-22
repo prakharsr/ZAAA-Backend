@@ -113,6 +113,18 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(request.body.releaseOrderNo){
         query['releaseOrderNo']=request.body.releaseOrderNo
     }
+
+    if(request.body.insertionPeriod){
+        to = new Date();
+        from =  new Date(to.getTime() - (request.body.insertionPeriod)*24*60*60*1000);
+        query['insertions.ISODate'] = {$lte:to, $gte:from}
+    }
+    else{
+        to = new Date()
+        from = new Date(1);
+        query['ISODate'] = {$lte:to, $gte:from}
+    }
+    console.log(to, from);
     console.log(query)
     resolve(query);
         
@@ -208,21 +220,14 @@ module.exports.queryInsertions = function(request, response){
                     var adCategory2 = request.body.adCategory2;
                     var to;
                     var from;
-                    if(request.body.insertionPeriod){
-                        to = new Date()
-                        from =  new Date( to.getFullYear(), to.getMonth(), parseInt(to.getDay() - parseInt(request.body.insertionPeriod)));
-                    }
-                    else{
-                        to = new Date()
-                        from = new Date(1);
-                    }
-                    console.log(to, from);
+
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
 
                     
                     ReleaseOrder
-                    .aggregate([{$unwind: "$insertions"}, 
-                    {$match:{$and:[query, {"insertions.ISODate":{$lte:to, $gte:from}}] }},
+                    .aggregate([
+                    {$unwind: "$insertions"}, 
+                    {$match:query},
                     { $group : { 
                         _id: "$_id",
                         count: {$sum: 1},
