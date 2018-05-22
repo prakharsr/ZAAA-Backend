@@ -862,7 +862,7 @@ module.exports.mailROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
+                                gstin :releaseOrder.agencyGSTIN.GSTNo,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,
@@ -927,10 +927,10 @@ module.exports.generateROPdf = function(request, response) {
                             var insData="";
                             var insertions = releaseOrder.insertions;
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
+                            var damount = ((releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount)/10000;
+                            var namount = releaseOrder.netAmountFigures;
                             insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
                                 image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
@@ -938,7 +938,7 @@ module.exports.generateROPdf = function(request, response) {
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
                                 cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
+                                gstin :releaseOrder.agencyGSTIN.GSTNo,
                                 scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
                                 gamount :releaseOrder.adGrossAmount,
                                 insertions :insData,
