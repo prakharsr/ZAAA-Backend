@@ -18,6 +18,56 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
 
+module.exports.createMHInvoice = async (request,response) => {
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var releaseorder = await ReleaseOrder.findById(request.body.id);
+    var firm = await Firm.findById(user.firm)
+
+    var mhinvoice = new MediaHouseInvoice({
+        releaseOrderId: releaseorder._id,
+        insertions: request.body.insertions,
+        releaseOrderNo: releaseorder.releaseOrderNo,
+        MHIDate: request.body.MHIDate,
+        MHIGrossAmount: request.body.MHIGrossAmount,
+        MHITaxAmount: request.body.MHITaxAmount,
+        mediahouseID: mediahouseID,
+        executiveID: executiveID,
+        clientID: clientID,
+        firm: firm._id
+    })
+
+    mhinvoice.save((err,doc)=>{
+        if(err){
+            response.send({
+                success: false,
+                msg: 'media house invoice cannot be created'
+            })
+        }
+        else{
+            (request.body.insertions).forEach((object) => {
+                var insertion = releaseorder.insertions.id(object._id);
+                insertion.MHID = doc._id
+            })
+            releaseorder.save((err,doc)=>{
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'insertion fetch error'
+                    })
+                }
+                else{
+                    response.send({
+                        success:true,
+                        msg: 'Successfully created the MHInvoice'
+                    })
+                }
+            })
+        }
+    })
+}
+
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
