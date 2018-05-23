@@ -229,6 +229,8 @@ async function f(request, response, user){
         var mediahouse = await findMediahouse(invoice.mediahouseID);
         var client = await findClient(invoice.clientID);
         var executive = await findExecutive(invoice.executiveID);
+        var counter = invoice.receiptSerial+1;
+        var rno = invoice.invoiceNO+'.'+counter;  
     }
     catch(err){
         console.log(err);
@@ -243,7 +245,7 @@ async function f(request, response, user){
         paymentAmountWords:request.body.paymentAmountWords,
         
         invoiceID :request.body.invoiceID,
-        ReceiptNO: '20',
+        receiptNO: rno,
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
@@ -300,11 +302,22 @@ async function f(request, response, user){
                 });
             }
             else{
-                response.send({
-                    success:true,
-                    msg:"Receipt saved.",
-                    receipt: receipt
-                });
+                invoice.receiptSerial += 1;
+                invoice.save((err,doc) => {
+                    if(err){
+                        response.send({
+                            success:false,
+                            msg: err + ""
+                        });
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg:"Receipt saved.",
+                            rceipt:doc 
+                        })
+                    }
+                })
             }
         });
     }
@@ -361,22 +374,22 @@ module.exports.createAdvancedReciept = function(request,response){
                 var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
                 var clientID = await getClientID(request,response,user);
                 var executiveID = await getExecutiveID(request,response,user);
-                
                 var mediahouseID = await getMediahouseID(request,response,user);
                 var mediahouse = await findMediahouse(mediahouseID)
                 var client = await findClient(clientID);
                 var executive = await findExecutive(executiveID);
+                var rno = 'Adv'+(firm.AdvReceiptSerial+1)
             
             var receipt = new Receipt({
                 advanced: true,
+                receiptNO: rno,
                 paymentType:request.body.paymentType,
                 paymentDate:request.body.paymentDate,
                 paymentNo:request.body.paymentNo,
                 paymentAmount:request.body.paymentAmount,
                 paymentBankName:request.body.paymentBankName,
-                paymentAmountWords:request.body.paymentAmountWords,
-                
-                ReceiptNO: '20',
+                paymentAmountWords:request.body.paymentAmountWords,                
+                receiptNO: rno,
                 agencyName: firm.FirmName,
                 agencyGSTIN: firm.GSTIN,
                 agencyPerson: user.name,
@@ -406,9 +419,20 @@ module.exports.createAdvancedReciept = function(request,response){
                     })
                 }
                 else{
-                    response.send({
-                        success:true,
-                        msg:'saved receipt data'
+                    firm.AdvReceiptSerial += 1;
+                    firm.save((err,doc) => {
+                        if(err){
+                            response.send({
+                                success:false,
+                                msg:'Cannot save firm data'
+                            })
+                        }
+                        else{
+                            response.send({
+                                success:true,
+                                msg:'saved receipt data'
+                            })
+                        }
                     })
                 }
             })

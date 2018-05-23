@@ -11,10 +11,14 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type:Date,
         default:new Date()
     },
-    // releaseOrderNO: {
-    //     type:String,
-    //     unique:true
-    // },
+    releaseOrderNO: {
+        type:String,
+        unique:true
+    },
+    invoiceSerial:{
+        type: Number,
+        default: 0
+    },
     agencyName: String,
     agencyGSTIN: String,
     agencyPin:String,
@@ -37,7 +41,6 @@ var ReleaseOrderSchema = new mongoose.Schema({
         GSTType:String,
         GSTNo:String
     },
-
     PremiumCustom:{
         Amount:Number,
         Percentage:Boolean,

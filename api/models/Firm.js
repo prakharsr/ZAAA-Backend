@@ -44,7 +44,14 @@ var FirmSchema = new mongoose.Schema({
         GSTType:String,
         GSTNo:String
     },
-    ROSerial:Number,
+    ROSerial:{
+        type: Number,
+        default: 0
+    },
+    AdvReceiptSerial:{
+        type: Number,
+        default: 0
+    },
     BankDetails:{
         AccountName:String,
         AccountNo:String,

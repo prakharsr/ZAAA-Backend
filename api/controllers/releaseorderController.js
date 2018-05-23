@@ -143,10 +143,20 @@ async function f (request, response, user){
     var mediahouseID = await getMediahouseID(request, response, user);
     var clientID = await getClientID(request, response, user);
     var executiveID = await getExecutiveID(request, response, user);
+    var date = new Date()
+    var sn = firm.ROSerial+1;
+    var fname = firm.FirmName;
+    var shortname = fname.match(/\b\w/g).join('');
+    var city = firm.OfficeAddress.city;
+    var gstin = firm.GSTIN;
+    gstin = GSTIN.GSTNO.substring(0,1);
+    var year = date.getFullYear();
+    var rno = year+''+gstin+''+shortname+''+city+''+sn;
+    console.log(rno);
     
     var releaseOrder = new ReleaseOrder({
         
-        // releaseOrderNO: '20',
+        releaseOrderNO: rno,
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
@@ -233,10 +243,21 @@ async function f (request, response, user){
             });
         }
         else{
-            response.send({
-                success:true,
-                msg: doc._id
-            })
+            firm.ROSerial += 1;
+            firm.save(function(err){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err.message
+                    });
+                }
+                else{
+                    response.send({
+                        success : true,
+                        msg : doc._id
+                    });
+                }
+            });
         }
     })
 };

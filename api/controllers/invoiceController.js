@@ -118,14 +118,15 @@ try {
     var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
     var client = await findClient(releaseOrder.clientID);
     var executive = await findExecutive(releaseOrder.executiveID);
+    var counter = releaseOrder.invoiceSerial+1;
+    var ino = releaseOrder.releaseOrderNO+'.'+counter
 }
 catch(err){
     console.log(err);
 }
     var invoice = new Invoice({
-        
         releaseOrderId :request.body.releaseOrderId,
-        InvoiceNO: '20',
+        InvoiceNO: ino,
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
@@ -184,7 +185,7 @@ catch(err){
                     msg:"Error in updating client GST number"
                 })
             }
-        })
+        });
         ReleaseOrder.updateMany(
             { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}]
             },
@@ -199,16 +200,24 @@ catch(err){
                 });
             }
             else{
-        
-                response.send({
-                    success:true,
-                    msg:"Invoice saved.",
-                    invoice:doc 
+                releaseOrder.invoiceSerial += 1;
+                releaseOrder.save((err,doc) => {
+                    if(err){
+                        response.send({
+                            success:false,
+                            msg: err + ""
+                        });
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg:"Invoice saved.",
+                            invoice:doc 
+                        })
+                    }
                 })
             }
-            
         })
-
         }
     })
 }
