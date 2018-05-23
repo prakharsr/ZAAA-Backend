@@ -585,7 +585,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         query['insertions.ISODate']={$gte: from, $lte:to} 
         console.log(to, from)
     }
-    
+    if(request.body.releaseOrderNo){
+        query['releaseOrderNo'] = request.body.releaseOrderNo;
+    }
     resolve(query);
         
     })
