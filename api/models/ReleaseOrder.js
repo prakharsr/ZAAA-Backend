@@ -109,7 +109,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
             default:0
         },
         ISODate: Date, 
-        MHID:{type:mongoose.Schema.Types.ObjectId, ref:"MediaHouseInvoice"}
+        PaidAmount:Number
     }
     ],
     adGrossAmount:String,
@@ -142,6 +142,15 @@ var ReleaseOrderSchema = new mongoose.Schema({
     otherRemark:String,
     FinalAmount:String,
     FinalTaxAmount:String,
+    mediahouseInvoices:[{
+        insertionId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'ReleaseOrder.insertions.$'
+        },
+        invoiceNo:String,
+        invoiceDate:String,
+        invoiceAmount:Number
+    }],
     mediahouseID: {
         type:mongoose.Schema.Types.ObjectId,
         ref:"MediaHouse"
