@@ -14,7 +14,6 @@ var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var receipt = require('../controllers/receiptController');
 
-router.post('/user/mediahouseinvoice/list', mediahouseInvoice.queryInsertions);
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
 router.post('/user/mobile', user.setMobile);
@@ -118,6 +117,9 @@ router.get('/user/receipts/:page', receipt.getReceipts);
 router.get('/user/receipt/:id', receipt.getReceipt);
 router.delete('/user/receipt/:id', receipt.deleteReceipt);
 router.patch('/user/receipt/:id', receipt.updateReceipt);
+
+router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
+router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryInsertions);
 
 
 module.exports = router;
