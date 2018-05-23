@@ -265,7 +265,8 @@ module.exports.queryInsertions = function(request, response){
                             });
                         }	
 	});
-}
+};
+
 
 
 

@@ -210,8 +210,7 @@ async function f (request, response, user){
         insertions: request.body.insertions.map(function(insertion) {
             return {
                 ...insertion,
-                _id: undefined,
-                Amount: (request.body.adGrossAmount + request.body.taxAmount * (!request.body.taxIncluded))
+                _id: undefined
             }
         }),
         executiveName:request.body.executiveName,

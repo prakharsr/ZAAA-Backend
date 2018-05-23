@@ -172,7 +172,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
             insertions.forEach(element => {
                 var date = element.date;
                 element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-                element.Amount = (+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded) ;
+                element.Amount = ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length ;
                 next();
             });
         }
