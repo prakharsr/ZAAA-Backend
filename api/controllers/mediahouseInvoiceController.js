@@ -173,7 +173,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     else{
         to = new Date()
         from = new Date(1);
-        query['ISODate'] = {$lte:to, $gte:from}
+        query['insertions.ISODate'] = {$lte:to, $gte:from}
     }
     console.log(to, from);
     console.log(query)
