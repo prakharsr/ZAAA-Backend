@@ -577,11 +577,13 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
             var to = new Date()
             var from = new Date( to.getTime()- request.body.insertionPeriod *24*60*60*1000);
             query['insertions.ISODate']={$gte: from, $lte:to} 
+            console.log(to, from)
     }
     else{
         var to = new Date()
         var from = new Date(1);
         query['insertions.ISODate']={$gte: from, $lte:to} 
+        console.log(to, from)
     }
     
     resolve(query);
@@ -783,12 +785,7 @@ module.exports.updateReleaseOrder = function(request, response){
 			});
 		}
 		else{
-             request.body.insertions = request.body.insertions.map(function(insertion) {
-                return {
-                    ...insertion,
-                    _id: undefined
-                }
-            })
+
             ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){
                 if(err){
                     console.log(err);
@@ -798,10 +795,21 @@ module.exports.updateReleaseOrder = function(request, response){
                     });
                 }
                 else{
-                    response.send({
-                        success:true,
-                        msg: "ReleaseOrder Updated"
+                    
+                    releaseOrder.save(function(err){
+                        if(err)
+                        {
+                            console.log(err)
+                        }
+                        else{
+                            response.send({
+                                success:true,
+                                msg: "ReleaseOrder Updated"
+                            });
+                        }
                     });
+            
+                 
                 }
                 
             })

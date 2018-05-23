@@ -165,7 +165,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     ReleaseOrderSchema.pre('save', function(next){
         var self = this;
         var insertions = self.insertions;
-        if(insertions.length == 0){
+        if(self.insertions.length == 0){
             return next(new Error('Please select insertions'));
         }
         else{
@@ -177,6 +177,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
             });
         }
     });
+
 
     module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
     
