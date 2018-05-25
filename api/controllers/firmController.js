@@ -418,4 +418,38 @@ module.exports.getTemplates = function(request, response){
 		}
 	});
 };
+
+module.exports.getFirmUsers = function(request,response){
+	var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			User.find({'firm':mongoose.mongo.ObjectId(user.firm)},{ "name": 1,"_id": 1 }).
+			
+			exec(function(err, users){
+				if(err||!firm){
+					console.log("User not found");
+					response.send({
+						success:false,
+						msg:err
+					});
+				}
+				else{
+					response.send({
+						success:true,
+						users: users
+					})
+					
+				}
+			});
+			
+		}
+	});
+}
 	
