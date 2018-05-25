@@ -582,29 +582,29 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     query['clientID'] = mongoose.mongo.ObjectId(clientID);
     if(executiveID)
     query['executiveID']=mongoose.mongo.ObjectId(executiveID);
-    if(request.body.creationPeriod)
+    if(request.body.creationPeriod != 0)
     {
             var to = new Date()
             var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
             query['date']={$gte: from, $lte:to} 
     }
-    else{
+    else if(request.body.creationPeriod == 0){
         var to = new Date()
         var from = new Date(1);
         query['date']={$gte: from, $lte:to} 
     }
-    if(request.body.insertionPeriod)
+    if(request.body.insertionPeriod )
     {
             var to = new Date()
             var from = new Date( to.getTime()- request.body.insertionPeriod *24*60*60*1000);
             query['insertions.ISODate']={$gte: from, $lte:to} 
-            console.log(to, from)
+
     }
-    else{
+    else if(request.body.insertionPeriod ){
         var to = new Date()
         var from = new Date(1);
-        // query['insertions.ISODate']={$gte: from, $lte:to} 
-        console.log(to, from)
+        query['insertions.ISODate']={$gte: from, $lte:to} 
+ 
     }
     if(request.body.releaseOrderNo){
         query['releaseOrderNo'] = request.body.releaseOrderNo;
@@ -613,6 +613,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     {
         query['generated']=true;
     }
+    console.log(query);
     resolve(query);
         
     })
@@ -646,9 +647,7 @@ module.exports.queryReleaseOrder = async function(request, response){
                     var adCategory2 = request.body.adCategory2;
                     
                     var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-                    console.log(request.body)
-                    console.log(query)
-                    console.log(request.body)
+
                     
                     ReleaseOrder.find(query)
                     .limit(perPage)
