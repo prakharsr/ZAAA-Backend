@@ -84,6 +84,15 @@ var ReceiptSchema = new mongoose.Schema({
     paymentBankName:String,
     paymentAmountWords:String,
 
+    status:{
+        type:Number,
+        default:0
+    },
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    }
+,
     mediahouseID: {
         type:mongoose.Schema.Types.ObjectId,
         ref:"MediaHouse"

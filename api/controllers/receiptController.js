@@ -276,6 +276,7 @@ async function f(request, response, user){
         
         template: firm.ROTemplate,
         firm:user.firm,
+        userId:user._id,
         mediahouseID : invoice.mediahouseID,
         clientID: invoice.clientID,
         executiveID: invoice.executiveID,  
@@ -710,6 +711,10 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
         }
         if(advanced)
         query['advanced']=advanced;
+        if(request.body.userId)
+        {
+            query['userId'] = request.body.userId;
+        }
         resolve(query);
         
     })
