@@ -37,6 +37,7 @@ router.post('/user/sign', user.signature);
 router.get('/user/profile', user.getUserProfile);
 router.post('/user/profile', user.setUserProfile);
 router.get('/firm/profile', firm.getFirmProfile);
+router.get('/firm/users', firm.getFirmUsers);
 router.post('/firm/profile', firm.setFirmProfile);
 router.post('/firm/logo', firm.logoImage);
 router.delete('/firm/logo', firm.deleteLogoImage);
