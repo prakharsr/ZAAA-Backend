@@ -276,7 +276,7 @@ async function f(request, response, user){
         
         template: firm.ROTemplate,
         firm:user.firm,
-        userId:user._id,
+        userID:user._id,
         mediahouseID : invoice.mediahouseID,
         clientID: invoice.clientID,
         executiveID: invoice.executiveID,  
@@ -711,9 +711,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
         }
         if(advanced)
         query['advanced']=advanced;
-        if(request.body.userId)
+        if(request.body.userID)
         {
-            query['userId'] = request.body.userId;
+            query['userID'] = request.body.userID;
         }
         resolve(query);
         
@@ -1084,4 +1084,54 @@ module.exports.generateReceiptPdf = function(request, response) {
             
         }
     })
+}
+
+module.exports.receiptStatus = async function(request, response){
+    try{
+    var receipt = await Receipt.findById(request.body.receiptID);
+    var invoice = await Invoice.findById(receipt.invoiceID);
+    }
+    catch(err){
+        console.log('error in await statements');
+    }
+    var oldStatus = receipt.status;
+    var newStatus = request.body.status;
+    var amount = 0;
+
+    if(newStatus==2)
+    amount = receipt.paymentAmount;
+    else if(oldStatus==2)
+    amount = -(receipt.paymentAmount);
+
+    receipt.status = newStatus;
+
+    receipt.save((err, doc) => {
+        if(err){
+            response.send({
+                success: false,
+                msg: 'Caanot save data'
+            });
+        }
+        else{
+            Invoice.update({"_id":doc.invoiceID},
+            { $set: {   
+                        "clearedAmount": invoice.clearedAmount-amount,
+                        "pendingAmount": invoice.pendingAmount+amount
+                    }}).exec(err,()=>{
+                    if(err){
+                        response.send({
+                            success:false,
+                            msg:"Error in updating invoice details"
+                        });
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg: 'Status changed successfully'
+                        })
+                    }
+            });
+        }
+    })
+
 }

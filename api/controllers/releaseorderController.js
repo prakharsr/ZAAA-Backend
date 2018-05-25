@@ -149,7 +149,7 @@ async function f (request, response, user){
     var shortname = fname.match(/\b\w/g).join('');
     var city = firm.OfficeAddress.city;
     var gstin = firm.GSTIN;
-    gstin = GSTIN.GSTNO.substring(0,1);
+    gstin = gstin.GSTNo.substring(0,1);
     var year = date.getFullYear();
     var rno = year+''+gstin+''+shortname+''+city+''+sn;
     console.log(rno);
@@ -603,7 +603,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     else{
         var to = new Date()
         var from = new Date(1);
-        query['insertions.ISODate']={$gte: from, $lte:to} 
+        // query['insertions.ISODate']={$gte: from, $lte:to} 
         console.log(to, from)
     }
     if(request.body.releaseOrderNo){

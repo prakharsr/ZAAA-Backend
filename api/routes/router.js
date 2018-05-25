@@ -117,6 +117,7 @@ router.get('/user/receipts/:page', receipt.getReceipts);
 router.get('/user/receipt/:id', receipt.getReceipt);
 router.delete('/user/receipt/:id', receipt.deleteReceipt);
 router.patch('/user/receipt/:id', receipt.updateReceipt);
+router.post('/user/receipt/status', receipt.receiptStatus);
 
 router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryInsertions);

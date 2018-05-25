@@ -120,13 +120,14 @@ try {
     var executive = await findExecutive(releaseOrder.executiveID);
     var counter = releaseOrder.invoiceSerial+1;
     var ino = releaseOrder.releaseOrderNO+'.'+counter
+
 }
 catch(err){
     console.log(err);
 }
     var invoice = new Invoice({
         releaseOrderId :request.body.releaseOrderId,
-        InvoiceNO: ino,
+        invoiceNO: ino,
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,

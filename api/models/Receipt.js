@@ -8,7 +8,7 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var ReceiptSchema = new mongoose.Schema({
     
     advanced:Boolean,
-    ReceiptNo:String,
+    receiptNO:String,
     invoiceID:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Invoice"
@@ -88,7 +88,7 @@ var ReceiptSchema = new mongoose.Schema({
         type:Number,
         default:0
     },
-    userId:{
+    userID:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     }
