@@ -293,7 +293,7 @@ async function f(request, response, user){
         }
         else{
             Invoice.update({ $and: [{firm:user.firm}, {"_id":doc.invoiceID}]},
-            { $set: { "clearedAmount": invoice.clearedAmount+request.body.paymentAmount,
+            { $set: { "collectedAmount": invoice.collectedAmount+request.body.paymentAmount,
             "pendingAmount": invoice.pendingAmount-request.body.paymentAmount
         }}).exec(err,function(){
             if(err){
@@ -467,7 +467,7 @@ module.exports.linkRecieptToInvoice = function(request,response){
                 else{
                     if(receipt.paymentAmount > invoice.pendingAmount){
                         Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
-                        { $set: { "clearedAmount": invoice.clearedAmount+invoice.pendingAmount,
+                        { $set: { "collectedAmount": invoice.collectedAmount+invoice.pendingAmount,
                         "pendingAmount": 0,
                         "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
                     }}).exec(err,function(){
@@ -488,7 +488,7 @@ module.exports.linkRecieptToInvoice = function(request,response){
                     }
                     else{
                         Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
-                        { $set: { "clearedAmount": invoice.clearedAmount + receipt.paymentAmount,
+                        { $set: { "collectedAmount": invoice.collectedAmount + receipt.paymentAmount,
                         "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
                     }}).exec(err,function(){
                         if(err){
@@ -1096,12 +1096,43 @@ module.exports.receiptStatus = async function(request, response){
     }
     var oldStatus = receipt.status;
     var newStatus = request.body.status;
-    var amount = 0;
+    var coamount = 0, pamount = 0, clamount = 0, amount = receipt.paymentAmount;
 
-    if(newStatus==2)
-    amount = receipt.paymentAmount;
-    else if(oldStatus==2)
-    amount = -(receipt.paymentAmount);
+    /* 0 for collected
+       1 for cleared
+       2 for rejected  */
+
+    if(oldStatus==0 && newStatus==1){
+        coamount = invoice.collectedAmount-amount;
+        pamount = invoice.pendingAmount;
+        clamount = invoice.clearedAmount+amount;
+    }
+    else if(oldStatus==0 && newStatus==2){
+        coamount = invoice.collectedAmount-amount;
+        pamount = invoice.pendingAmount+amount;
+        clamount = invoice.clearedAmount;
+    }
+    else if(oldStatus==1 && newStatus==0){
+        coamount = invoice.collectedAmount+amount;
+        pamount = invoice.pendingAmount;
+        clamount = invoice.clearedAmount-amount;
+    }
+    else if(oldStatus==1 && newStatus==2){
+        coamount = invoice.collectedAmount;
+        pamount = invoice.pendingAmount+amount;
+        clamount = invoice.clearedAmount-amount;
+    }
+    else if(oldStatus==2 && newStatus==0){
+        coamount = invoice.collectedAmount+amount;
+        pamount = invoice.pendingAmount-amount;
+        clamount = invoice.clearedAmount;
+    }
+    else if(oldStatus==2 && newStatus==1){
+        coamount = invoice.collectedAmount;
+        pamount = invoice.pendingAmount-amount;
+        clamount = invoice.clearedAmount+amount;
+    }
+    
 
     receipt.status = newStatus;
 
@@ -1109,14 +1140,15 @@ module.exports.receiptStatus = async function(request, response){
         if(err){
             response.send({
                 success: false,
-                msg: 'Caanot save data'
+                msg: 'Cannot save data'
             });
         }
         else{
             Invoice.update({"_id":doc.invoiceID},
             { $set: {   
-                        "clearedAmount": invoice.clearedAmount-amount,
-                        "pendingAmount": invoice.pendingAmount+amount
+                        "collectedAmount" : coamount,
+                        "clearedAmount": clamount,
+                        "pendingAmount": pamount
                     }}).exec(err,()=>{
                     if(err){
                         response.send({

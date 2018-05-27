@@ -105,7 +105,15 @@ var InvoiceSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    collectedAmount:{
+        type: Number,
+        default: 0
+    },
     pendingAmount:Number,
+    exceedingAmount:{
+        type: Number,
+        default: 0
+    },
     /*          */
     
     /* only marked insertions , kept for date purpose for invoice*/
