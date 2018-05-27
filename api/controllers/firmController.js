@@ -433,7 +433,7 @@ module.exports.getFirmUsers = function(request,response){
 			User.find({'firm':mongoose.mongo.ObjectId(user.firm)},{ "name": 1,"_id": 1 }).
 			
 			exec(function(err, users){
-				if(err||!firm){
+				if(err||!users){
 					console.log("User not found");
 					response.send({
 						success:false,
