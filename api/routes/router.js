@@ -106,7 +106,8 @@ router.get('/user/invoices/:page', invoice.getInvoices);
 router.get('/user/invoice/:id', invoice.getInvoice);
 router.delete('/user/invoice/:id', invoice.deleteInvoice);
 router.patch('/user/invoice/:id', invoice.updateInvoice);
-router.post('/user/invoice/payments', invoice.queryClientPayments);
+router.post('/user/invoice/clientPayments', invoice.queryClientPayments);
+router.post('/user/invoice/executivePayments', invoice.queryExecutivePayments);
 
 router.post('/user/receipt', receipt.createReceipt);
 router.post('/user/receipt/search/', receipt.queryReceipt);

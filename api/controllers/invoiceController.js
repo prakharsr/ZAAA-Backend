@@ -656,6 +656,77 @@ module.exports.queryClientPayments = function(request, response){
                         }	
 	});
 }
+module.exports.queryExecutivePayments = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+                    var mediahouseID =await searchMediahouseID(request, response, user);
+                    var clientID = await searchClientID(request, response, user);
+                    var executiveID = await searchExecutiveID(request, response, user);
+                    var date = (request.body.date)?(request.body.date):null;
+                      var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+
+                    
+                    Invoice.aggregate([ 
+                    {$match:query},
+                    { $group : { 
+                        _id: "$executiveID",
+                        count: {$sum: 1},
+                        entries: { $push:  
+                        {
+                        "publicationName":"$publicationName",
+                        "publicationEdition":"$publicationEdition", 
+                        "clientName":"$clientName",
+                        "invoiceNO":"$invoiceNO",
+                        shadow :{ $add: [ "$pendingAmount", "$collectedAmount" ] },
+                        "balance":"$collectedAmount",
+                        "totalBalance":"$pendingAmount",
+                        "executiveOrg":"$executiveOrg",
+                        "executiveName": "$executiveName",
+                    } }
+
+                     } },
+                    {$limit: perPage},
+                    {$skip:(perPage * request.body.page) - perPage}
+                    ])
+                    .exec(function(err, invoices){
+                                if(err){
+                                    console.log(err+ "");
+                                    response.send({
+                                        success:false,
+                                        msg: err +""
+                                    });
+                                }
+                                else{
+                                    Invoice.count(query, function(err, count){
+                                        response.send({
+                                            success:true,
+                                            invoices: invoices,
+                                            page: request.body.page,
+                                            perPage:perPage,
+                                            pageCount: Math.ceil(count/perPage)
+                                        });
+                                    })
+                                    
+                                }
+                            });
+                        }	
+	});
+}
 
 
 
