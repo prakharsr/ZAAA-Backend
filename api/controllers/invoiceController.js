@@ -615,6 +615,10 @@ module.exports.queryClientPayments = function(request, response){
                     { $group : { 
                         _id: "$clientID",
                         count: {$sum: 1},
+                        
+                        shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+                        balance :{$sum: "$collectedAmount" },
+                        totalBalance:{$sum: "$pendingAmount" },
                         entries: { $push:  
                         {
                         "publicationName":"$publicationName",
@@ -686,6 +690,10 @@ module.exports.queryExecutivePayments = function(request, response){
                     { $group : { 
                         _id: "$executiveID",
                         count: {$sum: 1},
+                        
+                        shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+                        balance :{$sum: "$collectedAmount" },
+                        totalBalance:{$sum: "$pendingAmount" },
                         entries: { $push:  
                         {
                         "publicationName":"$publicationName",
