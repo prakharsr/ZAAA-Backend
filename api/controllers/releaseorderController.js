@@ -603,10 +603,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(request.body.releaseOrderNo){
         query['releaseOrderNo'] = request.body.releaseOrderNo;
     }
-    if(request.body.generated = true)
-    {
-        query['generated']=true;
-    }
+
+    query['generated'] = request.body.generated == true;
+    
     console.log(query);
     resolve(query);
         
