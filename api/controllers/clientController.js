@@ -106,18 +106,8 @@ module.exports.createClientFromRO = function(request,response){
                     var client = new Client({
                         OrganizationName:request.body.organizationName,
                         CompanyName:request.body.companyName,
-                        NickName:request.body.nickName,
-                        CategoryType:request.body.categoryType,
-                        SubCategoryType:request.body.SubCategoryType,
-                        IncorporationDate:request.body.IncorporationDate,
                         Address:request.body.address,
-                        stdNo:request.body.stdNo,
-                        Landline:request.body.landline,
-                        Website:request.body.website,
-                        PanNO:request.body.panNo,
                         GSTIN:request.body.GSTIN,
-                        ContactPerson:request.body.contactPerson,
-                        Remark:request.body.Remark,
                         firm : user.firm
                     });
                     client.save(function(err){
