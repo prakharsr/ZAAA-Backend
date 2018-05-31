@@ -26,7 +26,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     agencyState:String,
     agencyPerson: String,
     signature: String,
-
+    
     publicationName:String,
     publicationEdition:String,
     mediaType:String,
@@ -73,7 +73,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
         Quantity:Number,
         Included:Boolean
     },
-
+    
     adType:String,
     rate:String,
     unit:String,
@@ -100,17 +100,17 @@ var ReleaseOrderSchema = new mongoose.Schema({
     adTotal:String,
     
     insertions:[
-    {
-        date:{day:String,month:String,year:String},
-        marked:{type:Boolean, default: false},
-        state:{type:Number, default: 0},
-        Amount:{
-            type:Number,
-            default:0
-        },
-        ISODate: Date, 
-        PaidAmount:Number
-    }
+        {
+            date:{day:String,month:String,year:String},
+            marked:{type:Boolean, default: false},
+            state:{type:Number, default: 0},
+            Amount:{
+                type:Number,
+                default:0
+            },
+            ISODate: Date, 
+            PaidAmount:Number
+        }
     ],
     adGrossAmount:String,
     publicationDiscount:String,
@@ -125,17 +125,17 @@ var ReleaseOrderSchema = new mongoose.Schema({
     netAmountWords:String,
     caption:String,
     remark:String,
-
+    
     paymentType:String,
     paymentDate:String,
     paymentNo:String,
     paymentAmount:String,
     paymentBankName:String,
     otherCharges:[
-    {
-        amount:String,
-        chargeType:String,
-    }
+        {
+            amount:String,
+            chargeType:String,
+        }
     ],
     executiveName:String,
     executiveOrg:String,
@@ -172,24 +172,23 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    });
+});
 
-    ReleaseOrderSchema.pre('save', function(next){
-        var self = this;
-        var insertions = self.insertions;
-        if(self.insertions.length == 0){
-            return next(new Error('Please select insertions'));
-        }
-        else{
-            insertions.forEach(element => {
-                var date = element.date;
-                element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");
-                element.Amount = ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length ;
-                next();
-            });
-        }
-    });
+ReleaseOrderSchema.pre('save', function(next){
+    var self = this;
+    var insertions = self.insertions;
+    if(self.insertions.length == 0){
+        return next(new Error('Please select insertions'));
+    }
+    else{
+        insertions.forEach(element => {
+            var date = element.date;
+            element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");            
+            element.Amount = ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length ;
+            next();
+        });
+    }
+});
 
 
-    module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
-    
+module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
