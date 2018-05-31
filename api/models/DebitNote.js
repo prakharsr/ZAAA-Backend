@@ -1,8 +1,7 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
 
-var NoteSchema = new mongoose.Schema({
-    type: Number,
+var DebitNoteSchema = new mongoose.Schema({
     partyName: String,
     docNumber: String,
     amount: Number,
@@ -18,4 +17,4 @@ var NoteSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Note', NoteSchema);
+module.exports = mongoose.model('Note', DebitNoteSchema);

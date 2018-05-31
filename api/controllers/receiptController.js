@@ -1095,7 +1095,7 @@ module.exports.receiptStatus = async function(request, response){
         console.log('error in await statements');
     }
     var oldStatus = receipt.status;
-    var newStatus = request.body.status;
+    var newStatus = +(request.body.status);
     var coamount = 0, pamount = 0, clamount = 0, amount = receipt.paymentAmount;
 
     /* 0 for collected
