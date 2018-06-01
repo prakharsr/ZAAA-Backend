@@ -600,8 +600,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
             query['insertions.ISODate']={$gte: from, $lte:to} 
 
     }
-    if(request.body.releaseOrderNo){
-        query['releaseOrderNo'] = request.body.releaseOrderNo;
+    if(request.body.releaseOrderNO){
+        query['releaseOrderNO'] = request.body.releaseOrderNO;
     }
 
     query['generated'] = request.body.generated == true;

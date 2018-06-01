@@ -518,8 +518,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         var to = new Date()
         var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
     }
-
-  
+    if(request.body.invoiceNO)
+    query['invoiceNO'] = request.body.invoiceNO
+    
     resolve(query);
         
     })

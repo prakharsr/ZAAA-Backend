@@ -1,9 +1,7 @@
 
 var MediaHouseNoteSchema = new mongoose.Schema({
-    type: Number,
     publicationName: String,
-    publicationState: STring,
-
+    publicationState: String,
     releaseOrderNO: String,
     amount: Number,
     remark: String,
@@ -12,9 +10,10 @@ var MediaHouseNoteSchema = new mongoose.Schema({
         month:String,
         year:String
     },
+    // Since releaseOrderNO is unique; it can be used for identification
     DocId: {
         type:mongoose.Schema.Types.ObjectId,
-        ref:"ReleaseOrderId"
+        ref:"ReleaseOrder"
     },
     firm: {
         type:mongoose.Schema.Types.ObjectId,

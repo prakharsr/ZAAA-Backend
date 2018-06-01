@@ -13,6 +13,7 @@ var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var receipt = require('../controllers/receiptController');
+var notes = require('../controllers/Accounts/creditDebit');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -124,6 +125,9 @@ router.post('/user/receipt/status', receipt.receiptStatus);
 
 router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryInsertions);
-
+router.post('/user/notes/client', notes.createClientNote);
+router.post('/user/notes/mediahouse', notes.createMediaHouseNote);
+router.post('/user/notes/client/search/', notes.queryClientNote);
+router.post('/user/notes/mediahouse/search/', notes.queryMediaHouseNote);
 
 module.exports = router;
