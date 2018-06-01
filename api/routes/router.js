@@ -13,7 +13,7 @@ var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var receipt = require('../controllers/receiptController');
-var notes = require('../controllers/Accounts/creditDebit');
+var notes = require('../controllers/creditDebit');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
