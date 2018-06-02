@@ -1,11 +1,14 @@
 var config = require('../../config');
 var userController = require('./userController');
 var User = require('../models/User');
+var MediaHouse = require('../models/MediaHouse');
+var Client = require('../models/Client');
 var Invoice = require('../models/Invoice');
 var ReleaseOrder = require('../models/ReleaseOrder');
 var ClientNote = require('../models/ClientNotes');
 var MediaHouseNote = require('../models/MediaHouseNotes');
 var mongoose = require('mongoose');
+var perPage=20;
 
 module.exports.createClientNote = function(request,response){
     var token = userController.getToken(request.headers);
@@ -104,32 +107,6 @@ module.exports.createMediaHouseNote = function(request,response){
             })
         }
     });
-}
-
-
-function searchExecutiveID(request, response, user){
-    return new Promise((resolve, reject) => {
-        Executive.find({$and: [
-            {'ExecutiveName':request.body.executiveName},
-            {'OrganizationName':request.body.executiveOrg}
-        ]}).exec(function(err, executive){
-            if(err)
-            {
-                console.log(err);
-                reject(err);
-                return;
-            }
-            else if (executive.length===0)
-            {
-                    resolve(null);
-            
-            }
-            if(executive.length!==0){
-                executiveID =  executive[0]._id;
-                resolve(executiveID);
-            }
-        })
-    })
 }
 
 function searchClientID(request, response, user){
@@ -236,7 +213,6 @@ module.exports.queryClientNote = async function(request, response){
 		else{
                 var mediahouseID =await searchMediahouseID(request, response, user);
                 var clientID = await searchClientID(request, response, user);
-                var executiveID = await searchExecutiveID(request, response, user);
                 var date = (request.body.date)?(request.body.date):null;
                 
                 var query = await formQuery(mediahouseID, clientID, date, user, request);
@@ -291,11 +267,10 @@ module.exports.queryMediaHouseNote = async function(request, response){
 		else{
                 var mediahouseID =await searchMediahouseID(request, response, user);
                 var clientID = await searchClientID(request, response, user);
-                var executiveID = await searchExecutiveID(request, response, user);
                 var date = (request.body.date)?(request.body.date):null;
                 
                 var query = await formQuery(mediahouseID, clientID, date, user, request);
-                
+                console.log(request.body.page)
                 MediaHouseNote.find(query)
                 .limit(perPage)
                 .skip((perPage * request.body.page) - perPage)
