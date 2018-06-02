@@ -129,5 +129,7 @@ router.post('/user/notes/client', notes.createClientNote);
 router.post('/user/notes/mediahouse', notes.createMediaHouseNote);
 router.post('/user/notes/client/search/', notes.queryClientNote);
 router.post('/user/notes/mediahouse/search/', notes.queryMediaHouseNote);
+router.post('/user/notes/download', notes.generateClientNotePdf);
+router.post('/user/notes/email', notes.mailClientNotePdf);
 
 module.exports = router;

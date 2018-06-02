@@ -47,9 +47,9 @@
             <div class="col">
                 <table>
                         <tr>
-                            <td><b>Receipt No.</b></td>
+                            <td><b>Note No.</b></td>
                             <td><b>:&nbsp;</b></td>
-                            <td>{{rno}}</td>
+                            <td>{{note_no}}</td>
                         </tr>
                         <tr>
                             <td><b>Invoice Date</b></td>
@@ -65,7 +65,7 @@
                     Particulars
                 </th>
                 <th colspan="2">
-                    Invoice No.
+                    Note No.
                 </th>
                 <th colspan="2">
                     Amount
@@ -84,11 +84,9 @@
             </tr>
         </table>
         <div class="row">
-            <div class="col">
-                <b>Narration</b><br>
-                {{details}}
+            <div class="col-sm-8">
             </div>
-            <div class="col" align="right">
+            <div class="col-sm-4" align="right">
                 <b>Authorised Signature</b><br>
                 <img src="{{signature}}">
             </div>

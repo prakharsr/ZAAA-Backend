@@ -40,6 +40,7 @@ module.exports.createClientNote = function(request,response){
                         clientName: invoice.clientName,
                         invoiceNO: request.body.invoiceNO,
                         amount: request.body.amount,
+                        amountWords: request.body.amountWords,
                         remark: request.body.remark,
                         date: request.body.date,
                         DocId: invoice._id,
@@ -315,7 +316,7 @@ module.exports.mailClientNotePdf = function(request, response) {
 			});
         }
         else {
-            Receipt.findById(request.body.id, async function(err, receipt){
+            ClientNote.findById(request.body.id, async function(err, note){
                 if(err){
                     console.log(err);
                     response.send({
@@ -323,37 +324,25 @@ module.exports.mailClientNotePdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!receipt){
+                else if(!note){
                     response.send({
                         success :false,
-                        msg: 'Receipt not found' 
+                        msg: 'Note not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(receipt.clientID);
-                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    var client = await Client.findById(note.DocId);
                     var Add = firm.OfficeAddress;
                     var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
                     var Add = client.Address;
                     var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
                     var cdetails = '';
-                    var details='';
                     if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
                     if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
                     if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-                    if(receipt.paymentType == 'NEFT'){
-                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-                    }
-                    else if(receipt.paymentType == 'Cheque'){
-                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-                    }
-                    else{
-                        details+='<p> Payment Date :'+receipt.paymentDate;
-                    }
-                    
+                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
+        
                     var Details = {
                         image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
                         sign : 'http://www.mom2k18.co.in/'+user.signature,
@@ -361,13 +350,11 @@ module.exports.mailClientNotePdf = function(request, response) {
                         fcdetails : cdetails,
                         cname : client.OrganizationName,
                         address :address,
-                        rno :receipt.ReceiptNo,
-                        amtwords :receipt.paymentAmountWords,
-                        amtfig: receipt.paymentAmount,
-                        insertions : insertions,
-                        details : details
+                        amtwords :note.amountWords,
+                        amtfig: note.amount,
+                        insertions : insertions
                     }
-                    pdf.mailPaymentReceipt(request,response,Details);
+                    pdf.mailClientNote(request,response,Details);
                 }
             })
         }
@@ -392,7 +379,7 @@ module.exports.generateClientNotePdf = function(request, response) {
 			});
         }
         else {
-            Receipt.findById(request.body.id, async function(err, receipt){
+            ClientNote.findById(request.body.id, async function(err, note){
                 if(err){
                     console.log(err);
                     response.send({
@@ -400,37 +387,25 @@ module.exports.generateClientNotePdf = function(request, response) {
                         msg: err 
                     });
                 }
-                else if(!receipt){
+                else if(!note){
                     response.send({
                         success :false,
-                        msg: 'Receipt not found' 
+                        msg: 'Note not found' 
                     });
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(receipt.clientID);
-                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    var client = await Client.findById(note.DocId);
                     var Add = firm.OfficeAddress;
                     var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
                     var Add = client.Address;
                     var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
                     var cdetails = '';
-                    var details='';
                     if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
                     if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
                     if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-                    if(receipt.paymentType == 'NEFT'){
-                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-                    }
-                    else if(receipt.paymentType == 'Cheque'){
-                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-                    }
-                    else{
-                        details+='<p> Payment Date :'+receipt.paymentDate;
-                    }
-                    
+                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
+        
                     var Details = {
                         image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
                         sign : 'http://www.mom2k18.co.in/'+user.signature,
@@ -438,13 +413,11 @@ module.exports.generateClientNotePdf = function(request, response) {
                         fcdetails : cdetails,
                         cname : client.OrganizationName,
                         address :address,
-                        rno :receipt.ReceiptNo,
-                        amtwords :receipt.paymentAmountWords,
-                        amtfig: receipt.paymentAmount,
-                        insertions : insertions,
-                        details : details
+                        amtwords :note.amountWords,
+                        amtfig: note.amount,
+                        insertions : insertions
                     }
-                    pdf.generatePaymentReceipt(request,response,Details);
+                    pdf.generateClientNote(request,response,Details);
                 }
             })
             

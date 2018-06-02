@@ -5,6 +5,7 @@ var ClientNoteSchema = new mongoose.Schema({
     clientName: String,
     invoiceNO: String,
     amount: Number,
+    amountWords: String,
     remark: String,
     date: {
         day:String,

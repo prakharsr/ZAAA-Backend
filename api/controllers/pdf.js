@@ -445,3 +445,110 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
     req.on('error', e => console.log(e));
     req.end();
 }
+
+module.exports.generateClientNote =  function(request,response,Details) {
+    var req = http.request('http://www.mom2k18.co.in/templates/Note.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            var today = new Date(Date.now());
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; 
+            var yyyy = today.getFullYear();
+            if(dd<10){
+                dd='0'+dd;
+            } 
+            if(mm<10){
+                mm='0'+mm;
+            } 
+            var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{date}}', today);
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{faddress}}', Details.faddress);
+            templateHtml = templateHtml.replace('{{signature}}', Details.sign);
+            templateHtml = templateHtml.replace('{{fcdetails}}', Details.fcdetails);
+            templateHtml = templateHtml.replace('{{clientname}}', Details.cname);
+            templateHtml = templateHtml.replace('{{address}}', Details.address);
+            templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
+            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+            var options = {
+                width: '200mm',
+                height: '400mm'
+            }
+            pdf.create(templateHtml, options).toStream(function (err, data) {
+                if (err) {
+                    console.log(err);
+                    response.send({
+                        success :false,
+                        msg :"cannot create pdf"
+                    });
+                }
+                else {
+                    response.writeHead(200, {
+                        'Content-Type': 'application/pdf',
+                        'Content-Disposition': 'attachment; filename="Note.pdf"'
+                    });
+                    data.pipe(response);
+                }
+            });
+        });
+    });
+    req.on('error', e => console.log(e));
+    req.end();
+}
+
+
+module.exports.mailClientNote =  function(request,response,Details) {
+    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            var today = new Date(Date.now());
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; 
+            var yyyy = today.getFullYear();
+            if(dd<10){
+                dd='0'+dd;
+            } 
+            if(mm<10){
+                mm='0'+mm;
+            } 
+            var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{date}}', today);
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{faddress}}', Details.faddress);
+            templateHtml = templateHtml.replace('{{signature}}', Details.sign);
+            templateHtml = templateHtml.replace('{{fcdetails}}', Details.fcdetails);
+            templateHtml = templateHtml.replace('{{cname}}', Details.cname);
+            templateHtml = templateHtml.replace('{{address}}', Details.address);
+            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
+            templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
+            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
+            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+            templateHtml = templateHtml.replace('{{details}}', Details.details);
+            var options = {
+                width: '200mm',
+                height: '4000mm'
+            }
+            pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
+                if (err) {
+                    console.log(err);
+                    response.send({
+                        success :false,
+                        msg :"cannot create pdf"
+                    });
+                }
+                else {
+                    mailFile(request, response, buffer, 'note.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'Notes','Following is the debit notes');
+                }
+            });
+        });
+    });
+    req.on('error', e => console.log(e));
+    req.end();
+}
