@@ -28,32 +28,40 @@ module.exports.createClientNote = function(request,response){
 			});
         }
         else{
-            var invoice = Invoice.findOne({invoiceNO: request.body.invoiceNO}, (err,invoice) => {
-                var clientNote = new ClientNote({
-                    clientName: invoice.clientName,
-                    invoiceNO: request.body.invoiceNO,
-                    amount: request.body.amount,
-                    remark: request.body.remark,
-                    date: request.body.date,
-                    DocId: invoice._id,
-                    firm: user.firm,
-                    user: user._id
-                });
+            Invoice.findOne({invoiceNO: request.body.invoiceNO}, (err,invoice) => {
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Cannot find Invoice'
+                    })
+                }
+                else{
+                    var clientNote = new ClientNote({
+                        clientName: invoice.clientName,
+                        invoiceNO: request.body.invoiceNO,
+                        amount: request.body.amount,
+                        remark: request.body.remark,
+                        date: request.body.date,
+                        DocId: invoice._id,
+                        firm: user.firm,
+                        user: user._id
+                    });
 
-                clientNote.save((err) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg:'Cannot save note'
-                        })
-                    }
-                    else{
-                        response.send({
-                            success: true,
-                            msg:'Note saved'
-                        })
-                    }
-                })
+                    clientNote.save((err) => {
+                        if(err){
+                            response.send({
+                                success: false,
+                                msg:'Cannot save note'
+                            })
+                        }
+                        else{
+                            response.send({
+                                success: true,
+                                msg:'Note saved'
+                            })
+                        }
+                    })
+                }
             })
         }
     });
@@ -77,7 +85,7 @@ module.exports.createMediaHouseNote = function(request,response){
 			});
         }
         else{
-            var releaseOrder = ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO}, (err,releaseorder) => {
+            ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO}, (err,releaseorder) => {
                 var mediaHouseNote = new MediaHouseNote({
                     publicationName: releaseorder.publicationName,
                     publicationState: releaseorder.publicationState,
@@ -113,10 +121,7 @@ function searchClientID(request, response, user){
     return new Promise((resolve, reject) => {
         Client.find(
             {$and: [
-                {$or:[
-                    {firm:mongoose.mongo.ObjectId(user.firm)},
-                    {global:true}
-                ]},
+                {firm:mongoose.mongo.ObjectId(user.firm)},
                 {'OrganizationName': request.body.clientName},
                 {'Address.state': request.body.clientState}
             ]}
@@ -145,7 +150,7 @@ function searchMediahouseID(request, response, user){
         MediaHouse.find({$and: [
             {'PublicationName':request.body.publicationName},
             {"Address.edition":request.body.publicationEdition},
-            {$or:[{'firm':mongoose.mongo.ObjectId(user.firm)},{global:true}]}
+            {'firm':mongoose.mongo.ObjectId(user.firm)}
         ]}).exec( function(err, mediahouse){
             if(err)
             {
@@ -174,17 +179,6 @@ function formQuery(mediahouseID, clientID, date, user, request){
         query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
         if(clientID)
         query['clientID'] = mongoose.mongo.ObjectId(clientID);
-         if(request.body.creationPeriod)
-        {
-            var to = new Date()
-            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
-            query['date']={$gte: from, $lte:to} 
-        }
-        else{
-            var to = new Date()
-            var from = new Date(1);
-            query['date']={$gte: from, $lte:to} 
-        }
         if(request.body.insertionPeriod){
             var to = new Date()
             var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
@@ -216,11 +210,11 @@ module.exports.queryClientNote = async function(request, response){
                 var date = (request.body.date)?(request.body.date):null;
                 
                 var query = await formQuery(mediahouseID, clientID, date, user, request);
-                
+                console.log(query);
                 ClientNote.find(query)
                 .limit(perPage)
                 .skip((perPage * request.body.page) - perPage)
-                .exec(function(err, invoice){
+                .exec(function(err, note){
                 if(err){
                     console.log(err+ "");
                     response.send({
@@ -265,16 +259,17 @@ module.exports.queryMediaHouseNote = async function(request, response){
 			});
 		}
 		else{
+        
                 var mediahouseID =await searchMediahouseID(request, response, user);
                 var clientID = await searchClientID(request, response, user);
                 var date = (request.body.date)?(request.body.date):null;
                 
                 var query = await formQuery(mediahouseID, clientID, date, user, request);
-                console.log(request.body.page)
+                console.log(query);
                 MediaHouseNote.find(query)
                 .limit(perPage)
                 .skip((perPage * request.body.page) - perPage)
-                .exec(function(err, invoice){
+                .exec(function(err, note){
                 if(err){
                     console.log(err+ "");
                     response.send({
