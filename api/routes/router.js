@@ -12,6 +12,7 @@ var mediahouseInvoice= require('../controllers/mediahouseInvoiceController');
 var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
+var taxation = require('../controllers/taxation');
 var receipt = require('../controllers/receiptController');
 var notes = require('../controllers/creditDebit');
 
@@ -131,5 +132,7 @@ router.post('/user/notes/client/search/', notes.queryClientNote);
 router.post('/user/notes/mediahouse/search/', notes.queryMediaHouseNote);
 router.post('/user/notes/download', notes.generateClientNotePdf);
 router.post('/user/notes/email', notes.mailClientNotePdf);
+
+router.post('/user/invoice/tax/', taxation.queryInvoiceTax);
 
 module.exports = router;
