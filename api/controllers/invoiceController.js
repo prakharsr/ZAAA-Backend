@@ -131,6 +131,7 @@ catch(err){
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
+        agencyState:firm.OfficeAddress.state,
         signature: user.signature,
         clientName:client.OrganizationName,
         clientGSTIN:request.body.GSTIN,
@@ -152,6 +153,7 @@ catch(err){
         otherCharges:request.body.otherCharges,
         extraCharges:request.body.extraCharges,
         pendingAmount:request.body.pendingAmount,
+        FinalTaxAmount:request.body.FinalTaxAmount,
 
         caption:request.body.caption,
         remark:request.body.remark,

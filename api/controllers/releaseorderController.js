@@ -73,7 +73,7 @@ function getClientID(request, response, user){
                     OrganizationName:request.body.clientName,
                     firm : user.firm,
                     "Address.state" : request.body.clientState,
-                    "GSTIN" : request.body.clientGSTIN
+                    GSTIN : request.body.clientGSTIN
                 });
                 newClient.save(function(err, doc){
                     if(err)
@@ -160,6 +160,7 @@ async function f (request, response, user){
         agencyName: firm.FirmName,
         agencyGSTIN: firm.GSTIN,
         agencyPerson: user.name,
+        agencyState:firm.OfficeAddress.state,
         signature: user.signature,
         clientName:request.body.clientName,
         clientGSTIN:request.body.clientGSTIN,

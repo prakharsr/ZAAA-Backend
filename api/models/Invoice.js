@@ -56,7 +56,8 @@ var InvoiceSchema = new mongoose.Schema({
     taxType:String,
     taxAmount:{
         primary:String,
-        secondary:String
+        secondary:String,
+        Amount:String
     },
     taxIncluded:Boolean,
     otherCharges:[
@@ -152,5 +153,12 @@ var InvoiceSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
+    InvoiceSchema.pre('save', function(next){
+        var self = this;
+        self.taxAmount.Amount = ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded);
+        console.log(self.agencyGSTIN, self.clientGSTIN);
+        self.taxType = (self.clientState == self.agencyState)?"SGST + CGST": "IGST"
+        next();
+    })
     module.exports = mongoose.model('Invoice', InvoiceSchema);
     
