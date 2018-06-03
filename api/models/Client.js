@@ -24,8 +24,14 @@ var ClientSchema = new mongoose.Schema({
     PanNO:String,
     IncorporationDate:Date,
     GSTIN:{
-        GSTType:String,
-        GSTNo:String
+        GSTType:{
+            type:String,
+            default:'URD'
+        },
+        GSTNo:{
+            type:String,
+            default:''
+        },
     },
     ContactPerson:[{
         Name:String,
