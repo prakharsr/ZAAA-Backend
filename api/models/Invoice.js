@@ -22,7 +22,10 @@ var InvoiceSchema = new mongoose.Schema({
         default: 0
     },
     agencyName: String,
-    agencyGSTIN: String,
+    agencyGSTIN: {
+        GSTType: String,
+        GSTNo:String
+    },
     agencyPin:String,
     agencyAddress:String,
     agencyState:String,
@@ -33,7 +36,10 @@ var InvoiceSchema = new mongoose.Schema({
     publicationEdition:String,
     mediaType:String,
     publicationState:String,
-    publicationGSTIN:String,
+    publicationGSTIN:{
+        GSTType: String,
+        GSTNo:String
+    },
     
     clientName:String,
     clientState:String,
