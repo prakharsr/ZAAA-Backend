@@ -134,5 +134,6 @@ router.post('/user/notes/download', notes.generateClientNotePdf);
 router.post('/user/notes/email', notes.mailClientNotePdf);
 
 router.post('/user/invoice/tax/', taxation.queryInvoiceTax);
+router.post('/user/invoice/taxSheet/',taxation.generateTaxSheet);
 
 module.exports = router;
