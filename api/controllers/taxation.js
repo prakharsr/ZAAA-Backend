@@ -239,9 +239,9 @@ module.exports.generateTaxSheet = async function(request, response){
                         "FinalTaxAmount":1,
                     }
                     },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                ]).exec(function(err, invoice){
+                    // {$limit: perPage},
+                    // {$skip:(perPage * request.body.page) - perPage}
+                ]).exec(function(err, invoices){
                         if(err){
                             console.log(err+ "");
                             response.send({
@@ -250,7 +250,8 @@ module.exports.generateTaxSheet = async function(request, response){
                             });
                         }
                         else{
-                            invoice.map(function(invoice){
+                            console.log(invoices);
+                            var inv = invoices.map(function(invoice){
                                 return {                                
                                     "Invoice No": invoice.invoiceNO,
                                     "Client Name": invoice.clientName,
@@ -261,8 +262,7 @@ module.exports.generateTaxSheet = async function(request, response){
                                     "Total Tax": invoice.FinalTaxAmount,
                                     "Client GSTIN": invoice.clientGSTIN?invoice.clientGSTIN:"-",
                             }})
-                            console.log(invoice)
-                            createSheet(invoice, request, response);
+                            createSheet(inv, request, response);
                         }
                     });
                 }	
