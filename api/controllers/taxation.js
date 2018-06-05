@@ -18,6 +18,9 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
 
+var fs = require('fs');
+var XLSX = require('xlsx');
+
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -272,10 +275,23 @@ module.exports.generateTaxSheet = async function(request, response){
 
 async function createSheet(data, request, response){
     console.log(data)
-    response.send({
-        success:true,
-        data: data
-    })
+    var wb = XLSX.utils.book_new();
+    wb.Props = {
+        Title: "Monthly Tax Report",
+        Subject: "GST",
+        Author: "AAMAN",
+        CreatedDate: new Date(2017,12,19)
+};
 
+    wb.SheetNames.push("MONTHLY SHEET");
+    var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
+
+    var ws = XLSX.utils.json_to_sheet(data);
+
+     response.send({
+         success:true,
+         msg: "converted",
+         file: ws
+     })
 
 }
