@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
-var ReleaseOrder = require('../ReleaseOrder')
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
