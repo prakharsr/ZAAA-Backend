@@ -20,7 +20,8 @@ var perPage=20;
 
 var fs = require('fs');
 var XLSX = require('xlsx');
-
+var base64 = require('base64-stream');
+var stream = require('stream');
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -276,22 +277,31 @@ module.exports.generateTaxSheet = async function(request, response){
 async function createSheet(data, request, response){
     console.log(data)
     var wb = XLSX.utils.book_new();
+    
     wb.Props = {
         Title: "Monthly Tax Report",
         Subject: "GST",
         Author: "AAMAN",
         CreatedDate: new Date(2017,12,19)
-};
-
-    wb.SheetNames.push("MONTHLY SHEET");
-    var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
-
+    };
+    
     var ws = XLSX.utils.json_to_sheet(data);
+    
+    XLSX.utils.book_append_sheet(wb, ws, "MONTHLY SHEET");
 
-     response.send({
-         success:true,
-         msg: "converted",
-         file: ws
-     })
+    var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'base64'});
 
+    response.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': 'attachment; filename="tax.xlsx"'
+    });
+
+    var decoder = base64.decode();
+    var xlStream = new stream.PassThrough();
+    xlStream.pipe(decoder)
+      .pipe(response);
+
+    xlStream.write(wbout);
+
+    response.end();
 }
