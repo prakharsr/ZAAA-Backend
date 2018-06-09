@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
+var ReleaseOrder = require('../ReleaseOrder')
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
@@ -43,5 +44,11 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
+
+    MediaHouseInvoiceSchema.pre('save', function(next){
+        self= this;
+        ReleaseOrder.update({releaseOrderId: self.releaseOrderId},{$push: {mediaHouseInvoices: self._id}})
+        next();
+    })
     module.exports = mongoose.model('MediaHouseInvoice', MediaHouseInvoiceSchema);
     
