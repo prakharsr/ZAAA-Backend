@@ -27,7 +27,7 @@ module.exports.createMHInvoice = async (request,response) => {
 
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
-        insertions: request.body.insertions,
+        insertionIds: request.body.insertionIds,
         releaseOrderNo: releaseorder.releaseOrderNo,
         MHIDate: request.body.MHIDate,
         MHIGrossAmount: request.body.MHIGrossAmount,
@@ -46,24 +46,11 @@ module.exports.createMHInvoice = async (request,response) => {
             })
         }
         else{
-            (request.body.insertions).forEach((object) => {
-                var insertion = releaseorder.insertions.id(object._id);
-                insertion.MHID = doc._id
-            })
-            releaseorder.save((err,doc)=>{
-                if(err){
-                    response.send({
-                        success: false,
-                        msg: 'insertion fetch error'
-                    })
-                }
-                else{
                     response.send({
                         success:true,
                         msg: 'Successfully created the MHInvoice'
                     })
-                }
-            })
+                
         }
     })
 }
