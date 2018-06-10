@@ -14,7 +14,7 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
     },
     insertions:[
         {
-        type:mongoose.Schema.Types.ObjectId, ref:"ReleaseOrder.insertions.$",
+        insertionId:{type:mongoose.Schema.Types.ObjectId, ref:"ReleaseOrder.insertions.$"},
         insertionDate: Date,
         Amount:Number,
         collectedAmount:Number,
@@ -53,8 +53,8 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
     MediaHouseInvoiceSchema.pre('save', function(next){
         self= this;
         ReleaseOrder.update({releaseOrderId: self.releaseOrderId},{$push: {mediaHouseInvoices: self._id}});
-        self.insertions.array.forEach(element => {
-            element.Amount = (MHIGrossAmount + MHITaxAmount)/self.insertions.array.length;
+        self.insertions.forEach(element => {
+            element.Amount = (self.MHIGrossAmount + self.MHITaxAmount)/self.insertions.length;
         });
         next();
     })
