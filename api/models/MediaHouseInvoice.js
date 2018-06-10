@@ -14,8 +14,10 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
     },
     insertions:[
         {
-            type:mongoose.Schema.Types.ObjectId, ref:"ReleaseOrder.insertions.$"
-        }],
+        type:mongoose.Schema.Types.ObjectId, ref:"ReleaseOrder.insertions.$",
+        insertionDate: Date
+        }
+    ],
     date: {
         type: Date,
         default: new Date()

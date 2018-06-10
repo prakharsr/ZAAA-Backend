@@ -27,7 +27,7 @@ module.exports.createMHInvoice = async (request,response) => {
 
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
-        insertionIds: request.body.insertionIds,
+        insertions: request.body.insertions,
         releaseOrderNo: releaseorder.releaseOrderNo,
         MHIDate: request.body.MHIDate,
         MHIGrossAmount: request.body.MHIGrossAmount,
