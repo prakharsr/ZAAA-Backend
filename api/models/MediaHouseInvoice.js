@@ -52,7 +52,10 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
 
     MediaHouseInvoiceSchema.pre('save', function(next){
         self= this;
-        ReleaseOrder.update({releaseOrderId: self.releaseOrderId},{$push: {mediaHouseInvoices: self._id}})
+        ReleaseOrder.update({releaseOrderId: self.releaseOrderId},{$push: {mediaHouseInvoices: self._id}});
+        self.insertions.array.forEach(element => {
+            element.Amount = (MHIGrossAmount + MHITaxAmount)/self.insertions.array.length;
+        });
         next();
     })
     module.exports = mongoose.model('MediaHouseInvoice', MediaHouseInvoiceSchema);
