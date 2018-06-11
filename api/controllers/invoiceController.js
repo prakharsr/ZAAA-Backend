@@ -112,19 +112,20 @@ function findMediahouse(id){
     })
 }
 async function f(request, response, user){
-try {
-    var releaseOrder = await findReleaseOrder(request, response, user)
-    var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
-    var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
-    var client = await findClient(releaseOrder.clientID);
-    var executive = await findExecutive(releaseOrder.executiveID);
-    var counter = releaseOrder.invoiceSerial+1;
-    var ino = releaseOrder.releaseOrderNO+'.'+counter
+    try {
+        var releaseOrder = await findReleaseOrder(request, response, user)
+        var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
+        var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
+        var client = await findClient(releaseOrder.clientID);
+        var executive = await findExecutive(releaseOrder.executiveID);
+        var counter = releaseOrder.invoiceSerial+1;
+        var ino = releaseOrder.releaseOrderNO+'.'+counter
 
-}
-catch(err){
-    console.log(err);
-}
+    }
+    catch(err){
+        console.log(err);
+    }
+
     var invoice = new Invoice({
         releaseOrderId :request.body.releaseOrderId,
         invoiceNO: ino,
@@ -179,51 +180,41 @@ catch(err){
             })
         }
         else{
-            Client.update({ $and: [{firm:user.firm}, {"_id":doc.clientID}]
-        },
-        { $set: { "GSTIN": doc.clientGSTIN }}).exec(err,function(){
-            if(err){
-                response.send({
-                    success:false,
-                    msg:"Error in updating client GST number"
-                })
-            }
-        });
-        ReleaseOrder.updateMany(
-            { $or: [{"firm":user.firm, "_id": request.body.releaseOrderId}]
-            },
-            { $set: { "insertions.$.marked": true }},
-        )
-        .exec(function(err){
-            if(err){
-                console.log(err);
-                console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
-                response.send({
-                    success:false,
-                    msg: err + ""
-                });
-            }
-            else{
-                releaseOrder.invoiceSerial += 1;
-                releaseOrder.save((err,doc) => {
-                    if(err){
-                        request.body.insertions.map(insertion => insertion._id)
-                        response.send({
-                            success:false,
-                            msg: err + "" + request.body.insertions.map(insertion => insertion._id)
-                        });
-                    }
-                    else{
-                        console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
-                        response.send({
-                            success:true,
-                            msg:"Invoice saved.",
-                            invoice:doc 
-                        })
-                    }
-                })
-            }
-        })
+            Client.update({ $and: [{firm:user.firm}, {"_id":doc.clientID}] },
+            { $set: { "GSTIN": doc.clientGSTIN }}).exec(err,function(){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg:"Error in updating client GST number"
+                    })
+                }
+            });
+
+            releaseOrder.insertions
+                .filter(insertion => invoice.insertions.some(ins => ins.date.day == insertion.date.day
+                                                                && ins.date.month == insertion.date.month
+                                                                && ins.date.year == insertion.date.year))
+                .forEach(insertion => insertion.marked = true);
+
+
+            releaseOrder.invoiceSerial += 1;
+            releaseOrder.save((err,doc) => {
+                if(err){
+                    request.body.insertions.map(insertion => insertion._id)
+                    response.send({
+                        success:false,
+                        msg: err + "" + request.body.insertions.map(insertion => insertion._id)
+                    });
+                }
+                else{
+                    console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
+                    response.send({
+                        success:true,
+                        msg:"Invoice saved.",
+                        invoice:doc 
+                    })
+                }
+            })
         }
     })
 }
