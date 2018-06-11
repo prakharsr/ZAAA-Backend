@@ -292,20 +292,23 @@ module.exports.generateSummarySheet = function(request, response){
 		else{
             try{
             request.body.mhis.forEach(element=> {
-                    MediaHouseInvoice.find({}).exec( mhi =>{
+                    MediaHouseInvoice.find({})
+                    .then( mhi =>{
                         console.log(mhi);
                         mhi.forEach(mhielem =>{
-                            mhielem.insertions.filter(insertion => element.insertion.some(ins => ins.insertionDate == insertion.insertionDate))
-                            .forEach(insertion => insertion.Amount = 0 )
+                            mhielem.insertions.filter(insertion => mhielem.insertions.some(ins => ins.insertionDate == insertion.insertionDate))
+                            .forEach(insertion => insertion.Amount = 0 );
+
+                            mhielem.save(function(err){
+                                if(err){
+                                    response.send({
+                                        success:false,
+                                        msg : "error" + err
+                                    });
+                                }
+                            });
                         });
-                        mhi.save(function(err){
-                            if(err){
-                                response.send({
-                                    success:false,
-                                    msg : "error" + err
-                                });
-                            }
-                        });
+
                     });
                 });
             }
