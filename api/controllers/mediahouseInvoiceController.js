@@ -223,6 +223,7 @@ module.exports.queryMediaHouseInvoices = function(request, response){
                     count: {$sum: 1},
                     entries: { $push:  
                         {
+                        "_id":"$_id",
                         "releaseOrderId":"$releaseOrderId",
                         "publicationName":"$publicationName",
                          "publicationEdition":"$publicationEdition",
@@ -266,6 +267,58 @@ module.exports.queryMediaHouseInvoices = function(request, response){
                     
                 }
             });
+        }	
+	});
+};
+
+
+module.exports.generateSummarySheet = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            try{
+            request.body.mhis.forEach(element=> {
+                    MediaHouseInvoice.find({}).exec( mhi =>{
+                        console.log(mhi);
+                        mhi.forEach(mhielem =>{
+                            mhielem.insertions.filter(insertion => element.insertion.some(ins => ins.insertionDate == insertion.insertionDate))
+                            .forEach(insertion => insertion.Amount = 0 )
+                        });
+                        mhi.save(function(err){
+                            if(err){
+                                response.send({
+                                    success:false,
+                                    msg : "error" + err
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+            catch(err){
+                if(err)
+                console.log(err)
+                else{
+                    response.send({
+                        success:true,
+                        msg:"RAM"
+                    })
+                }
+            }
         }	
 	});
 };

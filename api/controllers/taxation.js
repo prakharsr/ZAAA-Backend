@@ -261,7 +261,7 @@ module.exports.generateTaxSheet = async function(request, response){
                                     "Client Name": invoice.clientName,
                                     "Date": invoice.date,
                                     "SGST %":(invoice.taxType == 'SGST + CGST')?((invoice.taxAmount.primary + invoice.taxAmount.secondary)/2):"-",
-                                    "CGST %":(invoice.taxType == 'SGST + CGST')?(invoice.taxAmount.primary + invoice.taxAmount.secondary):"-",
+                                    "CGST %":(invoice.taxType == 'SGST + CGST')?(invoice.taxAmount.primary + invoice.taxAmount.secondary)/2:"-",
                                     "IGST %":(invoice.taxType == 'IGST')?(invoice.taxAmount.primary + invoice.taxAmount.secondary):"-",
                                     "Total Tax": invoice.FinalTaxAmount,
                                     "Client GSTIN": invoice.clientGSTIN?invoice.clientGSTIN:"-",

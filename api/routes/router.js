@@ -127,6 +127,7 @@ router.post('/user/receipt/status', receipt.receiptStatus);
 
 router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryMediaHouseInvoices);
+router.post('/user/summarySheet', mediahouseInvoice.generateSummarySheet);
 router.post('/user/notes/client', notes.createClientNote);
 router.post('/user/notes/mediahouse', notes.createMediaHouseNote);
 router.post('/user/notes/client/search/', notes.queryClientNote);
