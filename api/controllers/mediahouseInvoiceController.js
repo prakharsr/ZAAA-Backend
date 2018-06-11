@@ -315,13 +315,11 @@ module.exports.generateSummarySheet = function(request, response){
             catch(err){
                 if(err)
                 console.log(err)
-                else{
-                    response.send({
-                        success:true,
-                        msg:"RAM"
-                    })
-                }
             }
+            response.send({
+                success:true,
+                msg:"done"
+            })
         }	
 	});
 };
