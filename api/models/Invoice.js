@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
+var ReleaseOrder = require('./ReleaseOrder');
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
@@ -157,7 +158,17 @@ var InvoiceSchema = new mongoose.Schema({
         var self = this;
         self.taxAmount.Amount = ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded);
         console.log(self.agencyGSTIN, self.clientGSTIN);
-        self.taxType = (self.clientState == self.agencyState)?"SGST + CGST": "IGST"
+        self.taxType = (self.clientState == self.agencyState)?"SGST + CGST": "IGST";
+        self.insertions.forEach(element => {
+            ReleaseOrder.find({"_id": self.releaseOrderId},function(doc){
+                doc.insertions.forEach(function(insertion){
+                    if(insertion.$._id = element.$._id)
+                    insertion.marked = true;
+                });
+                doc.save();
+            })
+        });
+
         next();
     })
     module.exports = mongoose.model('Invoice', InvoiceSchema);
