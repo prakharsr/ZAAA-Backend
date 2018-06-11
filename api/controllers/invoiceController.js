@@ -190,13 +190,14 @@ catch(err){
             }
         });
         ReleaseOrder.updateMany(
-            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}]
+            { $or: [{"firm":user.firm, "_id": request.body.releaseOrderId}]
             },
-            { $set: { "insertions.$.marked": true }}
+            { $set: { "insertions.$.marked": true }},
         )
         .exec(function(err){
             if(err){
                 console.log(err);
+                console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
                 response.send({
                     success:false,
                     msg: err + ""
@@ -206,12 +207,14 @@ catch(err){
                 releaseOrder.invoiceSerial += 1;
                 releaseOrder.save((err,doc) => {
                     if(err){
+                        request.body.insertions.map(insertion => insertion._id)
                         response.send({
                             success:false,
-                            msg: err + ""
+                            msg: err + "" + request.body.insertions.map(insertion => insertion._id)
                         });
                     }
                     else{
+                        console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
                         response.send({
                             success:true,
                             msg:"Invoice saved.",
