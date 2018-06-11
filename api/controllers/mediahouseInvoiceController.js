@@ -225,14 +225,20 @@ module.exports.queryMediaHouseInvoices = function(request, response){
                         {
                         "releaseOrderId":"$releaseOrderId",
                         "publicationName":"$publicationName",
-                         "publicationEdition":"$publicationEdition", 
+                         "publicationEdition":"$publicationEdition",
+                         "date": "$date", 
                         "insertions":{
                             "insertionDate": "$insertions.insertionDate", 
                             "Amount":"$insertions.Amount",
-                        //  "marked": "$insertions.marked",
-                        //  "collectedAmount":"$insertions.collectedAmount",
-                           "_id": "$insertions._id",
-                         }
+                            "insertionId": "$insertions.insertionId",
+                            "collectedAmount":"$insertions.collectedAmount",
+                            "_id": "$insertions._id",
+                         },
+                         "releaseOrderNo":"$releaseOrderNo",
+                         "MHINo":"$MHINo",
+                         "MHIDate":"$MHIDate",
+                         "MHIGrossAmount":"$MHIGrossAmount",
+                         "MHITaxAmount":"$MHIAmount"
                     } }
                 } },
                 {$limit: perPage},
