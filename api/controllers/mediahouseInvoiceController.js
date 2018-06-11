@@ -44,6 +44,11 @@ module.exports.createMHInvoice = async (request,response) => {
             
             var mhinvoice = new MediaHouseInvoice({
                 releaseOrderId: releaseorder._id,
+                publicationName:releaseorder.publicationName,
+                publicationEdition:releaseorder.publicationEdition,
+                mediaType:releaseorder.mediaType,
+                publicationState:releaseorder.publicationState,
+                publicationGSTIN:releaseorder.publicationGSTIN,
                 insertions: request.body.insertions,
                 releaseOrderNo: releaseorder.releaseOrderNo,
                 MHIDate: request.body.MHIDate,
@@ -156,17 +161,13 @@ function searchMediahouseID(request, response, user){
     })
 }
 
-function formQuery(mediahouseID, clientID, executiveID, date, user, request){
+function formQuery(mediahouseID, date, user, request){
     return new Promise((resolve, reject) => {
         var query = {'firm':user.firm};
         console.log(query)
-        console.log(mediahouseID, clientID, executiveID, date, user)
+        console.log(mediahouseID, date, user)
         if(mediahouseID)
         query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
-        if(clientID)
-        query['clientID'] = mongoose.mongo.ObjectId(clientID);
-        if(executiveID)
-        query['executiveID']=mongoose.mongo.ObjectId(executiveID);
         if(request.body.releaseOrderNo){
             query['releaseOrderNo']=request.body.releaseOrderNo
         }
@@ -174,12 +175,12 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         if(request.body.insertionPeriod){
             to = new Date();
             from =  new Date(to.getTime() - (request.body.insertionPeriod)*24*60*60*1000);
-            query['insertions.ISODate'] = {$lte:to, $gte:from}
+            query['insertions.insertionDate'] = {$lte:to, $gte:from}
         }
         else{
             to = new Date()
             from = new Date(1);
-            query['insertions.ISODate'] = {$lte:to, $gte:from}
+            query['insertions.insertionDate'] = {$lte:to, $gte:from}
         }
         console.log(to, from);
         console.log(query)
@@ -190,8 +191,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     
 }
 
-
-module.exports.queryInsertions = function(request, response){
+module.exports.queryMediaHouseInvoices = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -210,39 +210,29 @@ module.exports.queryInsertions = function(request, response){
 		}
 		else{
             var mediahouseID =await searchMediahouseID(request, response, user);
-            var clientID = await searchClientID(request, response, user);
-            var executiveID = await searchExecutiveID(request, response, user);
             var date = (request.body.date)?(request.body.date):null;
-            var adCategory1 = request.body.adCategory1;
-            var adCategory2 = request.body.adCategory2;
-            var to;
-            var from;
-            
-            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+            var query = await formQuery(mediahouseID, date, user, request);
             
             
-            ReleaseOrder
+            MediaHouseInvoice
             .aggregate([
                 {$unwind: "$insertions"}, 
                 {$match:query},
                 { $group : { 
-                    _id: "$_id",
+                    _id: "$releaseOrderId",
                     count: {$sum: 1},
                     entries: { $push:  
-                        {"publicationName":"$publicationName",
-                        "publicationEdition":"$publicationEdition", 
-                        "clientName":"$clientName",
-                        "executiveName":"$executiveName",
-                        "executiveOrg":"$executiveOrg",
+                        {
+                        "releaseOrderId":"$releaseOrderId",
+                        "publicationName":"$publicationName",
+                         "publicationEdition":"$publicationEdition", 
                         "insertions":{
-                            "date": "$insertions.date", 
-                            "marked": "$insertions.marked",
-                            "state": "$insertions.state",
-                            "ISODate": "$insertions.ISODate",
+                            "insertionDate": "$insertions.insertionDate", 
                             "Amount":"$insertions.Amount",
-                            "MHID":"$insertions.MHID",
-                            "_id": "$insertions._id",
-                        }
+                        //  "marked": "$insertions.marked",
+                        //  "collectedAmount":"$insertions.collectedAmount",
+                           "_id": "$insertions._id",
+                         }
                     } }
                 } },
                 {$limit: perPage},
@@ -257,7 +247,8 @@ module.exports.queryInsertions = function(request, response){
                     });
                 }
                 else{
-                    ReleaseOrder.count(query, function(err, count){
+                    console.log(insertions)
+                    MediaHouseInvoice.count(query, function(err, count){
                         response.send({
                             success:true,
                             insertions: insertions,
@@ -272,8 +263,3 @@ module.exports.queryInsertions = function(request, response){
         }	
 	});
 };
-
-
-
-
-

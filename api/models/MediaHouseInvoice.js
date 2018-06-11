@@ -7,7 +7,15 @@ var twilioClient = require('twilio')(config.accountSid, config.authToken);
 
 
 var MediaHouseInvoiceSchema = new mongoose.Schema({
-    
+
+    publicationName:String,
+    publicationEdition:String,
+    mediaType:String,
+    publicationState:String,
+    publicationGSTIN:{
+        GSTType:String,
+        GSTNo:String
+    },
     releaseOrderId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"ReleaseOrder"
