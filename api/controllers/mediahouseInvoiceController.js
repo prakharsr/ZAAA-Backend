@@ -289,33 +289,34 @@ module.exports.generateSummarySheet = function(request, response){
 				msg : "User not found, Please Login"
 			});
 		}
-		else{
-            try{
-            request.body.mhis.forEach(element=> {
-                    MediaHouseInvoice.find({})
-                    .then( mhi =>{
-                        console.log(mhi);
-                        mhi.forEach(mhielem =>{
-                            mhielem.insertions.filter(insertion => mhielem.insertions.some(ins => ins.insertionDate == insertion.insertionDate))
-                            .forEach(insertion => insertion.Amount = 0 );
+		else {
+            try {
+                var mhis = request.body.mhis; // { ...insertion, amount: number }[]
 
-                            mhielem.save(function(err){
-                                if(err){
-                                    response.send({
-                                        success:false,
-                                        msg : "error" + err
-                                    });
-                                }
-                            });
+                MediaHouseInvoice.find({ firm: user.firm }).then(invoice => {
+                    invoice.insertions.forEach(mhiInsertion => {
+                        mhis.forEach(insertion => {
+                            if (mhiInsertion.insertionId == insertion._id) {
+                                mhiInsertion.collectedAmount = insertion.amount;
+                            }
                         });
+                    });
 
+                    invoice.save(function(err) {
+                        if (err) {
+                            response.send({
+                                success: false,
+                                msg: "error" + err
+                            });
+                        }
                     });
                 });
             }
-            catch(err){
-                if(err)
-                console.log(err)
+            catch (err) {
+                if (err)
+                    console.log(err)
             }
+
             response.send({
                 success:true,
                 msg:"done"
