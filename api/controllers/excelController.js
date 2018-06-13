@@ -267,6 +267,167 @@ module.exports.executiveExcelImport = (request, response) => {
     });
 }
 
+
+module.exports.clientExcelUpdate = (request, response) => {
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+            xlsx(request.files.excelFile, function(err, data){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+                else{
+                    var json = convertToJSON(data);
+                    json.forEach(element => {
+                        Client.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
+                            if(err){
+                                response.send({
+                                    success: false,
+                                    msg: 'Unsuccessful'
+                                });
+                            }
+                        });
+                    });
+                    response.send({
+                        success: true,
+                        msg: 'Bulk update successful'
+                    });
+                }
+            });
+        }
+    });
+}
+
+module.exports.ratecardExcelUpdate = (request, response) => {
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+            xlsx(request.files.excelFile, function(err, data){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+                else{
+                    var json = convertToJSON(data);
+                    json.forEach(element => {
+                        RateCard.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
+                            if(err){
+                                response.send({
+                                    success: false,
+                                    msg: 'Unsuccessful'
+                                });
+                            }
+                        });
+                    });
+                    response.send({
+                        success: true,
+                        msg: 'Bulk update successful'
+                    });
+                }
+            });
+        }
+    });
+}
+
+module.exports.mediahouseExcelUpdate = (request, response) => {
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+            xlsx(request.files.excelFile, function(err, data){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+                else{
+                    var json = convertToJSON(data);
+                    json.forEach(element => {
+                        MediaHouse.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
+                            if(err){
+                                response.send({
+                                    success: false,
+                                    msg: 'Unsuccessful'
+                                });
+                            }
+                        });
+                    });
+                    response.send({
+                        success: true,
+                        msg: 'Bulk update successful'
+                    });
+                }
+            });
+        }
+    });
+}
+
+module.exports.executiveExcelUpdate = (request, response) => {
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+            xlsx(request.files.excelFile, function(err, data){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+                else{
+                    var json = convertToJSON(data);
+                    json.forEach(element => {
+                        Executive.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
+                            if(err){
+                                response.send({
+                                    success: false,
+                                    msg: 'Unsuccessful'
+                                });
+                            }
+                        });
+                    });
+                    response.send({
+                        success: true,
+                        msg: 'Bulk update successful'
+                    });
+                }
+            });
+        }
+    });
+}
+
 module.exports.generateMediaHouseSheet = async function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
