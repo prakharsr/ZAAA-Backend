@@ -988,3 +988,45 @@ module.exports.generateROPdf = function(request, response) {
         }
     });
 }
+
+module.exports.queryReleaseOrderByNo = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            ReleaseOrder.find({
+                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNo': { $regex: request.params.keyword+"", $options:"i" }}]}]
+            })
+            .sort('releaseOrderNo')
+            .limit(5).exec(function(err, releaseOrders){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        executives: releaseOrders
+                    });
+                }
+            });
+		}	
+	});
+    
+};
