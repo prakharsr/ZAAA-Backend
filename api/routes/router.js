@@ -90,7 +90,7 @@ router.get('/user/ratecards/search/:keyword', ratecard.queryRatecards);
 
 router.post('/user/releaseorder', releaseOrder.createRO);
 router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
-router.post('/user/releaseorders/searchByNo/:keyword', releaseOrder.queryReleaseOrderByNo);
+router.get('/user/releaseorders/searchByNo/:keyword', releaseOrder.queryReleaseOrderByNo);
 router.post('/user/releaseorders/search', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorders/insertions/search', releaseOrder.queryInsertions);
 router.get('/user/releaseorders/insertions/:page', releaseOrder.getReleaseOrderInsertions);
