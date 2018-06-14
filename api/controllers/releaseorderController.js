@@ -1008,7 +1008,7 @@ module.exports.queryReleaseOrderByNo = function(request, response){
 		}
 		else{
             ReleaseOrder.find({
-                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNo': { $regex: request.params.keyword+"", $options:"i" }}]}]
+                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }}]}]
             })
             .sort('releaseOrderNo')
             .limit(5).exec(function(err, releaseOrders){
