@@ -159,15 +159,6 @@ var InvoiceSchema = new mongoose.Schema({
         self.taxAmount.Amount = ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded);
         console.log(self.agencyGSTIN, self.clientGSTIN);
         self.taxType = (self.clientState == self.agencyState)?"SGST + CGST": "IGST";
-        self.insertions.forEach(element => {
-            ReleaseOrder.find({"_id": self.releaseOrderId},function(doc){
-                doc.insertions.forEach(function(insertion){
-                    if(insertion.$._id = element.$._id)
-                    insertion.marked = true;
-                });
-                doc.save();
-            })
-        });
 
         next();
     })
