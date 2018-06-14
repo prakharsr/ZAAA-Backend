@@ -271,6 +271,58 @@ module.exports.queryMediaHouseInvoices = function(request, response){
 	});
 };
 
+module.exports.queryMediaHouseInvoices = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            var mediahouseID =await searchMediahouseID(request, response, user);
+            var date = (request.body.date)?(request.body.date):null;
+            var query = await formQuery(mediahouseID, date, user, request);
+            
+            
+            MediaHouseInvoice
+            .find(query)
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
+            .exec(function(err, mediahouseInvoice){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    MediaHouseInvoice.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            mediahouseInvoice: mediahouseInvoice,
+                            page: request.body.page,
+                            perPage:perPage,
+                            pageCount: Math.ceil(count/perPage)
+                        });
+                    })
+                    
+                }
+            });
+        }	
+	});
+};
+
 
 module.exports.generateSummarySheet = function(request, response){
     var token = userController.getToken(request.headers);
