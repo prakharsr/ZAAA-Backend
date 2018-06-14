@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
-
+var timestamps = require('mongoose-timestamp');
 
 var ClientSchema = new mongoose.Schema({
     OrganizationName:String,
@@ -55,4 +55,5 @@ var ClientSchema = new mongoose.Schema({
     },
 });
 ClientSchema.index({firm:1,OrganizationName:1}, {unique: true});
+ClientSchema.plugin(timestamps);
 module.exports = mongoose.model('Client', ClientSchema);

@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
-
+var timestamps = require('mongoose-timestamp');
 
 
  
@@ -29,5 +29,6 @@ var ExecutiveSchema = new mongoose.Schema({
     },
     
 });
+ExecutiveSchema.plugin(timestamps);
 module.exports = mongoose.model('Executive', ExecutiveSchema);
 

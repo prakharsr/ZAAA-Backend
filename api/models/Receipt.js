@@ -3,7 +3,7 @@ var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
-
+var timestamps = require('mongoose-timestamp');
 
 var ReceiptSchema = new mongoose.Schema({
     
@@ -111,5 +111,7 @@ var ReceiptSchema = new mongoose.Schema({
         ref:"Firm"
     },
     });
+    
+ReceiptSchema.plugin(timestamps);
     module.exports = mongoose.model('Receipt', ReceiptSchema);
     

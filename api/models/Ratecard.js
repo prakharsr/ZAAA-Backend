@@ -3,7 +3,7 @@ var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
-
+var timestamps = require('mongoose-timestamp');
 
 var RatecardSchema = new mongoose.Schema({
 MediaType:String,
@@ -84,4 +84,6 @@ RatecardSchema.pre('save', function(next) {
     }
 });
 
+
+RatecardSchema.plugin(timestamps);
 module.exports = mongoose.model('RateCard', RatecardSchema);

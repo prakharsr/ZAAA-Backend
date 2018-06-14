@@ -4,6 +4,7 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var nodemailer = require('nodemailer');
+var timestamps = require('mongoose-timestamp');
 
 var scheduling=new mongoose.Schema({
     Person:String,
@@ -51,4 +52,6 @@ global:{
 }
 });
 MediahouseSchema.index({firm:1,PublicationName: 1, "Address.edition":1 }, {unique: true});
+
+MediahouseSchema.plugin(timestamps);
 module.exports = mongoose.model('MediaHouse', MediahouseSchema);

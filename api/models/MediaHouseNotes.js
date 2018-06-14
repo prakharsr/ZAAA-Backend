@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
-
+var timestamps = require('mongoose-timestamp');
 var MediaHouseNoteSchema = new mongoose.Schema({
     publicationName: String,
     publicationState: String,
@@ -27,4 +27,5 @@ var MediaHouseNoteSchema = new mongoose.Schema({
     }
 });
 
+MediaHouseNoteSchema.plugin(timestamps);
 module.exports = mongoose.model('MediaHouseNote', MediaHouseNoteSchema);

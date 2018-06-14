@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
+var timestamps = require('mongoose-timestamp');
 
 var ClientNoteSchema = new mongoose.Schema({
     clientName: String,
@@ -27,4 +28,5 @@ var ClientNoteSchema = new mongoose.Schema({
     }
 });
 
+ClientNoteSchema.plugin(timestamps);
 module.exports = mongoose.model('ClientNote', ClientNoteSchema);

@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 var ReleaseOrder = require('./ReleaseOrder');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
-
+var timestamps = require('mongoose-timestamp');
 
 var MediaHouseInvoiceSchema = new mongoose.Schema({
 
@@ -66,5 +66,8 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         });
         next();
     })
+
+    
+MediaHouseInvoiceSchema.plugin(timestamps);
     module.exports = mongoose.model('MediaHouseInvoice', MediaHouseInvoiceSchema);
     

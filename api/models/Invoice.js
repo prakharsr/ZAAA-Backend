@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var ReleaseOrder = require('./ReleaseOrder');
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
-
+var timestamps = require('mongoose-timestamp');
 
 
 var InvoiceSchema = new mongoose.Schema({
@@ -162,5 +162,8 @@ var InvoiceSchema = new mongoose.Schema({
 
         next();
     })
+
+    
+InvoiceSchema.plugin(timestamps);
     module.exports = mongoose.model('Invoice', InvoiceSchema);
     

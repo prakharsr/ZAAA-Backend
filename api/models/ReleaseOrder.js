@@ -3,7 +3,7 @@ var config = require('../../config');
 var bcrypt = require('bcrypt');
 var authy = require('authy')(config.authyKey);
 var twilioClient = require('twilio')(config.accountSid, config.authToken);
-
+var timestamps = require('mongoose-timestamp');
 
 
 var ReleaseOrderSchema = new mongoose.Schema({
@@ -190,5 +190,5 @@ ReleaseOrderSchema.pre('save', function(next){
     }
 });
 
-
+ReleaseOrderSchema.plugin(timestamps);
 module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);

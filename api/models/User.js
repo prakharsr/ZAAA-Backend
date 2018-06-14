@@ -8,6 +8,7 @@ var mailgun = require("mailgun-js");
 var api_key = config.mailgun_api_key;
 var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
+var timestamps = require('mongoose-timestamp');
 var UserSchema = new mongoose.Schema({
     isAdmin : {
         type : Boolean,
@@ -194,5 +195,7 @@ UserSchema.methods.sendMessage = function(message, cb) {
     });
 };
         
+
+UserSchema.plugin(timestamps);
         
 module.exports = mongoose.model('User', UserSchema);

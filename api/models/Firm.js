@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
-
+var timestamps = require('mongoose-timestamp');
 
 
 var FirmSchema = new mongoose.Schema({
@@ -85,4 +85,5 @@ var FirmSchema = new mongoose.Schema({
 });
 
 
+FirmSchema.plugin(timestamps);
 module.exports = mongoose.model('Firm', FirmSchema);
