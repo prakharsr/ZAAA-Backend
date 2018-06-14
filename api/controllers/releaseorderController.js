@@ -1022,7 +1022,7 @@ module.exports.queryReleaseOrderByNo = function(request, response){
                 else{
                     response.send({
                         success:true,
-                        executives: releaseOrders
+                        releaseOrders: releaseOrders
                     });
                 }
             });
