@@ -323,7 +323,7 @@ module.exports.receiptReports = function(request,response){
 
 };
 
-module.exports.MediaHouseInvoiceReports = function(request,response){
+module.exports.mediahouseInvoiceReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -373,7 +373,7 @@ module.exports.MediaHouseInvoiceReports = function(request,response){
 
 };
 
-module.exports.MediaHouseNotesReports = function(request,response){
+module.exports.mediahouseNoteReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -422,7 +422,7 @@ module.exports.MediaHouseNotesReports = function(request,response){
      });
 
 };
-module.exports.ClientNotesReports = function(request,response){
+module.exports.clientNoteReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -472,7 +472,7 @@ module.exports.ClientNotesReports = function(request,response){
 
 };
 
-module.exports.RateCardReports = function(request,response){
+module.exports.rateCardReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
