@@ -51,6 +51,7 @@ module.exports.createMHInvoice = async (request,response) => {
                 publicationGSTIN:releaseorder.publicationGSTIN,
                 insertions: request.body.insertions,
                 releaseOrderNo: releaseorder.releaseOrderNo,
+                MHINo: request.body.MHINo,
                 MHIDate: request.body.MHIDate,
                 MHIGrossAmount: request.body.MHIGrossAmount,
                 MHITaxAmount: request.body.MHITaxAmount,
@@ -191,7 +192,7 @@ function formQuery(mediahouseID, date, user, request){
     
 }
 
-module.exports.queryMediaHouseInvoices = function(request, response){
+module.exports.querySummarySheet = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
