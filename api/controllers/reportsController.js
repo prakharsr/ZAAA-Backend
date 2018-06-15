@@ -73,7 +73,7 @@ module.exports.mediahouseReports = function(request,response){
 
 };
 
-module.exports.clientsReports = function(request,response){
+module.exports.clientReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -123,7 +123,7 @@ module.exports.clientsReports = function(request,response){
 
 };
 
-module.exports.ExecutiveReports = function(request,response){
+module.exports.executiveReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -173,7 +173,7 @@ module.exports.ExecutiveReports = function(request,response){
 
 };
 
-module.exports.ReleaseOrderReports = function(request,response){
+module.exports.releaseOrderReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -223,7 +223,7 @@ module.exports.ReleaseOrderReports = function(request,response){
 
 };
 
-module.exports.ClientInvoiceReports = function(request,response){
+module.exports.clientInvoiceReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -273,7 +273,7 @@ module.exports.ClientInvoiceReports = function(request,response){
 
 };
 
-module.exports.ReceiptReports = function(request,response){
+module.exports.receiptReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -521,12 +521,6 @@ module.exports.RateCardReports = function(request,response){
      });
 
 };
-
-
-
-
-
-
 
 async function createSheet(data, request, response, title, subject){
     console.log(data)

@@ -9,6 +9,7 @@ var executive = require('../controllers/executiveController');
 var mediahouse = require('../controllers/mediahouseController');
 var releaseOrder= require('../controllers/releaseorderController');
 var mediahouseInvoice= require('../controllers/mediahouseInvoiceController');
+var reports = require('../controllers/reportsController');
 var pdf= require('../controllers/pdfController');
 var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
@@ -148,5 +149,17 @@ router.post('/user/excel/export/ratecard',excel.generateRateCardSheet);
 router.post('/user/excel/export/client',excel.generateClientSheet);
 router.post('/user/excel/export/executive',excel.generateExecutiveSheet);
 router.post('/user/excel/export/mediahouse',excel.generateMediaHouseSheet);
+
+
+router.post('/user/reports/mediahouse' , reports.mediahouseReports);
+router.post('/user/reports/clients' , reports.clientReports);
+router.post('/user/reports/executive' , reports.executiveReports);
+router.post('/user/reports/invoice' , reports.clientInvoiceReports);
+router.post('/user/reports/releaseOrder' , reports.releaseOrderReports);
+router.post('/user/reports/receipt' , reports.receiptReports);
+router.post('/user/reports/mediahouseInvoice' , reports.mediahouseInvoiceReports);
+router.post('/user/reports/mediahouseNotes' , reports.mediahouseNoteReports);
+router.post('/user/reports/clientNote' , reports.clientNoteReports);
+router.post('/user/reports/ratecard' , reports.ratecardReports);
 
 module.exports = router;
