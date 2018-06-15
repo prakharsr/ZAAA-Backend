@@ -344,24 +344,26 @@ module.exports.generateSummarySheet = function(request, response){
 		}
 		else {
             try {
-                var mhis = request.body.mhis; // { ...insertion, amount: number }[]
+                var mhis = request.body.mhis; // { _id, amount: number }[]
 
-                MediaHouseInvoice.find({ firm: user.firm }).then(invoice => {
-                    invoice.insertions.forEach(mhiInsertion => {
-                        mhis.forEach(insertion => {
-                            if (mhiInsertion.insertionId == insertion._id) {
-                                mhiInsertion.collectedAmount = insertion.amount;
+                MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+                    invoices.forEach(invoice => {
+                        invoice.insertions.forEach(mhiInsertion => {
+                            mhis.forEach(insertion => {
+                                if (mhiInsertion._id == insertion._id) {
+                                    mhiInsertion.collectedAmount = insertion.amount;
+                                }
+                            });
+                        });
+
+                        invoice.save(function(err) {
+                            if (err) {
+                                response.send({
+                                    success: false,
+                                    msg: "error" + err
+                                });
                             }
                         });
-                    });
-
-                    invoice.save(function(err) {
-                        if (err) {
-                            response.send({
-                                success: false,
-                                msg: "error" + err
-                            });
-                        }
                     });
                 });
             }
