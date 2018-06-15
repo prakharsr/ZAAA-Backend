@@ -472,7 +472,7 @@ module.exports.clientNoteReports = function(request,response){
 
 };
 
-module.exports.rateCardReports = function(request,response){
+module.exports.ratecardReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
