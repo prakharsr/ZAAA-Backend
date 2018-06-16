@@ -51,7 +51,7 @@ module.exports.mediahouseReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -101,7 +101,7 @@ module.exports.clientReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -151,7 +151,7 @@ module.exports.executiveReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -201,7 +201,7 @@ module.exports.releaseOrderReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -251,7 +251,7 @@ module.exports.clientInvoiceReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -301,7 +301,7 @@ module.exports.receiptReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -351,7 +351,7 @@ module.exports.mediahouseInvoiceReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -401,7 +401,7 @@ module.exports.mediahouseNoteReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -450,7 +450,7 @@ module.exports.clientNoteReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -500,7 +500,7 @@ module.exports.ratecardReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
