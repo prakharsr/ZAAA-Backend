@@ -106,35 +106,35 @@ module.exports.ratecardExcelImport = (request, response) => {
                     var json = convertToJSON(data);
                     json.forEach(element => {
                         var ratecard = new RateCard({
-                            MediaType:request.body.mediaType,
-                            AdType:request.body.adType,
-                            AdWords:request.body.AdWords,
-                            AdWordsMax:request.body.AdWordsMax,
-                            AdTime:request.body.AdTime,
-                            RateCardType:request.body.rateCardType,
-                            BookingCenter:request.body.bookingCenter,
+                            MediaType:element.mediaType,
+                            AdType:element.adType,
+                            AdWords:element.AdWords,
+                            AdWordsMax:element.AdWordsMax,
+                            AdTime:element.AdTime,
+                            RateCardType:element.rateCardType,
+                            BookingCenter:element.bookingCenter,
                             mediahouseID:mediahouseID,
-                            Category:request.body.categories,
-                            Rate:request.body.rate,
-                            Position:request.body.position,
-                            Hue:request.body.hue,
-                            MaxSizeLimit: request.body.maxSizeLimit,
-                            MinSizeLimit:request.body.minSizeLimit,
-                            FixSize:request.body.fixSize,
-                            Scheme:request.body.scheme,
-                            Premium:request.body.premium,
-                            Tax:request.body.tax,
-                            ValidFrom:request.body.validFrom,
-                            ValidTill:request.body.validTill,
-                            Covered:request.body.covered,
-                            Remarks:request.body.remarks,
-                            PremiumCustom:request.body.PremiumCustom,
-                            PremiumBox:request.body.PremiumBox,
-                            PremiumBaseColour:request.body.PremiumBaseColour,
-                            PremiumCheckMark:request.body.PremiumCheckMark,
-                            PremiumEmailId:request.body.PremiumEmailId,
-                            PremiumWebsite:request.body.PremiumWebsite,
-                            PremiumExtraWords:request.body.PremiumWebsite,
+                            Category:element.categories,
+                            Rate:element.rate,
+                            Position:element.position,
+                            Hue:element.hue,
+                            MaxSizeLimit: element.maxSizeLimit,
+                            MinSizeLimit:element.minSizeLimit,
+                            FixSize:element.fixSize,
+                            Scheme:element.scheme,
+                            Premium:element.premium,
+                            Tax:element.tax,
+                            ValidFrom:element.validFrom,
+                            ValidTill:element.validTill,
+                            Covered:element.covered,
+                            Remarks:element.remarks,
+                            PremiumCustom:element.PremiumCustom,
+                            PremiumBox:element.PremiumBox,
+                            PremiumBaseColour:element.PremiumBaseColour,
+                            PremiumCheckMark:element.PremiumCheckMark,
+                            PremiumEmailId:element.PremiumEmailId,
+                            PremiumWebsite:element.PremiumWebsite,
+                            PremiumExtraWords:element.PremiumWebsite,
                             firm :user.firm,
                             global:false
                         });
@@ -179,19 +179,19 @@ module.exports.mediahouseExcelImport = (request, response) => {
                     var json = convertToJSON(data);
                     json.forEach(element => {
                         var mediahouse = new MediaHouse({
-                            OrganizationName:request.body.organizationName,
-                            PublicationName:request.body.publicationName,
-                            NickName:request.body.nickName,
-                            MediaType:request.body.mediaType,
-                            Language:request.body.Language,
-                            Address:request.body.address,
-                            OfficeLandline:request.body.officeLandline,
-                            officeStdNo:request.body.officeStdNo,
-                            Scheduling:request.body.scheduling,
+                            OrganizationName:element.organizationName,
+                            PublicationName:element.publicationName,
+                            NickName:element.nickName,
+                            MediaType:element.mediaType,
+                            Language:element.Language,
+                            Address:element.address,
+                            OfficeLandline:element.officeLandline,
+                            officeStdNo:element.officeStdNo,
+                            Scheduling:element.scheduling,
                             global:false,
-                            pullouts:request.body.pullouts,
-                            GSTIN:request.body.GSTIN,
-                            Remark:request.body.Remark,
+                            pullouts:element.pullouts,
+                            GSTIN:element.GSTIN,
+                            Remark:element.Remark,
                             firm : user.firm
                         });
                         mediahouse.save((err) => {
@@ -235,17 +235,17 @@ module.exports.executiveExcelImport = (request, response) => {
                     var json = convertToJSON(data);
                     json.forEach(element => {
                         var executive = new Executive({
-                            OrganizationName:request.body.organizationName,
-                            CompanyName:request.body.companyName,
-                            ExecutiveName:request.body.executiveName,
-                            Designation:request.body.designation,
-                            Department:request.body.department,
-                            MobileNo:request.body.mobileNo,
-                            EmailId:request.body.email,
-                            Photo:request.body.photo,
-                            DateOfBirth:request.body.dob,
-                            Anniversary:request.body.anniversary,
-                            Remark:request.body.Remark,    
+                            OrganizationName:element.organizationName,
+                            CompanyName:element.companyName,
+                            ExecutiveName:element.executiveName,
+                            Designation:element.designation,
+                            Department:element.department,
+                            MobileNo:element.mobileNo,
+                            EmailId:element.email,
+                            Photo:element.photo,
+                            DateOfBirth:element.dob,
+                            Anniversary:element.anniversary,
+                            Remark:element.Remark,    
                             firm : user.firm 
                         });
                         executive.save((err) => {
@@ -455,7 +455,10 @@ module.exports.generateMediaHouseSheet = async function(request, response){
                     });
                 }
                 else{
-                    createSheet(mediahouses, request, response,'MediaHouseExportData', 'excelExport');
+                    var mediahouses_map = mediahouses.map({
+
+                    });
+                    createSheet(mediahouses_map, request, response,'MediaHouseExportData', 'excelExport');
                 }
             });
         }	
@@ -490,7 +493,10 @@ module.exports.generateClientSheet = async function(request, response){
                     });
                 }
                 else{
-                    createSheet(clients, request, response,'ClientExportData', 'excelExport');
+                    var clients_map = clients.map({
+                        
+                    });
+                    createSheet(clients_map, request, response,'ClientExportData', 'excelExport');
                 }
             });
         }	
@@ -525,7 +531,10 @@ module.exports.generateExecutiveSheet = async function(request, response){
                     });
                 }
                 else{
-                    createSheet(executives, request, response,'ExecutiveExportData', 'excelExport');
+                    var executives_map = executives.map({
+
+                    });
+                    createSheet(executives_map, request, response,'ExecutiveExportData', 'excelExport');
                 }
             });
         }	
@@ -560,7 +569,10 @@ module.exports.generateRateCardSheet = async function(request, response){
                     });
                 }
                 else{
-                    createSheet(ratecards, request, response,'RateCardExportData', 'excelExport');
+                    var ratecards_map = ratecards.map({
+
+                    });
+                    createSheet(ratecards_map, request, response,'RateCardExportData', 'excelExport');
                 }
             });
         }	
