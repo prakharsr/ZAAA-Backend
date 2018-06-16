@@ -51,7 +51,7 @@ module.exports.mediahouseReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -73,7 +73,7 @@ module.exports.mediahouseReports = function(request,response){
 
 };
 
-module.exports.clientsReports = function(request,response){
+module.exports.clientReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -101,7 +101,7 @@ module.exports.clientsReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -123,7 +123,7 @@ module.exports.clientsReports = function(request,response){
 
 };
 
-module.exports.ExecutiveReports = function(request,response){
+module.exports.executiveReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -151,7 +151,7 @@ module.exports.ExecutiveReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -173,7 +173,7 @@ module.exports.ExecutiveReports = function(request,response){
 
 };
 
-module.exports.ReleaseOrderReports = function(request,response){
+module.exports.releaseOrderReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -201,7 +201,7 @@ module.exports.ReleaseOrderReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -223,7 +223,7 @@ module.exports.ReleaseOrderReports = function(request,response){
 
 };
 
-module.exports.ClientInvoiceReports = function(request,response){
+module.exports.clientInvoiceReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -251,7 +251,7 @@ module.exports.ClientInvoiceReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -273,7 +273,7 @@ module.exports.ClientInvoiceReports = function(request,response){
 
 };
 
-module.exports.ReceiptReports = function(request,response){
+module.exports.receiptReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -301,7 +301,7 @@ module.exports.ReceiptReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -323,7 +323,7 @@ module.exports.ReceiptReports = function(request,response){
 
 };
 
-module.exports.MediaHouseInvoiceReports = function(request,response){
+module.exports.mediahouseInvoiceReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -351,7 +351,7 @@ module.exports.MediaHouseInvoiceReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -373,7 +373,7 @@ module.exports.MediaHouseInvoiceReports = function(request,response){
 
 };
 
-module.exports.MediaHouseNotesReports = function(request,response){
+module.exports.mediahouseNoteReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -401,7 +401,7 @@ module.exports.MediaHouseNotesReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -422,7 +422,7 @@ module.exports.MediaHouseNotesReports = function(request,response){
      });
 
 };
-module.exports.ClientNotesReports = function(request,response){
+module.exports.clientNoteReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -450,7 +450,7 @@ module.exports.ClientNotesReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -472,7 +472,7 @@ module.exports.ClientNotesReports = function(request,response){
 
 };
 
-module.exports.RateCardReports = function(request,response){
+module.exports.ratecardReports = function(request,response){
 	var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
@@ -500,7 +500,7 @@ module.exports.RateCardReports = function(request,response){
             if(request.body.updationPeriod != 0)
             {
                     var to = new Date()
-                    var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
+                    var from = new Date( to.getTime()- request.body.updationPeriod *24*60*60*1000);
                     query['updatedAt']={$gte: from, $lte:to} 
             }
         
@@ -521,12 +521,6 @@ module.exports.RateCardReports = function(request,response){
      });
 
 };
-
-
-
-
-
-
 
 async function createSheet(data, request, response, title, subject){
     console.log(data)
