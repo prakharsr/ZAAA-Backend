@@ -672,7 +672,53 @@ module.exports.queryReleaseOrder = async function(request, response){
 	});
 
 };
-
+module.exports.queryGenerated = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+                    ReleaseOrder
+                    .findById(mongoose.mongo.ObjectId(request.body.id))
+                    .exec(function(err, releaseOrder){
+                                if(err){
+                                    console.log(err+ "");
+                                    response.send({
+                                        success:false,
+                                        msg: err +""
+                                    });
+                                }
+                                else{
+                                        releaseOrder.generated = true;
+                                        releaseOrder.save(function(err){
+                                            if(err){
+                                                response.send({
+                                                    success:false
+                                                })
+                                            }
+                                            else{
+                                                response.send({
+                                                    success:true
+                                                })
+                                            }
+                                        })
+                                    }
+                            });
+                        }	
+	});
+};
 module.exports.queryInsertions = function(request, response){
     var token = userController.getToken(request.headers);
 	var user = userController.getUser(token,request,response, async function(err, user){
