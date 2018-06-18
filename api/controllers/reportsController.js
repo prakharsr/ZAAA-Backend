@@ -181,12 +181,11 @@ module.exports.clientReports = function (request, response) {
                                 "Remark": client.Remark,
 
                             }
-                        if(client.ContactPerson.length> 0){
+                        if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
                             var index;
-                            var index = +i + 1
-                            var contactPerson = mediahouse.ContactPerson[i];
-                            for(var i = 0; i< contactPerson.length && i < 2; ++i){
+                            for(var i = 0; i< client.ContactPerson.length && i < 2; ++i){
                                 index = i+1;
+                                var contactPerson = client.ContactPerson[i];
                                 obj["Person Name" + index] = contactPerson.Name;
                                 obj["Person Designation" + index] = contactPerson.Designation;
                                 obj["Person Department" + index] = contactPerson.Department;
@@ -466,11 +465,11 @@ module.exports.clientInvoiceReports = function (request, response) {
                         }
                         if(invoice.insertions.length> 0){
                             var index;
-                            var index = +i + 1
+                            for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
+                                
+                            index = +i + 1
                             var insertion = invoice.insertions[i];
-                            for(var i = 0; i< insertion.length && i < 8; ++i){
-                                index = i+1;
-                                obj["Insertion" + index] = insertion.day + "/"+insertion.month+"/"+insertion.year;
+                                obj["Insertion" + index] = insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year;
                             } 
                         }
                     return obj
@@ -564,23 +563,13 @@ module.exports.receiptReports = function (request, response) {
                 }
                 if(receipt.otherCharges.length> 0){
                     var index;
-                    var index = +i + 1
-                    var otherCharge = receipt.otherCharges[i];
-                    for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                    for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
                         index = i+1;
+                    var otherCharge = receipt.otherCharges[i];
                         obj["Type" + index] = otherCharge.chargeType;
                         obj["Amount" + index] = otherCharge.amount;
                     } 
                 }
-                if(receipt.insertions.length> 0){
-                    var index;
-                    var index = +i + 1
-                    var insertion = receipt.insertions[i];
-                    for(var i = 0; i< insertion.length && i < 8; ++i){
-                        index = i+1;
-                        obj["Insertion" + index] = insertion.day + "/"+insertion.month+"/"+insertion.year;
-                     }
-                    }
                     return obj
                     })
                 }
@@ -588,7 +577,7 @@ module.exports.receiptReports = function (request, response) {
                     console.log(err)
                 }
 
-                createSheet(receipts, request, response, 'ReceiptExportData', 'excelReport');
+                createSheet(el, request, response, 'ReceiptExportData', 'excelReport');
             }
             })
 
@@ -637,16 +626,18 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                 }
                 else {
                     var el = mhinvoices.map(function(mhinvoice){
-                                            
+                    try{
+                                                
                     var obj = {
                         "Mediahouse Name":mhinvoice.publicationName,
                         "Edition":mhinvoice.publicationEdition,
-                        "Media Type":mediaType,
+                        "Media Type":mhiinvoice.mediaType,
                         "Mediahouse State":publicationState,
                         "GSTIN":publicationGSTIN.GSTType +"-"+publicationGSTIN.GSTNo,
-                    };
+                    }; 
+                    var index;
                         if(mhinvoice.insertions.length> 0){
-                            var index;
+                           
                             for(var i = 0; i< mhinvoice.insertions.length && i < 20; ++i){
                                 index = i+1;
                                 insertion = mhinvoice.insertions[i];
@@ -654,13 +645,17 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                             }
                         }
                         
-                        obj["Creattion Date"]=mhinvoice.date;
+                        obj["Creation Date"]=mhinvoice.date;
                         obj["RO Number"]=mhinvoice.releaseOrderNo;
                         obj["Invoice Number"]=mhinvoice.MHINo;
                         obj["Dated"]=mhinvoice.MHIDate;
                         obj["Amount"]=mhinvoice.MHIGrossAmount;
                         obj["Tax Amount"]=mhinvoice.MHITaxAmount;
-                    
+                    return obj;
+                    }
+                    catch(err){
+                        console.log(err);
+                    }
                     })
                     createSheet(el, request, response, 'MediahouseInvoiceExportData', 'excelReport');
                 }
@@ -729,7 +724,7 @@ module.exports.mediahouseNoteReports = function (request, response) {
                     catch (err) {
                         console.log(err)
                     }
-                    createSheet(mhnotes, request, response, 'MediahouseNoteExportData', 'excelReport');
+                    createSheet(el, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
 
@@ -795,7 +790,7 @@ module.exports.clientNoteReports = function (request, response) {
                         console.log(err)
                     }
 
-                    createSheet(clnotes, request, response, 'ClientNoteExportData', 'excelReport');
+                    createSheet(el, request, response, 'ClientNoteExportData', 'excelReport');
                 }
             })
 
