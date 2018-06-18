@@ -5,7 +5,7 @@ var firmController = require('./firmController');
 var pdf = require('./pdf');
 var User = require('../models/User');
 var ReleaseOrder = require('../models/ReleaseOrder');
-var Ticket = require('../model/Ticket');
+var Ticket = require('../models/Ticket');
 var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
@@ -20,28 +20,50 @@ var path = require('path');
 var perPage=20;
 
 module.exports.createTicket = (request,response) => {
-    var ticket = new Ticket({
-        subject: request.body.subject,
-        details: request.body.details
-    });
-    ticket.save((err,doc) => {
-        if(err){
-            response.send({
-                success:false,
-                msg: 'Cannot save ticket'
+    var token = userController.getToken(request.headers);
+    
+    userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+            var ticket = new Ticket({
+                subject: request.body.subject,
+                details: request.body.details,
+                user: user._id
             });
-        }
-        else{
-            response.send({
-                success: true,
-                msg: 'ticket generated with ticket no'+ doc._id
+
+            ticket.save((err,doc) => {
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: 'Cannot save ticket'
+                    });
+                }
+                else{
+                    response.send({
+                        success: true,
+                        msg: 'ticket generated with ticket no'+ doc._id
+                    })
+                }
             })
         }
-    })
+    });
 }
 
 
-function formQuery(mediahouseID, clientID, date, user, request){
+function formQuery(date, user, request){
     return new Promise((resolve, reject) => {
         var query = {'user':user._id};
         if(request.body.insertionPeriod){
@@ -55,7 +77,7 @@ function formQuery(mediahouseID, clientID, date, user, request){
 
 module.exports.queryUserTickets = function(request, response){
     var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
+	userController.getUser(token,request,response, async function(err, user){
 		if(err){
 			console.log(err);
 			response.send({
@@ -72,26 +94,12 @@ module.exports.queryUserTickets = function(request, response){
 		}
 		else{
             var date = (request.body.date)?(request.body.date):null;
-            var query = await formQuery(mediahouseID, date, user, request);
+            var query = await formQuery(date, user, request);
             
             
-            Ticket
-            .aggregate([
-                {$match:query},{
-                    $group : { 
-                        count: {$sum: 1},
-                        entries: { 
-                            $push:{
-                                "_id":"$_id",
-                                "subject":"$subject",
-                                "details":"$details",
-                            } 
-                        }
-                    } 
-                },
-                {$limit: perPage},
-                {$skip:(perPage * request.body.page) - perPage}
-            ])
+            Ticket.find(query)
+            .limit(perPage)
+            .skip((perPage * request.body.page) - perPage)
             .exec(function(err, tickets){
                 if(err){
                     console.log(err+ "");

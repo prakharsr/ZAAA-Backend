@@ -17,6 +17,7 @@ var taxation = require('../controllers/taxation');
 var receipt = require('../controllers/receiptController');
 var notes = require('../controllers/creditDebit');
 var excel = require('../controllers/excelController');
+var ticket = require('../controllers/ticketController');
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -163,5 +164,8 @@ router.post('/user/reports/mediahouseInvoice' , reports.mediahouseInvoiceReports
 router.post('/user/reports/mediahouseNotes' , reports.mediahouseNoteReports);
 router.post('/user/reports/clientNote' , reports.clientNoteReports);
 router.post('/user/reports/ratecard' , reports.ratecardReports);
+
+router.post('/user/ticket', ticket.createTicket);
+router.post('/user/ticket/search', ticket.queryUserTickets);
 
 module.exports = router;
