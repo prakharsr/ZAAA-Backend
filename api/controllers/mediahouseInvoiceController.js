@@ -352,6 +352,10 @@ module.exports.generateSummarySheet = function(request, response){
                             mhis.forEach(insertion => {
                                 if (mhiInsertion._id == insertion._id) {
                                     mhiInsertion.collectedAmount = insertion.amount;
+                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
+                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
+                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
+                                    
                                 }
                             });
                         });
