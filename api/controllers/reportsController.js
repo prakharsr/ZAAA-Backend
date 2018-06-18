@@ -75,21 +75,39 @@ module.exports.mediahouseReports = function (request, response) {
                                 "Media Type": mediahouse.MediaType ? mediahouse.MediaType : "-",
                                 "Language": mediahouse.Language ? mediahouse.Language : "-",
                                 "PIN": mediahouse.Address.pincode ? mediahouse.Address.pincode : "-",
-                                "Edition": mediahouse.Address.edition,
-                                "City": mediahouse.Address.city,
-                                "State": mediahouse.Address.state,
+                                "Edition": mediahouse.Address.edition?mediahouse.Address.edition:"-",
+                                "City": mediahouse.Address.city?mediahouse.Address.city:"-",
+                                "State": mediahouse.Address.state?mediahouse.Address.state:"-",
                                 "Phone": mediahouse.OfficeLandline.std + '-' + mediahouse.OfficeLandline.phone,
                                 "GSTIN": mediahouse.GSTIN.GSTType + '-' + (mediahouse.GSTIN.GSTNo ? mediahouse.GSTIN.GSTNo : "-"),
                                 "Remark": mediahouse.Remark
                             }
-
+                            if(mediahouse.pullouts.length > 0)
+                            {
+                                
                             for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
                                 var index = +i + 1
                                 var pullout = mediahouse.pullouts[i];
-                                obj["Pullout" + index] = pullout.Name;
-                                obj["PulloutLanguage" + index] = pullout.Language;
+                                obj["Pullout" + index] = pullout.Name?pullout.Name:"-";
+                                obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"-";
+                                obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"-";
+                                obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"-";
                             }
-
+                        }
+                            if(mediahouse.Scheduling.length > 0)
+                            {
+                                
+                            for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
+                                var index = +i + 1
+                                var scheduling = mediahouse.Scheduling[i];
+                                obj["PersonName" + index] = scheduling.Name?scheduling.Name:"-";
+                                obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"-";
+                                obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"-";
+                                obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"-";
+                                obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"-";
+                                obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"-";
+                            }
+                        }
                             return obj;
                         })
                     }
@@ -146,7 +164,7 @@ module.exports.clientReports = function (request, response) {
                 else {
                     try {
                         var el = clients.map(function (client) {
-                            return {
+                            var obj =  {
                                 "Organization Name": client.OrganizationName ? client.OrganizationName : "-",
                                 "Nick Name": client.NickName ? client.NickName : "-",
                                 "Company Name": client.CompanyName ? client.CompanyName : "-",
@@ -163,6 +181,23 @@ module.exports.clientReports = function (request, response) {
                                 "Remark": client.Remark,
 
                             }
+                        if(client.ContactPerson.length> 0){
+                            var index;
+                            var index = +i + 1
+                            var contactPerson = mediahouse.ContactPerson[i];
+                            for(var i = 0; i< contactPerson.length && i < 2; ++i){
+                                index = i+1;
+                                obj["Person Name" + index] = contactPerson.Name;
+                                obj["Person Designation" + index] = contactPerson.Designation;
+                                obj["Person Department" + index] = contactPerson.Department;
+                                obj["Person Mobile" + index] = contactPerson.MobileNo;
+                                obj["Person Phone" + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
+                                obj["Person Email" + index] = contactPerson.EmailId;
+                                obj["Person DOB" + index] = contactPerson.DateOfBirth;
+                                obj["Person Anniversary" + index] = contactPerson.Anniversary;
+                            }
+                        }
+                        return obj
                         })
                     }
                     catch (err) {
@@ -220,7 +255,7 @@ module.exports.executiveReports = function (request, response) {
                         var el = executives.map(function (executive) {
                             return {
                                 "Executive Name": executive.ExecutiveName ? executive.ExecutiveName : "-",
-                                "Company Name": executive.CompanyName ? executive.CompanyName : "-",
+                                "Organization Name": executive.OrganizationName ? executive.OrganizationName : "-",
                                 "Designation": executive.Designation ? executive.Designation : "-",
                                 "Departmet": executive.Department ? executive.Department : "-",
                                 "MobileNo": executive.MobileNo,
@@ -275,7 +310,7 @@ module.exports.releaseOrderReports = function (request, response) {
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
 
-            ReleaseOrder.find(query, function (err, releaseOrders) {
+            ReleaseOrder.find(query, async function (err, releaseOrders) {
                 if (err) {
                     console.log(err + "");
                     response.send({
@@ -286,25 +321,63 @@ module.exports.releaseOrderReports = function (request, response) {
                 else {
                     try {
                         var el = releaseOrders.map(function (releaseOrder) {
-                            return {
-                                "Executive Name": releaseOrder.ExecutiveName ? releaseOrder.ExecutiveName : "-",
-                                "Company Name": releaseOrder.CompanyName ? releaseOrder.CompanyName : "-",
-                                "Designation": releaseOrder.Designation ? releaseOrder.Designation : "-",
-                                "Departmet": releaseOrder.Department ? releaseOrder.Department : "-",
-                                "MobileNo": releaseOrder.MobileNo,
-                                "Email": releaseOrder.EmailId,
-                                "DOB": releaseOrder.DateOfBirth,
-                                "Anniversary": releaseOrder.Anniversary,
+                            var obj =  {
+                                "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
+                                "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
+                                "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
+                                "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
+                                "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
+                                "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
+                                "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
+                                "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
+                                "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
+                                "Rate": releaseOrder.rate?releaseOrder.rate:"-",
+                                "unit": releaseOrder.unit?releaseOrder.unit:"-",
+                                "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
+                                "Category2":releaseOrder.adCategory2?releaseOrder.adCategory2:"-",
+                                "Category3":releaseOrder.adCategory3?releaseOrder.adCategory3:"-",
+                                "Category4":releaseOrder.adCategory4?releaseOrder.adCategory4:"-",
+                                "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
+                                "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
+                                "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
+                                "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
+                                "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
+                                "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
+                                "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
+                                "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
+                                "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
                                 "Remark": releaseOrder.Remark,
+                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",
+                                
 
                             }
+                            if(releaseOrder.PremiumBox.Included){
+                                    
+                            }
+                        if(releaseOrder.insertions.length> 0){
+                            var index;
+                            for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
+                                index = i+1;
+                                insertion = releaseOrder.insertions[i];
+
+                                obj["Person Name" + index] = releaseOrder.ContactPerson.Name;
+                                obj["Person Designation" + index] = releaseOrder.ContactPerson.Designation;
+                                obj["Person Department" + index] = releaseOrder.ContactPerson.Department;
+                                obj["Person Mobile" + index] = releaseOrder.ContactPerson.MobileNo;
+                                obj["Person Phone" + index] = releaseOrder.ContactPerson.stdNo + "-" + releaseOrder.ContactPerson.Landline;
+                                obj["Person Email" + index] = releaseOrder.ContactPerson.EmailId;
+                                obj["Person DOB" + index] = releaseOrder.ContactPerson.DateOfBirth;
+                                obj["Person Anniversary" + index] = releaseOrder.ContactPerson.Anniversary;
+                            }
+                        }
+                        return obj
                         })
                     }
                     catch (err) {
                         console.log(err)
                     }
 
-                    createSheet(releaseOrders, request, response, 'ReleaseOrderExportData', 'excelReport');
+                    createSheet(el, request, response, 'ReleaseOrderExportData', 'excelReport');
                 }
             })
 
@@ -352,7 +425,62 @@ module.exports.clientInvoiceReports = function (request, response) {
                     });
                 }
                 else {
-                    createSheet(invoices, request, response, 'ClientInvoiceExportData', 'excelReport');
+                    try{
+                    var el = invoices.map(function (invoice) {
+                        var obj =  {
+                            "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
+                            "Date": invoice.date ? invoice.date : "-",
+                            "Mediahouse Name": invoice.publicationName ? invoice.publicationName : "-",
+                            "Edition": invoice.publicationEdition ? invoice.publicationEdition : "-",
+                            "Media Type": invoice.mediaType ? invoice.mediaType : "-",
+                            "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
+                            "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
+                            "Client Name": invoice.clientName?invoice.clientName:"-",
+                            "Client State": invoice.clientState?invoice.clientState:"-",
+                            "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
+                            "Executive Name": invoice.executiveName?invoice.executiveName:"-",
+                            "Executive Organization":invoice.executiveOrg?invoice.executiveOrg:"-",
+
+
+                            "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
+                            "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
+                            "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
+                            "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
+                            "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
+                            "Tax Amount":invoice.taxAmount?invoice.taxAmount:"-",
+                            "Tax Included":invoice.taxIncluded?invoice.taxIncluded:"-",
+                            "Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                            "Pending Amount":invoice.pendingAmount,
+                            "Final Tax Amount":invoice.FinalTaxAmount,
+                                                       
+                        }
+                        if(invoice.otherCharges.length> 0){
+                            var index;
+                            var index = +i + 1
+                            var otherCharge = invoice.otherCharges[i];
+                            for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                                index = i+1;
+                                obj["Type" + index] = otherCharge.chargeType;
+                                obj["Amount" + index] = otherCharge.amount;
+                            } 
+                        }
+                        if(invoice.insertions.length> 0){
+                            var index;
+                            var index = +i + 1
+                            var insertion = invoice.insertions[i];
+                            for(var i = 0; i< insertion.length && i < 8; ++i){
+                                index = i+1;
+                                obj["Insertion" + index] = insertion.day + "/"+insertion.month+"/"+insertion.year;
+                            } 
+                        }
+                    return obj
+                    })
+                }
+                catch (err) {
+                    console.log(err)
+                }
+
+                    createSheet(el, request, response, 'ClientInvoiceExportData', 'excelReport');
                 }
             })
 
@@ -400,8 +528,68 @@ module.exports.receiptReports = function (request, response) {
                     });
                 }
                 else {
-                    createSheet(receipts, request, response, 'ReceiptExportData', 'excelReport');
+                    try{
+                    var el =receipts.map(function (receipt) {
+                    var obj =  {
+                    "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
+                    "Date": receipt.date ? receipt.date : "-",
+                    "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
+                    "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
+                    "Media Type": receipt.mediaType ? receipt.mediaType : "-",
+                    "Mediahouse State": receipt.publicationState ? receipt.publicationState : "-",
+                    "Mediahouse GSTIN": receipt.publicationGSTIN.GSTType +"-"+ receipt.publicationGSTIN.GSTNo,
+                    "Client Name": receipt.clientName?receipt.clientName:"-",
+                    "Client State": receipt.clientState?receipt.clientState:"-",
+                    "Client GSTIN": receipt.clientGSTIN.GSTType + "-" +receipt.clientGSTIN.GSTNo,
+                    "Executive Name": receipt.executiveName?receipt.executiveName:"-",
+                    "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
+
+
+                    "Gross Amount":receipt.adGrossAmount?receipt.adGrossAmount:"-",
+                    "Publication Discount":receipt.publicationDiscount?receipt.publicationDiscount:"-",
+                    "Agency Discount1":receipt.agencyDiscount1?receipt.agencyDiscount1:"-",
+                    "Agency Discount2":receipt.agencyDiscount2?receipt.agencyDiscount2:"-",
+                    "Extra Charges":receipt.extraCharges?receipt.extraCharges:"-",
+                    "Tax Amount":receipt.taxAmount?receipt.taxAmount:"-",
+                    "Tax Included":receipt.taxIncluded?receipt.taxIncluded:"-",
+                    "Net Amount":receipt.netAmountFigures?receipt.netAmountFigures:"-",
+                    "Pending Amount":receipt.pendingAmount,
+                    "Final Tax Amount":receipt.FinalTaxAmount,
+                    
+                    "Payment Type":receipt.paymentType,
+                    "Payment Date":receipt.paymentDate,
+                    "Payment No":receipt.paymentNo,
+                    "Payment Amount":receipt.paymentAmount,
+                    "Payment BankName": receipt.paymentBankName
                 }
+                if(receipt.otherCharges.length> 0){
+                    var index;
+                    var index = +i + 1
+                    var otherCharge = receipt.otherCharges[i];
+                    for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                        index = i+1;
+                        obj["Type" + index] = otherCharge.chargeType;
+                        obj["Amount" + index] = otherCharge.amount;
+                    } 
+                }
+                if(receipt.insertions.length> 0){
+                    var index;
+                    var index = +i + 1
+                    var insertion = receipt.insertions[i];
+                    for(var i = 0; i< insertion.length && i < 8; ++i){
+                        index = i+1;
+                        obj["Insertion" + index] = insertion.day + "/"+insertion.month+"/"+insertion.year;
+                     }
+                    }
+                    return obj
+                    })
+                }
+                catch (err) {
+                    console.log(err)
+                }
+
+                createSheet(receipts, request, response, 'ReceiptExportData', 'excelReport');
+            }
             })
 
         }
@@ -448,7 +636,33 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                     });
                 }
                 else {
-                    createSheet(mhinvoices, request, response, 'MediahouseInvoiceExportData', 'excelReport');
+                    var el = mhinvoices.map(function(mhinvoice){
+                                            
+                    var obj = {
+                        "Mediahouse Name":mhinvoice.publicationName,
+                        "Edition":mhinvoice.publicationEdition,
+                        "Media Type":mediaType,
+                        "Mediahouse State":publicationState,
+                        "GSTIN":publicationGSTIN.GSTType +"-"+publicationGSTIN.GSTNo,
+                    };
+                        if(mhinvoice.insertions.length> 0){
+                            var index;
+                            for(var i = 0; i< mhinvoice.insertions.length && i < 20; ++i){
+                                index = i+1;
+                                insertion = mhinvoice.insertions[i];
+                                obj["Insertion - " + index] = insertion.insertionDate;
+                            }
+                        }
+                        
+                        obj["Creattion Date"]=mhinvoice.date;
+                        obj["RO Number"]=mhinvoice.releaseOrderNo;
+                        obj["Invoice Number"]=mhinvoice.MHINo;
+                        obj["Dated"]=mhinvoice.MHIDate;
+                        obj["Amount"]=mhinvoice.MHIGrossAmount;
+                        obj["Tax Amount"]=mhinvoice.MHITaxAmount;
+                    
+                    })
+                    createSheet(el, request, response, 'MediahouseInvoiceExportData', 'excelReport');
                 }
             })
 
@@ -496,6 +710,25 @@ module.exports.mediahouseNoteReports = function (request, response) {
                     });
                 }
                 else {
+                                        
+                    try {
+                        var el = mhnotes.map(function (mhnote) {
+                            var obj =  {
+                                "Publication Name": mhnote.publicationName?mhnote.publicationName:"-",
+                                "Publication State": mhnote.publicationState?mhnote.publicationState:'-',
+                                "RO Number":mhnote.releaseOrderNO?mhnote.releaseOrderNO:"-",
+                                "Date":mhnote.date.month?mhnote.date.month:"-" + "/"+mhnote.date.day?mhnote.date.day:"-" + "/" +mhnote.date.year?mhnote.date.year:"-",
+                                "Amount": mhnote.amount?mhnote.amount:"-",
+                                "Remark": mhnote.amount
+                                
+
+                            }
+                        return obj
+                        })
+                    }
+                    catch (err) {
+                        console.log(err)
+                    }
                     createSheet(mhnotes, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
@@ -543,6 +776,25 @@ module.exports.clientNoteReports = function (request, response) {
                     });
                 }
                 else {
+                    
+                    try {
+                        var el = clnotes.map(function (clnote) {
+                            var obj =  {
+                                "Client Name": clnote.clientName?clnote.clientName:"-",
+                                "Invoice Number": clnote.invoiceNO?clnote.invoiceNO:'-',
+                                "Date":clnote.date.month?clnote.date.month:"-" + "/"+clnote.date.day?clnote.date.day:"-" + "/" +clnote.date.year?clnote.date.year:"-",
+                                "Amount": clnote.amount?clnote.amount:"-",
+                                "Remark": clnote.amount
+                                
+
+                            }
+                        return obj
+                        })
+                    }
+                    catch (err) {
+                        console.log(err)
+                    }
+
                     createSheet(clnotes, request, response, 'ClientNoteExportData', 'excelReport');
                 }
             })
