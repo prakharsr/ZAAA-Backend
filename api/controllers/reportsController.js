@@ -360,7 +360,7 @@ module.exports.releaseOrderReports = function (request, response) {
                             }
                             if(releaseOrder.insertions.length> 0){
                                 var index;
-                                for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
+                                for(var i = 0; i< releaseOrder.insertions.length && i < 10; ++i){
                                     index = i+1;
                                     insertion = releaseOrder.insertions[i];
                                     obj["Insertion" + index] = insertion.ISODate;
@@ -848,54 +848,78 @@ module.exports.ratecardReports = function (request, response) {
                                 "Mediahouse Name": ratecard.BokingCenter.MediaHouseName ?ratecard.BokingCenter.MediaHouseName : "-",
                                 "Edition": ratecard.BokingCenter.Edition?ratecard.BokingCenter.Edition:"-",
                                 "Pullout Name":ratecard.BokingCenter.PulloutName?ratecard.BokingCenter.PulloutName:"-",
-                                "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
-                                "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
-                                "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
-                                "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
-                                "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
-                                "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
-                                "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
-                                "Rate": releaseOrder.rate?releaseOrder.rate:"-",
-                                "unit": releaseOrder.unit?releaseOrder.unit:"-",
-                                "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
-                                "Category2":releaseOrder.adCategory2?releaseOrder.adCategory2:"-",
-                                "Category3":releaseOrder.adCategory3?releaseOrder.adCategory3:"-",
-                                "Category4":releaseOrder.adCategory4?releaseOrder.adCategory4:"-",
-                                "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
-                                "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
-                                "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
-                                "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
-                                "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
-                                "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
-                                "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
-                                "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
-                                "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
-                                "Remark": releaseOrder.Remark,
-                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
-                                "Payment Type":releaseOrder.paymentType,
-                                "Payment Date":releaseOrder.paymentDate,
-                                "Payment No":releaseOrder.paymentNo,
-                                "Payment Amount":releaseOrder.paymentAmount,
-                                "Payment BankName": releaseOrder.paymentBankName
+                                "Media Type": ratecard.mediaType ? ratecard.mediaType : "-",
+                                "Ad Type": ratecard.AdType?ratecard.AdType:"-",
+                                "Ad time":ratecard.AdTime?ratecard.AdTime:"-",
+                                "Ratecard Type":ratecard.RateCardType,
+                                "Words": ratecard.AdWords?ratecard.AdWords:"-",
+                                "Max Words": ratecard.AdWordsMax?ratecard.AdWordsMax:"-",
+                                "Category Main":ratecard.Category.Main?ratecard.Category.Main:"-",
+                                "SubCategory1":ratecard.Category.SubCategory1?ratecard.Category.SubCategory1:"-",
+                                "SubCategory2":ratecard.Category.SubCategory2?ratecard.Category.SubCategory2:"-",
+                                "SubCategory3":ratecard.Category.SubCategory3?ratecard.Category.SubCategory3:"-",
+                                "SubCategory4":ratecard.Category.SubCategory4?ratecard.Category.SubCategory4:"-",
+                                "SubCategory5":ratecard.Category.SubCategory5?ratecard.Category.SubCategory5:"-",
+                                "SubCategory6":ratecard.Category.SubCategory6?ratecard.Category.SubCategory6:"-",
+                                "Hue":ratecard.Hue?ratecard.Hue:"-",
+                                "Rate":releaseOrder.Rate.rateQuantity + "-" + releaseOrder.Rate.unit+"-"+ releaseOrder.Rate.unitQuantity,
+                                "Position":ratecard.Posotion?ratecard.Posotion:"-",
+                                "Maximum Size":ratecard.MaxSizeLimit?ratecard.MaxSizeLimit.Length +" x "+ratecard.MaxSizeLimit.Width:"-",
+                                "Minimum Size":ratecard.MinSizeLimit?ratecard.MinSizeLimit.Length +" x "+ratecard.MinSizeLimit.Width:"-",
+                               
                             }
-                        })
-                        
-                        if(releaseOrder.PremiumBox.Included){
+                            if(ratecard.FixSize.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.FixSize.length && i < 10; ++i){
+                                    index = i+1;
+                                    fixsize = ratecard.FixSize[i];
+                                    obj["FixSize" + index] = fixsize.Length + " x "+fixsize.Width + " - "+fixsize.Amount;
+                                }
+                            }
+                                if(ratecard.Scheme.length> 0){
+                                    var index;
+                                    for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
+                                        index = i+1;
+                                        scheme = ratecard.Scheme[i];
+                                        obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.free + "-Free "+fixsize.Amount+"-Time limit";
+                                    }
+                                }
                             
-                        }
-                        if(releaseOrder.insertions.length> 0){
-                            var index;
-                            for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
-                                index = i+1;
-                                insertion = releaseOrder.insertions[i];
-                                obj["Insertion" + index] = insertion.ISODate;
-                            }
-                            obj["Publication Discount"] = releaseOrder.publicationDiscount;
-                            obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
-                            obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
-                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
-                            obj["Tax included"]  =releaseOrder.taxIncluded;
-                        }
+                                obj["PremiumCustom"]=ratecard.PremiumCustom?ratecard.PremiumCustom.PremiumType+"-"+ratecard.PremiumCustom.Amount+"-"+(ratecard.PremiumCustom.Percentage?"%":"Rs."):"-";
+                                obj["PremiumBox"]=ratecard.PremiumBox?ratecard.PremiumBox:"-";
+                                obj["PremiumBaseColour"]=ratecard.Premium.PremiumBaseColour?ratecard.PremiumBaseColour:"-";
+                                obj["PremiumCheckMark"]=ratecard.PremiumCheckMark?ratecard.PremiumCheckMark:"-";
+                                obj["PremiumEmail"]=ratecard.PremiumEmailId?ratecard.PremiumEmailId:"-";
+                                obj["PremiumWebsite"]=ratecard.PremiumWebsite?ratecard.PremiumWebsite:"-";
+                                obj["PremiumExtraWords"]=ratecard.PremiumExtraWords?ratecard.PremiumExtraWords:"-";
+                                obj["Validity"]=ratecard.ValidFrom?"From "+ratecard.ValidFrom+"-"+"Upto "+ratecard.ValidTill:"-";
+
+                                if(ratecard.Tax.length> 0){
+                                    var index;
+                                    for(var i = 0; i< ratecard.Tax.length && i < 10; ++i){
+                                        index = i+1;
+                                        tax = ratecard.Tax[i];
+                                        obj["Tax" + index] = tax.TaxRate +"-"+ tax.Included?"Include":"Excluded";
+                                    }
+                                }
+                                if(ratecard.Covered.length> 0){
+                                    var index;
+                                    for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
+                                        index = i+1;
+                                        covered = ratecard.Covered[i];
+                                        obj["Covered" + index] =covered.mediahouse +"-"+ covered.EditionArea;
+                                    }
+                                }
+                                if(ratecard.Remarks.length> 0){
+                                    var index;
+                                    for(var i = 0; i< ratecard.Remarks.length && i < 10; ++i){
+                                        index = i+1;
+                                        remark = ratecard.Remarks[i];
+                                        obj["Remark" + index] = remark.remark?remark.remark:"-";
+                                    }
+                                }
+                            
+                        })
                         return obj;
                         
                     }
@@ -912,7 +936,7 @@ module.exports.ratecardReports = function (request, response) {
     
 };
 
-module.exports.createSheet = async function (data, request, response, title, subject) {
+async function createSheet(data, request, response, title, subject) {
     console.log(data)
     var wb = XLSX.utils.book_new();
     

@@ -2,7 +2,6 @@ var config = require('../../config');
 var RateCard = require('../models/Ratecard');
 var userController = require('./userController');
 var firmController = require('./firmController');
-var reportsController = require('./reportsController');
 var pdf = require('./pdf');
 var User = require('../models/User');
 var ReleaseOrder = require('../models/ReleaseOrder');
@@ -17,6 +16,11 @@ var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
+
+var XLSX = require('xlsx');
+var base64 = require('base64-stream');
+var stream = require('stream');
+
 
 function getExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -864,7 +868,7 @@ module.exports.generateInsertionsSheet = function(request, response){
                                         obj["Status"] = "Disputed";
                                         return obj;
                                     })
-                                    reportsController.createSheet(el, request, response, 'Insertions Report', 'insertions Report');
+                                    createSheet(el, request, response, 'Insertions Report', 'insertions Report');
                                 }
                             });
                         }	
@@ -1154,3 +1158,34 @@ module.exports.queryReleaseOrderByNo = function(request, response){
 	});
     
 };
+async function createSheet(data, request, response, title, subject) {
+    console.log(data)
+    var wb = XLSX.utils.book_new();
+    
+    wb.Props = {
+        Title: title,
+        Subject: subject,
+        Author: "AAMAN",
+        CreatedDate: new Date(2017, 12, 19)
+    };
+    
+    var ws = XLSX.utils.json_to_sheet(data);
+    
+    XLSX.utils.book_append_sheet(wb, ws, "REPORT SHEET");
+    
+    var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+    
+    response.writeHead(200, {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': 'attachment; filename=' + title + ".xlsx"
+    });
+    
+    var decoder = base64.decode();
+    var xlStream = new stream.PassThrough();
+    xlStream.pipe(decoder)
+    .pipe(response);
+    
+    xlStream.write(wbout);
+    
+    response.end();
+}
