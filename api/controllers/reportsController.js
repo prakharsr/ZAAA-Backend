@@ -346,7 +346,12 @@ module.exports.releaseOrderReports = function (request, response) {
                                 "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
                                 "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
                                 "Remark": releaseOrder.Remark,
-                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",
+                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
+                                "Payment Type":releaseOrder.paymentType,
+                                "Payment Date":releaseOrder.paymentDate,
+                                "Payment No":releaseOrder.paymentNo,
+                                "Payment Amount":releaseOrder.paymentAmount,
+                                "Payment BankName": releaseOrder.paymentBankName
                                 
 
                             }
@@ -358,16 +363,15 @@ module.exports.releaseOrderReports = function (request, response) {
                             for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
                                 index = i+1;
                                 insertion = releaseOrder.insertions[i];
-
-                                obj["Person Name" + index] = releaseOrder.ContactPerson.Name;
-                                obj["Person Designation" + index] = releaseOrder.ContactPerson.Designation;
-                                obj["Person Department" + index] = releaseOrder.ContactPerson.Department;
-                                obj["Person Mobile" + index] = releaseOrder.ContactPerson.MobileNo;
-                                obj["Person Phone" + index] = releaseOrder.ContactPerson.stdNo + "-" + releaseOrder.ContactPerson.Landline;
-                                obj["Person Email" + index] = releaseOrder.ContactPerson.EmailId;
-                                obj["Person DOB" + index] = releaseOrder.ContactPerson.DateOfBirth;
-                                obj["Person Anniversary" + index] = releaseOrder.ContactPerson.Anniversary;
+                                obj["Insertion" + index] = insertion.ISODate;
                             }
+                            obj["Publication Discount"] = releaseOrder.publicationDiscount;
+                            obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
+                            obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
+                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                            obj["Tax included"]  =releaseOrder.taxIncluded;
+                            
+
                         }
                         return obj
                         })
@@ -838,6 +842,64 @@ module.exports.ratecardReports = function (request, response) {
                     });
                 }
                 else {
+                    try {
+                        var obj = {
+                        "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
+                        "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
+                        "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
+                        "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
+                        "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
+                        "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
+                        "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
+                        "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
+                        "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
+                        "Rate": releaseOrder.rate?releaseOrder.rate:"-",
+                        "unit": releaseOrder.unit?releaseOrder.unit:"-",
+                        "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
+                        "Category2":releaseOrder.adCategory2?releaseOrder.adCategory2:"-",
+                        "Category3":releaseOrder.adCategory3?releaseOrder.adCategory3:"-",
+                        "Category4":releaseOrder.adCategory4?releaseOrder.adCategory4:"-",
+                        "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
+                        "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
+                        "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
+                        "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
+                        "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
+                        "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
+                        "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
+                        "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
+                        "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
+                        "Remark": releaseOrder.Remark,
+                        "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
+                        "Payment Type":releaseOrder.paymentType,
+                        "Payment Date":releaseOrder.paymentDate,
+                        "Payment No":releaseOrder.paymentNo,
+                        "Payment Amount":releaseOrder.paymentAmount,
+                        "Payment BankName": releaseOrder.paymentBankName
+                        
+
+                    }
+                    if(releaseOrder.PremiumBox.Included){
+                            
+                    }
+                if(releaseOrder.insertions.length> 0){
+                    var index;
+                    for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
+                        index = i+1;
+                        insertion = releaseOrder.insertions[i];
+                        obj["Insertion" + index] = insertion.ISODate;
+                    }
+                    obj["Publication Discount"] = releaseOrder.publicationDiscount;
+                    obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
+                    obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
+                    obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                    obj["Tax included"]  =releaseOrder.taxIncluded;
+                }
+                        return obj;
+            }
+                    catch (err) {
+                        console.log(err)
+                    }
+
                     createSheet(ratecards, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
@@ -850,7 +912,7 @@ module.exports.ratecardReports = function (request, response) {
 async function createSheet(data, request, response, title, subject) {
     console.log(data)
     var wb = XLSX.utils.book_new();
-
+    
     wb.Props = {
         Title: title,
         Subject: subject,
