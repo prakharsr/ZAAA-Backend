@@ -881,7 +881,7 @@ module.exports.ratecardReports = function (request, response) {
                                         for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
                                             index = i+1;
                                             var scheme = ratecard.Scheme[i];
-                                            obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.free + "-Free "+scheme.Amount+"-Time limit";
+                                            obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.Free + "-Free "+scheme.Amount+"-Time limit";
                                         }
                                     }
                                 
