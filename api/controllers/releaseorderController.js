@@ -2,6 +2,7 @@ var config = require('../../config');
 var RateCard = require('../models/Ratecard');
 var userController = require('./userController');
 var firmController = require('./firmController');
+var reportsController = require('./reportsController');
 var pdf = require('./pdf');
 var User = require('../models/User');
 var ReleaseOrder = require('../models/ReleaseOrder');
@@ -430,7 +431,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
                     console.log("No insertions");
                     response.send({
                         success:false,
-                        msg:" No inseryions"
+                        msg:" No insertions"
                     });
                 }
                 else{
@@ -589,12 +590,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
             var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
             query['date']={$gte: from, $lte:to} 
     }
-    else if(request.body.creationPeriod == 0){
-        var to = new Date()
-        var from = new Date(1);
-        query['date']={$gte: from, $lte:to} 
-    }
-    if(request.body.insertionPeriod )
+
+    if(request.body.insertionPeriod !=0 )
     {
             var to = new Date()
             var from = new Date( to.getTime()- request.body.insertionPeriod *24*60*60*1000);
@@ -792,6 +789,89 @@ module.exports.queryInsertions = function(request, response){
 	});
 }
 
+module.exports.generateInsertionsSheet = function(request, response){
+    var token = userController.getToken(request.headers);
+	var user = userController.getUser(token,request,response, async function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "User not found, Please Login"
+			});
+		}
+		else{
+                    var mediahouseID =await searchMediahouseID(request, response, user);
+                    var clientID = await searchClientID(request, response, user);
+                    var executiveID = await searchExecutiveID(request, response, user);
+                    var date = (request.body.date)?(request.body.date):null;
+                    var adCategory1 = request.body.adCategory1;
+                    var adCategory2 = request.body.adCategory2;
+                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+
+                    
+                    ReleaseOrder
+                    .aggregate([{$unwind: "$insertions"}, 
+                    {$match:query },
+                    {$project: {
+                        "_id":1,
+                        "publicationName":1,
+                        "releaseOrderNO":1,
+                        "publicationEdition":1, 
+                        "clientName":1,
+                        "insertions.date": 1, 
+                        "insertions.marked": 1,
+                        "insertions.state": 1,
+                        "insertions.ISODate": 1, 
+                        "insertions._id": 1,
+                        "executiveName":1,
+                        "executiveOrg":1,
+                        "insertions.generated":1,
+                        "insertions.state":1
+                    }
+                    },
+                    {$limit: perPage},
+                    {$skip:(perPage * request.body.page) - perPage}
+                    ])
+                    .exec(function(err, insertions){
+                                if(err){
+                                    console.log(err+ "");
+                                    response.send({
+                                        success:false,
+                                        msg: err +""
+                                    });
+                                }
+                                else{
+                                    console.log(insertions)
+                                    var el = insertions.map(function(insertion){
+                                        var obj = {
+                                            "RO Number": insertion.releaseOrderNO,
+                                            "Insertion":insertion.insertions.ISODate,
+                                            "Client Name": insertion.clientName,
+                                            "Mediahouse Name": insertion.publicationName,
+                                            "Edition": insertion.publicationEdition,
+                                            "Invoice created":insertion.insertions.marked,
+                                        }
+                                        if(insertion.insertions.state ==0)
+                                        obj["Status"] = "Not Published";
+                                        if(insertion.insertions.state ==1)
+                                        obj["Status"] = "Published";
+                                        if(insertion.insertions.state ==2)
+                                        obj["Status"] = "Disputed";
+                                        return obj;
+                                    })
+                                    reports.createSheet(el, request, response, 'MediahouseNoteExportData', 'excelReport');
+                                }
+                            });
+                        }	
+	});
+}
 
 
 

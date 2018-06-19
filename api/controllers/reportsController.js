@@ -909,7 +909,7 @@ module.exports.ratecardReports = function (request, response) {
 
 };
 
-async function createSheet(data, request, response, title, subject) {
+module.exports.createSheet = async function (data, request, response, title, subject) {
     console.log(data)
     var wb = XLSX.utils.book_new();
     
