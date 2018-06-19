@@ -844,85 +844,84 @@ module.exports.ratecardReports = function (request, response) {
                 else {
                     try {
                         var el = ratecards.map(function(ratecard){
-                            var obj = {
-                                "Mediahouse Name": ratecard.BokingCenter.MediaHouseName ?ratecard.BokingCenter.MediaHouseName : "-",
-                                "Edition": ratecard.BokingCenter.Edition?ratecard.BokingCenter.Edition:"-",
-                                "Pullout Name":ratecard.BokingCenter.PulloutName?ratecard.BokingCenter.PulloutName:"-",
-                                "Media Type": ratecard.mediaType ? ratecard.mediaType : "-",
-                                "Ad Type": ratecard.AdType?ratecard.AdType:"-",
-                                "Ad time":ratecard.AdTime?ratecard.AdTime:"-",
-                                "Ratecard Type":ratecard.RateCardType,
-                                "Words": ratecard.AdWords?ratecard.AdWords:"-",
-                                "Max Words": ratecard.AdWordsMax?ratecard.AdWordsMax:"-",
-                                "Category Main":ratecard.Category.Main?ratecard.Category.Main:"-",
-                                "SubCategory1":ratecard.Category.SubCategory1?ratecard.Category.SubCategory1:"-",
-                                "SubCategory2":ratecard.Category.SubCategory2?ratecard.Category.SubCategory2:"-",
-                                "SubCategory3":ratecard.Category.SubCategory3?ratecard.Category.SubCategory3:"-",
-                                "SubCategory4":ratecard.Category.SubCategory4?ratecard.Category.SubCategory4:"-",
-                                "SubCategory5":ratecard.Category.SubCategory5?ratecard.Category.SubCategory5:"-",
-                                "SubCategory6":ratecard.Category.SubCategory6?ratecard.Category.SubCategory6:"-",
-                                "Hue":ratecard.Hue?ratecard.Hue:"-",
-                                "Rate":releaseOrder.Rate.rateQuantity + "-" + releaseOrder.Rate.unit+"-"+ releaseOrder.Rate.unitQuantity,
-                                "Position":ratecard.Posotion?ratecard.Posotion:"-",
-                                "Maximum Size":ratecard.MaxSizeLimit?ratecard.MaxSizeLimit.Length +" x "+ratecard.MaxSizeLimit.Width:"-",
-                                "Minimum Size":ratecard.MinSizeLimit?ratecard.MinSizeLimit.Length +" x "+ratecard.MinSizeLimit.Width:"-",
-                               
-                            }
-                            if(ratecard.FixSize.length> 0){
-                                var index;
-                                for(var i = 0; i< ratecard.FixSize.length && i < 10; ++i){
-                                    index = i+1;
-                                    fixsize = ratecard.FixSize[i];
-                                    obj["FixSize" + index] = fixsize.Length + " x "+fixsize.Width + " - "+fixsize.Amount;
+                         var obj = {
+                                    "Mediahouse Name": ratecard.BookingCenter.MediaHouseName ?ratecard.BookingCenter.MediaHouseName : "-",
+                                    "Edition": ratecard.BookingCenter.Edition?ratecard.BookingCenter.Edition:"-",
+                                    "Pullout Name":ratecard.BookingCenter.PulloutName?ratecard.BookingCenter.PulloutName:"-",
+                                    "Media Type": ratecard.mediaType ? ratecard.mediaType : "-",
+                                    "Ad Type": ratecard.AdType?ratecard.AdType:"-",
+                                    "Ad time":ratecard.AdTime?ratecard.AdTime:"-",
+                                    "Ratecard Type":ratecard.RateCardType,
+                                    "Words": ratecard.AdWords?ratecard.AdWords:"-",
+                                    "Max Words": ratecard.AdWordsMax?ratecard.AdWordsMax:"-",
+                                    "Category Main":ratecard.Category.Main?ratecard.Category.Main:"-",
+                                    "SubCategory1":ratecard.Category.SubCategory1?ratecard.Category.SubCategory1:"-",
+                                    "SubCategory2":ratecard.Category.SubCategory2?ratecard.Category.SubCategory2:"-",
+                                    "SubCategory3":ratecard.Category.SubCategory3?ratecard.Category.SubCategory3:"-",
+                                    "SubCategory4":ratecard.Category.SubCategory4?ratecard.Category.SubCategory4:"-",
+                                    "SubCategory5":ratecard.Category.SubCategory5?ratecard.Category.SubCategory5:"-",
+                                    "SubCategory6":ratecard.Category.SubCategory6?ratecard.Category.SubCategory6:"-",
+                                    "Hue":ratecard.Hue?ratecard.Hue:"-",
+                                    "Rate":ratecard.Rate.rateQuantity + "-" + ratecard.Rate.unit+"-"+ ratecard.Rate.unitQuantity,
+                                    "Position":ratecard.Posotion?ratecard.Posotion:"-",
+                                    "Maximum Size":ratecard.MaxSizeLimit?ratecard.MaxSizeLimit.Length +" x "+ratecard.MaxSizeLimit.Width:"-",
+                                    "Minimum Size":ratecard.MinSizeLimit?ratecard.MinSizeLimit.Length +" x "+ratecard.MinSizeLimit.Width:"-",
+                                   
                                 }
-                            }
-                                if(ratecard.Scheme.length> 0){
+                                if(ratecard.FixSize.length> 0){
                                     var index;
-                                    for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
+                                    for(var i = 0; i< ratecard.FixSize.length && i < 10; ++i){
                                         index = i+1;
-                                        scheme = ratecard.Scheme[i];
-                                        obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.free + "-Free "+fixsize.Amount+"-Time limit";
+                                        var fixsize = ratecard.FixSize[i];
+                                        obj["FixSize" + index] = fixsize.Length + " x "+fixsize.Width + " - "+fixsize.Amount;
                                     }
                                 }
-                            
-                                obj["PremiumCustom"]=ratecard.PremiumCustom?ratecard.PremiumCustom.PremiumType+"-"+ratecard.PremiumCustom.Amount+"-"+(ratecard.PremiumCustom.Percentage?"%":"Rs."):"-";
-                                obj["PremiumBox"]=ratecard.PremiumBox?ratecard.PremiumBox:"-";
-                                obj["PremiumBaseColour"]=ratecard.Premium.PremiumBaseColour?ratecard.PremiumBaseColour:"-";
-                                obj["PremiumCheckMark"]=ratecard.PremiumCheckMark?ratecard.PremiumCheckMark:"-";
-                                obj["PremiumEmail"]=ratecard.PremiumEmailId?ratecard.PremiumEmailId:"-";
-                                obj["PremiumWebsite"]=ratecard.PremiumWebsite?ratecard.PremiumWebsite:"-";
-                                obj["PremiumExtraWords"]=ratecard.PremiumExtraWords?ratecard.PremiumExtraWords:"-";
-                                obj["Validity"]=ratecard.ValidFrom?"From "+ratecard.ValidFrom+"-"+"Upto "+ratecard.ValidTill:"-";
-
-                                if(ratecard.Tax.length> 0){
-                                    var index;
-                                    for(var i = 0; i< ratecard.Tax.length && i < 10; ++i){
-                                        index = i+1;
-                                        tax = ratecard.Tax[i];
-                                        obj["Tax" + index] = tax.TaxRate +"-"+ tax.Included?"Include":"Excluded";
+                                    if(ratecard.Scheme.length> 0){
+                                        var index;
+                                        for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
+                                            index = i+1;
+                                            var scheme = ratecard.Scheme[i];
+                                            obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.free + "-Free "+scheme.Amount+"-Time limit";
+                                        }
                                     }
-                                }
-                                if(ratecard.Covered.length> 0){
-                                    var index;
-                                    for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
-                                        index = i+1;
-                                        covered = ratecard.Covered[i];
-                                        obj["Covered" + index] =covered.mediahouse +"-"+ covered.EditionArea;
+                                
+                                    obj["PremiumCustom"]=ratecard.PremiumCustom?ratecard.PremiumCustom.PremiumType+"-"+ratecard.PremiumCustom.Amount+"-"+(ratecard.PremiumCustom.Percentage?"%":"Rs."):"-";
+                                    obj["PremiumBox"]=ratecard.PremiumBox?ratecard.PremiumBox:"-";
+                                    obj["PremiumBaseColour"]=ratecard.PremiumBaseColour?ratecard.PremiumBaseColour:"-";
+                                    obj["PremiumCheckMark"]=ratecard.PremiumCheckMark?ratecard.PremiumCheckMark:"-";
+                                    obj["PremiumEmail"]=ratecard.PremiumEmailId?ratecard.PremiumEmailId:"-";
+                                    obj["PremiumWebsite"]=ratecard.PremiumWebsite?ratecard.PremiumWebsite:"-";
+                                    obj["PremiumExtraWords"]=ratecard.PremiumExtraWords?ratecard.PremiumExtraWords:"-";
+                                    obj["Validity"]=ratecard.ValidFrom?"From "+ratecard.ValidFrom+"-"+"Upto "+ratecard.ValidTill:"-";
+    
+                                    if(ratecard.Tax.length> 0){
+                                        var index;
+                                        for(var i = 0; i< ratecard.Tax.length && i < 10; ++i){
+                                            index = i+1;
+                                            var tax = ratecard.Tax[i];
+                                            obj["Tax" + index] = tax.TaxRate +"-"+ tax.Included?"Include":"Excluded";
+                                        }
                                     }
-                                }
-                                if(ratecard.Remarks.length> 0){
-                                    var index;
-                                    for(var i = 0; i< ratecard.Remarks.length && i < 10; ++i){
-                                        index = i+1;
-                                        remark = ratecard.Remarks[i];
-                                        obj["Remark" + index] = remark.remark?remark.remark:"-";
+                                    if(ratecard.Covered.length> 0){
+                                        var index;
+                                        for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
+                                            index = i+1;
+                                            var covered = ratecard.Covered[i];
+                                            obj["Covered" + index] =covered.mediahouse +"-"+ covered.EditionArea;
+                                        }
                                     }
-                                }
-                            
-                        })
-                        return obj;
-                        
-                    }
+                                    if(ratecard.Remarks.length> 0){
+                                        var index;
+                                        for(var i = 0; i< ratecard.Remarks.length && i < 10; ++i){
+                                            index = i+1;
+                                            var remark = ratecard.Remarks[i];
+                                            obj["Remark" + index] = remark.remark?remark.remark:"-";
+                                        }
+                                    }
+                                
+                            return obj;
+                            })
+                        }
                     catch (err) {
                         console.log(err)
                     }
