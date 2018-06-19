@@ -927,7 +927,7 @@ module.exports.ratecardReports = function (request, response) {
                         console.log(err)
                     }
                     
-                    createSheet(ratecards, request, response, 'MediahouseNoteExportData', 'excelReport');
+                    createSheet(el, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
             
