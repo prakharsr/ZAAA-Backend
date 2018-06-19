@@ -907,7 +907,7 @@ module.exports.ratecardReports = function (request, response) {
                                         for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
                                             index = i+1;
                                             var covered = ratecard.Covered[i];
-                                            obj["Covered" + index] =covered.mediahouse +"-"+ covered.EditionArea;
+                                            obj["Covered" + index] =covered.mediaHouse +"-"+ covered.EditionArea;
                                         }
                                     }
                                     if(ratecard.Remarks.length> 0){
