@@ -56,7 +56,7 @@ module.exports.mediahouseReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             MediaHouse.find(query, function (err, mediahouses) {
                 if (err) {
                     console.log(err + "");
@@ -85,29 +85,29 @@ module.exports.mediahouseReports = function (request, response) {
                             if(mediahouse.pullouts.length > 0)
                             {
                                 
-                            for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
-                                var index = +i + 1
-                                var pullout = mediahouse.pullouts[i];
-                                obj["Pullout" + index] = pullout.Name?pullout.Name:"-";
-                                obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"-";
-                                obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"-";
-                                obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"-";
+                                for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
+                                    var index = +i + 1
+                                    var pullout = mediahouse.pullouts[i];
+                                    obj["Pullout" + index] = pullout.Name?pullout.Name:"-";
+                                    obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"-";
+                                    obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"-";
+                                    obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"-";
+                                }
                             }
-                        }
                             if(mediahouse.Scheduling.length > 0)
                             {
                                 
-                            for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
-                                var index = +i + 1
-                                var scheduling = mediahouse.Scheduling[i];
-                                obj["PersonName" + index] = scheduling.Name?scheduling.Name:"-";
-                                obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"-";
-                                obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"-";
-                                obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"-";
-                                obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"-";
-                                obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"-";
+                                for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
+                                    var index = +i + 1
+                                    var scheduling = mediahouse.Scheduling[i];
+                                    obj["PersonName" + index] = scheduling.Name?scheduling.Name:"-";
+                                    obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"-";
+                                    obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"-";
+                                    obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"-";
+                                    obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"-";
+                                    obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"-";
+                                }
                             }
-                        }
                             return obj;
                         })
                     }
@@ -117,10 +117,10 @@ module.exports.mediahouseReports = function (request, response) {
                     createSheet(el, request, response, 'MediaHouseExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.clientReports = function (request, response) {
@@ -152,7 +152,7 @@ module.exports.clientReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             Client.find(query, function (err, clients) {
                 if (err) {
                     console.log(err + "");
@@ -179,24 +179,24 @@ module.exports.clientReports = function (request, response) {
                                 "PAN": client.PanNO,
                                 "GSTIN": client.GSTIN.GSTType + '-' + (client.GSTIN.GSTNo ? client.GSTIN.GSTNo : "-"),
                                 "Remark": client.Remark,
-
+                                
                             }
-                        if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
-                            var index;
-                            for(var i = 0; i< client.ContactPerson.length && i < 2; ++i){
-                                index = i+1;
-                                var contactPerson = client.ContactPerson[i];
-                                obj["Person Name" + index] = contactPerson.Name;
-                                obj["Person Designation" + index] = contactPerson.Designation;
-                                obj["Person Department" + index] = contactPerson.Department;
-                                obj["Person Mobile" + index] = contactPerson.MobileNo;
-                                obj["Person Phone" + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
-                                obj["Person Email" + index] = contactPerson.EmailId;
-                                obj["Person DOB" + index] = contactPerson.DateOfBirth;
-                                obj["Person Anniversary" + index] = contactPerson.Anniversary;
+                            if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
+                                var index;
+                                for(var i = 0; i< client.ContactPerson.length && i < 2; ++i){
+                                    index = i+1;
+                                    var contactPerson = client.ContactPerson[i];
+                                    obj["Person Name" + index] = contactPerson.Name;
+                                    obj["Person Designation" + index] = contactPerson.Designation;
+                                    obj["Person Department" + index] = contactPerson.Department;
+                                    obj["Person Mobile" + index] = contactPerson.MobileNo;
+                                    obj["Person Phone" + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
+                                    obj["Person Email" + index] = contactPerson.EmailId;
+                                    obj["Person DOB" + index] = contactPerson.DateOfBirth;
+                                    obj["Person Anniversary" + index] = contactPerson.Anniversary;
+                                }
                             }
-                        }
-                        return obj
+                            return obj
                         })
                     }
                     catch (err) {
@@ -205,10 +205,10 @@ module.exports.clientReports = function (request, response) {
                     createSheet(el, request, response, 'ClientsExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.executiveReports = function (request, response) {
@@ -240,7 +240,7 @@ module.exports.executiveReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             Executive.find(query, function (err, executives) {
                 if (err) {
                     console.log(err + "");
@@ -262,21 +262,21 @@ module.exports.executiveReports = function (request, response) {
                                 "DOB": executive.DateOfBirth,
                                 "Anniversary": executive.Anniversary,
                                 "Remark": executive.Remark,
-
+                                
                             }
                         })
                     }
                     catch (err) {
                         console.log(err)
                     }
-
+                    
                     createSheet(el, request, response, 'ExecutiveExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.releaseOrderReports = function (request, response) {
@@ -308,7 +308,7 @@ module.exports.releaseOrderReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             ReleaseOrder.find(query, async function (err, releaseOrders) {
                 if (err) {
                     console.log(err + "");
@@ -353,40 +353,40 @@ module.exports.releaseOrderReports = function (request, response) {
                                 "Payment Amount":releaseOrder.paymentAmount,
                                 "Payment BankName": releaseOrder.paymentBankName
                                 
-
+                                
                             }
                             if(releaseOrder.PremiumBox.Included){
-                                    
+                                
                             }
-                        if(releaseOrder.insertions.length> 0){
-                            var index;
-                            for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
-                                index = i+1;
-                                insertion = releaseOrder.insertions[i];
-                                obj["Insertion" + index] = insertion.ISODate;
+                            if(releaseOrder.insertions.length> 0){
+                                var index;
+                                for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
+                                    index = i+1;
+                                    insertion = releaseOrder.insertions[i];
+                                    obj["Insertion" + index] = insertion.ISODate;
+                                }
+                                obj["Publication Discount"] = releaseOrder.publicationDiscount;
+                                obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
+                                obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
+                                obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                                obj["Tax included"]  =releaseOrder.taxIncluded;
+                                
+                                
                             }
-                            obj["Publication Discount"] = releaseOrder.publicationDiscount;
-                            obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
-                            obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
-                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
-                            obj["Tax included"]  =releaseOrder.taxIncluded;
-                            
-
-                        }
-                        return obj
+                            return obj
                         })
                     }
                     catch (err) {
                         console.log(err)
                     }
-
+                    
                     createSheet(el, request, response, 'ReleaseOrderExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.clientInvoiceReports = function (request, response) {
@@ -418,7 +418,7 @@ module.exports.clientInvoiceReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             Invoice.find(query, function (err, invoices) {
                 if (err) {
                     console.log(err + "");
@@ -429,67 +429,67 @@ module.exports.clientInvoiceReports = function (request, response) {
                 }
                 else {
                     try{
-                    var el = invoices.map(function (invoice) {
-                        var obj =  {
-                            "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
-                            "Date": invoice.date ? invoice.date : "-",
-                            "Mediahouse Name": invoice.publicationName ? invoice.publicationName : "-",
-                            "Edition": invoice.publicationEdition ? invoice.publicationEdition : "-",
-                            "Media Type": invoice.mediaType ? invoice.mediaType : "-",
-                            "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
-                            "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
-                            "Client Name": invoice.clientName?invoice.clientName:"-",
-                            "Client State": invoice.clientState?invoice.clientState:"-",
-                            "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
-                            "Executive Name": invoice.executiveName?invoice.executiveName:"-",
-                            "Executive Organization":invoice.executiveOrg?invoice.executiveOrg:"-",
-
-
-                            "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
-                            "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
-                            "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
-                            "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
-                            "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
-                            "Tax Amount":invoice.taxAmount?invoice.taxAmount:"-",
-                            "Tax Included":invoice.taxIncluded?invoice.taxIncluded:"-",
-                            "Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
-                            "Pending Amount":invoice.pendingAmount,
-                            "Final Tax Amount":invoice.FinalTaxAmount,
-                                                       
-                        }
-                        if(invoice.otherCharges.length> 0){
-                            var index;
-                            var index = +i + 1
-                            var otherCharge = invoice.otherCharges[i];
-                            for(var i = 0; i< otherCharge.length && i < 8; ++i){
-                                index = i+1;
-                                obj["Type" + index] = otherCharge.chargeType;
-                                obj["Amount" + index] = otherCharge.amount;
-                            } 
-                        }
-                        if(invoice.insertions.length> 0){
-                            var index;
-                            for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
+                        var el = invoices.map(function (invoice) {
+                            var obj =  {
+                                "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
+                                "Date": invoice.date ? invoice.date : "-",
+                                "Mediahouse Name": invoice.publicationName ? invoice.publicationName : "-",
+                                "Edition": invoice.publicationEdition ? invoice.publicationEdition : "-",
+                                "Media Type": invoice.mediaType ? invoice.mediaType : "-",
+                                "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
+                                "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
+                                "Client Name": invoice.clientName?invoice.clientName:"-",
+                                "Client State": invoice.clientState?invoice.clientState:"-",
+                                "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
+                                "Executive Name": invoice.executiveName?invoice.executiveName:"-",
+                                "Executive Organization":invoice.executiveOrg?invoice.executiveOrg:"-",
                                 
-                            index = +i + 1
-                            var insertion = invoice.insertions[i];
-                                obj["Insertion" + index] = insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year;
-                            } 
-                        }
-                    return obj
-                    })
-                }
-                catch (err) {
-                    console.log(err)
-                }
-
+                                
+                                "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
+                                "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
+                                "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
+                                "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
+                                "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
+                                "Tax Amount":invoice.taxAmount?invoice.taxAmount:"-",
+                                "Tax Included":invoice.taxIncluded?invoice.taxIncluded:"-",
+                                "Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                                "Pending Amount":invoice.pendingAmount,
+                                "Final Tax Amount":invoice.FinalTaxAmount,
+                                
+                            }
+                            if(invoice.otherCharges.length> 0){
+                                var index;
+                                var index = +i + 1
+                                var otherCharge = invoice.otherCharges[i];
+                                for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                                    index = i+1;
+                                    obj["Type" + index] = otherCharge.chargeType;
+                                    obj["Amount" + index] = otherCharge.amount;
+                                } 
+                            }
+                            if(invoice.insertions.length> 0){
+                                var index;
+                                for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
+                                    
+                                    index = +i + 1
+                                    var insertion = invoice.insertions[i];
+                                    obj["Insertion" + index] = insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year;
+                                } 
+                            }
+                            return obj
+                        })
+                    }
+                    catch (err) {
+                        console.log(err)
+                    }
+                    
                     createSheet(el, request, response, 'ClientInvoiceExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.receiptReports = function (request, response) {
@@ -521,7 +521,7 @@ module.exports.receiptReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             Receipt.find(query, function (err, receipts) {
                 if (err) {
                     console.log(err + "");
@@ -532,62 +532,62 @@ module.exports.receiptReports = function (request, response) {
                 }
                 else {
                     try{
-                    var el =receipts.map(function (receipt) {
-                    var obj =  {
-                    "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
-                    "Date": receipt.date ? receipt.date : "-",
-                    "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
-                    "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
-                    "Media Type": receipt.mediaType ? receipt.mediaType : "-",
-                    "Mediahouse State": receipt.publicationState ? receipt.publicationState : "-",
-                    "Mediahouse GSTIN": receipt.publicationGSTIN.GSTType +"-"+ receipt.publicationGSTIN.GSTNo,
-                    "Client Name": receipt.clientName?receipt.clientName:"-",
-                    "Client State": receipt.clientState?receipt.clientState:"-",
-                    "Client GSTIN": receipt.clientGSTIN.GSTType + "-" +receipt.clientGSTIN.GSTNo,
-                    "Executive Name": receipt.executiveName?receipt.executiveName:"-",
-                    "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
-
-
-                    "Gross Amount":receipt.adGrossAmount?receipt.adGrossAmount:"-",
-                    "Publication Discount":receipt.publicationDiscount?receipt.publicationDiscount:"-",
-                    "Agency Discount1":receipt.agencyDiscount1?receipt.agencyDiscount1:"-",
-                    "Agency Discount2":receipt.agencyDiscount2?receipt.agencyDiscount2:"-",
-                    "Extra Charges":receipt.extraCharges?receipt.extraCharges:"-",
-                    "Tax Amount":receipt.taxAmount?receipt.taxAmount:"-",
-                    "Tax Included":receipt.taxIncluded?receipt.taxIncluded:"-",
-                    "Net Amount":receipt.netAmountFigures?receipt.netAmountFigures:"-",
-                    "Pending Amount":receipt.pendingAmount,
-                    "Final Tax Amount":receipt.FinalTaxAmount,
+                        var el =receipts.map(function (receipt) {
+                            var obj =  {
+                                "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
+                                "Date": receipt.date ? receipt.date : "-",
+                                "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
+                                "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
+                                "Media Type": receipt.mediaType ? receipt.mediaType : "-",
+                                "Mediahouse State": receipt.publicationState ? receipt.publicationState : "-",
+                                "Mediahouse GSTIN": receipt.publicationGSTIN.GSTType +"-"+ receipt.publicationGSTIN.GSTNo,
+                                "Client Name": receipt.clientName?receipt.clientName:"-",
+                                "Client State": receipt.clientState?receipt.clientState:"-",
+                                "Client GSTIN": receipt.clientGSTIN.GSTType + "-" +receipt.clientGSTIN.GSTNo,
+                                "Executive Name": receipt.executiveName?receipt.executiveName:"-",
+                                "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
+                                
+                                
+                                "Gross Amount":receipt.adGrossAmount?receipt.adGrossAmount:"-",
+                                "Publication Discount":receipt.publicationDiscount?receipt.publicationDiscount:"-",
+                                "Agency Discount1":receipt.agencyDiscount1?receipt.agencyDiscount1:"-",
+                                "Agency Discount2":receipt.agencyDiscount2?receipt.agencyDiscount2:"-",
+                                "Extra Charges":receipt.extraCharges?receipt.extraCharges:"-",
+                                "Tax Amount":receipt.taxAmount?receipt.taxAmount:"-",
+                                "Tax Included":receipt.taxIncluded?receipt.taxIncluded:"-",
+                                "Net Amount":receipt.netAmountFigures?receipt.netAmountFigures:"-",
+                                "Pending Amount":receipt.pendingAmount,
+                                "Final Tax Amount":receipt.FinalTaxAmount,
+                                
+                                "Payment Type":receipt.paymentType,
+                                "Payment Date":receipt.paymentDate,
+                                "Payment No":receipt.paymentNo,
+                                "Payment Amount":receipt.paymentAmount,
+                                "Payment BankName": receipt.paymentBankName
+                            }
+                            if(receipt.otherCharges.length> 0){
+                                var index;
+                                for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
+                                    index = i+1;
+                                    var otherCharge = receipt.otherCharges[i];
+                                    obj["Type" + index] = otherCharge.chargeType;
+                                    obj["Amount" + index] = otherCharge.amount;
+                                } 
+                            }
+                            return obj
+                        })
+                    }
+                    catch (err) {
+                        console.log(err)
+                    }
                     
-                    "Payment Type":receipt.paymentType,
-                    "Payment Date":receipt.paymentDate,
-                    "Payment No":receipt.paymentNo,
-                    "Payment Amount":receipt.paymentAmount,
-                    "Payment BankName": receipt.paymentBankName
+                    createSheet(el, request, response, 'ReceiptExportData', 'excelReport');
                 }
-                if(receipt.otherCharges.length> 0){
-                    var index;
-                    for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
-                        index = i+1;
-                    var otherCharge = receipt.otherCharges[i];
-                        obj["Type" + index] = otherCharge.chargeType;
-                        obj["Amount" + index] = otherCharge.amount;
-                    } 
-                }
-                    return obj
-                    })
-                }
-                catch (err) {
-                    console.log(err)
-                }
-
-                createSheet(el, request, response, 'ReceiptExportData', 'excelReport');
-            }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.mediahouseInvoiceReports = function (request, response) {
@@ -619,7 +619,7 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             MediaHouseInvoice.find(query, function (err, mhinvoices) {
                 if (err) {
                     console.log(err + "");
@@ -630,44 +630,44 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                 }
                 else {
                     var el = mhinvoices.map(function(mhinvoice){
-                    try{
-                                                
-                    var obj = {
-                        "Mediahouse Name":mhinvoice.publicationName,
-                        "Edition":mhinvoice.publicationEdition,
-                        "Media Type":mhiinvoice.mediaType,
-                        "Mediahouse State":publicationState,
-                        "GSTIN":publicationGSTIN.GSTType +"-"+publicationGSTIN.GSTNo,
-                    }; 
-                    var index;
-                        if(mhinvoice.insertions.length> 0){
-                           
-                            for(var i = 0; i< mhinvoice.insertions.length && i < 20; ++i){
-                                index = i+1;
-                                insertion = mhinvoice.insertions[i];
-                                obj["Insertion - " + index] = insertion.insertionDate;
+                        try{
+                            
+                            var obj = {
+                                "Mediahouse Name":mhinvoice.publicationName,
+                                "Edition":mhinvoice.publicationEdition,
+                                "Media Type":mhiinvoice.mediaType,
+                                "Mediahouse State":publicationState,
+                                "GSTIN":publicationGSTIN.GSTType +"-"+publicationGSTIN.GSTNo,
+                            }; 
+                            var index;
+                            if(mhinvoice.insertions.length> 0){
+                                
+                                for(var i = 0; i< mhinvoice.insertions.length && i < 20; ++i){
+                                    index = i+1;
+                                    insertion = mhinvoice.insertions[i];
+                                    obj["Insertion - " + index] = insertion.insertionDate;
+                                }
                             }
+                            
+                            obj["Creation Date"]=mhinvoice.date;
+                            obj["RO Number"]=mhinvoice.releaseOrderNo;
+                            obj["Invoice Number"]=mhinvoice.MHINo;
+                            obj["Dated"]=mhinvoice.MHIDate;
+                            obj["Amount"]=mhinvoice.MHIGrossAmount;
+                            obj["Tax Amount"]=mhinvoice.MHITaxAmount;
+                            return obj;
                         }
-                        
-                        obj["Creation Date"]=mhinvoice.date;
-                        obj["RO Number"]=mhinvoice.releaseOrderNo;
-                        obj["Invoice Number"]=mhinvoice.MHINo;
-                        obj["Dated"]=mhinvoice.MHIDate;
-                        obj["Amount"]=mhinvoice.MHIGrossAmount;
-                        obj["Tax Amount"]=mhinvoice.MHITaxAmount;
-                    return obj;
-                    }
-                    catch(err){
-                        console.log(err);
-                    }
+                        catch(err){
+                            console.log(err);
+                        }
                     })
                     createSheet(el, request, response, 'MediahouseInvoiceExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.mediahouseNoteReports = function (request, response) {
@@ -699,7 +699,7 @@ module.exports.mediahouseNoteReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             MediaHouseNotes.find(query, function (err, mhnotes) {
                 if (err) {
                     console.log(err + "");
@@ -709,7 +709,7 @@ module.exports.mediahouseNoteReports = function (request, response) {
                     });
                 }
                 else {
-                                        
+                    
                     try {
                         var el = mhnotes.map(function (mhnote) {
                             var obj =  {
@@ -720,9 +720,9 @@ module.exports.mediahouseNoteReports = function (request, response) {
                                 "Amount": mhnote.amount?mhnote.amount:"-",
                                 "Remark": mhnote.amount
                                 
-
+                                
                             }
-                        return obj
+                            return obj
                         })
                     }
                     catch (err) {
@@ -731,10 +731,10 @@ module.exports.mediahouseNoteReports = function (request, response) {
                     createSheet(el, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 module.exports.clientNoteReports = function (request, response) {
     var token = userController.getToken(request.headers);
@@ -765,7 +765,7 @@ module.exports.clientNoteReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             ClientNotes.find(query, function (err, clnotes) {
                 if (err) {
                     console.log(err + "");
@@ -785,22 +785,22 @@ module.exports.clientNoteReports = function (request, response) {
                                 "Amount": clnote.amount?clnote.amount:"-",
                                 "Remark": clnote.amount
                                 
-
+                                
                             }
-                        return obj
+                            return obj
                         })
                     }
                     catch (err) {
                         console.log(err)
                     }
-
+                    
                     createSheet(el, request, response, 'ClientNoteExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.ratecardReports = function (request, response) {
@@ -832,7 +832,7 @@ module.exports.ratecardReports = function (request, response) {
                 var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
-
+            
             RateCard.find(query, async function (err, ratecards) {
                 if (err) {
                     console.log(err + "");
@@ -843,70 +843,73 @@ module.exports.ratecardReports = function (request, response) {
                 }
                 else {
                     try {
-                        var obj = {
-                        "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
-                        "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
-                        "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
-                        "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
-                        "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
-                        "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
-                        "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
-                        "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
-                        "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
-                        "Rate": releaseOrder.rate?releaseOrder.rate:"-",
-                        "unit": releaseOrder.unit?releaseOrder.unit:"-",
-                        "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
-                        "Category2":releaseOrder.adCategory2?releaseOrder.adCategory2:"-",
-                        "Category3":releaseOrder.adCategory3?releaseOrder.adCategory3:"-",
-                        "Category4":releaseOrder.adCategory4?releaseOrder.adCategory4:"-",
-                        "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
-                        "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
-                        "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
-                        "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
-                        "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
-                        "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
-                        "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
-                        "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
-                        "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
-                        "Remark": releaseOrder.Remark,
-                        "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
-                        "Payment Type":releaseOrder.paymentType,
-                        "Payment Date":releaseOrder.paymentDate,
-                        "Payment No":releaseOrder.paymentNo,
-                        "Payment Amount":releaseOrder.paymentAmount,
-                        "Payment BankName": releaseOrder.paymentBankName
+                        var el = ratecards.map(function(ratecard){
+                            var obj = {
+                                "Mediahouse Name": ratecard.BokingCenter.MediaHouseName ?ratecard.BokingCenter.MediaHouseName : "-",
+                                "Edition": ratecard.BokingCenter.Edition?ratecard.BokingCenter.Edition:"-",
+                                "Pullout Name":ratecard.BokingCenter.PulloutName?ratecard.BokingCenter.PulloutName:"-",
+                                "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
+                                "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
+                                "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
+                                "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
+                                "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
+                                "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
+                                "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
+                                "Rate": releaseOrder.rate?releaseOrder.rate:"-",
+                                "unit": releaseOrder.unit?releaseOrder.unit:"-",
+                                "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
+                                "Category2":releaseOrder.adCategory2?releaseOrder.adCategory2:"-",
+                                "Category3":releaseOrder.adCategory3?releaseOrder.adCategory3:"-",
+                                "Category4":releaseOrder.adCategory4?releaseOrder.adCategory4:"-",
+                                "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
+                                "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
+                                "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
+                                "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
+                                "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
+                                "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
+                                "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
+                                "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
+                                "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
+                                "Remark": releaseOrder.Remark,
+                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
+                                "Payment Type":releaseOrder.paymentType,
+                                "Payment Date":releaseOrder.paymentDate,
+                                "Payment No":releaseOrder.paymentNo,
+                                "Payment Amount":releaseOrder.paymentAmount,
+                                "Payment BankName": releaseOrder.paymentBankName
+                            }
+                        })
                         
-
-                    }
-                    if(releaseOrder.PremiumBox.Included){
+                        if(releaseOrder.PremiumBox.Included){
                             
-                    }
-                if(releaseOrder.insertions.length> 0){
-                    var index;
-                    for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
-                        index = i+1;
-                        insertion = releaseOrder.insertions[i];
-                        obj["Insertion" + index] = insertion.ISODate;
-                    }
-                    obj["Publication Discount"] = releaseOrder.publicationDiscount;
-                    obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
-                    obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
-                    obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
-                    obj["Tax included"]  =releaseOrder.taxIncluded;
-                }
+                        }
+                        if(releaseOrder.insertions.length> 0){
+                            var index;
+                            for(var i = 0; i< releaseOrder.insertions.length && i < 2; ++i){
+                                index = i+1;
+                                insertion = releaseOrder.insertions[i];
+                                obj["Insertion" + index] = insertion.ISODate;
+                            }
+                            obj["Publication Discount"] = releaseOrder.publicationDiscount;
+                            obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
+                            obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
+                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                            obj["Tax included"]  =releaseOrder.taxIncluded;
+                        }
                         return obj;
-            }
+                        
+                    }
                     catch (err) {
                         console.log(err)
                     }
-
+                    
                     createSheet(ratecards, request, response, 'MediahouseNoteExportData', 'excelReport');
                 }
             })
-
+            
         }
     });
-
+    
 };
 
 module.exports.createSheet = async function (data, request, response, title, subject) {
@@ -919,24 +922,24 @@ module.exports.createSheet = async function (data, request, response, title, sub
         Author: "AAMAN",
         CreatedDate: new Date(2017, 12, 19)
     };
-
+    
     var ws = XLSX.utils.json_to_sheet(data);
-
+    
     XLSX.utils.book_append_sheet(wb, ws, "REPORT SHEET");
-
+    
     var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-
+    
     response.writeHead(200, {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': 'attachment; filename=' + title + ".xlsx"
     });
-
+    
     var decoder = base64.decode();
     var xlStream = new stream.PassThrough();
     xlStream.pipe(decoder)
-        .pipe(response);
-
+    .pipe(response);
+    
     xlStream.write(wbout);
-
+    
     response.end();
 }

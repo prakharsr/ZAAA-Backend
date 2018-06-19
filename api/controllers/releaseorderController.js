@@ -601,7 +601,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(request.body.releaseOrderNO){
         query['releaseOrderNO'] = request.body.releaseOrderNO;
     }
-
+    if(request.body.generated)
     query['generated'] = request.body.generated == true;
     
     console.log(query);
@@ -835,9 +835,7 @@ module.exports.generateInsertionsSheet = function(request, response){
                         "insertions.generated":1,
                         "insertions.state":1
                     }
-                    },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
+                    }
                     ])
                     .exec(function(err, insertions){
                                 if(err){
@@ -866,7 +864,7 @@ module.exports.generateInsertionsSheet = function(request, response){
                                         obj["Status"] = "Disputed";
                                         return obj;
                                     })
-                                    reports.createSheet(el, request, response, 'MediahouseNoteExportData', 'excelReport');
+                                    reportsController.createSheet(el, request, response, 'Insertions Report', 'insertions Report');
                                 }
                             });
                         }	
