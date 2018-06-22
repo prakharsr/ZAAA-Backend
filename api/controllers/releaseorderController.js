@@ -178,6 +178,7 @@ async function f (request, response, user){
         pulloutName: request.body.pulloutName,
         adType:request.body.adType,
         rate:request.body.rate,
+        fixRate: request.body.fixRate,
         unit:request.body.unit,
         adCategory1:request.body.adCategory1,
         adCategory2:request.body.adCategory2,

@@ -43,6 +43,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     },
 
     pulloutName: String,
+    fixRate: Boolean,
 
     PremiumCustom:{
         Amount:Number,
