@@ -175,6 +175,7 @@ async function f (request, response, user){
         mediaType:request.body.mediaType,
         publicationState:request.body.publicationState,
         publicationGSTIN:request.body.publicationGSTIN,
+        pulloutName: request.body.pulloutName,
         adType:request.body.adType,
         rate:request.body.rate,
         unit:request.body.unit,

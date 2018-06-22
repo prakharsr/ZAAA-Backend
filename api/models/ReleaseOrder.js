@@ -41,6 +41,9 @@ var ReleaseOrderSchema = new mongoose.Schema({
         GSTType:String,
         GSTNo:String
     },
+
+    pulloutName: String,
+
     PremiumCustom:{
         Amount:Number,
         Percentage:Boolean,
