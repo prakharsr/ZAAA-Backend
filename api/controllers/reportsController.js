@@ -561,46 +561,45 @@ module.exports.receiptReports = function (request, response) {
                 }
                 else {
                     try{
-                        var el =receipts.map( async function (receipt) {
-                            
-                        var invoice = await findInvoice(receipt.receiptNO, user);
-                            
-                            var obj =  {
-                                "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
-                                "Reciept Date": receipt.date ? receipt.date : "-",
-                                "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
-                                "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
-                                "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
-                                "Client Name": receipt.clientName?receipt.clientName:"-",
-                                "Client State": receipt.clientState?receipt.clientState:"-",
-                                "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
-                                "Invoice Date": new Date(),
-                                "Executive Name": receipt.executiveName?receipt.executiveName:"-",
-                                "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
-
+                        var el =await Promise.all(receipts.map( async function (receipt) {
+                            var invoice = await findInvoice(receipt.receiptNO, user);
                                 
-                                "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
-                                "Amount recieved":invoice.collectedAmount?invoice.collectedAmount:"-",
-                                "Amount Balance":invoice.pendingAmount?invoice.pendingAmount:"-",
-
-                                "Payment Type":receipt.paymentType,
-                                "Payment Date":receipt.paymentDate,
-                                "Payment No":receipt.paymentNo,
-                                "Payment Amount":receipt.paymentAmount,
-                                "Payment BankName": receipt.paymentBankName,
-                                "Payment Status":receipt.collectedAmount
-                            }
-                            if(receipt.otherCharges.length> 0){
-                                var index;
-                                for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
-                                    index = i+1;
-                                    var otherCharge = receipt.otherCharges[i];
-                                    obj["Type" + index] = otherCharge.chargeType;
-                                    obj["Amount" + index] = otherCharge.amount;
-                                } 
-                            }
-                            return obj
-                        })
+                                var obj =  {
+                                    "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
+                                    "Reciept Date": receipt.date ? receipt.date : "-",
+                                    "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
+                                    "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
+                                    "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
+                                    "Client Name": receipt.clientName?receipt.clientName:"-",
+                                    "Client State": receipt.clientState?receipt.clientState:"-",
+                                    "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
+                                    "Invoice Date": new Date(),
+                                    "Executive Name": receipt.executiveName?receipt.executiveName:"-",
+                                    "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
+    
+                                    
+                                    "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                                    "Amount recieved":invoice.collectedAmount?invoice.collectedAmount:"-",
+                                    "Amount Balance":invoice.pendingAmount?invoice.pendingAmount:"-",
+    
+                                    "Payment Type":receipt.paymentType,
+                                    "Payment Date":receipt.paymentDate,
+                                    "Payment No":receipt.paymentNo,
+                                    "Payment Amount":receipt.paymentAmount,
+                                    "Payment BankName": receipt.paymentBankName,
+                                    "Payment Status":receipt.collectedAmount
+                                }
+                                if(receipt.otherCharges.length> 0){
+                                    var index;
+                                    for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
+                                        index = i+1;
+                                        var otherCharge = receipt.otherCharges[i];
+                                        obj["Type" + index] = otherCharge.chargeType;
+                                        obj["Amount" + index] = otherCharge.amount;
+                                    } 
+                                }
+                                return obj
+                            }))
                     }
                     catch (err) {
                         console.log(err)
