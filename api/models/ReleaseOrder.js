@@ -176,6 +176,11 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    cancelled:{
+        type: Boolean,
+        default: false
+    },
+    generatedAt: Date
 });
 
 ReleaseOrderSchema.pre('save', function(next){

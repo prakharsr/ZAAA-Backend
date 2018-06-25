@@ -1002,7 +1002,11 @@ module.exports.mailROPdf = function(request, response) {
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
+                    if (releaseOrder.generated==false){
+                        releaseOrder.generated=true;
+                        var date = new Date();
+                        releaseOrder.generatedAt = date
+                    }
                     releaseOrder.save(function(err){
                         if(err)
                         response.send({
@@ -1078,7 +1082,11 @@ module.exports.generateROPdf = function(request, response) {
                 }
                 else{
                     var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    releaseOrder.generated=true;
+                    if (releaseOrder.generated==false){
+                        releaseOrder.generated=true;
+                        var date = new Date();
+                        releaseOrder.generatedAt = date
+                    }
                     releaseOrder.save(function(err){
                         if(err)
                         response.send({

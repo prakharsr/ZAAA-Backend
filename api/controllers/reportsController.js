@@ -321,15 +321,20 @@ module.exports.releaseOrderReports = function (request, response) {
                     try {
                         var el = releaseOrders.map(function (releaseOrder) {
                             var obj =  {
+                                "RO No.":releaseOrder.releaseOrderNO?releaseOrder.releaseOrderNO:"-",
+                                "RO Date":releaseOrder.createdAt?releaseOrder.createdAt:"-",
+
                                 "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
                                 "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
                                 "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
+                                "Pullout Name":releaseOrder.PulloutName?releaseOrder.PulloutName:"-",
                                 "Mediahouse State": releaseOrder.publicationState ? releaseOrder.publicationState : "-",
                                 "Mediahouse GSTIN": releaseOrder.publicationGSTIN.GSTType +"-"+ releaseOrder.publicationGSTIN.GSTNo,
                                 "Client Name": releaseOrder.clientName?releaseOrder.clientName:"-",
                                 "Client State": releaseOrder.clientState?releaseOrder.clientState:"-",
                                 "Client GSTIN": releaseOrder.clientGSTIN.GSTType + "-" +releaseOrder.clientGSTIN.GSTNo,
                                 "Ad Type": releaseOrder.adType?releaseOrder.adType:"-",
+                                "Publish Edition":releaseOrder.publicationEdition?releaseOrder.publicationEdition:"-",
                                 "Rate": releaseOrder.rate?releaseOrder.rate:"-",
                                 "unit": releaseOrder.unit?releaseOrder.unit:"-",
                                 "Category1":releaseOrder.adCategory1?releaseOrder.adCategory1:"-",
@@ -339,14 +344,16 @@ module.exports.releaseOrderReports = function (request, response) {
                                 "Category5":releaseOrder.adCategory5?releaseOrder.adCategory5:"-",
                                 "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
                                 "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
-                                "Words":releaseOrder.AdWords?releaseOrder.AdWords:"-",
+                                "Caption":releaseOrder.Caption?releaseOrder.Caption:"-",
+
+                                "Words/Line":releaseOrder.AdWords?releaseOrder.AdWords:"-",
                                 "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
                                 "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
                                 "Position":releaseOrder.adPosotion?releaseOrder.adPosotion:"-",
                                 "Scheme-Paid":releaseOrder.adSchemePaid?releaseOrder.adSchemePaid:"-",
                                 "Scheme-Free":releaseOrder.adSchemeFree?releaseOrder.adSchemeFree:"-",
                                 "Remark": releaseOrder.Remark,
-                                "Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
+                                "Gross Amount": releaseOrder.adGrossAmount?releaseOrder.adGrossAmount:"-",     
                                 "Payment Type":releaseOrder.paymentType,
                                 "Payment Date":releaseOrder.paymentDate,
                                 "Payment No":releaseOrder.paymentNo,
@@ -365,14 +372,15 @@ module.exports.releaseOrderReports = function (request, response) {
                                     insertion = releaseOrder.insertions[i];
                                     obj["Insertion" + index] = insertion.ISODate;
                                 }
-                                obj["Publication Discount"] = releaseOrder.publicationDiscount;
-                                obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
-                                obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
-                                obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
-                                obj["Tax included"]  =releaseOrder.taxIncluded;
-                                
-                                
                             }
+                            
+                            obj["Publication Discount"] = releaseOrder.publicationDiscount;
+                            obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
+                            obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
+                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                            obj["Tax included"]  =releaseOrder.taxIncluded;
+                            obj["Remark"]  = releaseOrder.remark?releaseOrder.remark:"-";
+                            obj["Status"] = releaseOrder.cancelled?"Cancelled":"Active";
                             return obj
                         })
                     }
@@ -492,6 +500,27 @@ module.exports.clientInvoiceReports = function (request, response) {
     
 };
 
+function findInvoice(invoiceNO, user){
+    return new Promise((resolve, reject) => {
+        var index =invoiceNO.indexOf('.',invoiceNO.indexOf('.')+1);
+        var substring = invoiceNO.slice(0,index);
+        Invoice.find({
+            $and:[{"firm":user.firm},{"invoiceNO":substring}]
+        }).exec(function(err, invoice){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(invoice.length == 0)
+            {
+                resolve(null);
+            }
+            else{
+                resolve(invoice[0]);
+            }
+        })
+    })
+}
 module.exports.receiptReports = function (request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token, request, response, async function (err, user) {
@@ -522,7 +551,7 @@ module.exports.receiptReports = function (request, response) {
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
             
-            Receipt.find(query, function (err, receipts) {
+            Receipt.find(query, async function (err, receipts) {
                 if (err) {
                     console.log(err + "");
                     response.send({
@@ -532,38 +561,34 @@ module.exports.receiptReports = function (request, response) {
                 }
                 else {
                     try{
-                        var el =receipts.map(function (receipt) {
+                        var el =receipts.map( async function (receipt) {
+                            
+                        var invoice = await findInvoice(receipt.receiptNO, user);
+                            
                             var obj =  {
                                 "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
-                                "Date": receipt.date ? receipt.date : "-",
+                                "Reciept Date": receipt.date ? receipt.date : "-",
+                                "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
                                 "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
                                 "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
-                                "Media Type": receipt.mediaType ? receipt.mediaType : "-",
-                                "Mediahouse State": receipt.publicationState ? receipt.publicationState : "-",
-                                "Mediahouse GSTIN": receipt.publicationGSTIN.GSTType +"-"+ receipt.publicationGSTIN.GSTNo,
                                 "Client Name": receipt.clientName?receipt.clientName:"-",
                                 "Client State": receipt.clientState?receipt.clientState:"-",
-                                "Client GSTIN": receipt.clientGSTIN.GSTType + "-" +receipt.clientGSTIN.GSTNo,
+                                "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
+                                "Invoice Date": new Date(),
                                 "Executive Name": receipt.executiveName?receipt.executiveName:"-",
                                 "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
+
                                 
-                                
-                                "Gross Amount":receipt.adGrossAmount?receipt.adGrossAmount:"-",
-                                "Publication Discount":receipt.publicationDiscount?receipt.publicationDiscount:"-",
-                                "Agency Discount1":receipt.agencyDiscount1?receipt.agencyDiscount1:"-",
-                                "Agency Discount2":receipt.agencyDiscount2?receipt.agencyDiscount2:"-",
-                                "Extra Charges":receipt.extraCharges?receipt.extraCharges:"-",
-                                "Tax Amount":receipt.taxAmount?receipt.taxAmount:"-",
-                                "Tax Included":receipt.taxIncluded?receipt.taxIncluded:"-",
-                                "Net Amount":receipt.netAmountFigures?receipt.netAmountFigures:"-",
-                                "Pending Amount":receipt.pendingAmount,
-                                "Final Tax Amount":receipt.FinalTaxAmount,
-                                
+                                "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                                "Amount recieved":invoice.collectedAmount?invoice.collectedAmount:"-",
+                                "Amount Balance":invoice.pendingAmount?invoice.pendingAmount:"-",
+
                                 "Payment Type":receipt.paymentType,
                                 "Payment Date":receipt.paymentDate,
                                 "Payment No":receipt.paymentNo,
                                 "Payment Amount":receipt.paymentAmount,
-                                "Payment BankName": receipt.paymentBankName
+                                "Payment BankName": receipt.paymentBankName,
+                                "Payment Status":receipt.collectedAmount
                             }
                             if(receipt.otherCharges.length> 0){
                                 var index;
