@@ -579,8 +579,6 @@ module.exports.receiptReports = function (request, response) {
     
                                     
                                     "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
-                                    "Amount recieved":invoice.collectedAmount?invoice.collectedAmount:"-",
-                                    "Amount Balance":invoice.pendingAmount?invoice.pendingAmount:"-",
     
                                     "Payment Type":receipt.paymentType,
                                     "Payment Date":receipt.paymentDate,
@@ -659,9 +657,9 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                             var obj = {
                                 "Mediahouse Name":mhinvoice.publicationName,
                                 "Edition":mhinvoice.publicationEdition,
-                                "Media Type":mhiinvoice.mediaType,
-                                "Mediahouse State":publicationState,
-                                "GSTIN":publicationGSTIN.GSTType +"-"+publicationGSTIN.GSTNo,
+                                "Media Type":mhinvoice.mediaType,
+                                "Mediahouse State":mhinvoice.publicationState,
+                                "GSTIN":mhinvoice.publicationGSTIN.GSTType +"-"+mhinvoice.publicationGSTIN.GSTNo,
                             }; 
                             var index;
                             if(mhinvoice.insertions.length> 0){
@@ -808,8 +806,6 @@ module.exports.clientNoteReports = function (request, response) {
                                 "Date":clnote.date.month?clnote.date.month:"-" + "/"+clnote.date.day?clnote.date.day:"-" + "/" +clnote.date.year?clnote.date.year:"-",
                                 "Amount": clnote.amount?clnote.amount:"-",
                                 "Remark": clnote.amount
-                                
-                                
                             }
                             return obj
                         })
