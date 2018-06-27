@@ -322,7 +322,7 @@ module.exports.releaseOrderReports = function (request, response) {
                         var el = releaseOrders.map(function (releaseOrder) {
                             var obj =  {
                                 "RO No.":releaseOrder.releaseOrderNO?releaseOrder.releaseOrderNO:"-",
-                                "RO Date":releaseOrder.createdAt?releaseOrder.createdAt:"-",
+                                "RO Date":releaseOrder.createdAt?releaseOrder.createdAt.toLocaleDateString():"-",
 
                                 "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
                                 "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
@@ -358,26 +358,29 @@ module.exports.releaseOrderReports = function (request, response) {
                                 "Payment Date":releaseOrder.paymentDate,
                                 "Payment No":releaseOrder.paymentNo,
                                 "Payment Amount":releaseOrder.paymentAmount,
-                                "Payment BankName": releaseOrder.paymentBankName
-                                
-                                
+                                "Payment BankName": releaseOrder.paymentBankName,
                             }
                             if(releaseOrder.PremiumBox.Included){
                                 
                             }
                             if(releaseOrder.insertions.length> 0){
-                                var index;
+                                var insertionString=""
                                 for(var i = 0; i< releaseOrder.insertions.length && i < 10; ++i){
-                                    index = i+1;
                                     insertion = releaseOrder.insertions[i];
-                                    obj["Insertion" + index] = insertion.ISODate;
+                                    insertionString += insertion.ISODate.toLocaleDateString() + ", ";
                                 }
+                                obj["Insertions"] = insertionString;
                             }
                             
                             obj["Publication Discount"] = releaseOrder.publicationDiscount;
                             obj["Agency Discount 1"] = releaseOrder.agencyDiscount1;
                             obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
-                            obj["Tax"] = releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary;
+                            obj["Total Discount"] = +releaseOrder.publicationDiscount + +releaseOrder.agencyDiscount1 + +releaseOrder. agencyDiscount2;
+                            obj["Tax"] = +releaseOrder.taxAmount.primary + +releaseOrder.taxAmount.secondary;
+                            obj["Tax Amount"] = ((+releaseOrder.taxAmount.primary + +releaseOrder.taxAmount.secondary) * (+releaseOrder.adGrossAmount/100));
+                            obj["Net Amount"] = "to be calculated";
+                            obj["Executive Name"] = releaseOrder.executiveName?releaseOrder.executiveName:"-";
+                            obj["Executive Org."] = releaseOrder.executiveOrg?releaseOrder.executiveOrg:"-";
                             obj["Tax included"]  =releaseOrder.taxIncluded;
                             obj["Remark"]  = releaseOrder.remark?releaseOrder.remark:"-";
                             obj["Status"] = releaseOrder.cancelled?"Cancelled":"Active";
@@ -440,49 +443,50 @@ module.exports.clientInvoiceReports = function (request, response) {
                         var el = invoices.map(function (invoice) {
                             var obj =  {
                                 "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
-                                "Date": invoice.date ? invoice.date : "-",
+                                "Date": invoice.date ? invoice.date.toLocaleDateString() : "-",
                                 "Mediahouse Name": invoice.publicationName ? invoice.publicationName : "-",
                                 "Edition": invoice.publicationEdition ? invoice.publicationEdition : "-",
                                 "Media Type": invoice.mediaType ? invoice.mediaType : "-",
-                                "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
-                                "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
+                                "RO No.":invoice.invoiceNO,
+                                // "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
+                                // "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
                                 "Client Name": invoice.clientName?invoice.clientName:"-",
                                 "Client State": invoice.clientState?invoice.clientState:"-",
                                 "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
-                                "Executive Name": invoice.executiveName?invoice.executiveName:"-",
-                                "Executive Organization":invoice.executiveOrg?invoice.executiveOrg:"-",
-                                
-                                
                                 "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
                                 "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
                                 "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
                                 "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
                                 "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
-                                "Tax Amount":invoice.taxAmount?invoice.taxAmount:"-",
-                                "Tax Included":invoice.taxIncluded?invoice.taxIncluded:"-",
-                                "Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
-                                "Pending Amount":invoice.pendingAmount,
-                                "Final Tax Amount":invoice.FinalTaxAmount,
+                                "Final Gross Amount":"to be calculated",
+                                "GSTIN":invoice.taxAmount?+invoice.taxAmount.primary + +invoice.taxAmount.secondary:"-",
+                                "GSTIN Included":invoice.taxIncluded?invoice.taxIncluded:"-",
+                                "Tax Amount":invoice.FinalTaxAmount,
+                                "Final Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
                                 
                             }
                             if(invoice.otherCharges.length> 0){
                                 var index;
                                 var index = +i + 1
                                 var otherCharge = invoice.otherCharges[i];
+                                var otherChargesString = "";
                                 for(var i = 0; i< otherCharge.length && i < 8; ++i){
                                     index = i+1;
-                                    obj["Type" + index] = otherCharge.chargeType;
-                                    obj["Amount" + index] = otherCharge.amount;
+                                    otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
                                 } 
+                                obj["Other Charges"] =otherChargesString;
                             }
                             if(invoice.insertions.length> 0){
-                                var index;
+                                var insertionString="";
                                 for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
                                     
-                                    index = +i + 1
                                     var insertion = invoice.insertions[i];
-                                    obj["Insertion" + index] = insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year;
+                                    insertionString += insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year+", ";
                                 } 
+                                obj["Insertions"] = insertionString;
+                                obj["Executive Name"]= invoice.executiveName?invoice.executiveName:"-";
+                                obj["Executive Organization"]=invoice.executiveOrg?invoice.executiveOrg:"-";
+                                obj["Remark"] = invoice.remark?invoice.remark:"-";
                             }
                             return obj
                         })
@@ -566,14 +570,14 @@ module.exports.receiptReports = function (request, response) {
                                 
                                 var obj =  {
                                     "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
-                                    "Reciept Date": receipt.date ? receipt.date : "-",
+                                    "Reciept Date": receipt.date ? receipt.date.toLocaleDateString() : "-",
                                     "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
                                     "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
                                     "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
                                     "Client Name": receipt.clientName?receipt.clientName:"-",
                                     "Client State": receipt.clientState?receipt.clientState:"-",
                                     "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
-                                    "Invoice Date": new Date(),
+                                    "Invoice Date": new Date().toLocaleDateString(),
                                     "Executive Name": receipt.executiveName?receipt.executiveName:"-",
                                     "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
     
@@ -585,17 +589,25 @@ module.exports.receiptReports = function (request, response) {
                                     "Payment No":receipt.paymentNo,
                                     "Payment Amount":receipt.paymentAmount,
                                     "Payment BankName": receipt.paymentBankName,
-                                    "Payment Status":receipt.collectedAmount
                                 }
                                 if(receipt.otherCharges.length> 0){
                                     var index;
+                                    var otherChargesString="";
                                     for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
-                                        index = i+1;
                                         var otherCharge = receipt.otherCharges[i];
-                                        obj["Type" + index] = otherCharge.chargeType;
-                                        obj["Amount" + index] = otherCharge.amount;
+                                        otherChargesString+= "Type- "+otherCharge.chargeType+" Amount- "+ otherCharge.amount+", ";
                                     } 
+                                    obj["Other Charges"] = otherChargesString;
                                 }
+                                var paymentStatus="";
+                                if(receipt.status==0)
+                                paymentStatus = "Collected";
+                                if(receipt.status==1)
+                                paymentStatus = "Received";
+                                if(receipt.status==2)
+                                paymentStatus = "Rejected";
+
+                                obj["Payment Status"] = paymentStatus;
                                 return obj
                             }))
                     }
@@ -671,10 +683,10 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                                 }
                             }
                             
-                            obj["Creation Date"]=mhinvoice.date;
+                            obj["Creation Date"]=mhinvoice.date.toLocaleDateString();
                             obj["RO Number"]=mhinvoice.releaseOrderNo;
                             obj["Invoice Number"]=mhinvoice.MHINo;
-                            obj["Dated"]=mhinvoice.MHIDate;
+                            obj["Dated"]=mhinvoice.MHIDate.toLocaleDateString();
                             obj["Amount"]=mhinvoice.MHIGrossAmount;
                             obj["Tax Amount"]=mhinvoice.MHITaxAmount;
                             return obj;

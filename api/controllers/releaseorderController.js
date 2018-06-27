@@ -839,7 +839,12 @@ module.exports.generateInsertionsSheet = function(request, response){
                         "executiveName":1,
                         "executiveOrg":1,
                         "insertions.generated":1,
-                        "insertions.state":1
+                        "insertions.state":1,
+                        "adType":1,
+                        "adEdition":1,
+                        "adPosition":1,
+                        "adCategory1":1,
+                        "caption":1,
                     }
                     }
                     ])
@@ -856,14 +861,19 @@ module.exports.generateInsertionsSheet = function(request, response){
                                     var el = insertions.map(function(insertion){
                                         var obj = {
                                             "RO Number": insertion.releaseOrderNO,
-                                            "Insertion":insertion.insertions.ISODate,
+                                            "Insertion":insertion.insertions.ISODate.toLocaleDateString(),
                                             "Client Name": insertion.clientName,
                                             "Mediahouse Name": insertion.publicationName,
                                             "Edition": insertion.publicationEdition,
+                                            "Ad Type":insertion.adType,
+                                            "Published Edition":insertion.adEdition,
+                                            "Position":insertion.adPosition,
+                                            "Caption":insertion.caption,
+                                            "Category":insertion.adCategory1,
                                             "Invoice created":insertion.insertions.marked,
                                         }
                                         if(insertion.insertions.state ==0)
-                                        obj["Status"] = "Not Published";
+                                        obj["Status"] = "To be Published";
                                         if(insertion.insertions.state ==1)
                                         obj["Status"] = "Published";
                                         if(insertion.insertions.state ==2)
