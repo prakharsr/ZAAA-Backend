@@ -84,7 +84,6 @@ module.exports.mediahouseReports = function (request, response) {
                             }
                             if(mediahouse.pullouts.length > 0)
                             {
-                                
                                 for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
                                     var index = +i + 1
                                     var pullout = mediahouse.pullouts[i];
@@ -96,7 +95,6 @@ module.exports.mediahouseReports = function (request, response) {
                             }
                             if(mediahouse.Scheduling.length > 0)
                             {
-                                
                                 for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
                                     var index = +i + 1
                                     var scheduling = mediahouse.Scheduling[i];
@@ -179,7 +177,6 @@ module.exports.clientReports = function (request, response) {
                                 "PAN": client.PanNO,
                                 "GSTIN": client.GSTIN.GSTType + '-' + (client.GSTIN.GSTNo ? client.GSTIN.GSTNo : "-"),
                                 "Remark": client.Remark,
-                                
                             }
                             if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
                                 var index;
@@ -262,14 +259,12 @@ module.exports.executiveReports = function (request, response) {
                                 "DOB": executive.DateOfBirth,
                                 "Anniversary": executive.Anniversary,
                                 "Remark": executive.Remark,
-                                
                             }
                         })
                     }
                     catch (err) {
                         console.log(err)
                     }
-                    
                     createSheet(el, request, response, 'ExecutiveExportData', 'excelReport');
                 }
             })
@@ -323,7 +318,6 @@ module.exports.releaseOrderReports = function (request, response) {
                             var obj =  {
                                 "RO No.":releaseOrder.releaseOrderNO?releaseOrder.releaseOrderNO:"-",
                                 "RO Date":releaseOrder.createdAt?releaseOrder.createdAt.toLocaleDateString():"-",
-
                                 "Mediahouse Name": releaseOrder.publicationName ? releaseOrder.publicationName : "-",
                                 "Edition": releaseOrder.publicationEdition ? releaseOrder.publicationEdition : "-",
                                 "Media Type": releaseOrder.mediaType ? releaseOrder.mediaType : "-",
@@ -345,7 +339,7 @@ module.exports.releaseOrderReports = function (request, response) {
                                 "Category6":releaseOrder.adCategory6?releaseOrder.adCategory6:"-",
                                 "Hue":releaseOrder.adHue?releaseOrder.adHue:"-",
                                 "Caption":releaseOrder.Caption?releaseOrder.Caption:"-",
-
+                                
                                 "Words/Line":releaseOrder.AdWords?releaseOrder.AdWords:"-",
                                 "Size":releaseOrder.adSizeL + "x"+ releaseOrder.adSizeW,
                                 "Time":releaseOrder.adTime?releaseOrder.adTime:"-",
@@ -390,7 +384,6 @@ module.exports.releaseOrderReports = function (request, response) {
                     catch (err) {
                         console.log(err)
                     }
-                    
                     createSheet(el, request, response, 'ReleaseOrderExportData', 'excelReport');
                 }
             })
@@ -525,6 +518,29 @@ function findInvoice(invoiceNO, user){
         })
     })
 }
+
+function findReleaseOrder(releaseOrderId, user){
+    return new Promise((resolve, reject) => {
+        ReleaseOrder.find({
+            $and:[{"firm":user.firm}]
+        }).exec(function(err, releaseOrder){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else if(releaseOrder.length == 0)
+            {
+                console.log("A");
+                resolve(null);
+            }
+            else{
+                
+                console.log("As");
+                resolve(releaseOrder[0]);
+            }
+        })
+    })
+}
 module.exports.receiptReports = function (request, response) {
     var token = userController.getToken(request.headers);
     var user = userController.getUser(token, request, response, async function (err, user) {
@@ -567,49 +583,46 @@ module.exports.receiptReports = function (request, response) {
                     try{
                         var el =await Promise.all(receipts.map( async function (receipt) {
                             var invoice = await findInvoice(receipt.receiptNO, user);
-                                
-                                var obj =  {
-                                    "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
-                                    "Reciept Date": receipt.date ? receipt.date.toLocaleDateString() : "-",
-                                    "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
-                                    "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
-                                    "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
-                                    "Client Name": receipt.clientName?receipt.clientName:"-",
-                                    "Client State": receipt.clientState?receipt.clientState:"-",
-                                    "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
-                                    "Invoice Date": new Date().toLocaleDateString(),
-                                    "Executive Name": receipt.executiveName?receipt.executiveName:"-",
-                                    "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
-    
-                                    
-                                    "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
-    
-                                    "Payment Type":receipt.paymentType,
-                                    "Payment Date":receipt.paymentDate,
-                                    "Payment No":receipt.paymentNo,
-                                    "Payment Amount":receipt.paymentAmount,
-                                    "Payment BankName": receipt.paymentBankName,
-                                }
-                                if(receipt.otherCharges.length> 0){
-                                    var index;
-                                    var otherChargesString="";
-                                    for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
-                                        var otherCharge = receipt.otherCharges[i];
-                                        otherChargesString+= "Type- "+otherCharge.chargeType+" Amount- "+ otherCharge.amount+", ";
-                                    } 
-                                    obj["Other Charges"] = otherChargesString;
-                                }
-                                var paymentStatus="";
-                                if(receipt.status==0)
-                                paymentStatus = "Collected";
-                                if(receipt.status==1)
-                                paymentStatus = "Received";
-                                if(receipt.status==2)
-                                paymentStatus = "Rejected";
-
-                                obj["Payment Status"] = paymentStatus;
-                                return obj
-                            }))
+                            
+                            var obj =  {
+                                "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
+                                "Reciept Date": receipt.date ? receipt.date.toLocaleDateString() : "-",
+                                "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
+                                "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
+                                "Edition": receipt.publicationEdition ? receipt.publicationEdition : "-",
+                                "Client Name": receipt.clientName?receipt.clientName:"-",
+                                "Client State": receipt.clientState?receipt.clientState:"-",
+                                "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
+                                "Invoice Date": new Date().toLocaleDateString(),
+                                "Executive Name": receipt.executiveName?receipt.executiveName:"-",
+                                "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
+                                "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                                "Payment Type":receipt.paymentType,
+                                "Payment Date":receipt.paymentDate,
+                                "Payment No":receipt.paymentNo,
+                                "Payment Amount":receipt.paymentAmount,
+                                "Payment BankName": receipt.paymentBankName,
+                            }
+                            if(receipt.otherCharges.length> 0){
+                                var index;
+                                var otherChargesString="";
+                                for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
+                                    var otherCharge = receipt.otherCharges[i];
+                                    otherChargesString+= "Type- "+otherCharge.chargeType+" Amount- "+ otherCharge.amount+", ";
+                                } 
+                                obj["Other Charges"] = otherChargesString;
+                            }
+                            var paymentStatus="";
+                            if(receipt.status==0)
+                            paymentStatus = "Collected";
+                            if(receipt.status==1)
+                            paymentStatus = "Received";
+                            if(receipt.status==2)
+                            paymentStatus = "Rejected";
+                            
+                            obj["Payment Status"] = paymentStatus;
+                            return obj
+                        }))
                     }
                     catch (err) {
                         console.log(err)
@@ -654,54 +667,83 @@ module.exports.mediahouseInvoiceReports = function (request, response) {
                 query['updatedAt'] = { $gte: from, $lte: to }
             }
             
-            MediaHouseInvoice.find(query, function (err, mhinvoices) {
-                if (err) {
-                    console.log(err + "");
-                    response.send({
-                        success: false,
-                        msg: err + ""
-                    });
-                }
-                else {
-                    var el = mhinvoices.map(function(mhinvoice){
-                        try{
-                            
-                            var obj = {
-                                "Mediahouse Name":mhinvoice.publicationName,
-                                "Edition":mhinvoice.publicationEdition,
-                                "Media Type":mhinvoice.mediaType,
-                                "Mediahouse State":mhinvoice.publicationState,
-                                "GSTIN":mhinvoice.publicationGSTIN.GSTType +"-"+mhinvoice.publicationGSTIN.GSTNo,
-                            }; 
-                            var index;
-                            if(mhinvoice.insertions.length> 0){
-                                
-                                for(var i = 0; i< mhinvoice.insertions.length && i < 20; ++i){
-                                    index = i+1;
-                                    insertion = mhinvoice.insertions[i];
-                                    obj["Insertion - " + index] = insertion.insertionDate;
-                                }
-                            }
-                            
-                            obj["Creation Date"]=mhinvoice.date.toLocaleDateString();
-                            obj["RO Number"]=mhinvoice.releaseOrderNo;
-                            obj["Invoice Number"]=mhinvoice.MHINo;
-                            obj["Dated"]=mhinvoice.MHIDate.toLocaleDateString();
-                            obj["Amount"]=mhinvoice.MHIGrossAmount;
-                            obj["Tax Amount"]=mhinvoice.MHITaxAmount;
-                            return obj;
-                        }
-                        catch(err){
-                            console.log(err);
-                        }
-                    })
-                    createSheet(el, request, response, 'MediahouseInvoiceExportData', 'excelReport');
-                }
-            })
             
+            MediaHouseInvoice
+            .aggregate([{$unwind: "$insertions"}, 
+            {$match:query },
+            {$project: {
+                "_id":1,    
+                "publicationName":1,
+                "publicationEdition":1,
+                "mediaType":1,
+                "publicationState":1,
+                "publicationGSTIN.GSTType":1,
+                "publicationGSTIN.GSTNo":1,
+                "insertions.insertionDate": 1,
+                "insertions.Amount":1,
+                "insertions.collectedAmount":1,
+                "insertions.pendingAmount":1,
+                "insertions.recieptNumber":1,
+                "insertions.recieptDate":1,
+                "insertions.paymentMode":1,
+                "date":1,
+                "releaseOrderNo":1,
+                "MHINo":1,
+                "MHIDate": 1,
+                "MHIGrossAmount":1,
+                "MHITaxAmount":1,
+            }
         }
-    });
-    
+    ])
+    .exec(async function (err, mhinvoices) {
+        if (err) {
+            console.log(err + "");
+            response.send({
+                success: false,
+                msg: err + ""
+            });
+        }
+        else {                 
+            try{
+                var el = await Promise.all(mhinvoices.map( async function(mhinvoice){
+                    
+                    
+                    var releaseOrder = await findReleaseOrder(mhinvoice.releaseOrderId, user);
+                    console.log(releaseOrder);
+                    var obj = {
+                        "RO No":releaseOrder.releaseOrderNO,
+                        "RO Date":releaseOrder.generatedAt?releaseOrder.generatedAt.toLocaleDateString():"-",
+                        "Mediahouse Name":mhinvoice.publicationName,
+                        "Edition":mhinvoice.publicationEdition,
+                        "Client Name":releaseOrder.clientName,
+                        "Insertion Date":mhinvoice.insertions.insertionDate.toLocaleDateString(),
+                        "Net RO Amount":mhinvoice.insertions.Amount,
+                        "Invoice No.":mhinvoice.MHINo,
+                        "Invoice Amount":mhinvoice.MHIGrossAmount,
+                        "Invoice Tax":mhinvoice.MHITaxAmount,
+                        "Invoice Gross Amount": mhinvoice.MHIGrossAmount + mhinvoice.MHITaxAmount,
+                        "Invoice Date": mhinvoice.MHIDate,
+                        "Paid":mhinvoice.insertions.collectedAmount,
+                        "Balance Amount":mhinvoice.insertions.pendingAmount,
+                        "Receipt No":mhinvoice.insertions.receiptNumber,
+                        "Receipt Date": mhinvoice.insertions.receiptDate,
+                        "Payment Mode": mhinvoice.insertions.paymentMode
+                    };
+                    return obj;
+                })
+            )
+            createSheet(el, request, response, 'MediahouseInvoiceExportData', 'excelReport');
+        }
+        catch(err){
+            console.log(err);
+        }
+        
+    }
+})
+
+}
+});
+
 };
 
 module.exports.mediahouseNoteReports = function (request, response) {
@@ -876,84 +918,84 @@ module.exports.ratecardReports = function (request, response) {
                 else {
                     try {
                         var el = ratecards.map(function(ratecard){
-                         var obj = {
-                                    "Mediahouse Name": ratecard.BookingCenter.MediaHouseName ?ratecard.BookingCenter.MediaHouseName : "-",
-                                    "Edition": ratecard.BookingCenter.Edition?ratecard.BookingCenter.Edition:"-",
-                                    "Pullout Name":ratecard.BookingCenter.PulloutName?ratecard.BookingCenter.PulloutName:"-",
-                                    "Media Type": ratecard.mediaType ? ratecard.mediaType : "-",
-                                    "Ad Type": ratecard.AdType?ratecard.AdType:"-",
-                                    "Ad time":ratecard.AdTime?ratecard.AdTime:"-",
-                                    "Ratecard Type":ratecard.RateCardType,
-                                    "Words": ratecard.AdWords?ratecard.AdWords:"-",
-                                    "Max Words": ratecard.AdWordsMax?ratecard.AdWordsMax:"-",
-                                    "Category Main":ratecard.Category.Main?ratecard.Category.Main:"-",
-                                    "SubCategory1":ratecard.Category.SubCategory1?ratecard.Category.SubCategory1:"-",
-                                    "SubCategory2":ratecard.Category.SubCategory2?ratecard.Category.SubCategory2:"-",
-                                    "SubCategory3":ratecard.Category.SubCategory3?ratecard.Category.SubCategory3:"-",
-                                    "SubCategory4":ratecard.Category.SubCategory4?ratecard.Category.SubCategory4:"-",
-                                    "SubCategory5":ratecard.Category.SubCategory5?ratecard.Category.SubCategory5:"-",
-                                    "SubCategory6":ratecard.Category.SubCategory6?ratecard.Category.SubCategory6:"-",
-                                    "Hue":ratecard.Hue?ratecard.Hue:"-",
-                                    "Rate":ratecard.Rate.rateQuantity + "-" + ratecard.Rate.unit+"-"+ ratecard.Rate.unitQuantity,
-                                    "Position":ratecard.Posotion?ratecard.Posotion:"-",
-                                    "Maximum Size":ratecard.MaxSizeLimit?ratecard.MaxSizeLimit.Length +" x "+ratecard.MaxSizeLimit.Width:"-",
-                                    "Minimum Size":ratecard.MinSizeLimit?ratecard.MinSizeLimit.Length +" x "+ratecard.MinSizeLimit.Width:"-",
-                                   
-                                }
-                                if(ratecard.FixSize.length> 0){
-                                    var index;
-                                    for(var i = 0; i< ratecard.FixSize.length && i < 10; ++i){
-                                        index = i+1;
-                                        var fixsize = ratecard.FixSize[i];
-                                        obj["FixSize" + index] = fixsize.Length + " x "+fixsize.Width + " - "+fixsize.Amount;
-                                    }
-                                }
-                                    if(ratecard.Scheme.length> 0){
-                                        var index;
-                                        for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
-                                            index = i+1;
-                                            var scheme = ratecard.Scheme[i];
-                                            obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.Free + "-Free "+scheme.Amount+"-Time limit";
-                                        }
-                                    }
+                            var obj = {
+                                "Mediahouse Name": ratecard.BookingCenter.MediaHouseName ?ratecard.BookingCenter.MediaHouseName : "-",
+                                "Edition": ratecard.BookingCenter.Edition?ratecard.BookingCenter.Edition:"-",
+                                "Pullout Name":ratecard.BookingCenter.PulloutName?ratecard.BookingCenter.PulloutName:"-",
+                                "Media Type": ratecard.mediaType ? ratecard.mediaType : "-",
+                                "Ad Type": ratecard.AdType?ratecard.AdType:"-",
+                                "Ad time":ratecard.AdTime?ratecard.AdTime:"-",
+                                "Ratecard Type":ratecard.RateCardType,
+                                "Words": ratecard.AdWords?ratecard.AdWords:"-",
+                                "Max Words": ratecard.AdWordsMax?ratecard.AdWordsMax:"-",
+                                "Category Main":ratecard.Category.Main?ratecard.Category.Main:"-",
+                                "SubCategory1":ratecard.Category.SubCategory1?ratecard.Category.SubCategory1:"-",
+                                "SubCategory2":ratecard.Category.SubCategory2?ratecard.Category.SubCategory2:"-",
+                                "SubCategory3":ratecard.Category.SubCategory3?ratecard.Category.SubCategory3:"-",
+                                "SubCategory4":ratecard.Category.SubCategory4?ratecard.Category.SubCategory4:"-",
+                                "SubCategory5":ratecard.Category.SubCategory5?ratecard.Category.SubCategory5:"-",
+                                "SubCategory6":ratecard.Category.SubCategory6?ratecard.Category.SubCategory6:"-",
+                                "Hue":ratecard.Hue?ratecard.Hue:"-",
+                                "Rate":ratecard.Rate.rateQuantity + "-" + ratecard.Rate.unit+"-"+ ratecard.Rate.unitQuantity,
+                                "Position":ratecard.Posotion?ratecard.Posotion:"-",
+                                "Maximum Size":ratecard.MaxSizeLimit?ratecard.MaxSizeLimit.Length +" x "+ratecard.MaxSizeLimit.Width:"-",
+                                "Minimum Size":ratecard.MinSizeLimit?ratecard.MinSizeLimit.Length +" x "+ratecard.MinSizeLimit.Width:"-",
                                 
-                                    obj["PremiumCustom"]=ratecard.PremiumCustom?ratecard.PremiumCustom.PremiumType+"-"+ratecard.PremiumCustom.Amount+"-"+(ratecard.PremiumCustom.Percentage?"%":"Rs."):"-";
-                                    obj["PremiumBox"]=ratecard.PremiumBox?ratecard.PremiumBox:"-";
-                                    obj["PremiumBaseColour"]=ratecard.PremiumBaseColour?ratecard.PremiumBaseColour:"-";
-                                    obj["PremiumCheckMark"]=ratecard.PremiumCheckMark?ratecard.PremiumCheckMark:"-";
-                                    obj["PremiumEmail"]=ratecard.PremiumEmailId?ratecard.PremiumEmailId:"-";
-                                    obj["PremiumWebsite"]=ratecard.PremiumWebsite?ratecard.PremiumWebsite:"-";
-                                    obj["PremiumExtraWords"]=ratecard.PremiumExtraWords?ratecard.PremiumExtraWords:"-";
-                                    obj["Validity"]=ratecard.ValidFrom?"From "+ratecard.ValidFrom+"-"+"Upto "+ratecard.ValidTill:"-";
-    
-                                    if(ratecard.Tax.length> 0){
-                                        var index;
-                                        for(var i = 0; i< ratecard.Tax.length && i < 10; ++i){
-                                            index = i+1;
-                                            var tax = ratecard.Tax[i];
-                                            obj["Tax" + index] = tax.TaxRate +"-"+ tax.Included?"Include":"Excluded";
-                                        }
-                                    }
-                                    if(ratecard.Covered.length> 0){
-                                        var index;
-                                        for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
-                                            index = i+1;
-                                            var covered = ratecard.Covered[i];
-                                            obj["Covered" + index] =covered.mediaHouse +"-"+ covered.EditionArea;
-                                        }
-                                    }
-                                    if(ratecard.Remarks.length> 0){
-                                        var index;
-                                        for(var i = 0; i< ratecard.Remarks.length && i < 10; ++i){
-                                            index = i+1;
-                                            var remark = ratecard.Remarks[i];
-                                            obj["Remark" + index] = remark.remark?remark.remark:"-";
-                                        }
-                                    }
-                                
+                            }
+                            if(ratecard.FixSize.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.FixSize.length && i < 10; ++i){
+                                    index = i+1;
+                                    var fixsize = ratecard.FixSize[i];
+                                    obj["FixSize" + index] = fixsize.Length + " x "+fixsize.Width + " - "+fixsize.Amount;
+                                }
+                            }
+                            if(ratecard.Scheme.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.Scheme.length && i < 10; ++i){
+                                    index = i+1;
+                                    var scheme = ratecard.Scheme[i];
+                                    obj["Scheme" + index] = scheme.paid + "-Paid "+scheme.Free + "-Free "+scheme.Amount+"-Time limit";
+                                }
+                            }
+                            
+                            obj["PremiumCustom"]=ratecard.PremiumCustom?ratecard.PremiumCustom.PremiumType+"-"+ratecard.PremiumCustom.Amount+"-"+(ratecard.PremiumCustom.Percentage?"%":"Rs."):"-";
+                            obj["PremiumBox"]=ratecard.PremiumBox?ratecard.PremiumBox:"-";
+                            obj["PremiumBaseColour"]=ratecard.PremiumBaseColour?ratecard.PremiumBaseColour:"-";
+                            obj["PremiumCheckMark"]=ratecard.PremiumCheckMark?ratecard.PremiumCheckMark:"-";
+                            obj["PremiumEmail"]=ratecard.PremiumEmailId?ratecard.PremiumEmailId:"-";
+                            obj["PremiumWebsite"]=ratecard.PremiumWebsite?ratecard.PremiumWebsite:"-";
+                            obj["PremiumExtraWords"]=ratecard.PremiumExtraWords?ratecard.PremiumExtraWords:"-";
+                            obj["Validity"]=ratecard.ValidFrom?"From "+ratecard.ValidFrom+"-"+"Upto "+ratecard.ValidTill:"-";
+                            
+                            if(ratecard.Tax.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.Tax.length && i < 10; ++i){
+                                    index = i+1;
+                                    var tax = ratecard.Tax[i];
+                                    obj["Tax" + index] = tax.TaxRate +"-"+ tax.Included?"Include":"Excluded";
+                                }
+                            }
+                            if(ratecard.Covered.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.Covered.length && i < 10; ++i){
+                                    index = i+1;
+                                    var covered = ratecard.Covered[i];
+                                    obj["Covered" + index] =covered.mediaHouse +"-"+ covered.EditionArea;
+                                }
+                            }
+                            if(ratecard.Remarks.length> 0){
+                                var index;
+                                for(var i = 0; i< ratecard.Remarks.length && i < 10; ++i){
+                                    index = i+1;
+                                    var remark = ratecard.Remarks[i];
+                                    obj["Remark" + index] = remark.remark?remark.remark:"-";
+                                }
+                            }
+                            
                             return obj;
-                            })
-                        }
+                        })
+                    }
                     catch (err) {
                         console.log(err)
                     }

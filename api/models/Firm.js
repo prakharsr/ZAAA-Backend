@@ -82,6 +82,10 @@ var FirmSchema = new mongoose.Schema({
         twitter:String,
         Others:String
     },
+    FirmStatus:{
+        type:Number,
+        default:0
+    }
 });
 
 

@@ -353,8 +353,8 @@ module.exports.generateSummarySheet = function(request, response){
                                 if (mhiInsertion._id == insertion._id) {
                                     mhiInsertion.collectedAmount = insertion.amount;
                                     mhiInsertion.recieptNumber = insertion.recieptNumber;
-                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
-                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
+                                    mhiInsertion.recieptDate = insertion.recieptDate;
+                                    mhiInsertion.paymentMode = insertion.paymentMode;
                                     
                                 }
                             });
