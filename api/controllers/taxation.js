@@ -171,12 +171,13 @@ module.exports.queryInvoiceTax = async function(request, response){
                         "taxAmount.primary":1,
                         "taxAmount.secondary":1,
                         "taxType":1,
+                        "adGrossAmount":1,
                         "FinalTaxAmount":1,
                     }
                     },
                     {$limit: perPage},
                     {$skip:(perPage * request.body.page) - perPage}
-                ]).exec(function(err, invoice){
+                ]).exec( async function(err, invoices){
                         if(err){
                             console.log(err+ "");
                             response.send({
@@ -185,10 +186,13 @@ module.exports.queryInvoiceTax = async function(request, response){
                             });
                         }
                         else{
+                            invoices.map(invoice =>{
+                                invoice.FinalTaxAmount = Math.round(((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100))*100)/100
+                            })
                             Invoice.count(query, function(err, count){
                                 response.send({
                                     success:true,
-                                    invoice: invoice,
+                                    invoice: invoices,
                                     page: request.body.page,
                                     perPage:perPage,
                                     pageCount: Math.ceil(count/perPage)
@@ -233,6 +237,7 @@ module.exports.generateTaxSheet = async function(request, response){
                     {$match:query },
                     {$project: { 
                         "clientName":1,
+                        "clientState":1,
                         "invoiceNO":1,
                         "date":1,
                         "clientGSTIN.GSTType":1,
@@ -241,6 +246,10 @@ module.exports.generateTaxSheet = async function(request, response){
                         "taxAmount.secondary":1,
                         "taxType":1,
                         "FinalTaxAmount":1,
+                        "FinalAmount":1,
+                        "adGrossAmount":1,
+                        "taxIncluded":1,
+                        "netAmountFigures":1,
                     }
                     },
                     // {$limit: perPage},
@@ -256,16 +265,22 @@ module.exports.generateTaxSheet = async function(request, response){
                         else{
                             console.log(invoices);
                             var inv = invoices.map(function(invoice){
-                                return {                                
-                                    "Invoice No": invoice.invoiceNO,
+                                var obj = {                                
                                     "Client Name": invoice.clientName,
-                                    "Date": invoice.date,
-                                    "SGST %":(invoice.taxType == 'SGST + CGST')?((invoice.taxAmount.primary + invoice.taxAmount.secondary)/2):"-",
-                                    "CGST %":(invoice.taxType == 'SGST + CGST')?(invoice.taxAmount.primary + invoice.taxAmount.secondary)/2:"-",
-                                    "IGST %":(invoice.taxType == 'IGST')?(invoice.taxAmount.primary + invoice.taxAmount.secondary):"-",
-                                    "Total Tax": invoice.FinalTaxAmount,
-                                    "Client GSTIN": invoice.clientGSTIN?invoice.clientGSTIN:"-",
-                            }})
+                                    "Client State":invoice.clientState,
+                                    "GST Status":invoice.clientGSTIN.GSTType,
+                                    "GST No.":invoice.clientGSTIN.GSTType=="RD"?invoice.clientGSTIN.GSTNo:"NA",
+                                    "Invoice No": invoice.invoiceNO,
+                                    "Invoice Date": invoice.date.toLocaleDateString(),
+                                    "Invoice Value":invoice.FinalTaxAmount,
+                                    "Net Amount":invoice.netAmountFigures,
+                                    "Tax Percentage":+invoice.taxAmount.primary + +invoice.taxAmount.secondary,
+                                    "SGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                                    "CGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                                    "IGST ":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
+                            };
+                        return obj;
+                        })
                             createSheet(inv, request, response);
                         }
                     });
