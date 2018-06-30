@@ -607,8 +607,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     if(request.body.releaseOrderNO){
         query['releaseOrderNO'] = request.body.releaseOrderNO;
     }
-    if(request.body.generated)
-    query['generated'] = request.body.generated == true;
+    if(request.body.generated !== undefined)
+        query['generated'] = request.body.generated == true;
     if(request.body.marked)
     query['insertions.marked'] = false;
     
