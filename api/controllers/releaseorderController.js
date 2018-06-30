@@ -393,58 +393,6 @@ module.exports.getReleaseOrders = function(request, response){
     
 };
 
-
-module.exports.getMarkedReleaseOrders = function(request, response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            ReleaseOrder.find({"firm":user.firm,
-            "insertions.marked": { $ne: false }   
-        })
-            .limit(perPage)
-            .skip((perPage*request.params.page) - perPage)
-            .sort(-'date')
-            .exec(function(err, releaseOrders){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!releaseOrders){
-                    console.log("No releaseorder");
-                    response.send({
-                        success:false,
-                        msg:" No release Order"
-                    });
-                }
-                else{
-                    ReleaseOrder.count({}, function(err, count){
-                        response.send({
-                            success : true,
-                            releaseOrders : releaseOrders,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                            
-                        });
-                    })
-                }
-            });
-		}
-	});	
-    
-};
-
 module.exports.getReleaseOrderInsertions = function(request, response){
     
     var token = userController.getToken(request.headers);
@@ -661,6 +609,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     }
     if(request.body.generated)
     query['generated'] = request.body.generated == true;
+    if(request.body.marked)
+    query['insertions.marked'] = false;
     
     console.log(query);
     resolve(query);
