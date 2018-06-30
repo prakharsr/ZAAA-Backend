@@ -100,6 +100,7 @@ router.post('/user/releaseorders/insertions/check', releaseOrder.setInsertionChe
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
 router.post('/user/releaseorders/email', releaseOrder.mailROPdf);
 router.get('/user/releaseorders/:page', releaseOrder.getReleaseOrders);
+router.get('/user/releaseorders/marked/:page', releaseOrder.getMarkedReleaseOrders);
 router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
 router.post('/user/releaseorder/generate', releaseOrder.queryGenerated);
 router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);

@@ -496,7 +496,109 @@ module.exports.clientInvoiceReports = function (request, response) {
     });
     
 };
-
+module.exports.invoiceTaxationReports = function (request, response) {
+    var token = userController.getToken(request.headers);
+    var user = userController.getUser(token, request, response, async function (err, user) {
+        if (err) {
+            console.log(err);
+            response.send({
+                success: false,
+                msg: err
+            });
+        }
+        else if (!user) {
+            console.log("User not found");
+            response.send({
+                success: false,
+                msg: "User not found, Please Login"
+            });
+        }
+        else {
+            var query = { "firm": user.firm }
+            if (request.body.creationPeriod != 0) {
+                var to = new Date()
+                var from = new Date(to.getTime() - request.body.creationPeriod * 24 * 60 * 60 * 1000);
+                query['createdAt'] = { $gte: from, $lte: to }
+            }
+            if (request.body.updationPeriod != 0) {
+                var to = new Date()
+                var from = new Date(to.getTime() - request.body.updationPeriod * 24 * 60 * 60 * 1000);
+                query['updatedAt'] = { $gte: from, $lte: to }
+            }
+            
+            Invoice.find(query, function (err, invoices) {
+                if (err) {
+                    console.log(err + "");
+                    response.send({
+                        success: false,
+                        msg: err + ""
+                    });
+                }
+                else {
+                    try{
+                        var el = invoices.map(function (invoice) {
+                            var obj =  {
+                                "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
+                                "Date": invoice.date ? invoice.date.toLocaleDateString() : "-",
+                                "Mediahouse Name": invoice.publicationName ? invoice.publicationName : "-",
+                                "Edition": invoice.publicationEdition ? invoice.publicationEdition : "-",
+                                "Media Type": invoice.mediaType ? invoice.mediaType : "-",
+                                "RO No.":invoice.invoiceNO,
+                                // "Mediahouse State": invoice.publicationState ? invoice.publicationState : "-",
+                                // "Mediahouse GSTIN": invoice.publicationGSTIN.GSTType +"-"+ invoice.publicationGSTIN.GSTNo,
+                                "Client Name": invoice.clientName?invoice.clientName:"-",
+                                "Client State": invoice.clientState?invoice.clientState:"-",
+                                "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
+                                "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
+                                "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
+                                "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
+                                "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
+                                "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
+                                "Final Gross Amount":"to be calculated",
+                                "GSTIN":invoice.taxAmount?+invoice.taxAmount.primary + +invoice.taxAmount.secondary:"-",
+                                "GSTIN Included":invoice.taxIncluded?invoice.taxIncluded:"-",
+                                "Tax Amount":invoice.FinalTaxAmount,
+                                "Final Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                                
+                            }
+                            if(invoice.otherCharges.length> 0){
+                                var index;
+                                var index = +i + 1
+                                var otherCharge = invoice.otherCharges[i];
+                                var otherChargesString = "";
+                                for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                                    index = i+1;
+                                    otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
+                                } 
+                                obj["Other Charges"] =otherChargesString;
+                            }
+                            if(invoice.insertions.length> 0){
+                                var insertionString="";
+                                for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
+                                    
+                                    var insertion = invoice.insertions[i];
+                                    insertionString += insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year+", ";
+                                } 
+                                obj["Insertions"] = insertionString;
+                                obj["Executive Name"]= invoice.executiveName?invoice.executiveName:"-";
+                                obj["Executive Organization"]=invoice.executiveOrg?invoice.executiveOrg:"-";
+                                obj["Remark"] = invoice.remark?invoice.remark:"-";
+                            }
+                            return obj
+                        })
+                    }
+                    catch (err) {
+                        console.log(err)
+                    }
+                    
+                    createSheet(el, request, response, 'ClientInvoiceExportData', 'excelReport');
+                }
+            })
+            
+        }
+    });
+    
+};
 function findInvoice(invoiceNO, user){
     return new Promise((resolve, reject) => {
         var index =invoiceNO.indexOf('.',invoiceNO.indexOf('.')+1);
