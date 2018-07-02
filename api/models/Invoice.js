@@ -102,9 +102,9 @@ var InvoiceSchema = new mongoose.Schema({
     caption:String,
     remark:String,
     otherRemark:String,
-    FinalAmount:String,
-    FinalTaxAmount:String,
-    netAmountFigures:String,
+    FinalAmount:Number,
+    FinalTaxAmount:Number,
+    netAmountFigures:Number,
     netAmountWords:String,
 
 
@@ -133,7 +133,7 @@ var InvoiceSchema = new mongoose.Schema({
     paymentType:String,
     paymentDate:String,
     paymentNo:String,
-    paymentAmount:String,
+    paymentAmount:Number,
     paymentBankName:String,
 
     mediahouseID: {

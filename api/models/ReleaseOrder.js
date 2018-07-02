@@ -116,16 +116,16 @@ var ReleaseOrderSchema = new mongoose.Schema({
             PaidAmount:Number
         }
     ],
-    adGrossAmount:String,
-    publicationDiscount:String,
-    agencyDiscount1:String,
-    agencyDiscount2:String,
+    adGrossAmount:Number,
+    publicationDiscount:Number,
+    agencyDiscount1:Number,
+    agencyDiscount2:Number,
     taxAmount:{
-        primary:String,
-        secondary:String
+        primary:Number,
+        secondary:Number
     },
     taxIncluded:Boolean,
-    netAmountFigures:String,
+    netAmountFigures:Number,
     netAmountWords:String,
     caption:String,
     remark:String,
@@ -133,19 +133,19 @@ var ReleaseOrderSchema = new mongoose.Schema({
     paymentType:String,
     paymentDate:String,
     paymentNo:String,
-    paymentAmount:String,
+    paymentAmount:Number,
     paymentBankName:String,
     otherCharges:[
         {
-            amount:String,
+            amount:Number,
             chargeType:String,
         }
     ],
     executiveName:String,
     executiveOrg:String,
     otherRemark:String,
-    FinalAmount:String,
-    FinalTaxAmount:String,
+    FinalAmount:Number,
+    FinalTaxAmount:Number,
     mediahouseInvoices:[{
         insertionId:{
             type: mongoose.Schema.Types.ObjectId,

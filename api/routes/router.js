@@ -15,6 +15,7 @@ var ratecard = require('../controllers/ratecardController');
 var invoice = require('../controllers/invoiceController');
 var taxation = require('../controllers/taxation');
 var receipt = require('../controllers/receiptController');
+var dashboard = require('../controllers/dashboard');
 var notes = require('../controllers/creditDebit');
 var excel = require('../controllers/excelController');
 var ticket = require('../controllers/ticketController');
@@ -169,4 +170,10 @@ router.post('/user/reports/insertions', releaseOrder.generateInsertionsSheet);
 router.post('/user/ticket', ticket.createTicket);
 router.post('/user/ticket/search', ticket.queryUserTickets);
 
+router.post('/user/dashboard/releaseorder', dashboard.ROchartData);
+router.post('/user/dashboard/invoice', dashboard.InvoiceData);
+router.post('/user/dashboard/clientDues', dashboard.DueOverdueData);
+router.post('/user/dashboard/clientPayments', dashboard.ClientPaymentsData);
+router.post('/user/dashboard/mediahouseinvoice', dashboard.MediahouseInvoiceData);
+router.post('/user/dashboard/cheque', dashboard.RecieptsChequeData);
 module.exports = router;

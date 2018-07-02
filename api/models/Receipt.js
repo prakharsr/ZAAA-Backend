@@ -38,7 +38,7 @@ var ReceiptSchema = new mongoose.Schema({
     executiveOrg:String,
 
     /*fields of release order to come */
-    adGrossAmount:String,
+    adGrossAmount:Number,
     taxType:String,
     taxAmount:{
         primary:String,
@@ -47,7 +47,7 @@ var ReceiptSchema = new mongoose.Schema({
     taxIncluded:Boolean,
     otherCharges:[
         {
-            amount:String,
+            amount:Number,
             chargeType:String,
         }
     ],
@@ -57,7 +57,10 @@ var ReceiptSchema = new mongoose.Schema({
 
     /*fields of Invoice, which are to be filled on invoice creation,
      to be filled by default with values of respective feilds in release Order*/
-    extraCharges:String,
+    extraCharges:{
+        amount:Number,
+        percentage : Boolean
+    },
     publicationDiscount:String,
     agencyDiscount1:String,
     agencyDiscount2:String,
@@ -70,17 +73,17 @@ var ReceiptSchema = new mongoose.Schema({
     caption:String,
     remark:String,
     otherRemark:String,
-    FinalAmount:String,
-    FinalTaxAmount:String,
+    FinalAmount:Number,
+    FinalTaxAmount:Number,
     netAmountFigures:Number,
     netAmountWords:String,
 
 
     /*may be omitted, not discussed yet */
     paymentType:String,
-    paymentDate:String,
+    paymentDate:Date,
     paymentNo:String,
-    paymentAmount:String,
+    paymentAmount:Number,
     paymentBankName:String,
     paymentAmountWords:String,
 
