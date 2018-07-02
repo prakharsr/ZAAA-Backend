@@ -131,7 +131,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
     remark:String,
     
     paymentType:String,
-    paymentDate:String,
+    paymentDate:Date,
     paymentNo:String,
     paymentAmount:Number,
     paymentBankName:String,

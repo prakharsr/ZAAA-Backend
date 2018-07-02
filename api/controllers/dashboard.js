@@ -183,7 +183,8 @@ module.exports.DueOverdueData = function(request, response){
                             "$cond": [{"$eq":["$paymentType",'Credit']},
                             "$paymentAmount",0]
                         }},
-                        totalAmount:{$sum:"$paymentAmount"}
+                        totalAmount:{$sum:"$paymentAmount"},
+                        paymentDate
                         }}
                     ])
                     .exec(function(err, receipt){
