@@ -989,8 +989,8 @@ module.exports.mailReceiptPdf = function(request, response) {
                     }
                     
                     var Details = {
-                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        sign : 'http://www.adagencymanager.com/'+user.signature,
                         faddress : Address,
                         fcdetails : cdetails,
                         cname : client.OrganizationName,
@@ -1066,8 +1066,8 @@ module.exports.generateReceiptPdf = function(request, response) {
                     }
                     
                     var Details = {
-                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        sign : 'http://www.adagencymanager.com/'+user.signature,
                         faddress : Address,
                         fcdetails : cdetails,
                         cname : client.OrganizationName,

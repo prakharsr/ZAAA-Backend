@@ -740,10 +740,10 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 	};
 	var token = jwt.sign(token_data, config.SECRET);
 	var data = {
-		from: 'AAMan <postmaster@mom2k18.co.in>',
+		from: 'AAMan <postmaster@adagencymanager.com>',
 		to: request.body.email,
 		subject: 'Password Reset Link',
-		text: 'https://www.mom2k18.co.in/reset_password/'+token,
+		text: 'http://www.adagencymanager.com/reset_password/'+token,
 	  };
 	  
 	  mailgun.messages().send(data, function (error, body) {

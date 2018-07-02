@@ -129,7 +129,7 @@ UserSchema.methods.sendPassword = function(password,cb){
     var self = this;
 
 var data = {
-    from: 'Excited User <postmaster@mom2k18.co.in>',
+    from: 'Excited User <postmaster@adagencymanager.com>',
     to: self.email,
     subject: "Password",// Subject lin
     text: "Here is the password for your login at AAMAN", // plaintext body

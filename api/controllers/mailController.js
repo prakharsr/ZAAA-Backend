@@ -5,7 +5,7 @@ var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 
 module.exports.mail = function(file, to,subject, text){
     var data = {
-        from: 'Excited User <postmaster@mom2k18.co.in>',
+        from: 'Excited User <postmaster@adagencymanager.com>',
         to: to.join(),
         subject: subject,
         text: text,
