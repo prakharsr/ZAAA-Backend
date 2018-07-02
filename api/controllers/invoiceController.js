@@ -881,7 +881,7 @@ module.exports.mailInvoicePdf = function(request, response) {
                     });
 
                     var Details={
-                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
+                        image: 'http://www.adagencymanager.com/'+firm.logoURL, 
                         clientname: client.OrganizationName,
                         address: client.Address.address,
                         state: client.Address.state,
@@ -961,7 +961,7 @@ module.exports.generateInvoicePdf = function(request, response) {
                     });
 
                     var Details={
-                        image: 'http://www.mom2k18.co.in/'+firm.logoURL, 
+                        image: 'http://www.adagencymanager.com/'+firm.logoURL, 
                         clientname : client.OrganizationName,
                         address: client.Address.address,
                         state: client.Address.state,

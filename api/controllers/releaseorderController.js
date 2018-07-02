@@ -1035,7 +1035,7 @@ module.exports.mailROPdf = function(request, response) {
                                 insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
+                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
                                 mediahouse :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,
@@ -1115,7 +1115,7 @@ module.exports.generateROPdf = function(request, response) {
                                 insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
-                                image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
+                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
                                 mediahouse :releaseOrder.publicationName,
                                 pgstin :releaseOrder.publicationGSTIN.GSTNo,
                                 cname :releaseOrder.clientName,

@@ -344,8 +344,8 @@ module.exports.mailClientNotePdf = function(request, response) {
                     var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
         
                     var Details = {
-                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        image : 'http://adagencymanager.com/'+firm.LogoURL,
+                        sign : 'http://adagencymanager.com/'+user.signature,
                         faddress : Address,
                         fcdetails : cdetails,
                         cname : client.OrganizationName,
@@ -407,8 +407,8 @@ module.exports.generateClientNotePdf = function(request, response) {
                     var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
         
                     var Details = {
-                        image : 'http://www.mom2k18.co.in/'+firm.LogoURL,
-                        sign : 'http://www.mom2k18.co.in/'+user.signature,
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        sign : 'http://www.adagencymanager.com/'+user.signature,
                         faddress : Address,
                         fcdetails : cdetails,
                         cname : client.OrganizationName,

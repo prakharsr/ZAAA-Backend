@@ -9,7 +9,7 @@ cfg.twilioNumber = process.env.TWILIO_NUMBER;
 cfg.authyKey = process.env.AUTHY_API_KEY;
 cfg.enableValidationSMS=1;
 cfg.mailgun_api_key = 'key-510704fc134355458f91b11bb7a98a57';
-cfg.DOMAIN = 'mom2k18.co.in';
+cfg.DOMAIN = 'adagencymanager.com';
 
 
 module.exports = cfg;

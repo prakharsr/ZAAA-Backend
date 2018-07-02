@@ -46,7 +46,7 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
 };
 
 module.exports.generateInvoice = function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/invoice.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/invoice.html', res => {
         var templateHtml = "";
 
         res.on('data', chunk => {
@@ -88,7 +88,7 @@ module.exports.generateInvoice = function(request,response,Details) {
                     console.log(err);
                 }
                 else {
-                    mailFile(request, response, buffer, 'invoice.pdf', 'Zenedo India <postmaster@mom2k18.co.in>', Details.email ,'','','ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA');
+                    mailFile(request, response, buffer, 'invoice.pdf', 'Zenedo India <postmaster@adagencymanager.com>', Details.email ,'','','ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA');
                 }
             });
         });
@@ -99,7 +99,7 @@ module.exports.generateInvoice = function(request,response,Details) {
 
 
 module.exports.mailReleaseOrder = function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/releaseOrder.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/releaseOrder.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -152,7 +152,7 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
 }
 
 module.exports.generateReleaseOrder =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/releaseOrder.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/releaseOrder.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -211,7 +211,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
 
 
 module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -277,7 +277,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
 
 
 module.exports.mailPaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -338,7 +338,7 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
 }
 
 module.exports.generatePaymentReceipt =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -395,7 +395,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
 
 
 module.exports.mailPaymentReceipt =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -447,7 +447,7 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
 }
 
 module.exports.generateClientNote =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/Note.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/Note.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -502,7 +502,7 @@ module.exports.generateClientNote =  function(request,response,Details) {
 
 
 module.exports.mailClientNote =  function(request,response,Details) {
-    var req = http.request('http://www.mom2k18.co.in/templates/PaymentReceipt.html', res => {
+    var req = http.request('http://www.adagencymanager.com/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
