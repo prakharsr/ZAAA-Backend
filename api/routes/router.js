@@ -19,6 +19,7 @@ var dashboard = require('../controllers/dashboard');
 var notes = require('../controllers/creditDebit');
 var excel = require('../controllers/excelController');
 var ticket = require('../controllers/ticketController');
+var auth  = require('../middleware/auth')
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
@@ -176,4 +177,5 @@ router.post('/user/dashboard/clientDues', dashboard.DueOverdueData);
 router.post('/user/dashboard/clientPayments', dashboard.ClientPaymentsData);
 router.post('/user/dashboard/mediahouseinvoice', dashboard.MediahouseInvoiceData);
 router.post('/user/dashboard/cheque', dashboard.RecieptsChequeData);
+router.post('/user/dashboard/check', auth, dashboard.check);
 module.exports = router;

@@ -8,6 +8,7 @@ var port = config.PORT;
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var path = require('path');
+var auth  =require('./api/middleware/auth');
 
 var corsOptions = {
     "origin": "*",
@@ -32,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
-app.use('/api', require('./api/routes/router'));
+app.use('/api',auth, require('./api/routes/router'));
 
 mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){

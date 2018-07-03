@@ -124,34 +124,34 @@ module.exports.InvoiceData = function(request, response){
 		}
 		else{
             var query = await formQuery( user, request, response);       
-                    Invoice.aggregate([
-                    {$match:query},
-                    { $group : { 
-                        _id: null,
-                        count: {$sum: 1},
-                        totalAmount:{$sum:{$add:"$FinalTaxAmount"}},
-                        generated:{$sum:"$collectedAmount"}
-
-                    } 
-                    }
-                    ])
-                    .exec(function(err, invoices){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                        response.send({
-                                            success:true,
-                                            invoices: invoices
-                                        });
-                                }
-                            });
-                        }	
-	});
+            Invoice.aggregate([
+                {$match:query},
+                { $group : { 
+                    _id: null,
+                    count: {$sum: 1},
+                    totalAmount:{$sum:{$add:"$FinalTaxAmount"}},
+                    generated:{$sum:"$collectedAmount"}
+                    
+                } 
+            }
+        ])
+        .exec(function(err, invoices){
+            if(err){
+                console.log(err+ "");
+                response.send({
+                    success:false,
+                    msg: err +""
+                });
+            }
+            else{
+                response.send({
+                    success:true,
+                    invoices: invoices
+                });
+            }
+        });
+    }	
+});
 };
 
 
@@ -174,38 +174,38 @@ module.exports.DueOverdueData = function(request, response){
 		}
 		else{
             var query = await formQuery( user, request, response);       
-                    Receipt.aggregate([
-                    {$match:query},
-                    { $group : {
-                        _id:null, 
-                        count: {$sum: 1},
-                        onCreditAmount:{$sum:{
-                            "$cond": [{"$eq":["$paymentType",'Credit']},
-                            "$paymentAmount",0]
-                        }},
-                        totalAmount:{$sum:"$paymentAmount"},
-                        paymentDate
-                        }}
-                    ])
-                    .exec(function(err, receipt){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    Receipt.count(query, function(err, count){
-                                        response.send({
-                                            success:true,
-                                            receipt:receipt
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
+            Receipt.aggregate([
+                {$match:query},
+                { $group : {
+                    _id:null, 
+                    count: {$sum: 1},
+                    onCreditAmount:{$sum:{
+                        "$cond": [{"$eq":["$paymentType",'Credit']},
+                        "$paymentAmount",0]
+                    }},
+                    totalAmount:{$sum:"$paymentAmount"},
+                    paymentDate
+                }}
+            ])
+            .exec(function(err, receipt){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    Receipt.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            receipt:receipt
+                        });
+                    })
+                    
+                }
+            });
+        }	
 	});
 };
 
@@ -227,43 +227,43 @@ module.exports.ClientPaymentsData = function(request, response){
 			});
 		}
 		else{
-                      var query = await formQuery(user, request);
-
+            var query = await formQuery(user, request);
+            
+            
+            Invoice.aggregate([ 
+                {$match:query},
+                { $group : { 
+                    _id: null,
+                    count: {$sum: 1},
                     
-                    Invoice.aggregate([ 
-                    {$match:query},
-                    { $group : { 
-                        _id: null,
-                        count: {$sum: 1},
-                        
-                        shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-                        collectedAmount :{$sum: "$collectedAmount" },
-                        completed:{$sum: "$clearedAmount" },
-                        totalAmount:{$sum:"$FinalTaxAmount"},
-                        pendingAmount:{$sum:"$pendingAmount"}
-                        
-
-                     } }
-                    ])
-                    .exec(function(err, invoices){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    Invoice.count(query, function(err, count){
-                                        response.send({
-                                            success:true,
-                                            invoices: invoices
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
+                    shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+                    collectedAmount :{$sum: "$collectedAmount" },
+                    completed:{$sum: "$clearedAmount" },
+                    totalAmount:{$sum:"$FinalTaxAmount"},
+                    pendingAmount:{$sum:"$pendingAmount"}
+                    
+                    
+                } }
+            ])
+            .exec(function(err, invoices){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    Invoice.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            invoices: invoices
+                        });
+                    })
+                    
+                }
+            });
+        }	
 	});
 }
 
@@ -285,42 +285,42 @@ module.exports.MediahouseInvoiceData = function(request, response){
 			});
 		}
 		else{
-                      var query = await formQuery(user, request);
-
+            var query = await formQuery(user, request);
+            
+            
+            MediaHouseInvoice.aggregate([ 
+                {$match:query},
+                {$unwind:"$insertions"},
+                { $group : { 
+                    _id: null,
+                    count: {$sum: 1},
                     
-                    MediaHouseInvoice.aggregate([ 
-                    {$match:query},
-                    {$unwind:"$insertions"},
-                    { $group : { 
-                        _id: null,
-                        count: {$sum: 1},
-                        
-                        collectedAmount :{$sum: "$insertions.collectedAmount" },
-                        totalAmount:{$sum:"$insertions.Amount"},
-                        pendingAmount:{$sum:"$insertions.pendingAmount"}
-                        
-
-                     } }
-                    ])
-                    .exec(function(err, mhinvoices){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    MediaHouseInvoice.count(query, function(err, count){
-                                        response.send({
-                                            success:true,
-                                            mhinvoices: mhinvoices
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
+                    collectedAmount :{$sum: "$insertions.collectedAmount" },
+                    totalAmount:{$sum:"$insertions.Amount"},
+                    pendingAmount:{$sum:"$insertions.pendingAmount"}
+                    
+                    
+                } }
+            ])
+            .exec(function(err, mhinvoices){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    MediaHouseInvoice.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            mhinvoices: mhinvoices
+                        });
+                    })
+                    
+                }
+            });
+        }	
 	});
 }
 
@@ -344,55 +344,64 @@ module.exports.RecieptsChequeData = function(request, response){
 			});
 		}
 		else{
-                      var query = await formQuery(user, request);
-
+            var query = await formQuery(user, request);
+            
+            
+            Receipt.aggregate([ 
+                {$match:query},
+                { $group : { 
+                    _id: null,
+                    count: {$sum: 1},
                     
-                    Receipt.aggregate([ 
-                    {$match:query},
-                    { $group : { 
-                        _id: null,
-                        count: {$sum: 1},
-                        
-                         DueChequesAmount:{$sum:{
-                            "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                            "$paymentAmount",0]
-                        }},
-                        DueChequesNumber:{$sum:{
-                            "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                            1,0]
-                        }},
-                        CreditAmount:{$sum:{
-                            "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                            "$paymentAmount",0]
-                        }},
-                        OverDueChequesNumber:{$sum:{
-                            "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
-                            1,0]
-                        }},
-                        OverDueChequesAmount:{$sum:{
-                            "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
-                            "$paymentAmount",0]
-                        }},
-                        
-
-                     } }
-                    ])
-                    .exec(function(err, receipts){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                        response.send({
-                                            success:true,
-                                            receipts: receipts
-                                        });
-                                    
-                                }
-                            });
-                        }	
+                    DueChequesAmount:{$sum:{
+                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                        "$paymentAmount",0]
+                    }},
+                    DueChequesNumber:{$sum:{
+                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                        1,0]
+                    }},
+                    CreditAmount:{$sum:{
+                        "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                        "$paymentAmount",0]
+                    }},
+                    OverDueChequesNumber:{$sum:{
+                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                        1,0]
+                    }},
+                    OverDueChequesAmount:{$sum:{
+                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                        "$paymentAmount",0]
+                    }},
+                    
+                    
+                } }
+            ])
+            .exec(function(err, receipts){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        receipts: receipts
+                    });
+                    
+                }
+            });
+        }	
 	});
 }
+
+module.exports.check= function(request, response, user){
+console.log(response.locals.user);
+    response.send({
+        success:true,
+        user:response.locals.user,
+        firm:response.locals.firm
+    })
+};
