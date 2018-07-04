@@ -184,7 +184,6 @@ module.exports.DueOverdueData = function(request, response){
                         "$paymentAmount",0]
                     }},
                     totalAmount:{$sum:"$paymentAmount"},
-                    paymentDate
                 }}
             ])
             .exec(function(err, receipt){
