@@ -72,7 +72,7 @@ module.exports.ROchartData = function(request, response){
                 {$unwind:"$insertions"}, 
                 {$match:query},
                 { $group : { 
-                    _id : { month: { $month: "$date" }, year: { $year: "$date" } },
+                    _id : { day: { $dayOfMonth : "$date" },month: { $month: "$date" }, year: { $year: "$date" } },
                     count: {$sum: 1},
                     totalAmount:{$sum:"$insertions.Amount"},
                     generated:{$sum:{
