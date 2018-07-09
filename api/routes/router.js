@@ -101,6 +101,7 @@ router.get('/user/releaseorders/insertions/:page', releaseOrder.getReleaseOrderI
 router.post('/user/releaseorders/insertions/check', releaseOrder.setInsertionChecks);
 router.post('/user/releaseorder/download', releaseOrder.generateROPdf);
 router.post('/user/releaseorders/email', releaseOrder.mailROPdf);
+router.post('/user/releaseorders/preview', releaseOrder.previewROPdf);
 router.get('/user/releaseorders/:page', releaseOrder.getReleaseOrders);
 router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
 router.post('/user/releaseorder/generate', releaseOrder.queryGenerated);

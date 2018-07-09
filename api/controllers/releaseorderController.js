@@ -1107,7 +1107,24 @@ module.exports.generateROPdf = function(request, response) {
                         });
                         else{
                             var insData="";
+                            var ins1;
                             var insertions = releaseOrder.insertions;
+                            var ins = new Array();
+                            insertions.forEach(object => {
+                                var key = object.date.month +'-'+ object.date.year;
+                                ins.push(key);
+                            });
+                            var uins = ins.match(/\b\w/g).join('');
+
+                            uins.forEach(object => {
+                                ins1[object] = new Array();
+                            });
+
+                            insertions.forEach(object => {
+                                var key = object.date.month +'-'+ object.date.year;
+                                ins1[key].push(object);
+                            });
+                            
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                             var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
                             var namount = releaseOrder.adGrossAmount - damount ;
@@ -1138,6 +1155,55 @@ module.exports.generateROPdf = function(request, response) {
         }
     });
 }
+
+module.exports.previewROPdf = function(request, response) {
+    var token = userController.getToken(request.headers);
+    var user = userController.getUser(token,request,response, function(err, user){
+		if(err){
+			console.log(err);
+			response.send({
+				success:false,
+				msg:err + ""
+			});
+		}
+		else if(!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg : "Please Login"
+			});
+        }
+        else{
+            var releaseOrder = request.body.releaseOrder;
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            var insData="";
+            var insertions = releaseOrder.insertions;
+            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+            var namount = releaseOrder.adGrossAmount - damount ;
+            insertions.forEach(object =>{
+                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+            });
+            var Details = {
+                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                mediahouse :releaseOrder.publicationName,
+                pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                cname :releaseOrder.clientName,
+                cgstin :releaseOrder.clientGSTIN.GSTNo,
+                gstin :releaseOrder.agencyGSTIN,
+                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                gamount :releaseOrder.adGrossAmount,
+                insertions :insData,
+                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+                damount :damount,
+                namount :namount,
+                logo: firm.LogoURL
+            }
+            pdf.generateReleaseOrder(request,response,Details);
+        }
+    });
+}
+
 
 module.exports.queryReleaseOrderByNo = function(request, response){
     var token = userController.getToken(request.headers);
