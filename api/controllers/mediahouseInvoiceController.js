@@ -181,7 +181,7 @@ function formQuery(mediahouseID, date, user, request){
         else{
             to = new Date()
             from = new Date(1);
-            query['insertions.insertionDate'] = {$lte:to, $gte:from}
+         //   query['insertions.insertionDate'] = {$lte:to, $gte:from}
         }
         console.log(to, from);
         console.log(query)
