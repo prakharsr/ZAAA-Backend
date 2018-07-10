@@ -1158,7 +1158,7 @@ module.exports.generateROPdf = function(request, response) {
 
 module.exports.previewROPdf = function(request, response) {
     var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
+    var user = userController.getUser(token,request,response, async function(err, user){
 		if(err){
 			console.log(err);
 			response.send({
