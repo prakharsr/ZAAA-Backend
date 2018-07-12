@@ -56,9 +56,9 @@ function getClientID(request, response, user){
     return new Promise((resolve, reject) => {
         Client.find(
             {$and: [
-                    {firm:mongoose.mongo.ObjectId(user.firm)},
-                    {'OrganizationName': request.body.clientName},
-                    {'Address.state': request.body.clientState}
+                {firm:mongoose.mongo.ObjectId(user.firm)},
+                {'OrganizationName': request.body.clientName},
+                {'Address.state': request.body.clientState}
             ]}
         ).exec(function(err, client){
             if(err)
@@ -225,7 +225,7 @@ function findMediahouse(id){
 async function f(request, response, user){
     try {
         var invoice = await findInvoice(request, response, user);
-        var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
+        var firm = response.locals.firm;
         var mediahouse = await findMediahouse(invoice.mediahouseID);
         var client = await findClient(invoice.clientID);
         var executive = await findExecutive(invoice.executiveID);
@@ -326,285 +326,206 @@ async function f(request, response, user){
 }
 
 module.exports.createReceipt = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log("error in finding user");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-        }
-        else if(!user)
-        {
-            console.log("User not found");
-            response.send({
-                success:false,
-                msg:" no user"
-            });
-            
-        }
-		else if(user){
-            f(request, response, user)
-            
-            
-        }
-    });
+    f(request, response, response.locals.user)
 };
 
-module.exports.createAdvancedReciept = function(request,response){
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log("error in finding user");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-        }
-        else if(!user)
-        {
-            console.log("User not found");
+module.exports.createAdvancedReciept = async function(request,response){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var clientID = await getClientID(request,response,user);
+    var executiveID = await getExecutiveID(request,response,user);
+    var mediahouseID = await getMediahouseID(request,response,user);
+    var mediahouse = await findMediahouse(mediahouseID)
+    var client = await findClient(clientID);
+    var executive = await findExecutive(executiveID);
+    var rno = 'Adv'+(firm.AdvReceiptSerial+1)
+    
+    var receipt = new Receipt({
+        advanced: true,
+        receiptNO: rno,
+        paymentType:request.body.paymentType,
+        paymentDate:request.body.paymentDate,
+        paymentNo:request.body.paymentNo,
+        paymentAmount:request.body.paymentAmount,
+        paymentBankName:request.body.paymentBankName,
+        paymentAmountWords:request.body.paymentAmountWords,                
+        receiptNO: rno,
+        agencyName: firm.FirmName,
+        agencyGSTIN: firm.GSTIN,
+        agencyPerson: user.name,
+        signature: user.signature,
+        clientName:client.OrganizationName,
+        clientGSTIN:client.GSTIN,
+        clientState:client.Address.state,
+        publicationName:mediahouse.PublicationName,
+        publicationEdition:mediahouse.Address.edition,
+        mediaType:mediahouse.MediaType,
+        publicationState:mediahouse.Address.state,
+        publicationGSTIN:mediahouse.GSTIN,
+        executiveName:executive.ExecutiveName,
+        executiveOrg:executive.OrganizationName,
+        exceedingAmount: 0,
+        template: firm.ROTemplate,
+        firm:user.firm,
+        mediahouseID : mediahouseID,
+        clientID: clientID,
+        executiveID: executiveID
+    });
+    receipt.save(function(err,doc){
+        if(err){
             response.send({
                 success:false,
-                msg:" no user"
-            });
-            
+                msg:'Cannot save receipt data'
+            })
         }
-		else {
-                var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
-                var clientID = await getClientID(request,response,user);
-                var executiveID = await getExecutiveID(request,response,user);
-                var mediahouseID = await getMediahouseID(request,response,user);
-                var mediahouse = await findMediahouse(mediahouseID)
-                var client = await findClient(clientID);
-                var executive = await findExecutive(executiveID);
-                var rno = 'Adv'+(firm.AdvReceiptSerial+1)
-            
-            var receipt = new Receipt({
-                advanced: true,
-                receiptNO: rno,
-                paymentType:request.body.paymentType,
-                paymentDate:request.body.paymentDate,
-                paymentNo:request.body.paymentNo,
-                paymentAmount:request.body.paymentAmount,
-                paymentBankName:request.body.paymentBankName,
-                paymentAmountWords:request.body.paymentAmountWords,                
-                receiptNO: rno,
-                agencyName: firm.FirmName,
-                agencyGSTIN: firm.GSTIN,
-                agencyPerson: user.name,
-                signature: user.signature,
-                clientName:client.OrganizationName,
-                clientGSTIN:client.GSTIN,
-                clientState:client.Address.state,
-                publicationName:mediahouse.PublicationName,
-                publicationEdition:mediahouse.Address.edition,
-                mediaType:mediahouse.MediaType,
-                publicationState:mediahouse.Address.state,
-                publicationGSTIN:mediahouse.GSTIN,
-                executiveName:executive.ExecutiveName,
-                executiveOrg:executive.OrganizationName,
-                exceedingAmount: 0,
-                template: firm.ROTemplate,
-                firm:user.firm,
-                mediahouseID : mediahouseID,
-                clientID: clientID,
-                executiveID: executiveID
-            });
-            receipt.save(function(err,doc){
+        else{
+            firm.AdvReceiptSerial += 1;
+            firm.save((err,doc) => {
                 if(err){
                     response.send({
                         success:false,
-                        msg:'Cannot save receipt data'
+                        msg:'Cannot save firm data'
                     })
                 }
                 else{
-                    firm.AdvReceiptSerial += 1;
-                    firm.save((err,doc) => {
-                        if(err){
-                            response.send({
-                                success:false,
-                                msg:'Cannot save firm data'
-                            })
-                        }
-                        else{
-                            response.send({
-                                success:true,
-                                msg:'saved receipt data'
-                            })
-                        }
+                    response.send({
+                        success:true,
+                        msg:'saved receipt data'
                     })
                 }
             })
         }
-    });  
+    }) 
 }
 
-module.exports.linkRecieptToInvoice = function(request,response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
-            var receipt = await Receipt.findById(request.body.receiptID);
-            var invoice = await Invoice.findById(request.body.invoiceID);
-        
-            receipt.invoiceID = request.body.invoiceID;
-            receipt.save((err,doc) => {
+module.exports.linkRecieptToInvoice = async function(request,response){
+    var user = response.locals.user;
+    var receipt = await Receipt.findById(request.body.receiptID);
+    var invoice = await Invoice.findById(request.body.invoiceID);
+    
+    receipt.invoiceID = request.body.invoiceID;
+    receipt.save((err,doc) => {
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: "Error! in saving Receipt" + err
+            })
+        }
+        else{
+            if(receipt.paymentAmount > invoice.pendingAmount){
+                Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
+                { $set: { "collectedAmount": invoice.collectedAmount+invoice.pendingAmount,
+                "pendingAmount": 0,
+                "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
+            }}).exec(err,function(){
                 if(err){
-                    console.log(err);
                     response.send({
                         success:false,
-                        msg: "Error! in saving Receipt" + err
-                    })
+                        msg:"Error in updating invoice details"
+                    });
                 }
                 else{
-                    if(receipt.paymentAmount > invoice.pendingAmount){
-                        Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
-                        { $set: { "collectedAmount": invoice.collectedAmount+invoice.pendingAmount,
-                        "pendingAmount": 0,
-                        "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
-                    }}).exec(err,function(){
-                        if(err){
-                            response.send({
-                                success:false,
-                                msg:"Error in updating invoice details"
-                            });
-                        }
-                        else{
-                            response.send({
-                                success:true,
-                                msg:"Receipt saved.",
-                                receipt: receipt
-                            });
-                        }
-                    });
-                    }
-                    else{
-                        Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
-                        { $set: { "collectedAmount": invoice.collectedAmount + receipt.paymentAmount,
-                        "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
-                    }}).exec(err,function(){
-                        if(err){
-                            response.send({
-                                success:false,
-                                msg:"Error in updating invoice details"
-                            });
-                        }
-                        else{
-                            response.send({
-                                success:true,
-                                msg:"Receipt saved.",
-                                receipt: receipt
-                            });
-                        }
+                    response.send({
+                        success:true,
+                        msg:"Receipt saved.",
+                        receipt: receipt
                     });
                 }
+            });
+        }
+        else{
+            Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
+            { $set: { "collectedAmount": invoice.collectedAmount + receipt.paymentAmount,
+            "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
+        }}).exec(err,function(){
+            if(err){
+                response.send({
+                    success:false,
+                    msg:"Error in updating invoice details"
+                });
+            }
+            else{
+                response.send({
+                    success:true,
+                    msg:"Receipt saved.",
+                    receipt: receipt
+                });
             }
         });
     }
+}
 });
 }
 
 module.exports.getReceipt = function(request,response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{    
-            Receipt.findById(request.params.id,async function(err, receipt){
-                if(err){
-                    console.log("here" +err);
-                    response.send({
-                        success:false,
-                        msg: err+"",
-                    });
-                }
-                else{
-                    try{
-                        var mediahouse = await findMediahouse(receipt.mediahouseID);
-                        var executive = await findExecutive(receipt.executiveID);
-                        var client = await findClient(receipt.clientID);
-                        var invoice = await Invoice.findById(receipt.invoiceID);
-                        response.send({
-                            mediahouse: mediahouse,
-                            client: client,
-                            executive: executive,
-                            success : true,
-                            invoice : invoice,
-                            receipt : receipt
-                        }); 
-                    }
-                    catch(err){
-                        response.send({
-                            success: false,
-                            msg: "Can't fetch Receipt" + err
-                        });
-                    }
-                }
+    var user = response.locals.user;  
+    Receipt.findById(request.params.id,async function(err, receipt){
+        if(err){
+            console.log("here" +err);
+            response.send({
+                success:false,
+                msg: err+"",
             });
-			
-		}
-	});	
+        }
+        else{
+            try{
+                var mediahouse = await findMediahouse(receipt.mediahouseID);
+                var executive = await findExecutive(receipt.executiveID);
+                var client = await findClient(receipt.clientID);
+                var invoice = await Invoice.findById(receipt.invoiceID);
+                response.send({
+                    mediahouse: mediahouse,
+                    client: client,
+                    executive: executive,
+                    success : true,
+                    invoice : invoice,
+                    receipt : receipt
+                }); 
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: "Can't fetch Receipt" + err
+                });
+            }
+        }
+    });
 };
 
 module.exports.getReceipts = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            Receipt.find({firm:user.firm})
-            .limit(perPage)
-            .skip((perPage*request.params.page) - perPage)
-            .sort(-'date')
-            .exec(function(err, receipt){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!receipt){
-                    console.log("No receipt");
-                    response.send({
-                        success:false,
-                        msg:" No Receipt"
-                    });
-                }
-                else{
-                    Receipt.count({}, function(err, count){
-                        response.send({
-                            success : true,
-                            receipt : receipt,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                        });
-                    })
-                }
+    var user = response.locals.user;
+    Receipt.find({firm:user.firm})
+    .limit(perPage)
+    .skip((perPage*request.params.page) - perPage)
+    .sort(-'date')
+    .exec(function(err, receipt){
+        if(err){
+            console.log("here");
+            response.send({
+                success:false,
+                msg: err + ""
             });
-		}
-	});	
-    
+        }
+        else if(!receipt){
+            console.log("No receipt");
+            response.send({
+                success:false,
+                msg:" No Receipt"
+            });
+        }
+        else{
+            Receipt.count({}, function(err, count){
+                response.send({
+                    success : true,
+                    receipt : receipt,
+                    perPage:perPage,
+                    page: request.params.page,
+                    pageCount : Math.ceil(count/perPage)
+                });
+            })
+        }
+    });    
 };
 
 function searchExecutiveID(request, response, user){
@@ -723,145 +644,100 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
 }
 
 module.exports.queryReceipt = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var mediahouseID =await searchMediahouseID(request, response, user);
-            var clientID = await searchClientID(request, response, user);
-            var executiveID = await searchExecutiveID(request, response, user);
-            var date = (request.body.date)?(request.body.date):null;
-            var adCategory1 = request.body.adCategory1;
-            var adCategory2 = request.body.adCategory2;
-            
-            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, false);
-            
-            Receipt.find(query)
-            .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
-            .exec(function(err, receipt){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    Receipt.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            receipt: receipt,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
     
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, false);
+    
+    Receipt.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, receipt){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            Receipt.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    receipt: receipt,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });    
 };
 
 
 module.exports.queryAdvancedReceipt = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var mediahouseID =await searchMediahouseID(request, response, user);
-            var clientID = await searchClientID(request, response, user);
-            var executiveID = await searchExecutiveID(request, response, user);
-            var date = (request.body.date)?(request.body.date):null;
-            var adCategory1 = request.body.adCategory1;
-            var adCategory2 = request.body.adCategory2;
-            
-            var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, true);
-
-            Receipt.find(query)
-            .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
-            .exec(function(err, receipt){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    Receipt.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            receipt: receipt,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
     
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request, true);
+    
+    Receipt.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, receipt){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            Receipt.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    receipt: receipt,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };
 
-module.exports.deleteReceipt = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var receipt = await Receipt.findById(request.params.id);
-            var invoice = await Invoice.findById(receipt.invoiceID);
-            Invoice.update(
-                { $and: [{firm:user.firm}, { _id : receipt.invoiceID }]
-            },
-            { $set: {"clearedAmount": invoice.clearedAmount-receipt.netAmountFigures,
-            "pendingAmount": invoice.pendingAmount+receipt.netAmountFigures }}
-        )
-        .exec(function(err){
+module.exports.deleteReceipt = async function(request, response){
+	var user = response.locals.user;
+    var receipt = await Receipt.findById(request.params.id);
+    var invoice = await Invoice.findById(receipt.invoiceID);
+    Invoice.update(
+        { $and: [{firm:user.firm}, { _id : receipt.invoiceID }]
+    },
+    { $set: {"clearedAmount": invoice.clearedAmount-receipt.netAmountFigures,
+    "pendingAmount": invoice.pendingAmount+receipt.netAmountFigures }}
+)
+.exec(function(err){
+    if(err){
+        console.log(err);
+        response.send({
+            success:false,
+            msg: err + ""
+        });
+    }
+    else{
+        Receipt.findByIdAndRemove(request.params.id,function(err){
             if(err){
                 console.log(err);
                 response.send({
@@ -870,226 +746,160 @@ module.exports.deleteReceipt = function(request, response){
                 });
             }
             else{
-                Receipt.findByIdAndRemove(request.params.id,function(err){
-                    if(err){
-                        console.log(err);
-                        response.send({
-                            success:false,
-                            msg: err + ""
-                        });
-                    }
-                    else{
-                        response.send({
-                            success:true,
-                            msg: "Receipt deleted"
-                        });
-                    }
-                    
-                })
+                response.send({
+                    success:true,
+                    msg: "Receipt deleted"
+                });
             }
+            
         })
-    }	
-});
+    }
+})
 };
 
 module.exports.updateReceipt = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            Receipt.findByIdAndUpdate(request.params.id,{$set:request.body},function(err, receipt){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "receipt Updated"
-                    });
-                }
-                
-            })
-		}	
-	});
+	var user = response.locals.user;
+    Receipt.findByIdAndUpdate(request.params.id,{$set:request.body},function(err, receipt){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                msg: "receipt Updated"
+            });
+        }
+        
+    })
 };
 
 
 module.exports.mailReceiptPdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    Receipt.findById(request.body.id, async function(err, receipt){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            Receipt.findById(request.body.id, async function(err, receipt){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!receipt){
-                    response.send({
-                        success :false,
-                        msg: 'Receipt not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(receipt.clientID);
-                    var invoice = await Invoice.findById(receipt.invoiceID);
-                    var Add = firm.OfficeAddress;
-                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var Add = client.Address;
-                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var cdetails = '';
-                    var details='';
-                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-                    if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-                    if(receipt.paymentType == 'NEFT'){
-                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-                    }
-                    else if(receipt.paymentType == 'Cheque'){
-                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-                    }
-                    else{
-                        details+='<p> Payment Date :'+receipt.paymentDate;
-                    }
-                    
-                    var Details = {
-                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                        sign : 'http://www.adagencymanager.com/'+user.signature,
-                        faddress : Address,
-                        fcdetails : cdetails,
-                        cname : client.OrganizationName,
-                        address :address,
-                        rno :receipt.ReceiptNo,
-                        amtwords :receipt.paymentAmountWords,
-                        amtfig: receipt.paymentAmount,
-                        insertions : insertions,
-                        details : details
-                    }
-                    pdf.mailPaymentReceipt(request,response,Details);
-                }
-            })
+        else if(!receipt){
+            response.send({
+                success :false,
+                msg: 'Receipt not found' 
+            });
         }
-    });
+        else{
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            var client = await Client.findById(receipt.clientID);
+            var invoice = await Invoice.findById(receipt.invoiceID);
+            var Add = firm.OfficeAddress;
+            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var Add = client.Address;
+            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var cdetails = '';
+            var details='';
+            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+            if(firm.Email) cdetails += ' '+firm.Email;
+            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
+            insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
+            if(receipt.paymentType == 'NEFT'){
+                details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
+            }
+            else if(receipt.paymentType == 'Cheque'){
+                details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
+            }
+            else{
+                details+='<p> Payment Date :'+receipt.paymentDate;
+            }
+            
+            var Details = {
+                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                sign : 'http://www.adagencymanager.com/'+user.signature,
+                faddress : Address,
+                fcdetails : cdetails,
+                cname : client.OrganizationName,
+                address :address,
+                rno :receipt.ReceiptNo,
+                amtwords :receipt.paymentAmountWords,
+                amtfig: receipt.paymentAmount,
+                insertions : insertions,
+                details : details
+            }
+            pdf.mailPaymentReceipt(request,response,Details);
+        }
+    })
 }
 
 module.exports.generateReceiptPdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    Receipt.findById(request.body.id, async function(err, receipt){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            Receipt.findById(request.body.id, async function(err, receipt){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!receipt){
-                    response.send({
-                        success :false,
-                        msg: 'Receipt not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(receipt.clientID);
-                    var invoice = await Invoice.findById(receipt.invoiceID);
-                    var Add = firm.OfficeAddress;
-                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var Add = client.Address;
-                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var cdetails = '';
-                    var details='';
-                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-                    if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-                    insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-                    if(receipt.paymentType == 'NEFT'){
-                        details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-                    }
-                    else if(receipt.paymentType == 'Cheque'){
-                        details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-                    }
-                    else{
-                        details+='<p> Payment Date :'+receipt.paymentDate;
-                    }
-                    
-                    var Details = {
-                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                        sign : 'http://www.adagencymanager.com/'+user.signature,
-                        faddress : Address,
-                        fcdetails : cdetails,
-                        cname : client.OrganizationName,
-                        address :address,
-                        rno :receipt.ReceiptNo,
-                        amtwords :receipt.paymentAmountWords,
-                        amtfig: receipt.paymentAmount,
-                        insertions : insertions,
-                        details : details
-                    }
-                    pdf.generatePaymentReceipt(request,response,Details);
-                }
-            })
+        else if(!receipt){
+            response.send({
+                success :false,
+                msg: 'Receipt not found' 
+            });
+        }
+        else{
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            var client = await Client.findById(receipt.clientID);
+            var invoice = await Invoice.findById(receipt.invoiceID);
+            var Add = firm.OfficeAddress;
+            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var Add = client.Address;
+            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var cdetails = '';
+            var details='';
+            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+            if(firm.Email) cdetails += ' '+firm.Email;
+            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
+            insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
+            if(receipt.paymentType == 'NEFT'){
+                details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
+            }
+            else if(receipt.paymentType == 'Cheque'){
+                details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
+            }
+            else{
+                details+='<p> Payment Date :'+receipt.paymentDate;
+            }
             
+            var Details = {
+                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                sign : 'http://www.adagencymanager.com/'+user.signature,
+                faddress : Address,
+                fcdetails : cdetails,
+                cname : client.OrganizationName,
+                address :address,
+                rno :receipt.ReceiptNo,
+                amtwords :receipt.paymentAmountWords,
+                amtfig: receipt.paymentAmount,
+                insertions : insertions,
+                details : details
+            }
+            pdf.generatePaymentReceipt(request,response,Details);
         }
     })
 }
 
 module.exports.receiptStatus = async function(request, response){
     try{
-    var receipt = await Receipt.findById(request.body.receiptID);
-    var invoice = await Invoice.findById(receipt.invoiceID);
+        var receipt = await Receipt.findById(request.body.receiptID);
+        var invoice = await Invoice.findById(receipt.invoiceID);
     }
     catch(err){
         console.log('error in await statements');
@@ -1097,11 +907,11 @@ module.exports.receiptStatus = async function(request, response){
     var oldStatus = receipt.status;
     var newStatus = +(request.body.status);
     var coamount = 0, pamount = 0, clamount = 0, amount = receipt.paymentAmount;
-
+    
     /* 0 for collected
-       1 for cleared
-       2 for rejected  */
-
+    1 for cleared
+    2 for rejected  */
+    
     if(oldStatus==0 && newStatus==1){
         coamount = invoice.collectedAmount-amount;
         pamount = invoice.pendingAmount;
@@ -1133,9 +943,9 @@ module.exports.receiptStatus = async function(request, response){
         clamount = invoice.clearedAmount+amount;
     }
     
-
+    
     receipt.status = newStatus;
-
+    
     receipt.save((err, doc) => {
         if(err){
             response.send({
@@ -1146,24 +956,24 @@ module.exports.receiptStatus = async function(request, response){
         else{
             Invoice.update({"_id":doc.invoiceID},
             { $set: {   
-                        "collectedAmount" : coamount,
-                        "clearedAmount": clamount,
-                        "pendingAmount": pamount
-                    }}).exec(err,()=>{
-                    if(err){
-                        response.send({
-                            success:false,
-                            msg:"Error in updating invoice details"
-                        });
-                    }
-                    else{
-                        response.send({
-                            success:true,
-                            msg: 'Status changed successfully'
-                        })
-                    }
+                "collectedAmount" : coamount,
+                "clearedAmount": clamount,
+                "pendingAmount": pamount
+            }}).exec(err,()=>{
+                if(err){
+                    response.send({
+                        success:false,
+                        msg:"Error in updating invoice details"
+                    });
+                }
+                else{
+                    response.send({
+                        success:true,
+                        msg: 'Status changed successfully'
+                    })
+                }
             });
         }
     })
-
+    
 }

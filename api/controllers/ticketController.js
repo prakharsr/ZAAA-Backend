@@ -20,46 +20,27 @@ var path = require('path');
 var perPage=20;
 
 module.exports.createTicket = (request,response) => {
-    var token = userController.getToken(request.headers);
+    var user = response.locals.user;
+    var ticket = new Ticket({
+        subject: request.body.subject,
+        details: request.body.details,
+        user: user._id
+    });
     
-    userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var ticket = new Ticket({
-                subject: request.body.subject,
-                details: request.body.details,
-                user: user._id
+    ticket.save((err,doc) => {
+        if(err){
+            response.send({
+                success:false,
+                msg: 'Cannot save ticket'
             });
-
-            ticket.save((err,doc) => {
-                if(err){
-                    response.send({
-                        success:false,
-                        msg: 'Cannot save ticket'
-                    });
-                }
-                else{
-                    response.send({
-                        success: true,
-                        msg: 'ticket generated with ticket no'+ doc._id
-                    })
-                }
+        }
+        else{
+            response.send({
+                success: true,
+                msg: 'ticket generated with ticket no'+ doc._id
             })
         }
-    });
+    })
 }
 
 
@@ -75,52 +56,34 @@ function formQuery(date, user, request){
 }
 
 
-module.exports.queryUserTickets = function(request, response){
-    var token = userController.getToken(request.headers);
-	userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var date = (request.body.date)?(request.body.date):null;
-            var query = await formQuery(date, user, request);
-            
-            
-            Ticket.find(query)
-            .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
-            .exec(function(err, tickets){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    Ticket.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            tickets: tickets,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
+module.exports.queryUserTickets = async function(request, response){
+    var user = response.locals.user;
+    var date = (request.body.date)?(request.body.date):null;
+    var query = await formQuery(date, user, request);
+    
+    
+    Ticket.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, tickets){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-        }	
-	});
+        }
+        else{
+            Ticket.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    tickets: tickets,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };

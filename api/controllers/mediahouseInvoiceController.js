@@ -19,65 +19,47 @@ var path = require('path');
 var perPage=20;
 
 module.exports.createMHInvoice = async (request,response) => {
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var mediahouseID =await searchMediahouseID(request, response, user);
-            var clientID = await searchClientID(request, response, user);
-            var executiveID = await searchExecutiveID(request, response, user);
-            var releaseorder = await ReleaseOrder.findById(request.body.releaseOrderId);
-            var firm = await Firm.findById(user.firm)
-            
-            var mhinvoice = new MediaHouseInvoice({
-                releaseOrderId: releaseorder._id,
-                publicationName:releaseorder.publicationName,
-                publicationEdition:releaseorder.publicationEdition,
-                mediaType:releaseorder.mediaType,
-                publicationState:releaseorder.publicationState,
-                publicationGSTIN:releaseorder.publicationGSTIN,
-                insertions: request.body.insertions,
-                releaseOrderNo: releaseorder.releaseOrderNo,
-                MHINo: request.body.MHINo,
-                MHIDate: request.body.MHIDate,
-                MHIGrossAmount: request.body.MHIGrossAmount,
-                MHITaxAmount: request.body.MHITaxAmount,
-                mediahouseID: mediahouseID,
-                executiveID: executiveID,
-                clientID: clientID,
-                firm: firm._id
+    var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var releaseorder = await ReleaseOrder.findById(request.body.releaseOrderId);
+    var firm = await Firm.findById(user.firm)
+    
+    var mhinvoice = new MediaHouseInvoice({
+        releaseOrderId: releaseorder._id,
+        publicationName:releaseorder.publicationName,
+        publicationEdition:releaseorder.publicationEdition,
+        mediaType:releaseorder.mediaType,
+        publicationState:releaseorder.publicationState,
+        publicationGSTIN:releaseorder.publicationGSTIN,
+        insertions: request.body.insertions,
+        releaseOrderNo: releaseorder.releaseOrderNo,
+        MHINo: request.body.MHINo,
+        MHIDate: request.body.MHIDate,
+        MHIGrossAmount: request.body.MHIGrossAmount,
+        MHITaxAmount: request.body.MHITaxAmount,
+        mediahouseID: mediahouseID,
+        executiveID: executiveID,
+        clientID: clientID,
+        firm: firm._id
+    })
+    
+    mhinvoice.save((err,doc)=>{
+        if(err){
+            response.send({
+                success: false,
+                msg: 'media house invoice cannot be created' + err
+            })
+        }
+        else{
+            response.send({
+                success:true,
+                msg: 'Successfully created the MHInvoice'
             })
             
-            mhinvoice.save((err,doc)=>{
-                if(err){
-                    response.send({
-                        success: false,
-                        msg: 'media house invoice cannot be created' + err
-                    })
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: 'Successfully created the MHInvoice'
-                    })
-                    
-                }
-            })
-        }	
-	});
+        }
+    })
 }
 
 
@@ -181,205 +163,150 @@ function formQuery(mediahouseID, date, user, request){
         else{
             to = new Date()
             from = new Date(1);
-         //   query['insertions.insertionDate'] = {$lte:to, $gte:from}
+            //   query['insertions.insertionDate'] = {$lte:to, $gte:from}
         }
         console.log(to, from);
         console.log(query)
         resolve(query);
         
     })
-    
-    
 }
 
-module.exports.querySummarySheet = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var mediahouseID =await searchMediahouseID(request, response, user);
-            var date = (request.body.date)?(request.body.date):null;
-            var query = await formQuery(mediahouseID, date, user, request);
-            
-            
-            MediaHouseInvoice
-            .aggregate([
-                {$unwind: "$insertions"}, 
-                {$match:query},
-                { $group : { 
-                    _id: "$releaseOrderId",
-                    count: {$sum: 1},
-                    entries: { $push:  
-                        {
-                        "_id":"$_id",
-                        "releaseOrderId":"$releaseOrderId",
-                        "publicationName":"$publicationName",
-                         "publicationEdition":"$publicationEdition",
-                         "date": "$date", 
-                        "insertions":{
-                            "insertionDate": "$insertions.insertionDate", 
-                            "Amount":"$insertions.Amount",
-                            "insertionId": "$insertions.insertionId",
-                            "collectedAmount":"$insertions.collectedAmount",
-                            "_id": "$insertions._id",
-                         },
-                         "releaseOrderNo":"$releaseOrderNo",
-                         "MHINo":"$MHINo",
-                         "MHIDate":"$MHIDate",
-                         "MHIGrossAmount":"$MHIGrossAmount",
-                         "MHITaxAmount":"$MHIAmount"
-                    } }
-                } },
-                {$limit: perPage},
-                {$skip:(perPage * request.body.page) - perPage}
-            ])
-            .exec(function(err, insertions){
-                if(err){
-                    console.log(err+ "");
+module.exports.querySummarySheet =async function(request, response){
+    var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var query = await formQuery(mediahouseID, date, user, request);
+    
+    
+    MediaHouseInvoice
+    .aggregate([
+        {$unwind: "$insertions"}, 
+        {$match:query},
+        { $group : { 
+            _id: "$releaseOrderId",
+            count: {$sum: 1},
+            entries: { $push:  
+                {
+                    "_id":"$_id",
+                    "releaseOrderId":"$releaseOrderId",
+                    "publicationName":"$publicationName",
+                    "publicationEdition":"$publicationEdition",
+                    "date": "$date", 
+                    "insertions":{
+                        "insertionDate": "$insertions.insertionDate", 
+                        "Amount":"$insertions.Amount",
+                        "insertionId": "$insertions.insertionId",
+                        "collectedAmount":"$insertions.collectedAmount",
+                        "_id": "$insertions._id",
+                    },
+                    "releaseOrderNo":"$releaseOrderNo",
+                    "MHINo":"$MHINo",
+                    "MHIDate":"$MHIDate",
+                    "MHIGrossAmount":"$MHIGrossAmount",
+                    "MHITaxAmount":"$MHIAmount"
+                } }
+            } },
+            {$limit: perPage},
+            {$skip:(perPage * request.body.page) - perPage}
+        ])
+        .exec(function(err, insertions){
+            if(err){
+                console.log(err+ "");
+                response.send({
+                    success:false,
+                    msg: err +""
+                });
+            }
+            else{
+                console.log(insertions)
+                MediaHouseInvoice.count(query, function(err, count){
                     response.send({
-                        success:false,
-                        msg: err +""
+                        success:true,
+                        insertions: insertions,
+                        page: request.body.page,
+                        perPage:perPage,
+                        pageCount: Math.ceil(count/perPage)
                     });
-                }
-                else{
-                    console.log(insertions)
-                    MediaHouseInvoice.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            insertions: insertions,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
-};
-
-module.exports.queryMediaHouseInvoices = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var mediahouseID =await searchMediahouseID(request, response, user);
-            var date = (request.body.date)?(request.body.date):null;
-            var query = await formQuery(mediahouseID, date, user, request);
-            
-            
-            MediaHouseInvoice
-            .find(query)
-            .limit(perPage)
-            .skip((perPage * request.body.page) - perPage)
-            .exec(function(err, mediahouseInvoice){
-                if(err){
-                    console.log(err+ "");
+                })
+                
+            }
+        });
+    };
+    
+    module.exports.queryMediaHouseInvoices =async function(request, response){
+        var user = response.locals.user;
+        var mediahouseID =await searchMediahouseID(request, response, user);
+        var date = (request.body.date)?(request.body.date):null;
+        var query = await formQuery(mediahouseID, date, user, request);
+        
+        
+        MediaHouseInvoice
+        .find(query)
+        .limit(perPage)
+        .skip((perPage * request.body.page) - perPage)
+        .exec(function(err, mediahouseInvoice){
+            if(err){
+                console.log(err+ "");
+                response.send({
+                    success:false,
+                    msg: err +""
+                });
+            }
+            else{
+                MediaHouseInvoice.count(query, function(err, count){
                     response.send({
-                        success:false,
-                        msg: err +""
+                        success:true,
+                        mediahouseInvoice: mediahouseInvoice,
+                        page: request.body.page,
+                        perPage:perPage,
+                        pageCount: Math.ceil(count/perPage)
                     });
-                }
-                else{
-                    MediaHouseInvoice.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            mediahouseInvoice: mediahouseInvoice,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
-};
-
-
-module.exports.generateSummarySheet = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else {
-            try {
-                var mhis = request.body.mhis; // { _id, amount: number }[]
-
-                MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
-                    invoices.forEach(invoice => {
-                        invoice.insertions.forEach(mhiInsertion => {
-                            mhis.forEach(insertion => {
-                                if (mhiInsertion._id == insertion._id) {
-                                    mhiInsertion.collectedAmount = insertion.amount;
-                                    mhiInsertion.recieptNumber = insertion.recieptNumber;
-                                    mhiInsertion.recieptDate = insertion.recieptDate;
-                                    mhiInsertion.paymentMode = insertion.paymentMode;
-                                    
-                                }
-                            });
-                        });
-
-                        invoice.save(function(err) {
-                            if (err) {
-                                response.send({
-                                    success: false,
-                                    msg: "error" + err
-                                });
+                })
+                
+            }
+        });
+    };
+    
+    
+    module.exports.generateSummarySheet = function(request, response){
+        var user = response.locals.user;
+        try {
+            var mhis = request.body.mhis; // { _id, amount: number }[]
+            
+            MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+                invoices.forEach(invoice => {
+                    invoice.insertions.forEach(mhiInsertion => {
+                        mhis.forEach(insertion => {
+                            if (mhiInsertion._id == insertion._id) {
+                                mhiInsertion.collectedAmount = insertion.amount;
+                                mhiInsertion.recieptNumber = insertion.recieptNumber;
+                                mhiInsertion.recieptDate = insertion.recieptDate;
+                                mhiInsertion.paymentMode = insertion.paymentMode;
+                                
                             }
                         });
                     });
+                    
+                    invoice.save(function(err) {
+                        if (err) {
+                            response.send({
+                                success: false,
+                                msg: "error" + err
+                            });
+                        }
+                    });
                 });
-            }
-            catch (err) {
-                if (err)
-                    console.log(err)
-            }
-
-            response.send({
-                success:true,
-                msg:"done"
-            })
-        }	
-	});
-};
+            });
+        }
+        catch (err) {
+            if (err)
+            console.log(err)
+        }
+        
+        response.send({
+            success:true,
+            msg:"done"
+        })
+    };
+    

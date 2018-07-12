@@ -11,111 +11,75 @@ var mongoose = require('mongoose');
 var perPage=20;
 
 module.exports.createClientNote = function(request,response){
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user =reponse.locals.user;
+    Invoice.findOne({invoiceNO: request.body.invoiceNO}, (err,invoice) => {
+        if(err){
+            response.send({
+                success: false,
+                msg: 'Cannot find Invoice'
+            })
         }
         else{
-            Invoice.findOne({invoiceNO: request.body.invoiceNO}, (err,invoice) => {
+            var clientNote = new ClientNote({
+                clientName: invoice.clientName,
+                invoiceNO: request.body.invoiceNO,
+                amount: request.body.amount,
+                amountWords: request.body.amountWords,
+                remark: request.body.remark,
+                date: request.body.date,
+                DocId: invoice._id,
+                firm: user.firm,
+                user: user._id
+            });
+            
+            clientNote.save((err) => {
                 if(err){
                     response.send({
                         success: false,
-                        msg: 'Cannot find Invoice'
+                        msg:'Cannot save note'
                     })
                 }
                 else{
-                    var clientNote = new ClientNote({
-                        clientName: invoice.clientName,
-                        invoiceNO: request.body.invoiceNO,
-                        amount: request.body.amount,
-                        amountWords: request.body.amountWords,
-                        remark: request.body.remark,
-                        date: request.body.date,
-                        DocId: invoice._id,
-                        firm: user.firm,
-                        user: user._id
-                    });
-
-                    clientNote.save((err) => {
-                        if(err){
-                            response.send({
-                                success: false,
-                                msg:'Cannot save note'
-                            })
-                        }
-                        else{
-                            response.send({
-                                success: true,
-                                msg:'Note saved'
-                            })
-                        }
+                    response.send({
+                        success: true,
+                        msg:'Note saved'
                     })
                 }
             })
         }
-    });
+    })
 }
 
 module.exports.createMediaHouseNote = function(request,response){
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
-        }
-        else{
-            ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO}, (err,releaseorder) => {
-                var mediaHouseNote = new MediaHouseNote({
-                    publicationName: releaseorder.publicationName,
-                    publicationState: releaseorder.publicationState,
-                    releaseOrderNO: request.body.releaseOrderNO,
-                    amount: request.body.amount,
-                    remark: request.body.remark,
-                    date: request.body.date,
-                    DocId: releaseorder._id,
-                    firm: user.firm,
-                    user: user._id
-                });
-
-                mediaHouseNote.save((err) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg:'Cannot save note'
-                        })
-                    }
-                    else{
-                        response.send({
-                            success: true,
-                            msg:'Note saved'
-                        })
-                    }
+    var user = reponse.locals.user;
+    ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO}, (err,releaseorder) => {
+        var mediaHouseNote = new MediaHouseNote({
+            publicationName: releaseorder.publicationName,
+            publicationState: releaseorder.publicationState,
+            releaseOrderNO: request.body.releaseOrderNO,
+            amount: request.body.amount,
+            remark: request.body.remark,
+            date: request.body.date,
+            DocId: releaseorder._id,
+            firm: user.firm,
+            user: user._id
+        });
+        
+        mediaHouseNote.save((err) => {
+            if(err){
+                response.send({
+                    success: false,
+                    msg:'Cannot save note'
                 })
-            })
-        }
-    });
+            }
+            else{
+                response.send({
+                    success: true,
+                    msg:'Note saved'
+                })
+            }
+        })
+    })
 }
 
 function searchClientID(request, response, user){
@@ -137,7 +101,7 @@ function searchClientID(request, response, user){
             {
                 
                 resolve(null);
-            
+                
             }
             if(client.length!==0){
                 clientID =  client[0]._id;
@@ -189,238 +153,164 @@ function formQuery(mediahouseID, clientID, date, user, request){
 }
 
 module.exports.queryClientNote = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                var mediahouseID =await searchMediahouseID(request, response, user);
-                var clientID = await searchClientID(request, response, user);
-                var date = (request.body.date)?(request.body.date):null;
-                
-                var query = await formQuery(mediahouseID, clientID, date, user, request);
-                console.log(query);
-                ClientNote.find(query)
-                .limit(perPage)
-                .skip((perPage * request.body.page) - perPage)
-                .exec(function(err, note){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    ClientNote.count(query, function(err, count){
-                        console.log(note, count)
-                        response.send({
-                            success:true,
-                            note: note,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    
+    var query = await formQuery(mediahouseID, clientID, date, user, request);
+    console.log(query);
+    ClientNote.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, note){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-        }	
-	});
+        }
+        else{
+            ClientNote.count(query, function(err, count){
+                console.log(note, count)
+                response.send({
+                    success:true,
+                    note: note,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };
 
 
 module.exports.queryMediaHouseNote = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-        
-                var mediahouseID =await searchMediahouseID(request, response, user);
-                var clientID = await searchClientID(request, response, user);
-                var date = (request.body.date)?(request.body.date):null;
-                
-                var query = await formQuery(mediahouseID, clientID, date, user, request);
-                console.log(query);
-                MediaHouseNote.find(query)
-                .limit(perPage)
-                .skip((perPage * request.body.page) - perPage)
-                .exec(function(err, note){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    MediaHouseNote.count(query, function(err, count){
-                        console.log(note, count)
-                        response.send({
-                            success:true,
-                            note: note,
-                            page: request.body.page,
-                            perPage:perPage,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                    
-                }
+	var user =response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    
+    var query = await formQuery(mediahouseID, clientID, date, user, request);
+    console.log(query);
+    MediaHouseNote.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, note){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-        }	
-	});
+        }
+        else{
+            MediaHouseNote.count(query, function(err, count){
+                console.log(note, count)
+                response.send({
+                    success:true,
+                    note: note,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };
 
 /*Pdf creation not working => Not clear on layout of notes*/
 
 module.exports.mailClientNotePdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    ClientNote.findById(request.body.id, async function(err, note){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            ClientNote.findById(request.body.id, async function(err, note){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!note){
-                    response.send({
-                        success :false,
-                        msg: 'Note not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(note.DocId);
-                    var Add = firm.OfficeAddress;
-                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var Add = client.Address;
-                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var cdetails = '';
-                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-                    if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
-        
-                    var Details = {
-                        image : 'http://adagencymanager.com/'+firm.LogoURL,
-                        sign : 'http://adagencymanager.com/'+user.signature,
-                        faddress : Address,
-                        fcdetails : cdetails,
-                        cname : client.OrganizationName,
-                        address :address,
-                        amtwords :note.amountWords,
-                        amtfig: note.amount,
-                        insertions : insertions
-                    }
-                    pdf.mailClientNote(request,response,Details);
-                }
-            })
+        else if(!note){
+            response.send({
+                success :false,
+                msg: 'Note not found' 
+            });
         }
-    });
+        else{
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            var client = await Client.findById(note.DocId);
+            var Add = firm.OfficeAddress;
+            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var Add = client.Address;
+            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var cdetails = '';
+            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+            if(firm.Email) cdetails += ' '+firm.Email;
+            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
+            
+            var Details = {
+                image : 'http://adagencymanager.com/'+firm.LogoURL,
+                sign : 'http://adagencymanager.com/'+user.signature,
+                faddress : Address,
+                fcdetails : cdetails,
+                cname : client.OrganizationName,
+                address :address,
+                amtwords :note.amountWords,
+                amtfig: note.amount,
+                insertions : insertions
+            }
+            pdf.mailClientNote(request,response,Details);
+        }
+    })
 }
 
 module.exports.generateClientNotePdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    ClientNote.findById(request.body.id, async function(err, note){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            ClientNote.findById(request.body.id, async function(err, note){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!note){
-                    response.send({
-                        success :false,
-                        msg: 'Note not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var client = await Client.findById(note.DocId);
-                    var Add = firm.OfficeAddress;
-                    var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var Add = client.Address;
-                    var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-                    var cdetails = '';
-                    if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-                    if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-                    if(firm.Email) cdetails += ' '+firm.Email;
-                    var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
-        
-                    var Details = {
-                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                        sign : 'http://www.adagencymanager.com/'+user.signature,
-                        faddress : Address,
-                        fcdetails : cdetails,
-                        cname : client.OrganizationName,
-                        address :address,
-                        amtwords :note.amountWords,
-                        amtfig: note.amount,
-                        insertions : insertions
-                    }
-                    pdf.generateClientNote(request,response,Details);
-                }
-            })
+        else if(!note){
+            response.send({
+                success :false,
+                msg: 'Note not found' 
+            });
+        }
+        else{
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            var client = await Client.findById(note.DocId);
+            var Add = firm.OfficeAddress;
+            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var Add = client.Address;
+            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
+            var cdetails = '';
+            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
+            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
+            if(firm.Email) cdetails += ' '+firm.Email;
+            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
             
+            var Details = {
+                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                sign : 'http://www.adagencymanager.com/'+user.signature,
+                faddress : Address,
+                fcdetails : cdetails,
+                cname : client.OrganizationName,
+                address :address,
+                amtwords :note.amountWords,
+                amtfig: note.amount,
+                insertions : insertions
+            }
+            pdf.generateClientNote(request,response,Details);
         }
     })
 }

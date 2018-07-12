@@ -144,7 +144,7 @@ function getMediahouseID(request, response, user){
 
 
 async function f (request, response, user){
-    var firm = await Firm.findById(user.firm);
+    var firm = response.locals.firm;
     var mediahouseID = await getMediahouseID(request, response, user);
     var clientID = await getClientID(request, response, user);
     var executiveID = await getExecutiveID(request, response, user);
@@ -271,232 +271,155 @@ async function f (request, response, user){
 };
 
 module.exports.createRO = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log("error in finding user");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-        }
-        else if(!user)
-        {
-            console.log("User not found");
-            response.send({
-                success:false,
-                msg:" no user"
-            });
-            
-        }
-		else if(user){
-            f(request, response, user)
-            
-            
-        }
-    });
+    f(request, response, response.locals.user)
 };
 
 module.exports.getReleaseOrder = function(request,response){
     
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
-            
-            ReleaseOrder.findById(request.params.id,async function(err, releaseOrder){
-                if(err){
-                    console.log("here" +err);
-                    response.send({
-                        success:false,
-                        msg: err+"",
-                    });
-                }
-                else{
-                    try{
-                        var mediahouse = await MediaHouse.findById(releaseOrder.mediahouseID);
-                        var executive = await Executive.findById(releaseOrder.executiveID);
-                        var client = await Client.findById(releaseOrder.clientID);
-                        response.send({
-                            mediahouse: mediahouse,
-                            client: client,
-                            executive: executive,
-                            success : true,
-                            releaseOrder : releaseOrder
-                        }); 
-                    }
-                    catch(err){
-                        response.send({
-                            success: false,
-                            msg: "Can't fetch releaseOrder"
-                        });
-                    }
-                }
+    var user = response.locals.user;
+    ReleaseOrder.findById(request.params.id,async function(err, releaseOrder){
+        if(err){
+            console.log("here" +err);
+            response.send({
+                success:false,
+                msg: err+"",
             });
-			
-		}
-	});	
+        }
+        else{
+            try{
+                var mediahouse = await MediaHouse.findById(releaseOrder.mediahouseID);
+                var executive = await Executive.findById(releaseOrder.executiveID);
+                var client = await Client.findById(releaseOrder.clientID);
+                response.send({
+                    mediahouse: mediahouse,
+                    client: client,
+                    executive: executive,
+                    success : true,
+                    releaseOrder : releaseOrder
+                }); 
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: "Can't fetch releaseOrder"
+                });
+            }
+        }
+    });
 };
 
 module.exports.getReleaseOrders = function(request, response){
     
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            ReleaseOrder.find({"firm":user.firm})
-            .limit(perPage)
-            .skip((perPage*request.params.page) - perPage)
-            .sort(-'date')
-            .exec(function(err, releaseOrders){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!releaseOrders){
-                    console.log("No releaseorder");
-                    response.send({
-                        success:false,
-                        msg:" No release Order"
-                    });
-                }
-                else{
-                    ReleaseOrder.count({}, function(err, count){
-                        response.send({
-                            success : true,
-                            releaseOrders : releaseOrders,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                            
-                        });
-                    })
-                }
+    var user = response.locals.user;
+    ReleaseOrder.find({"firm":user.firm})
+    .limit(perPage)
+    .skip((perPage*request.params.page) - perPage)
+    .sort(-'date')
+    .exec(function(err, releaseOrders){
+        if(err){
+            console.log("here");
+            response.send({
+                success:false,
+                msg: err + ""
             });
-		}
-	});	
-    
+        }
+        else if(!releaseOrders){
+            console.log("No releaseorder");
+            response.send({
+                success:false,
+                msg:" No release Order"
+            });
+        }
+        else{
+            ReleaseOrder.count({}, function(err, count){
+                response.send({
+                    success : true,
+                    releaseOrders : releaseOrders,
+                    perPage:perPage,
+                    page: request.params.page,
+                    pageCount : Math.ceil(count/perPage)
+                    
+                });
+            })
+        }
+    });
 };
 
 module.exports.getReleaseOrderInsertions = function(request, response){
     
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            ReleaseOrder
-            .aggregate([{$unwind: "$insertions"}, 
-                {$match:{firm:user.firm} },
-                {$project: {
-                    "_id":1,
-                    "publicationName":1,
-                    "publicationEdition":1, 
-                    "clientName":1,
-                    "insertions.date": 1, 
-                    "insertions.marked": 1,
-                    "insertions.state": 1,
-                    "insertions.ISODate": 1, 
-                    "insertions._id": 1,
-                    "executiveName":1,
-                    "executiveOrg":1,
-                }
-                },
-                {$limit: perPage},
-                {$skip:(perPage * request.params.page) - perPage}
-            ])
-            .exec(function(err, insertions){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!insertions){
-                    console.log("No insertions");
-                    response.send({
-                        success:false,
-                        msg:" No insertions"
-                    });
-                }
-                else{
-                    ReleaseOrder.count({}, function(err, count){    
-                        response.send({
-                            success : true,
-                            insertions : insertions,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                            
-                        });
-                    })
-                }
+    var user = response.locals.user;
+    ReleaseOrder
+    .aggregate([{$unwind: "$insertions"}, 
+    {$match:{firm:user.firm} },
+    {$project: {
+        "_id":1,
+        "publicationName":1,
+        "publicationEdition":1, 
+        "clientName":1,
+        "insertions.date": 1, 
+        "insertions.marked": 1,
+        "insertions.state": 1,
+        "insertions.ISODate": 1, 
+        "insertions._id": 1,
+        "executiveName":1,
+        "executiveOrg":1,
+    }
+},
+{$limit: perPage},
+{$skip:(perPage * request.params.page) - perPage}
+])
+.exec(function(err, insertions){
+    if(err){
+        console.log("here");
+        response.send({
+            success:false,
+            msg: err + ""
+        });
+    }
+    else if(!insertions){
+        console.log("No insertions");
+        response.send({
+            success:false,
+            msg:" No insertions"
+        });
+    }
+    else{
+        ReleaseOrder.count({}, function(err, count){    
+            response.send({
+                success : true,
+                insertions : insertions,
+                perPage:perPage,
+                page: request.params.page,
+                pageCount : Math.ceil(count/perPage)
+                
             });
-		}
-	});	
+        })
+    }
+});
 };
 module.exports.setInsertionChecks = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            ReleaseOrder.updateMany(
-                { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-                },
-                { $set: { "insertions.$.state": request.body.state }}
-            )
-            .exec(function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "ReleaseOrder Insertions Updated"
-                    });
-                }
-                
-            })
-		}	
-	});
+	var user = response.locals.user;
+    ReleaseOrder.updateMany(
+        { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
+    },
+    { $set: { "insertions.$.state": request.body.state }}
+)
+.exec(function(err){
+    if(err){
+        console.log(err);
+        response.send({
+            success:false,
+            msg: err + ""
+        });
+    }
+    else{
+        response.send({
+            success:true,
+            msg: "ReleaseOrder Insertions Updated"
+        });
+    }
+    
+})
 };
 
 function searchExecutiveID(request, response, user){
@@ -513,8 +436,8 @@ function searchExecutiveID(request, response, user){
             }
             else if (executive.length===0)
             {
-                    resolve(null);
-            
+                resolve(null);
+                
             }
             if(executive.length!==0){
                 executiveID =  executive[0]._id;
@@ -546,7 +469,7 @@ function searchClientID(request, response, user){
             {
                 
                 resolve(null);
-            
+                
             }
             if(client.length!==0){
                 clientID =  client[0]._id;
@@ -584,36 +507,36 @@ function searchMediahouseID(request, response, user){
 function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     return new Promise((resolve, reject) => {
         var query = {'firm':user.firm};
-    if(mediahouseID)
-    query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
-    if(clientID)
-    query['clientID'] = mongoose.mongo.ObjectId(clientID);
-    if(executiveID)
-    query['executiveID']=mongoose.mongo.ObjectId(executiveID);
-    if(request.body.creationPeriod)
-    {
+        if(mediahouseID)
+        query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
+        if(clientID)
+        query['clientID'] = mongoose.mongo.ObjectId(clientID);
+        if(executiveID)
+        query['executiveID']=mongoose.mongo.ObjectId(executiveID);
+        if(request.body.creationPeriod)
+        {
             var to = new Date()
             var from = new Date( to.getTime()- request.body.creationPeriod *24*60*60*1000);
             query['date']={$gte: from, $lte:to} 
-    }
-
-    if(request.body.insertionPeriod )
-    {
+        }
+        
+        if(request.body.insertionPeriod )
+        {
             var to = new Date()
             var from = new Date( to.getTime()- request.body.insertionPeriod *24*60*60*1000);
             query['insertions.ISODate']={$gte: from, $lte:to} 
-
-    }
-    if(request.body.releaseOrderNO){
-        query['releaseOrderNO'] = request.body.releaseOrderNO;
-    }
-    if(request.body.generated !== undefined)
+            
+        }
+        if(request.body.releaseOrderNO){
+            query['releaseOrderNO'] = request.body.releaseOrderNO;
+        }
+        if(request.body.generated !== undefined)
         query['generated'] = request.body.generated == true;
-    if(request.body.marked)
-    query['insertions.marked'] = false;
-    
-    console.log(query);
-    resolve(query);
+        if(request.body.marked)
+        query['insertions.marked'] = false;
+        
+        console.log(query);
+        resolve(query);
         
     })
     
@@ -621,630 +544,441 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
 }
 
 module.exports.queryReleaseOrder = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
-                    
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    ReleaseOrder.find(query)
-                    .limit(perPage)
-                    .skip((perPage * request.body.page) - perPage)
-                    .exec(function(err, releaseOrders){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
-                            });
-                        }
-                        else{
-                            ReleaseOrder.count(query, function(err, count){
-                                console.log(releaseOrders, count)
-                                response.send({
-                                    success:true,
-                                    releaseOrders: releaseOrders,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
-                            
-                        }
-                    });
-                }	
-	});
-
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
+    
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    ReleaseOrder.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, releaseOrders){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            ReleaseOrder.count(query, function(err, count){
+                console.log(releaseOrders, count)
+                response.send({
+                    success:true,
+                    releaseOrders: releaseOrders,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };
 module.exports.queryGenerated = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    ReleaseOrder
-                    .findById(mongoose.mongo.ObjectId(request.body.id))
-                    .exec(function(err, releaseOrder){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                        releaseOrder.generated = true;
-                                        releaseOrder.save(function(err){
-                                            if(err){
-                                                response.send({
-                                                    success:false
-                                                })
-                                            }
-                                            else{
-                                                response.send({
-                                                    success:true
-                                                })
-                                            }
-                                        })
-                                    }
-                            });
-                        }	
-	});
+    var user = response.locals.user;
+    ReleaseOrder
+    .findById(mongoose.mongo.ObjectId(request.body.id))
+    .exec(function(err, releaseOrder){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            releaseOrder.generated = true;
+            releaseOrder.save(function(err){
+                if(err){
+                    response.send({
+                        success:false
+                    })
+                }
+                else{
+                    response.send({
+                        success:true
+                    })
+                }
+            })
+        }
+    });
 };
-module.exports.queryInsertions = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    ReleaseOrder
-                    .aggregate([{$unwind: "$insertions"}, 
-                    {$match:query },
-                    {$project: {
-                        "_id":1,
-                        "publicationName":1,
-                        "publicationEdition":1, 
-                        "clientName":1,
-                        "insertions.date": 1, 
-                        "insertions.marked": 1,
-                        "insertions.state": 1,
-                        "insertions.ISODate": 1, 
-                        "insertions._id": 1,
-                        "executiveName":1,
-                        "executiveOrg":1,
-                    }
-                    },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                    ])
-                    .exec(function(err, insertions){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    ReleaseOrder.count(query, function(err, count){
-                                        console.log(insertions, count)
-                                        response.send({
-                                            success:true,
-                                            insertions: insertions,
-                                            page: request.body.page,
-                                            perPage:perPage,
-                                            pageCount: Math.ceil(count/perPage)
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
-	});
+module.exports.queryInsertions =async function(request, response){
+    var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    ReleaseOrder
+    .aggregate([{$unwind: "$insertions"}, 
+    {$match:query },
+    {$project: {
+        "_id":1,
+        "publicationName":1,
+        "publicationEdition":1, 
+        "clientName":1,
+        "insertions.date": 1, 
+        "insertions.marked": 1,
+        "insertions.state": 1,
+        "insertions.ISODate": 1, 
+        "insertions._id": 1,
+        "executiveName":1,
+        "executiveOrg":1,
+    }
+},
+{$limit: perPage},
+{$skip:(perPage * request.body.page) - perPage}
+])
+.exec(function(err, insertions){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        ReleaseOrder.count(query, function(err, count){
+            console.log(insertions, count)
+            response.send({
+                success:true,
+                insertions: insertions,
+                page: request.body.page,
+                perPage:perPage,
+                pageCount: Math.ceil(count/perPage)
+            });
+        })
+        
+    }
+});
 }
 
-module.exports.generateInsertionsSheet = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    var adCategory1 = request.body.adCategory1;
-                    var adCategory2 = request.body.adCategory2;
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    ReleaseOrder
-                    .aggregate([{$unwind: "$insertions"}, 
-                    {$match:query },
-                    {$project: {
-                        "_id":1,
-                        "publicationName":1,
-                        "releaseOrderNO":1,
-                        "publicationEdition":1, 
-                        "clientName":1,
-                        "insertions.date": 1, 
-                        "insertions.marked": 1,
-                        "insertions.state": 1,
-                        "insertions.ISODate": 1, 
-                        "insertions._id": 1,
-                        "executiveName":1,
-                        "executiveOrg":1,
-                        "insertions.generated":1,
-                        "insertions.state":1,
-                        "adType":1,
-                        "adEdition":1,
-                        "adPosition":1,
-                        "adCategory1":1,
-                        "caption":1,
-                    }
-                    }
-                    ])
-                    .exec(function(err, insertions){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    console.log(insertions)
-                                    var el = insertions.map(function(insertion){
-                                        var obj = {
-                                            "RO Number": insertion.releaseOrderNO,
-                                            "Insertion":insertion.insertions.ISODate.toLocaleDateString(),
-                                            "Client Name": insertion.clientName,
-                                            "Mediahouse Name": insertion.publicationName,
-                                            "Edition": insertion.publicationEdition,
-                                            "Ad Type":insertion.adType,
-                                            "Published Edition":insertion.adEdition,
-                                            "Position":insertion.adPosition,
-                                            "Caption":insertion.caption,
-                                            "Category":insertion.adCategory1,
-                                            "Invoice created":insertion.insertions.marked,
-                                        }
-                                        if(insertion.insertions.state ==0)
-                                        obj["Status"] = "To be Published";
-                                        if(insertion.insertions.state ==1)
-                                        obj["Status"] = "Published";
-                                        if(insertion.insertions.state ==2)
-                                        obj["Status"] = "Disputed";
-                                        return obj;
-                                    })
-                                    createSheet(el, request, response, 'Insertions Report', 'insertions Report');
-                                }
-                            });
-                        }	
-	});
+module.exports.generateInsertionsSheet =async function(request, response){
+    var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var adCategory1 = request.body.adCategory1;
+    var adCategory2 = request.body.adCategory2;
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    ReleaseOrder
+    .aggregate([{$unwind: "$insertions"}, 
+    {$match:query },
+    {$project: {
+        "_id":1,
+        "publicationName":1,
+        "releaseOrderNO":1,
+        "publicationEdition":1, 
+        "clientName":1,
+        "insertions.date": 1, 
+        "insertions.marked": 1,
+        "insertions.state": 1,
+        "insertions.ISODate": 1, 
+        "insertions._id": 1,
+        "executiveName":1,
+        "executiveOrg":1,
+        "insertions.generated":1,
+        "insertions.state":1,
+        "adType":1,
+        "adEdition":1,
+        "adPosition":1,
+        "adCategory1":1,
+        "caption":1,
+    }
+}
+])
+.exec(function(err, insertions){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        console.log(insertions)
+        var el = insertions.map(function(insertion){
+            var obj = {
+                "RO Number": insertion.releaseOrderNO,
+                "Insertion":insertion.insertions.ISODate.toLocaleDateString(),
+                "Client Name": insertion.clientName,
+                "Mediahouse Name": insertion.publicationName,
+                "Edition": insertion.publicationEdition,
+                "Ad Type":insertion.adType,
+                "Published Edition":insertion.adEdition,
+                "Position":insertion.adPosition,
+                "Caption":insertion.caption,
+                "Category":insertion.adCategory1,
+                "Invoice created":insertion.insertions.marked,
+            }
+            if(insertion.insertions.state ==0)
+            obj["Status"] = "To be Published";
+            if(insertion.insertions.state ==1)
+            obj["Status"] = "Published";
+            if(insertion.insertions.state ==2)
+            obj["Status"] = "Disputed";
+            return obj;
+        })
+        createSheet(el, request, response, 'Insertions Report', 'insertions Report');
+    }
+});
 }
 
 
 
 module.exports.deleteReleaseOrder = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            ReleaseOrder.findByIdAndRemove(request.params.id,function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
+	var user = response.locals.user;
+    ReleaseOrder.findByIdAndRemove(request.params.id,function(err){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                msg: "Release Order deleted"
+            });
+        }
+        
+    })
+};
+
+module.exports.updateReleaseOrder = function(request, response){
+	var user = response.locals.user;
+    ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else{
+            releaseOrder.save(function(err){
+                if(err)
+                {
+                    console.log(err)
                 }
                 else{
                     response.send({
                         success:true,
-                        msg: "Release Order deleted"
+                        msg: "ReleaseOrder Updated"
                     });
                 }
-                
-            })
-		}	
-	});
-};
-
-module.exports.updateReleaseOrder = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-
-            ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    
-                    releaseOrder.save(function(err){
-                        if(err)
-                        {
-                            console.log(err)
-                        }
-                        else{
-                            response.send({
-                                success:true,
-                                msg: "ReleaseOrder Updated"
-                            });
-                        }
-                    });
-            
-                 
-                }
-                
-            })
-		}	
-	});
+            });   
+        }
+    })
 };
 
 
 module.exports.mailROPdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!releaseOrder){
-                    response.send({
-                        success :false,
-                        msg: 'Release order not found' 
-                    });
-                }
+        else if(!releaseOrder){
+            response.send({
+                success :false,
+                msg: 'Release order not found' 
+            });
+        }
+        else{
+            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+            if (releaseOrder.generated==false){
+                releaseOrder.generated=true;
+                var date = new Date();
+                releaseOrder.generatedAt = date
+            }
+            releaseOrder.save(function(err){
+                if(err)
+                response.send({
+                    success:false,
+                    msg: err
+                });
                 else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    if (releaseOrder.generated==false){
-                        releaseOrder.generated=true;
-                        var date = new Date();
-                        releaseOrder.generatedAt = date
+                    var insData="";
+                    var insertions = releaseOrder.insertions;
+                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount/10000;
+                    var namount = releaseOrder.netAmountFigures;
+                    insertions.forEach(object =>{
+                        insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                    });
+                    var Details = {
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        mediahouse :releaseOrder.publicationName,
+                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                        cname :releaseOrder.clientName,
+                        cgstin :releaseOrder.clientGSTIN.GSTNo,
+                        gstin :releaseOrder.agencyGSTIN,
+                        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                        gamount :releaseOrder.adGrossAmount,
+                        insertions :insData,
+                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+                        damount :damount,
+                        namount :namount,
+                        logo: firm.LogoURL,
+                        email: user.email
                     }
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var insertions = releaseOrder.insertions;
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount/10000;
-                            var namount = releaseOrder.netAmountFigures;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL,
-                                email: user.email
-                            }
-                            pdf.mailReleaseOrder(request,response,Details);
-                        }
-                    })
-                    
+                    pdf.mailReleaseOrder(request,response,Details);
                 }
             })
+            
         }
-    });
+    })
 }
 
 module.exports.generateROPdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+    var user = response.locals.user;
+    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
         }
-        else {
-            ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!releaseOrder){
-                    response.send({
-                        success :false,
-                        msg: 'Release order not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    if (releaseOrder.generated==false){
-                        releaseOrder.generated=true;
-                        var date = new Date();
-                        releaseOrder.generatedAt = date
-                    }
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var ins1;
-                            var insertions = releaseOrder.insertions;
-                            var ins = new Array();
-                            insertions.forEach(object => {
-                                var key = object.date.month +'-'+ object.date.year;
-                                ins.push(key);
-                            });
-                            var uins = ins.match(/\b\w/g).join('');
-
-                            uins.forEach(object => {
-                                ins1[object] = new Array();
-                            });
-
-                            insertions.forEach(object => {
-                                var key = object.date.month +'-'+ object.date.year;
-                                ins1[key].push(object);
-                            });
-                            
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
-                            insertions.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL
-                            }
-                            pdf.generateReleaseOrder(request,response,Details);
-                        }
-                    })
-                    
-                }
-            })
-        }
-    });
-}
-
-module.exports.previewROPdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
+        else if(!releaseOrder){
+            response.send({
+                success :false,
+                msg: 'Release order not found' 
+            });
         }
         else{
-            var releaseOrder = request.body.releaseOrder;
             var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-            var insData="";
-            var insertions = releaseOrder.insertions;
-            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-            var namount = releaseOrder.adGrossAmount - damount ;
-            insertions.forEach(object =>{
-                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-            });
-            var Details = {
-                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                mediahouse :releaseOrder.publicationName,
-                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                cname :releaseOrder.clientName,
-                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                gstin :releaseOrder.agencyGSTIN,
-                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                gamount :releaseOrder.adGrossAmount,
-                insertions :insData,
-                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                damount :damount,
-                namount :namount,
-                logo: firm.LogoURL
+            if (releaseOrder.generated==false){
+                releaseOrder.generated=true;
+                var date = new Date();
+                releaseOrder.generatedAt = date
             }
-            pdf.generateReleaseOrder(request,response,Details);
+            releaseOrder.save(function(err){
+                if(err)
+                response.send({
+                    success:false,
+                    msg: err
+                });
+                else{
+                    var insData="";
+                    var ins1;
+                    var insertions = releaseOrder.insertions;
+                    var ins = new Array();
+                    insertions.forEach(object => {
+                        var key = object.date.month +'-'+ object.date.year;
+                        ins.push(key);
+                    });
+                    var uins = ins.match(/\b\w/g).join('');
+                    
+                    uins.forEach(object => {
+                        ins1[object] = new Array();
+                    });
+                    
+                    insertions.forEach(object => {
+                        var key = object.date.month +'-'+ object.date.year;
+                        ins1[key].push(object);
+                    });
+                    
+                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                    var namount = releaseOrder.adGrossAmount - damount ;
+                    insertions.forEach(object =>{
+                        insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                    });
+                    var Details = {
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        mediahouse :releaseOrder.publicationName,
+                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                        cname :releaseOrder.clientName,
+                        cgstin :releaseOrder.clientGSTIN.GSTNo,
+                        gstin :releaseOrder.agencyGSTIN,
+                        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                        gamount :releaseOrder.adGrossAmount,
+                        insertions :insData,
+                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+                        damount :damount,
+                        namount :namount,
+                        logo: firm.LogoURL
+                    }
+                    pdf.generateReleaseOrder(request,response,Details);
+                }
+            })
+            
         }
-    });
+    })
 }
 
-
+module.exports.previewROPdf = async function(request, response) {
+    var user = response.locals.user;
+    var releaseOrder = request.body.releaseOrder;
+    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+    var insData="";
+    var insertions = releaseOrder.insertions;
+    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+    var namount = releaseOrder.adGrossAmount - damount ;
+    insertions.forEach(object =>{
+        insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+    });
+    var Details = {
+        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+        mediahouse :releaseOrder.publicationName,
+        pgstin :releaseOrder.publicationGSTIN.GSTNo,
+        cname :releaseOrder.clientName,
+        cgstin :releaseOrder.clientGSTIN.GSTNo,
+        gstin :releaseOrder.agencyGSTIN,
+        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+        gamount :releaseOrder.adGrossAmount,
+        insertions :insData,
+        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+        damount :damount,
+        namount :namount,
+        logo: firm.LogoURL
+    }
+    pdf.generateReleaseOrder(request,response,Details);
+};
 module.exports.queryReleaseOrderByNo = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            ReleaseOrder.find({
-                $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }}]}]
-            })
-            .sort('releaseOrderNo')
-            .limit(5).exec(function(err, releaseOrders){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        releaseOrders: releaseOrders
-                    });
-                }
+    var user = response.locals.user;
+    ReleaseOrder.find({
+        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }}]}]
+    })
+    .sort('releaseOrderNo')
+    .limit(5).exec(function(err, releaseOrders){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-		}	
-	});
-    
+        }
+        else{
+            response.send({
+                success:true,
+                releaseOrders: releaseOrders
+            });
+        }
+    });    
 };
 async function createSheet(data, request, response, title, subject) {
     console.log(data)

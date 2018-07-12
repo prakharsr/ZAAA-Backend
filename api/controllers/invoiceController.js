@@ -20,26 +20,26 @@ var perPage=20;
 
 
 function findReleaseOrder(request, response, user){
-return new Promise((resolve, reject)=>{
-    console.log(request.body)
-    ReleaseOrder.findOne({
-        $and:[
-            {firm:user.firm},
-            {"_id":mongoose.mongo.ObjectID(request.body.releaseOrderId)},
-            {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}
-        ]
-    
-    }).exec( function(err, releaseOrder){
-        if(err){
-            console.log(err)
-            reject(err)
-        }
-        else{
-            console.log(releaseOrder);
-            resolve(releaseOrder);
-        }
+    return new Promise((resolve, reject)=>{
+        console.log(request.body)
+        ReleaseOrder.findOne({
+            $and:[
+                {firm:user.firm},
+                {"_id":mongoose.mongo.ObjectID(request.body.releaseOrderId)},
+                {"insertions._id":{$in:request.body.insertions.map(insertion => insertion._id)}}
+            ]
+            
+        }).exec( function(err, releaseOrder){
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else{
+                console.log(releaseOrder);
+                resolve(releaseOrder);
+            }
+        })
     })
-})
 }
 
 function findExecutive(id){
@@ -114,18 +114,17 @@ function findMediahouse(id){
 async function f(request, response, user){
     try {
         var releaseOrder = await findReleaseOrder(request, response, user)
-        var firm = await findFirm(mongoose.mongo.ObjectId(user.firm));
+        var firm = response.locals.firm;
         var mediahouse = await findMediahouse(releaseOrder.mediahouseID);
         var client = await findClient(releaseOrder.clientID);
         var executive = await findExecutive(releaseOrder.executiveID);
         var counter = releaseOrder.invoiceSerial+1;
         var ino = releaseOrder.releaseOrderNO+'.'+counter
-
+        
     }
     catch(err){
         console.log(err);
-    }
-
+    };
     var invoice = new Invoice({
         releaseOrderId :request.body.releaseOrderId,
         invoiceNO: ino,
@@ -155,22 +154,20 @@ async function f(request, response, user){
         extraCharges:request.body.extraCharges,
         pendingAmount:request.body.pendingAmount,
         FinalTaxAmount:request.body.FinalTaxAmount,
-
+        
         caption:request.body.caption,
         remark:request.body.remark,
         otherRemark:request.body.otherRemark,
         insertions: request.body.insertions,
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
-
+        
         template: firm.ROTemplate,
         firm:user.firm,
         mediahouseID : releaseOrder.mediahouseID,
         clientID: releaseOrder.clientID,
         executiveID: releaseOrder.executiveID,
-
-    })
-
+    });
     invoice.save(function(err, doc){
         if(err){
             console.log(err);
@@ -180,8 +177,11 @@ async function f(request, response, user){
             })
         }
         else{
-            Client.update({ $and: [{firm:user.firm}, {"_id":doc.clientID}] },
-            { $set: { "GSTIN": doc.clientGSTIN }}).exec(err,function(){
+            Client.update(
+                { $and: [{firm:user.firm}, {"_id":doc.clientID}] },
+                { $set: { "GSTIN": doc.clientGSTIN }}
+            )
+            .exec(err,function(){
                 if(err){
                     response.send({
                         success:false,
@@ -189,223 +189,155 @@ async function f(request, response, user){
                     })
                 }
             });
-
-            releaseOrder.insertions
-                .filter(insertion => invoice.insertions.some(ins => ins.date.day == insertion.date.day
-                                                                && ins.date.month == insertion.date.month
-                                                                && ins.date.year == insertion.date.year))
+            releaseOrder.insertions.filter(insertion => invoice.insertions.some(ins => ins.date.day == insertion.date.day
+                && ins.date.month == insertion.date.month
+                && ins.date.year == insertion.date.year))
                 .forEach(insertion => insertion.marked = true);
-
-
-            releaseOrder.invoiceSerial += 1;
-            releaseOrder.save((err,doc) => {
-                if(err){
-                    request.body.insertions.map(insertion => insertion._id)
+                releaseOrder.invoiceSerial += 1;
+                releaseOrder.save((err,doc) => {
+                    if(err){
+                        request.body.insertions.map(insertion => insertion._id)
+                        response.send({
+                            success:false,
+                            msg: err + "" + request.body.insertions.map(insertion => insertion._id)
+                        });
+                    }
+                    else{
+                        console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
+                        response.send({
+                            success:true,
+                            msg:"Invoice saved.",
+                            invoice:doc 
+                        })
+                    }
+                })
+            }
+        })
+    };
+    module.exports.createInvoice = function(request, response){
+        f(request, response, response.locals.user)
+    };
+    module.exports.getInvoice = function(request,response){
+        var user = response.locals.user;
+        Invoice.findById(request.params.id,async function(err, invoice){
+            if(err){
+                console.log("here" +err);
+                response.send({
+                    success:false,
+                    msg: err+"",
+                });
+            }
+            else{
+                try{
+                    var mediahouse = await findMediahouse(invoice.mediahouseID);
+                    var executive = await findExecutive(invoice.executiveID);
+                    var client = await findClient(invoice.clientID);
+                    var releaseOrder = await ReleaseOrder.findById(invoice.releaseOrderId);
                     response.send({
-                        success:false,
-                        msg: err + "" + request.body.insertions.map(insertion => insertion._id)
+                        mediahouse: mediahouse,
+                        client: client,
+                        executive: executive,
+                        success : true,
+                        releaseOrder: releaseOrder,
+                        invoice : invoice
+                    }); 
+                }
+                catch(err){
+                    response.send({
+                        success: false,
+                        msg: "Can't fetch Invoice" + err
                     });
                 }
-                else{
-                    console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
+            }
+        });
+    };
+    
+    module.exports.getInvoices = function(request, response){
+        var user = response.locals.user;
+        Invoice.find({firm:user.firm})
+        .limit(perPage)
+        .skip((perPage*request.params.page) - perPage)
+        .sort(-'date')
+        .exec(function(err, invoice){
+            if(err){
+                console.log("here");
+                response.send({
+                    success:false,
+                    msg: err + ""
+                });
+            }
+            else if(!invoice){
+                console.log("No releaseorder");
+                response.send({
+                    success:false,
+                    msg:" No release Order"
+                });
+            }
+            else{
+                Invoice.count({}, function(err, count){
                     response.send({
-                        success:true,
-                        msg:"Invoice saved.",
-                        invoice:doc 
-                    })
-                }
-            })
+                        success : true,
+                        invoice : invoice,
+                        perPage:perPage,
+                        page: request.params.page,
+                        pageCount : Math.ceil(count/perPage)
+                        
+                    });
+                })
+            }
+        });
+    };
+    
+    module.exports.getInvoiceInsertions = function(request, response){
+        var user  =response.locals.user;
+        Invoice
+        .aggregate([{$unwind: "$insertions"}, 
+        {$match:{firm:user.firm} },
+        {$project: {
+            "_id":1,
+            "publicationName":1,
+            "publicationEdition":1, 
+            "clientName":1,
+            "insertions.date": 1, 
+            "insertions.marked": 1,
+            "insertions.state": 1,
+            "insertions.ISODate": 1, 
+            "insertions._id": 1,
+            "executiveName":1,
+            "executiveOrg":1,
         }
-    })
-}
-
-module.exports.createInvoice = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log("error in finding user");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-        }
-        else if(!user)
-        {
-            console.log("User not found");
+    },
+    {$limit: perPage},
+    {$skip:(perPage * request.params.page) - perPage}
+])
+.exec(function(err, insertions){
+    if(err){
+        console.log("here");
+        response.send({
+            success:false,
+            msg: err + ""
+        });
+    }
+    else if(!insertions){
+        console.log("No insertions");
+        response.send({
+            success:false,
+            msg:" No inseryions"
+        });
+    }
+    else{
+        Invoice.count({}, function(err, count){    
             response.send({
-                success:false,
-                msg:" no user"
+                success : true,
+                insertions : insertions,
+                perPage:perPage,
+                page: request.params.page,
+                pageCount : Math.ceil(count/perPage)
+                
             });
-            
-        }
-		else if(user){
-            f(request, response, user)
-            
-            
-        }
-    });
-};
-
-module.exports.getInvoice = function(request,response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
-            
-            Invoice.findById(request.params.id,async function(err, invoice){
-                if(err){
-                    console.log("here" +err);
-                    response.send({
-                        success:false,
-                        msg: err+"",
-                    });
-                }
-                else{
-                    try{
-                        var mediahouse = await findMediahouse(invoice.mediahouseID);
-                        var executive = await findExecutive(invoice.executiveID);
-                        var client = await findClient(invoice.clientID);
-                        var releaseOrder = await ReleaseOrder.findById(invoice.releaseOrderId);
-                        response.send({
-                            mediahouse: mediahouse,
-                            client: client,
-                            executive: executive,
-                            success : true,
-                            releaseOrder: releaseOrder,
-                            invoice : invoice
-                        }); 
-                    }
-                    catch(err){
-                        response.send({
-                            success: false,
-                            msg: "Can't fetch Invoice" + err
-                        });
-                    }
-                }
-            });
-			
-		}
-	});	
-};
-
-module.exports.getInvoices = function(request, response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            Invoice.find({firm:user.firm})
-            .limit(perPage)
-            .skip((perPage*request.params.page) - perPage)
-            .sort(-'date')
-            .exec(function(err, invoice){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!invoice){
-                    console.log("No releaseorder");
-                    response.send({
-                        success:false,
-                        msg:" No release Order"
-                    });
-                }
-                else{
-                    Invoice.count({}, function(err, count){
-                        response.send({
-                            success : true,
-                            invoice : invoice,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                            
-                        });
-                    })
-                }
-            });
-		}
-	});	
-    
-};
-
-module.exports.getInvoiceInsertions = function(request, response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log(err);
-			response.send({
-				success:false,
-				msg: err +""
-			});
-		}
-		else{
-            Invoice
-            .aggregate([{$unwind: "$insertions"}, 
-                {$match:{firm:user.firm} },
-                {$project: {
-                    "_id":1,
-                    "publicationName":1,
-                    "publicationEdition":1, 
-                    "clientName":1,
-                    "insertions.date": 1, 
-                    "insertions.marked": 1,
-                    "insertions.state": 1,
-                    "insertions.ISODate": 1, 
-                    "insertions._id": 1,
-                    "executiveName":1,
-                    "executiveOrg":1,
-                }
-                },
-                {$limit: perPage},
-                {$skip:(perPage * request.params.page) - perPage}
-            ])
-            .exec(function(err, insertions){
-                if(err){
-                    console.log("here");
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else if(!insertions){
-                    console.log("No insertions");
-                    response.send({
-                        success:false,
-                        msg:" No inseryions"
-                    });
-                }
-                else{
-                    Invoice.count({}, function(err, count){    
-                        response.send({
-                            success : true,
-                            insertions : insertions,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount : Math.ceil(count/perPage)
-                            
-                        });
-                    })
-                }
-            });
-		}
-	});	
+        })
+    }
+});
 };
 
 function searchExecutiveID(request, response, user){
@@ -422,8 +354,8 @@ function searchExecutiveID(request, response, user){
             }
             else if (executive.length===0)
             {
-                    resolve(null);
-            
+                resolve(null);
+                
             }
             if(executive.length!==0){
                 executiveID =  executive[0]._id;
@@ -455,7 +387,7 @@ function searchClientID(request, response, user){
             {
                 
                 resolve(null);
-            
+                
             }
             if(client.length!==0){
                 clientID =  client[0]._id;
@@ -493,31 +425,31 @@ function searchMediahouseID(request, response, user){
 function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     return new Promise((resolve, reject) => {
         var query = {'firm':user.firm};
-    if(mediahouseID)
-    query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
-    if(clientID)
-    query['clientID'] = mongoose.mongo.ObjectId(clientID);
-    if(executiveID)
-    query['executiveID']=mongoose.mongo.ObjectId(executiveID);
-    if(request.body.creationPeriod)
-    {
+        if(mediahouseID)
+        query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
+        if(clientID)
+        query['clientID'] = mongoose.mongo.ObjectId(clientID);
+        if(executiveID)
+        query['executiveID']=mongoose.mongo.ObjectId(executiveID);
+        if(request.body.creationPeriod)
+        {
             var to = new Date()
             var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
             query['date']={$gte: from, $lte:to} 
-    }
-    else{
-        var to = new Date()
-        var from = new Date(1);
-        query['date']={$gte: from, $lte:to} 
-    }
-    if(request.body.insertionPeriod){
-        var to = new Date()
-        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-    }
-    if(request.body.invoiceNO)
-    query['invoiceNO'] = request.body.invoiceNO
-    
-    resolve(query);
+        }
+        else{
+            var to = new Date()
+            var from = new Date(1);
+            query['date']={$gte: from, $lte:to} 
+        }
+        if(request.body.insertionPeriod){
+            var to = new Date()
+            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+        }
+        if(request.body.invoiceNO)
+        query['invoiceNO'] = request.body.invoiceNO
+        
+        resolve(query);
         
     })
     
@@ -525,99 +457,119 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
 }
 
 module.exports.queryInvoice = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-                    console.log(request.body)
-                    console.log(query)
-                    console.log(request.body)
-                    
-                    Invoice.find(query)
-                    .limit(perPage)
-                    .skip((perPage * request.body.page) - perPage)
-                    .exec(function(err, invoice){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
-                            });
-                        }
-                        else{
-                            Invoice.count(query, function(err, count){
-                                console.log(invoice, count)
-                                response.send({
-                                    success:true,
-                                    invoice: invoice,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
-                            
-                        }
-                    });
-                }	
-	});
-
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    console.log(request.body)
+    console.log(query)
+    console.log(request.body)
+    
+    Invoice.find(query)
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, invoice){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            Invoice.count(query, function(err, count){
+                console.log(invoice, count)
+                response.send({
+                    success:true,
+                    invoice: invoice,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
 };
 
-module.exports.queryClientPayments = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                      var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    Invoice.aggregate([ 
-                    {$match:query},
-                    { $group : { 
-                        _id: "$clientID",
-                        count: {$sum: 1},
-                        
-                        shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-                        balance :{$sum: "$collectedAmount" },
-                        totalBalance:{$sum: "$pendingAmount" },
-                        entries: { $push:  
-                        {
+module.exports.queryClientPayments = async function(request, response){
+    var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    Invoice.aggregate([ 
+        {$match:query},
+        { $group : { 
+            _id: "$clientID",
+            count: {$sum: 1},
+            
+            shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+            balance :{$sum: "$collectedAmount" },
+            totalBalance:{$sum: "$pendingAmount" },
+            entries: { $push:  
+                {
+                    "publicationName":"$publicationName",
+                    "publicationEdition":"$publicationEdition", 
+                    "clientName":"$clientName",
+                    "invoiceNO":"$invoiceNO",
+                    shadow :{ $add: [ "$pendingAmount", "$collectedAmount" ] },
+                    "balance":"$collectedAmount",
+                    "totalBalance":"$pendingAmount",
+                    "executiveOrg":"$executiveOrg",
+                    "executiveName": "$executiveName",
+                } }
+                
+            } },
+            {$limit: perPage},
+            {$skip:(perPage * request.body.page) - perPage}
+        ])
+        .exec(function(err, invoices){
+            if(err){
+                console.log(err+ "");
+                response.send({
+                    success:false,
+                    msg: err +""
+                });
+            }
+            else{
+                Invoice.count(query, function(err, count){
+                    response.send({
+                        success:true,
+                        invoices: invoices,
+                        page: request.body.page,
+                        perPage:perPage,
+                        pageCount: Math.ceil(count/perPage)
+                    });
+                })
+                
+            }
+        });
+    };
+    module.exports.queryExecutivePayments = async function(request, response){
+        var user = response.locals.user;
+        var mediahouseID =await searchMediahouseID(request, response, user);
+        var clientID = await searchClientID(request, response, user);
+        var executiveID = await searchExecutiveID(request, response, user);
+        var date = (request.body.date)?(request.body.date):null;
+        var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+        Invoice.aggregate([ 
+            {$match:query},
+            { $group : { 
+                _id: "$executiveID",
+                count: {$sum: 1},
+                
+                shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+                balance :{$sum: "$collectedAmount" },
+                totalBalance:{$sum: "$pendingAmount" },
+                entries: { $push:  
+                    {
                         "publicationName":"$publicationName",
                         "publicationEdition":"$publicationEdition", 
                         "clientName":"$clientName",
@@ -628,364 +580,215 @@ module.exports.queryClientPayments = function(request, response){
                         "executiveOrg":"$executiveOrg",
                         "executiveName": "$executiveName",
                     } }
-
-                     } },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                    ])
-                    .exec(function(err, invoices){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    Invoice.count(query, function(err, count){
-                                        response.send({
-                                            success:true,
-                                            invoices: invoices,
-                                            page: request.body.page,
-                                            perPage:perPage,
-                                            pageCount: Math.ceil(count/perPage)
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
-	});
-}
-module.exports.queryExecutivePayments = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                      var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
                     
-                    Invoice.aggregate([ 
-                    {$match:query},
-                    { $group : { 
-                        _id: "$executiveID",
-                        count: {$sum: 1},
-                        
-                        shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-                        balance :{$sum: "$collectedAmount" },
-                        totalBalance:{$sum: "$pendingAmount" },
-                        entries: { $push:  
-                        {
-                        "publicationName":"$publicationName",
-                        "publicationEdition":"$publicationEdition", 
-                        "clientName":"$clientName",
-                        "invoiceNO":"$invoiceNO",
-                        shadow :{ $add: [ "$pendingAmount", "$collectedAmount" ] },
-                        "balance":"$collectedAmount",
-                        "totalBalance":"$pendingAmount",
-                        "executiveOrg":"$executiveOrg",
-                        "executiveName": "$executiveName",
-                    } }
-
-                     } },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                    ])
-                    .exec(function(err, invoices){
-                                if(err){
-                                    console.log(err+ "");
-                                    response.send({
-                                        success:false,
-                                        msg: err +""
-                                    });
-                                }
-                                else{
-                                    Invoice.count(query, function(err, count){
-                                        response.send({
-                                            success:true,
-                                            invoices: invoices,
-                                            page: request.body.page,
-                                            perPage:perPage,
-                                            pageCount: Math.ceil(count/perPage)
-                                        });
-                                    })
-                                    
-                                }
-                            });
-                        }	
-	});
-}
-
-
-
-
-module.exports.deleteInvoice = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
+                } },
+                {$limit: perPage},
+                {$skip:(perPage * request.body.page) - perPage}
+            ])
+            .exec(function(err, invoices){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    Invoice.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            invoices: invoices,
+                            page: request.body.page,
+                            perPage:perPage,
+                            pageCount: Math.ceil(count/perPage)
+                        });
+                    })
+                    
+                }
+            });
+        }
+        
+        
+        
+        
+        module.exports.deleteInvoice = function(request, response){
+            var user = response.locals.user;
             ReleaseOrder.updateMany(
                 { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-                },
-                { $set: { "insertions.$.marked": false }}
-            )
-            .exec(function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-
-            Invoice.findByIdAndRemove(request.params.id,function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "Invoice deleted"
-                    });
-                }
+            },
+            { $set: { "insertions.$.marked": false }}
+        )
+        .exec(function(err){
+            if(err){
+                console.log(err);
+                response.send({
+                    success:false,
+                    msg: err + ""
+                });
+            }
+            else{
                 
-            })
-        }
+                Invoice.findByIdAndRemove(request.params.id,function(err){
+                    if(err){
+                        console.log(err);
+                        response.send({
+                            success:false,
+                            msg: err + ""
+                        });
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg: "Invoice deleted"
+                        });
+                    }
+                    
+                })
+            }
         })
-		}	
-    });
-};
-
-module.exports.updateInvoice = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            Invoice.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, invoice){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "invoice Updated"
-                    });
+    };
+    
+    module.exports.updateInvoice = function(request, response){
+        var user = response.locals.user;
+        Invoice.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, invoice){
+            if(err){
+                console.log(err);
+                response.send({
+                    success:false,
+                    msg: err + ""
+                });
+            }
+            else{
+                response.send({
+                    success:true,
+                    msg: "invoice Updated"
+                });
+            }
+            
+        })
+    };
+    
+    
+    module.exports.mailInvoicePdf = function(request, response) {
+        var user = response.locals.user;
+        Invoice.findById(request.body.id, async function(err, invoice){
+            if(err){
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg: err 
+                });
+            }
+            else if(!invoice){
+                response.send({
+                    success :false,
+                    msg: 'Invoice not found' 
+                });
+            }
+            else{
+                var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+                var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
+                var client = await Client.findById(invoice.clientID);
+                var executive = await Client.findById(invoice.executiveID);
+                var mediahouse = await Client.findById(invoice.mediaHouseID);
+                var pan = client.PanNO;
+                var insertions = invoice.insertions;
+                var size = releaseorder.adSizeL * releaseorder.adSizeW;
+                var count = 0;
+                var insData="";
+                var total= size*releaseorder.rate;
+                var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
+                var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
+                insertions.forEach(object =>{
+                    insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
+                });
+                
+                var Details={
+                    image: 'http://www.adagencymanager.com/'+firm.logoURL, 
+                    clientname: client.OrganizationName,
+                    address: client.Address.address,
+                    state: client.Address.state,
+                    pan: pan,
+                    ino: 'dummy',
+                    gstin:client.GSTIN.GSTNo,
+                    insertions: insData,
+                    tnc: '',
+                    gamount: invoice.adGrossAmount,
+                    disc: disc,
+                    cgst:'',
+                    igst:'',
+                    sgst:'',
+                    cgstper:'',
+                    igstper:'',
+                    sgstper:'',
+                    echarges: echarges,
+                    amtwords: invoice.netAmountWords,
+                    amtfig:invoice.netAmountFigures
                 }
                 
-            })
-		}	
-	});
-};
-
-
-module.exports.mailInvoicePdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
-        }
-        else {
-            Invoice.findById(request.body.id, async function(err, invoice){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
+                pdf.mailPaymentInvoice(request,response,Details);
+            }
+        })
+    }
+    
+    module.exports.generateInvoicePdf = function(request, response) {
+        var user = response.locals.user;
+        Invoice.findById(request.body.id, async function(err, invoice){
+            if(err){
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg: err 
+                });
+            }
+            else if(!invoice){
+                response.send({
+                    success :false,
+                    msg: 'Invoice not found' 
+                });
+            }
+            else{
+                var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+                var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
+                var client = await Client.findById(invoice.clientID);
+                var executive = await Client.findById(invoice.executiveID);
+                var mediahouse = await Client.findById(invoice.mediaHouseID);
+                var pan = client.PanNO;
+                var insertions = invoice.insertions;
+                var size = releaseorder.adSizeL * releaseorder.adSizeW;
+                var count = 0;
+                var insData="";
+                var total= size*releaseorder.rate;
+                var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
+                var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
+                insertions.forEach(object =>{
+                    insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
+                });
+                
+                var Details={
+                    image: 'http://www.adagencymanager.com/'+firm.logoURL, 
+                    clientname : client.OrganizationName,
+                    address: client.Address.address,
+                    state: client.Address.state,
+                    pan: pan,
+                    ino: 'dummy',
+                    gstin:client.GSTIN.GSTNo,
+                    insertions: insData,
+                    tnc: '',
+                    gamount: invoice.adGrossAmount,
+                    disc: disc,
+                    cgst:'',
+                    igst:'',
+                    sgst:'',
+                    cgstper:'',
+                    igstper:'',
+                    sgstper:'',
+                    echarges: echarges,
+                    amtwords: invoice.netAmountWords,
+                    amtfig:invoice.netAmountFigures
                 }
-                else if(!invoice){
-                    response.send({
-                        success :false,
-                        msg: 'Invoice not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
-                    var client = await Client.findById(invoice.clientID);
-                    var executive = await Client.findById(invoice.executiveID);
-                    var mediahouse = await Client.findById(invoice.mediaHouseID);
-                    var pan = client.PanNO;
-                    var insertions = invoice.insertions;
-                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
-                    var count = 0;
-                    var insData="";
-                    var total= size*releaseorder.rate;
-                    var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
-                    var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
-                    insertions.forEach(object =>{
-                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
-                    });
-
-                    var Details={
-                        image: 'http://www.adagencymanager.com/'+firm.logoURL, 
-                        clientname: client.OrganizationName,
-                        address: client.Address.address,
-                        state: client.Address.state,
-                        pan: pan,
-                        ino: 'dummy',
-                        gstin:client.GSTIN.GSTNo,
-                        insertions: insData,
-                        tnc: '',
-                        gamount: invoice.adGrossAmount,
-                        disc: disc,
-                        cgst:'',
-                        igst:'',
-                        sgst:'',
-                        cgstper:'',
-                        igstper:'',
-                        sgstper:'',
-                        echarges: echarges,
-                        amtwords: invoice.netAmountWords,
-                        amtfig:invoice.netAmountFigures
-                    }
-                    
-                    pdf.mailPaymentInvoice(request,response,Details);
-                }
-            })
-        }
-    });
-}
-
-module.exports.generateInvoicePdf = function(request, response) {
-    var token = userController.getToken(request.headers);
-    var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "Please Login"
-			});
-        }
-        else {
-            Invoice.findById(request.body.id, async function(err, invoice){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg: err 
-                    });
-                }
-                else if(!invoice){
-                    response.send({
-                        success :false,
-                        msg: 'Invoice not found' 
-                    });
-                }
-                else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var releaseorder = await ReleaseOrder.findById(invoice.releaseOrderId);
-                    var client = await Client.findById(invoice.clientID);
-                    var executive = await Client.findById(invoice.executiveID);
-                    var mediahouse = await Client.findById(invoice.mediaHouseID);
-                    var pan = client.PanNO;
-                    var insertions = invoice.insertions;
-                    var size = releaseorder.adSizeL * releaseorder.adSizeW;
-                    var count = 0;
-                    var insData="";
-                    var total= size*releaseorder.rate;
-                    var disc = (invoice.publicationDiscount.percentage) ? invoice.adGrossAmount*invoice.publicationDiscount.amount/100 : invoice.publicationDiscount.amount;
-                    var echarges = (invoice.extraCharges.percentage) ? invoice.adGrossAmount*invoice.extraCharges.amount/100 : invoice.extraCharges.amount;
-                    insertions.forEach(object =>{
-                        insData+='<tr><td>'+(++count)+'</td><td>'+releaseorder.publicationName+'</td><td>'+releaseorder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseorder.adPosition+'</td><td>'+releaseorder.adSizeW+'</td><td>'+releaseorder.adSizeL+'</td><td>'+size+'</td><td>'+releaseorder.rate+'</td><td>'+total+'</td></tr>';
-                    });
-
-                    var Details={
-                        image: 'http://www.adagencymanager.com/'+firm.logoURL, 
-                        clientname : client.OrganizationName,
-                        address: client.Address.address,
-                        state: client.Address.state,
-                        pan: pan,
-                        ino: 'dummy',
-                        gstin:client.GSTIN.GSTNo,
-                        insertions: insData,
-                        tnc: '',
-                        gamount: invoice.adGrossAmount,
-                        disc: disc,
-                        cgst:'',
-                        igst:'',
-                        sgst:'',
-                        cgstper:'',
-                        igstper:'',
-                        sgstper:'',
-                        echarges: echarges,
-                        amtwords: invoice.netAmountWords,
-                        amtfig:invoice.netAmountFigures
-                    }
-                    
-                    pdf.generatePaymentInvoice(request,response,Details);
-                }
-            })
-        }
-    });
-}
+                
+                pdf.generatePaymentInvoice(request,response,Details);
+            }
+        })
+    }

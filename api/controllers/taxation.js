@@ -37,8 +37,8 @@ function searchExecutiveID(request, response, user){
             }
             else if (executive.length===0)
             {
-                    resolve(null);
-            
+                resolve(null);
+                
             }
             if(executive.length!==0){
                 executiveID =  executive[0]._id;
@@ -70,7 +70,7 @@ function searchClientID(request, response, user){
             {
                 
                 resolve(null);
-            
+                
             }
             if(client.length!==0){
                 clientID =  client[0]._id;
@@ -108,25 +108,25 @@ function searchMediahouseID(request, response, user){
 function formQuery(mediahouseID, clientID, executiveID, date, user, request){
     return new Promise((resolve, reject) => {
         var query = {'firm':user.firm};
-    if(mediahouseID)
-    query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
-    if(clientID)
-    query['clientID'] = mongoose.mongo.ObjectId(clientID);
-    if(executiveID)
-    query['executiveID']=mongoose.mongo.ObjectId(executiveID);
-    
-    if(request.body.period)
-    {
-        var period = request.body.period;
-        console.log(period)
-        var to = new Date( period.year, period.month-1, period.day)
-        var from = new Date( period.year, period.month-1, 1);
-        console.log(to, from)
-        query['date']={$gte: from, $lte:to} 
-    }
-
-    
-    resolve(query);
+        if(mediahouseID)
+        query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
+        if(clientID)
+        query['clientID'] = mongoose.mongo.ObjectId(clientID);
+        if(executiveID)
+        query['executiveID']=mongoose.mongo.ObjectId(executiveID);
+        
+        if(request.body.period)
+        {
+            var period = request.body.period;
+            console.log(period)
+            var to = new Date( period.year, period.month-1, period.day)
+            var from = new Date( period.year, period.month-1, 1);
+            console.log(to, from)
+            query['date']={$gte: from, $lte:to} 
+        }
+        
+        
+        resolve(query);
         
     })
     
@@ -134,159 +134,121 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
 }
 
 module.exports.queryInvoiceTax = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    Invoice
-                    .aggregate([ 
-                    {$match:query },
-                    {$project: { 
-                        "clientName":1,
-                        "invoiceNO":1,
-                        "date":1,
-                        "clientGSTIN.GSTType":1,
-                        "clientGSTIN.GSTNo":1,
-                        "taxAmount.primary":1,
-                        "taxAmount.secondary":1,
-                        "taxType":1,
-                        "adGrossAmount":1,
-                        "FinalTaxAmount":1,
-                    }
-                    },
-                    {$limit: perPage},
-                    {$skip:(perPage * request.body.page) - perPage}
-                ]).exec( async function(err, invoices){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
-                            });
-                        }
-                        else{
-                            invoices.map(invoice =>{
-                                invoice.FinalTaxAmount = Math.round(((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100))*100)/100
-                            })
-                            Invoice.count(query, function(err, count){
-                                response.send({
-                                    success:true,
-                                    invoice: invoices,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
-                            
-                        }
-                    });
-                }	
-	});
-
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    Invoice
+    .aggregate([ 
+        {$match:query },
+        {$project: { 
+            "clientName":1,
+            "invoiceNO":1,
+            "date":1,
+            "clientGSTIN.GSTType":1,
+            "clientGSTIN.GSTNo":1,
+            "taxAmount.primary":1,
+            "taxAmount.secondary":1,
+            "taxType":1,
+            "adGrossAmount":1,
+            "FinalTaxAmount":1,
+        }
+    },
+    {$limit: perPage},
+    {$skip:(perPage * request.body.page) - perPage}
+]).exec( async function(err, invoices){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        invoices.map(invoice =>{
+            invoice.FinalTaxAmount = Math.round(((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100))*100)/100
+        })
+        Invoice.count(query, function(err, count){
+            response.send({
+                success:true,
+                invoice: invoices,
+                page: request.body.page,
+                perPage:perPage,
+                pageCount: Math.ceil(count/perPage)
+            });
+        })
+        
+    }
+});
 };
 
 module.exports.generateTaxSheet = async function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-                    var mediahouseID =await searchMediahouseID(request, response, user);
-                    var clientID = await searchClientID(request, response, user);
-                    var executiveID = await searchExecutiveID(request, response, user);
-                    var date = (request.body.date)?(request.body.date):null;
-                    
-                    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
-
-                    
-                    Invoice
-                    .aggregate([ 
-                    {$match:query },
-                    {$project: { 
-                        "clientName":1,
-                        "clientState":1,
-                        "invoiceNO":1,
-                        "date":1,
-                        "clientGSTIN.GSTType":1,
-                        "clientGSTIN.GSTNo":1,
-                        "taxAmount.primary":1,
-                        "taxAmount.secondary":1,
-                        "taxType":1,
-                        "FinalTaxAmount":1,
-                        "FinalAmount":1,
-                        "adGrossAmount":1,
-                        "taxIncluded":1,
-                        "netAmountFigures":1,
-                    }
-                    },
-                    // {$limit: perPage},
-                    // {$skip:(perPage * request.body.page) - perPage}
-                ]).exec(function(err, invoices){
-                        if(err){
-                            console.log(err+ "");
-                            response.send({
-                                success:false,
-                                msg: err +""
-                            });
-                        }
-                        else{
-                            console.log(invoices);
-                            var inv = invoices.map(function(invoice){
-                                var obj = {                                
-                                    "Client Name": invoice.clientName,
-                                    "Client State":invoice.clientState,
-                                    "GST Status":invoice.clientGSTIN.GSTType,
-                                    "GST No.":invoice.clientGSTIN.GSTType=="RD"?invoice.clientGSTIN.GSTNo:"NA",
-                                    "Invoice No": invoice.invoiceNO,
-                                    "Invoice Date": invoice.date.toLocaleDateString(),
-                                    "Invoice Value":invoice.FinalTaxAmount,
-                                    "Net Amount":invoice.netAmountFigures,
-                                    "Tax Percentage":+invoice.taxAmount.primary + +invoice.taxAmount.secondary,
-                                    "SGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
-                                    "CGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
-                                    "IGST ":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
-                            };
-                        return obj;
-                        })
-                            createSheet(inv, request, response);
-                        }
-                    });
-                }	
-	});
-
+	var user = response.locals.user;
+    var mediahouseID =await searchMediahouseID(request, response, user);
+    var clientID = await searchClientID(request, response, user);
+    var executiveID = await searchExecutiveID(request, response, user);
+    var date = (request.body.date)?(request.body.date):null;
+    
+    var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
+    
+    
+    Invoice
+    .aggregate([ 
+        {$match:query },
+        {$project: { 
+            "clientName":1,
+            "clientState":1,
+            "invoiceNO":1,
+            "date":1,
+            "clientGSTIN.GSTType":1,
+            "clientGSTIN.GSTNo":1,
+            "taxAmount.primary":1,
+            "taxAmount.secondary":1,
+            "taxType":1,
+            "FinalTaxAmount":1,
+            "FinalAmount":1,
+            "adGrossAmount":1,
+            "taxIncluded":1,
+            "netAmountFigures":1,
+        }
+    },
+    // {$limit: perPage},
+    // {$skip:(perPage * request.body.page) - perPage}
+]).exec(function(err, invoices){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        console.log(invoices);
+        var inv = invoices.map(function(invoice){
+            var obj = {                                
+                "Client Name": invoice.clientName,
+                "Client State":invoice.clientState,
+                "GST Status":invoice.clientGSTIN.GSTType,
+                "GST No.":invoice.clientGSTIN.GSTType=="RD"?invoice.clientGSTIN.GSTNo:"NA",
+                "Invoice No": invoice.invoiceNO,
+                "Invoice Date": invoice.date.toLocaleDateString(),
+                "Invoice Value":invoice.FinalTaxAmount,
+                "Net Amount":invoice.netAmountFigures,
+                "Tax Percentage":+invoice.taxAmount.primary + +invoice.taxAmount.secondary,
+                "SGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                "CGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                "IGST ":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
+            };
+            return obj;
+        })
+        createSheet(inv, request, response);
+    }
+});
 };
 
 async function createSheet(data, request, response){
@@ -303,20 +265,20 @@ async function createSheet(data, request, response){
     var ws = XLSX.utils.json_to_sheet(data);
     
     XLSX.utils.book_append_sheet(wb, ws, "MONTHLY SHEET");
-
+    
     var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'base64'});
-
+    
     response.writeHead(200, {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': 'attachment; filename="tax.xlsx"'
     });
-
+    
     var decoder = base64.decode();
     var xlStream = new stream.PassThrough();
     xlStream.pipe(decoder)
-      .pipe(response);
-
+    .pipe(response);
+    
     xlStream.write(wbout);
-
+    
     response.end();
 }

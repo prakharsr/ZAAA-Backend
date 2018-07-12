@@ -36,7 +36,7 @@ function getMediahouseID(request, response, user){
                     GSTIN:request.body.GSTIN,
                     firm : user.firm
                 });
-    
+                
                 newMediahouse.save(function(err, doc){
                     console.log('mediahouse saved');
                     mediahouseID = newMediahouse._id;
@@ -54,7 +54,6 @@ function getMediahouseID(request, response, user){
 }
 async function f(request, response, user)
 {
-
     var mediaHouseID = await getMediahouseID(request,response,user);
     var ratecard = new RateCard({
         MediaType:request.body.mediaType,
@@ -86,7 +85,7 @@ async function f(request, response, user)
         PremiumEmailId:request.body.PremiumEmailId,
         PremiumWebsite:request.body.PremiumWebsite,
         PremiumExtraWords:request.body.PremiumWebsite,
-
+        
         firm :user.firm,
         global:false
     });
@@ -110,94 +109,54 @@ async function f(request, response, user)
 
 //http://localhost:8000/api/get/plans
 module.exports.createRatecard = function(request,response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
-            f(request, response, user);
-		}
-	});	
-    
+    f(request, response, response.locals.user); 
 };
 
 module.exports.getRatecard = function(request,response){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
-            RateCard.findById(request.params.id,async function(err, ratecard){
-                try{
-                    var mediahouse = await MediaHouse.find(ratecard.mediahouseID);
-                    response.send({
-                        success : true,
-                        ratecard : ratecard,
-                        mediahouse: mediahouse
-                    }); 
-                }
-                catch(err){
-                    console.log("here" +err);
-                    response.send({
-                        success:false,
-                        msg: err+"",
-                    });
-                }
+    var user = response.locals.user;
+    RateCard.findById(request.params.id,async function(err, ratecard){
+        try{
+            var mediahouse = await MediaHouse.find(ratecard.mediahouseID);
+            response.send({
+                success : true,
+                ratecard : ratecard,
+                mediahouse: mediahouse
+            }); 
+        }
+        catch(err){
+            console.log("here" +err);
+            response.send({
+                success:false,
+                msg: err+"",
             });
-		}
-	});	
+        }
+    });
 };
 
 function findRatecards(request,response, global){
-    
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+""
-			});
-		}
-		else{
+    var user = response.locals.user;
+    RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
+    .limit(perPage)
+    .skip((perPage * request.params.page) - perPage)
+    .exec(function(err, ratecards){
+        
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            RateCard.count(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
+            .exec(function(err, count){
+                response.send({
+                    success : true,
+                    ratecards : ratecards,
+                    perPage:perPage,
+                    page: request.params.page,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
             
-            RateCard.find(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
-            .limit(perPage)
-            .skip((perPage * request.params.page) - perPage)
-            .exec(function(err, ratecards){
-                
-                if(err){
-                    console.log("here" +err);
-                }
-                else{
-                    RateCard.count(global ? {global:global} : {firm:mongoose.mongo.ObjectId(user.firm)})
-                    .exec(function(err, count){
-                        response.send({
-                            success : true,
-                            ratecards : ratecards,
-                            perPage:perPage,
-                            page: request.params.page,
-                            pageCount: Math.ceil(count/perPage)
-                        });
-                    })
-                     
-                }
-            });
-			
-		}
-	});	
-    
+        }
+    });
 };
 
 module.exports.getLocalRatecards = function(request,response){
@@ -208,24 +167,7 @@ module.exports.getGlobalRatecards = function(request,response){
 };
 
 module.exports.queryRatecards = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-             
+    var user = response.locals.user;
     RateCard.find().and([{$or:[{global:true},{firm:user.firm}]},{$or:[{ 'BookingCenter.MediaHouseName': { $regex: request.params.keyword+"", $options:"i" }}, { 'BookingCenter.Edition': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.Main': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.Main': { $regex: request.params.keyword+"", $options:"i" }},{ 'Category.SubCategory1': { $regex: request.params.keyword+"", $options:"i" }}]}])
     .limit(5).exec(function(err, ratecards){
         if(err){
@@ -242,88 +184,48 @@ module.exports.queryRatecards = function(request, response){
             });
         }
     });
-
-		}	
-	});
 };
-    
+
 
 
 module.exports.deleteRatecard = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            RateCard.findByIdAndRemove(request.params.id,function(err){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg: "Ratecard deleted"
-                    });
-                }
-                
-            })
-		}	
-	});
+	var user = response.locals.user;
+    RateCard.findByIdAndRemove(request.params.id,function(err){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                msg: "Ratecard deleted"
+            });
+        }
+        
+    })
 };
 
 module.exports.updateRatecard = function(request, response){
-	var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err + ""
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
-                if(err){
-                    console.log(err);
-                    response.send({
-                        success:false,
-                        msg: err + ""
-                    });
-                }
-                else{
-                    // if(request.body.OrganizationName){
-                    //     client.OrganizationName = request.body.OrganizationName;
-                    // }
-                    response.send({
-                        success:true,
-                        msg: "Ratecard Updated"
-                    });
-                }
-                
-            })
-		}	
-	});
+	var user = response.locals.user;
+    RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
+        if(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else{
+            // if(request.body.OrganizationName){
+            //     client.OrganizationName = request.body.OrganizationName;
+            // }
+            response.send({
+                success:true,
+                msg: "Ratecard Updated"
+            });
+        }
+    })
 };

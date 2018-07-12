@@ -13,9 +13,6 @@ var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 var SALT_WORK_FACTOR = 10;
 
-
-
-
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
 	var reqBody = req.body;
@@ -55,7 +52,7 @@ module.exports.signup = function(req,res){
 					});
 				}
 				else{
-                   
+					
 					res.send({
 						success : false,
 						msg : err
@@ -98,7 +95,7 @@ module.exports.signup = function(req,res){
 };
 //POST https://localhost:8000/api/login
 module.exports.login = function(req,res){
-
+	
 	if(req.body.phone){
 		var user =	User.findOne({phone:req.body.phone}, function(err, user){
 			if(err) throw err;
@@ -131,7 +128,7 @@ module.exports.login = function(req,res){
 				});
 			}	
 		});
-
+		
 	}
 	else if (req.body.email){
 		var user =	User.findOne({email:req.body.email.toLowerCase()}, function(err, user){
@@ -169,170 +166,128 @@ module.exports.login = function(req,res){
 };
 
 module.exports.setMobile=function(req, res){
-	var reqBody =req.body;
-	console.log(reqBody);
-	var token =  getToken(req.headers);
-	var user = getUser(token,req,res, function(err, user){
-		if(err) throw err;
-		else{
-			user.phone = reqBody.phone;
-			user.save(function(err, doc) {
-				if (err) {
-					if (err.code == 11000) {
-						return res.json({
-							success: false,
-							msg: "Username already exists"
-						});
-					} else {
-						//Throw error message if not known
+	var user = response.locals.user;
+	user.phone = reqBody.phone;
+	user.save(function(err, doc) {
+		if (err) {
+			if (err.code == 11000) {
+				return res.json({
+					success: false,
+					msg: "Username already exists"
+				});
+			} else {
+				//Throw error message if not known
+				res.send({
+					success: false,
+					msg: err +"bhjdw"
+				});
+			}
+		} else {
+			//We may not to want to always send SMS messages.
+			if (config.enableValidationSMS == 1) {
+				// If the user is created successfully, send them an account
+				// verification token
+				user.sendAuthyToken(function(err) {
+					if (err) {
 						res.send({
 							success: false,
-							msg: err +"bhjdw"
-						});
-					}
-				} else {
-					//We may not to want to always send SMS messages.
-					if (config.enableValidationSMS == 1) {
-						// If the user is created successfully, send them an account
-						// verification token
-						user.sendAuthyToken(function(err) {
-							if (err) {
-								res.send({
-									success: false,
-									msg: " in sendAuthyToken" + err
-								});
-							} else {
-								// Send for verification page
-								res.send({
-									success: true,
-									msg: doc._id
-									
-								});
-							}
+							msg: " in sendAuthyToken" + err
 						});
 					} else {
-						
-						//If we do not want to enable sms verification lets register and send confirmation
+						// Send for verification page
 						res.send({
 							success: true,
-							msg: {
-								msg: "Account created (SMS validation false)"
-							}
+							msg: doc._id
+							
 						});
 					}
-				}
-			});
+				});
+			} else {
+				
+				//If we do not want to enable sms verification lets register and send confirmation
+				res.send({
+					success: true,
+					msg: {
+						msg: "Account created (SMS validation false)"
+					}
+				});
+			}
 		}
 	});
 };
 
 module.exports.verifyMobile = function(request, response) {
-	var token = getToken(request.headers);
-	var user = getUser(token, request, response, function(err, user){
-		if(err){
-			console.log(err);
+	var user = response.locals.user;
+	user.verifyAuthyToken(request.body.code, postVerify);
+	// Handle verification response
+	function postVerify(err, self) {
+		if (err) {
 			return response.send({
 				success: false,
-				msg: "err" +err
-			});		var _id = mongoose.mongo.ObjectId(decoded.id);
-		}
-		if(!user){
-			return response.send({
-				success:false,
-				msg: "err not found" + err
+				msg: "The token you entered was invalid - please retry."
 			});
 		}
+		
+		// If the token was valid, flip the bit to validate the user account
+		user.mobile_verified = true;
+		user.save(postSave(err));
+	}
+	
+	// after we save the user, handle sending a confirmation
+	function postSave(err) {
+		if (err) {
+			return response.send({
+				success: true,
+				msg: "There was a problem validating your account."
+			});
+		}
+		
 		else{
-			user.verifyAuthyToken(request.body.code, postVerify);
-			// Handle verification response
-			function postVerify(err, self) {
-				if (err) {
-					return response.send({
-						success: false,
-						msg: "The token you entered was invalid - please retry."
-					});
-				}
-				
-				// If the token was valid, flip the bit to validate the user account
-				user.mobile_verified = true;
-				user.save(postSave(err));
+			return response.send({
+				success:true,
+				msg:"phone number verified"});
 			}
 			
-			// after we save the user, handle sending a confirmation
-			function postSave(err) {
-				if (err) {
-					return response.send({
-						success: true,
-						msg: "There was a problem validating your account."
-					});
+		}
+		
+		// respond with an error not current used
+		function die(message) {
+			response.send({
+				success: false,
+				msg: message
+			});
+		}
+	};
+	function getUser(token,req,res, cb){
+		var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
+			User.findById(decoded.id, function(err, doc) {
+				if (err || !doc) {
+					return  cb(err,null);
 				}
-				
 				else{
-					return response.send({
-						success:true,
-						msg:"phone number verified"});
-					}
-					
+					return cb(null, doc);
 				}
-				
-				// respond with an error not current used
-				function die(message) {
-					response.send({
-						success: false,
-						msg: message
-					});
-				}
-			}
+			});
 		});
-		
 	}
-		
-function getUser(token,req,res, cb){
-	var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
-		User.findById(decoded.id, function(err, doc) {
-			if (err || !doc) {
-				return  cb(err,null);
+	function getToken(headers) {
+		if (headers && headers.authorization) {
+			var parted = headers.authorization.split(' ');
+			if (parted.length === 2) {
+				return parted[1];
+			} else {
+				return null;
 			}
-			else{
-				return cb(null, doc);
-			}
-		});
-	});
-}
-		
-function getToken(headers) {
-	if (headers && headers.authorization) {
-		var parted = headers.authorization.split(' ');
-		if (parted.length === 2) {
-			return parted[1];
-		} else {
+		}
+		else {
 			return null;
 		}
-	} else {
-		return null;
-	}
-}
-
-module.exports.getToken = getToken;
-module.exports.getUser = getUser;
-		
-module.exports.profileImage = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}  
-		else if(!user){
-			response.send({
-				success:false,
-				msg:"user not found"
-			});
-		}
-		else{
+	};
+	
+	module.exports.getToken = getToken;
+	module.exports.getUser = getUser;
+	module.exports.profileImage = function(request,response){
+		var user = response.locals.user;
 		var dirname = __dirname+'/../../public/uploads/'+user.firm;
 		mkdirp(dirname, function(err){
 			if(err){
@@ -382,61 +337,29 @@ module.exports.profileImage = function(request,response){
 				});
 			}
 		});
-				
 	}
-});
-}
-module.exports.deleteProfileImage = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}  
-		else if(!user){
-			response.send({
-				success:false,
-				msg:"user not found"
-			});
-		}
-		else{
-		
-			user.photo = '/images/profile.jpg' ;
-			user.save(function(err,doc){
-				if (err) {
-					console.log(err);
-					response.send({
-						success: false,
-						msg: err+"gy"
-					});
-				} 
-				else{
-					response.send({
-						success : true,
-						msg : "Profile photo removed.",
-						photo: user.photo
-					});
-				}
-			});				
-		}
-	});
-}
-
-   
-		
-module.exports.signature = function(request,response){
-var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
+	module.exports.deleteProfileImage = function(request,response){
+		var user = response.locals.user;
+		user.photo = '/images/profile.jpg' ;
+		user.save(function(err,doc){
+			if (err) {
+				console.log(err);
+				response.send({
+					success: false,
+					msg: err+"gy"
+				});
+			} 
+			else{
+				response.send({
+					success : true,
+					msg : "Profile photo removed.",
+					photo: user.photo
+				});
+			}
+		});
+	}	
+	module.exports.signature = function(request,response){
+		var user = response.locals.user;
 		var dirname = __dirname+'../../../public/uploads/'+user.firm;
 		mkdirp(dirname, function(err){
 			if(err){
@@ -486,212 +409,150 @@ var token = getToken(request.headers);
 				});
 			}
 		});
-	});
-}
-module.exports.deleteSignature = function(request,response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}  
-		else if(!user){
-			response.send({
-				success:false,
-				msg:"user not found"
-			});
+	}
+	module.exports.deleteSignature = function(request,response){
+		var user = response.locals.user;				
+		user.signature = '/images/sign.png' ;
+		user.save(function(err,doc){
+			if (err) {
+				console.log(err);
+				response.send({
+					success: false,
+					msg: err+"gy"
+				});
+			} 
+			else{
+				response.send({
+					success : true,
+					msg : "File is uploaded.",
+					sign: user.sign
+				});
+			}
+		});
+	}
+	function removeA(arr) {
+		var what, a = arguments, L = a.length, ax;
+		while (L > 1 && arr.length) {
+			what = a[--L];
+			while ((ax= arr.indexOf(what)) !== -1) {
+				arr.splice(ax, 1);
+			}
 		}
-		else{
+		return arr;
+	}	
+	module.exports.deleteUser = function(request, response){
+		var user = response.locals.user;
+		var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
+			if(err){
+				console.log(err);
+			}
+			else{
+				if(user._id === mongoose.mongo.ObjectId(request.params.id) || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
+				else{
+					firm.co_users.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
+					firm.admins.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
+					User.findOneAndRemove({_id : mongoose.mongo.ObjectId(request.params.id)}, function(err){
+						if(err){
+							console.log(err);
+							response.send({
+								success : false,
+								msg : err
+							})
+						}
+						else{
+							firm.save(function(err){
+								if(err){
+									response.send({
+										success : false,
+										msg : err
+									});
+								}
+								else{
+									response.send({
+										success : true,
+										msg : "Co-User deleted"
+									});
+								}
+							});
+						}
+					});
+				}
+			}
+		});
+	};
+	
+	module.exports.setUserProfile = function(request, response){
+		var user = response.locals.user;
+		if(request.body.name)
+		user.name = request.body.name;
 		
-						user.signature = '/images/sign.png' ;
-						user.save(function(err,doc){
-							if (err) {
-								console.log(err);
-								response.send({
-									success: false,
-									msg: err+"gy"
-								});
-							} 
-							else{
-								response.send({
-									success : true,
-									msg : "File is uploaded.",
-									sign: user.sign
-								});
-							}
-						});				
-	}
-});
-}
-
-
-function removeA(arr) {
-	var what, a = arguments, L = a.length, ax;
-	while (L > 1 && arr.length) {
-		what = a[--L];
-		while ((ax= arr.indexOf(what)) !== -1) {
-			arr.splice(ax, 1);
-		}
-	}
-	return arr;
-}
-
-module.exports.deleteUser = function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found"
-			});
-		}
-		else{
-			var firm = Firm.findById(mongoose.mongo.ObjectId(user.firm), function(err, firm){
-				if(err){
-					console.log(err);
-				}
-				else{
-					if(user._id === mongoose.mongo.ObjectId(request.params.id) || !user.isAdmin)	return response.status(403).send("you cannot delete yourselves");
-					else{
-						firm.co_users.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
-						firm.admins.pull({ _id: mongoose.mongo.ObjectId(request.params.id) });
-						User.findOneAndRemove({_id : mongoose.mongo.ObjectId(request.params.id)}, function(err){
-							if(err){
-								console.log(err);
-								response.send({
-									success : false,
-									msg : err
-								})
-							}
-							else{
-								firm.save(function(err){
-									if(err){
-										response.send({
-											success : false,
-											msg : err
-										});
-									}
-									else{
-										response.send({
-											success : true,
-											msg : "Co-User deleted"
-										});
-									}
-								});
-							}
-						});
-					}
-				}
-			});
-		}	
-	});
-};
-
-module.exports.setUserProfile = function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			if(request.body.name)
-			user.name = request.body.name;
-
-			if (request.body.designation)
-			  user.designation = request.body.designation;
-
-			user.save(function(){
-				if(err){
-					console.log(err);
-					response.send({
-						success:false,
-						msg:" error in set user profile" + err
-					});
-				}
-				else{
-					console.log(user);
-					response.json({
-						success:true,
-						msg:"saved ",
-						user:user
-					});
-				}
-			});
-			
-		}
-	});
+		if (request.body.designation)
+		user.designation = request.body.designation;
+		
+		user.save(function(){
+			if(err){
+				console.log(err);
+				response.send({
+					success:false,
+					msg:" error in set user profile" + err
+				});
+			}
+			else{
+				console.log(user);
+				response.json({
+					success:true,
+					msg:"saved ",
+					user:user
+				});
+			}
+		});
+	};
+	module.exports.getUserProfile = function(request, response){
+		var token = getToken(request.headers);
+		var user = getUser(token,request,response, function(err, user){
+			if(err||!user){
+				console.log("User not found");
+				response.send({
+					success:false,
+					msg:err
+				});
+			}
+			else{
+				console.log(user);
+				response.json({
+					success:true,
+					msg:"user profile obtained ",
+					user:user
+				});
+				
+			}
+		});
+		
+	};
 	
-};
-module.exports.getUserProfile = function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-					console.log(user);
-					response.json({
-						success:true,
-						msg:"user profile obtained ",
-						user:user
-					});
-			
-		}
-	});
+	module.exports.getCurrentUser=function(request, response){
+		var token = getToken(request.headers);
+		var user = getUser(token,request,response, function(err, user){
+			if(err||!user){
+				console.log("User not found");
+				response.send({
+					success:false,
+					msg:err
+				});
+			}
+			else{
+				response.send({
+					success:true,
+					user:user
+				});
+			}
+		});
+		
+	};
 	
-};
-	
-module.exports.getCurrentUser=function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else{
-			response.send({
-				success:true,
-				user:user
-			});
-		}
-	});
-	
-};
-
-module.exports.changePassword=function(request, response){
-	var token = getToken(request.headers);
-	var user = getUser(token,request,response, function(err, user){
-		if(err||!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg:err+"error in finding user"
-			});
-		}
-		else{
-			user.comparePassword(request.body.oldPassword, function(err, isMatch,user){
+	module.exports.changePassword=function(request, response){
+		var user = response.locals.user;
+		user.comparePassword(request.body.oldPassword, function(err, isMatch,user){
 			if(isMatch && !err){
 				user.password = request.body.newPassword;
 				user.save(function(err){
@@ -716,14 +577,12 @@ module.exports.changePassword=function(request, response){
 					msg : "Wrong Current Password"
 				});
 			}
-			})
-		}
-	});
-};
-
-module.exports.sendPasswordResetEmail = function(request,response){
-var user = User.findOne({email : request.body.email.toLowerCase()}, function(err,user){
-	if(err) throw err;
+		})
+	};
+	
+	module.exports.sendPasswordResetEmail = function(request,response){
+		var user = User.findOne({email : request.body.email.toLowerCase()}, function(err,user){
+			if(err) throw err;
 			if(!user){
 				response.send({
 					success: false,
@@ -731,85 +590,85 @@ var user = User.findOne({email : request.body.email.toLowerCase()}, function(err
 				});
 			}
 			else{
-	var now = new Date();
-	var time = new Date(now).getTime();
-	var token_data = {
-		id: user._id,
-		time: time,
-		reset : true
-	};
-	var token = jwt.sign(token_data, config.SECRET);
-	var data = {
-		from: 'AAMan <postmaster@adagencymanager.com>',
-		to: request.body.email,
-		subject: 'Password Reset Link',
-		text: 'http://www.adagencymanager.com/reset_password/'+token,
-	  };
-	  
-	  mailgun.messages().send(data, function (error, body) {
-		console.log(error,body);
-		if(error){
-		response.send({
-			success:false,
-			msg: error + ""
-		});
-	}
-	else{
-		response.send({
-			success:true,
-			msg: "sent" + body
-		});
-	}
-	  });
-}
-})
-}
-
-module.exports.resetPassword = function(request,response){
-	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
-		var now = new Date();
-		var time = new Date(now).getTime();
-		if(!decoded.reset){
-			response.status(403).send("You are not authorised to view this page");
-		}
-		else if(time - decoded.time > 900000){
-			response.status(403).send("The token has expired");
-		}
-		else{
-			User.findById(decoded.id, function(err,user){
-			if(err){
-				console.log(err)
-				response.send({
-					success:false,
-					msg:err +" error"
-				});
-			}
-			else if(!user){
-				response.send({
-					success:false,
-					msg:"User not found for this Id",
-				});
-			}
-			else{
-				user.password = request.body.password;
-				user.save(function(err){
-					if(err) {
-						console.log(err);
+				var now = new Date();
+				var time = new Date(now).getTime();
+				var token_data = {
+					id: user._id,
+					time: time,
+					reset : true
+				};
+				var token = jwt.sign(token_data, config.SECRET);
+				var data = {
+					from: 'AAMan <postmaster@adagencymanager.com>',
+					to: request.body.email,
+					subject: 'Password Reset Link',
+					text: 'http://www.adagencymanager.com/reset_password/'+token,
+				};
+				
+				mailgun.messages().send(data, function (error, body) {
+					console.log(error,body);
+					if(error){
 						response.send({
-							success : false,
-							msg : 'Cannot save user'
+							success:false,
+							msg: error + ""
 						});
 					}
 					else{
 						response.send({
-							success : true,
-							msg : 'password successfully changed'
+							success:true,
+							msg: "sent" + body
 						});
 					}
 				});
 			}
 		})
 	}
-	});
 	
-};
+	module.exports.resetPassword = function(request,response){
+		var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
+			var now = new Date();
+			var time = new Date(now).getTime();
+			if(!decoded.reset){
+				response.status(403).send("You are not authorised to view this page");
+			}
+			else if(time - decoded.time > 900000){
+				response.status(403).send("The token has expired");
+			}
+			else{
+				User.findById(decoded.id, function(err,user){
+					if(err){
+						console.log(err)
+						response.send({
+							success:false,
+							msg:err +" error"
+						});
+					}
+					else if(!user){
+						response.send({
+							success:false,
+							msg:"User not found for this Id",
+						});
+					}
+					else{
+						user.password = request.body.password;
+						user.save(function(err){
+							if(err) {
+								console.log(err);
+								response.send({
+									success : false,
+									msg : 'Cannot save user'
+								});
+							}
+							else{
+								response.send({
+									success : true,
+									msg : 'password successfully changed'
+								});
+							}
+						});
+					}
+				})
+			}
+		});
+		
+	};
