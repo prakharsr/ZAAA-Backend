@@ -1114,21 +1114,21 @@ module.exports.generateROPdf = function(request, response) {
                                 var key = object.date.month +'-'+ object.date.year;
                                 ins.push(key);
                             });
-                            var uins = ins.match(/\b\w/g).join('');
+                            var uins = ins.filter((x,i,a) => a.indexOf(x) == i) //get unique keys
 
                             uins.forEach(object => {
                                 ins1[object] = new Array();
-                            });
+                            }); //make a JSON with keys and empty arrays
 
                             insertions.forEach(object => {
                                 var key = object.date.month +'-'+ object.date.year;
                                 ins1[key].push(object);
-                            });
+                            });//Fill the empty arrays
                             
                             var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                             var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
                             var namount = releaseOrder.adGrossAmount - damount ;
-                            insertions.forEach(object =>{
+                            ins1.forEach(object =>{
                                 insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                             });
                             var Details = {
