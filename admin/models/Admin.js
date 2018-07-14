@@ -40,6 +40,9 @@ var AdminSchema = new mongoose.Schema({
         state:String
     },
     AadharNo: String,
+    AadharAtt : String,
+    BankAtt: String,
+    IdAtt: String,
     PfNo: String,
     ESINo: String,
     photo : {
@@ -66,6 +69,11 @@ var AdminSchema = new mongoose.Schema({
     privileges:{
         type: Number,
         default: 0
+    },
+    OtherAttachments:{
+        Att1: String,
+        Att2: String,
+        Att3: String
     }
 },
 {

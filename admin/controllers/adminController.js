@@ -23,7 +23,8 @@ module.exports.signup = function(req,res){
 			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email.toLowerCase(),
 			password : reqBody.password,
-			phone:""
+			phone:"",
+			empno:'20'
         });
         
 		admin.save(function(err, doc){
@@ -182,6 +183,382 @@ module.exports.profileImage = function(request,response){
 		}
 	});
 }
+
+module.exports.Aadhaar = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.AadharAtt = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.AadharAtt
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+module.exports.IDAttachment = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.IdAtt = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.IdAtt
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+module.exports.bankAttachment = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.BankAtt = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.BankAtt
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+module.exports.OtherAtt1 = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.OtherAttachments.Att1 = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.OtherAttachments.Att1
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+
+module.exports.OtherAtt2 = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.OtherAttachments.Att2 = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.OtherAttachments.Att2
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+
+module.exports.OtherAtt3 = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.OtherAttachments.Att3 = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.OtherAttachments.Att3
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+
+module.exports.Aadhaar = function(request,response){
+	var admin = response.locals.admin;
+	var dirname = __dirname+'/../../public/uploads/'+admin.empno;
+	mkdirp(dirname, function(err){
+		if(err){
+			response.send({
+				success : false,
+				msg : "Directory can not be created " + err
+			})
+		}
+		else{
+			var location;
+			var storage = multer.diskStorage({
+				destination: function(request,file,cb){
+					cb(null,dirname);
+				},
+				filename: function(request, file,cb){
+					location = '/uploads/'+admin.empno+'/'+file.fieldname + '-'+admin._id+path.extname(file.originalname);
+					cb(null, file.fieldname + '-'+admin._id+path.extname(file.originalname));
+				}
+			});                            
+			var upload = multer({storage : storage}).single('user');
+			upload(request,response,function(err){
+				if(err){
+					response.send({
+						success : false,
+						msg : "error uploading file." + err
+					});
+				}
+				else{
+					admin.AadharAtt = location;
+					admin.save(function(err,doc){
+						if (err) {
+							console.log(err);
+							response.send({
+								success: false,
+								msg: err+"gy"
+							});
+						} 
+						else{
+							response.send({
+								success : true,
+								msg : "File is uploaded.",
+								photo: admin.AadharAtt
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+
 module.exports.deleteProfileImage = function(request,response){
 	var admin = response.locals.admin;
 	admin.photo = '/images/profile.jpg' ;
