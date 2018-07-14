@@ -15,8 +15,9 @@ var perPage=20;
 
 
 var unAuthRoutes = [
-    '/api/user/signup',
-    '/api/user/login',
+    {method:'POST',path:'/api/user/signup'},
+    {method:'POST',path:'/api/user/login'},
+    {method:'POST',path:'/api/user/forgotPassword'}
 ];
 
 function getUser(token,req,res, cb){
@@ -57,7 +58,8 @@ function getToken(headers) {
 }
 
 module.exports = function(req, res, next){
-    if(unAuthRoutes.indexOf(req.originalUrl) > -1)
+    var query = {method:req.method,path:req.originalUrl};
+    if(JSON.stringify(unAuthRoutes).indexOf(JSON.stringify(query)) >= 0)
     {
         next();
     }
