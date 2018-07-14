@@ -11,8 +11,6 @@ router.delete('/admin/sign', admin.deleteSignature);
 router.post('/admin/sign', admin.signature);
 router.post('/admin/profile', admin.setUserProfile);
 router.post('/admin/changePassword', admin.changePassword);
-router.post('/admin/forgotPassword', admin.sendPasswordResetEmail);
-router.post('/admin/resetPassword',admin.resetPassword);
 router.delete('/admin/:id', admin.deleteUser);
 
 module.exports = router;

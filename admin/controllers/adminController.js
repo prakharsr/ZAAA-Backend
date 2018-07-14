@@ -310,31 +310,31 @@ module.exports.deleteUser = function(request, response){
 };
 
 module.exports.setUserProfile = function(request, response){
-	var admin = response.locals.admin
-	if(request.body.name)
-	admin.name = request.body.name;
-
-	if (request.body.designation)
-	admin.designation = request.body.designation;
-
-	admin.save(function(){
+	var admin = response.locals.admin;
+	Admin.findByIdAndUpdate(mongoose.mongo.ObjectId(admin._id),{$set:request.body},function(err, admin){
 		if(err){
 			console.log(err);
 			response.send({
 				success:false,
-				msg:" error in set user profile" + err
+				msg: err + ""
 			});
 		}
 		else{
-			console.log(admin);
-			response.json({
-				success:true,
-				msg:"saved ",
-				admin:admin
+			admin.save(function(err){
+				if(err)
+				{
+					console.log(err)
+				}
+				else{
+					response.send({
+						success:true,
+						msg: "Admin Profile Updated"
+					});
+				}
 			});
 		}
-	});		
-};
+	});
+}
 
 module.exports.changePassword=function(request, response){
 	var admin = response.locals.admin;
@@ -364,97 +364,4 @@ module.exports.changePassword=function(request, response){
 		});
 	}
 	});
-};
-
-module.exports.sendPasswordResetEmail = function(request,response){
-var admin = Admin.findOne({email : request.body.email.toLowerCase()}, function(err,admin){
-	if(err) throw err;
-	if(!admin){
-		response.send({
-			success: false,
-			msg: 'Authentication Failed'
-		});
-	}
-	else{
-		var now = new Date();
-		var time = new Date(now).getTime();
-		var token_data = {
-			id: admin._id,
-			time: time,
-			reset : true
-		};
-		var token = jwt.sign(token_data, config.SECRET);
-		var data = {
-			from: 'AAMan <postmaster@adagencymanager.com>',
-			to: request.body.email,
-			subject: 'Password Reset Link',
-			text: 'http://www.adagencymanager.com/reset_password/'+token,
-		};
-		
-		mailgun.messages().send(data, function (error, body) {
-			console.log(error,body);
-			if(error){
-			response.send({
-				success:false,
-				msg: error + ""
-			});
-		}
-		else{
-			response.send({
-				success:true,
-				msg: "sent" + body
-			});
-		}
-	  });
-}
-})
-}
-
-module.exports.resetPassword = function(request,response){
-	var decoded = jwt.verify(request.body.token, config.SECRET, function(err,decoded){
-		var now = new Date();
-		var time = new Date(now).getTime();
-		if(decoded.reset){
-			response.status(403).send("You are not authorised to view this page");
-		}
-		else if(time - decoded.time > 900000){
-			response.status(403).send("The token has expired");
-		}
-		else{
-			Admin.findById(decoded.id, function(err,admin){
-			if(err){
-				console.log(err)
-				response.send({
-					success:false,
-					msg:err +" error"
-				});
-			}
-			else if(!admin){
-				response.send({
-					success:false,
-					msg:"User not found for this Id",
-				});
-			}
-			else{
-				admin.password = request.body.password;
-				admin.save(function(err){
-					if(err) {
-						console.log(err);
-						response.send({
-							success : false,
-							msg : 'Cannot save user'
-						});
-					}
-					else{
-						response.send({
-							success : true,
-							msg : 'password successfully changed'
-						});
-					}
-				});
-			}
-		})
-	}
-	});
-	
 };
