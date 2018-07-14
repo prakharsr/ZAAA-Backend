@@ -49,41 +49,92 @@ function formQuery(user, request){
     
 }
 
-module.exports.ROchartData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery( user, request, response);
-            ReleaseOrder.aggregate([
-                {$unwind:"$insertions"}, 
-                {$match:query},
-                { $group : { 
-                    _id : { day: { $dayOfMonth : "$date" },month: { $month: "$date" }, year: { $year: "$date" } },
-                    count: {$sum: 1},
-                    totalAmount:{$sum:"$insertions.Amount"},
-                    generated:{$sum:{
-                        "$cond": [{"$eq":["$insertions.marked",true]},
-                        "$insertions.Amount",0]
-                    }
-                }
+module.exports.ROchartData = async function(request, response){
+    var user = response.locals.user;
+    var query = await formQuery( user, request, response);
+    ReleaseOrder.aggregate([
+        {$unwind:"$insertions"}, 
+        {$match:query},
+        { $group : { 
+            _id : { day: { $dayOfMonth : "$date" },month: { $month: "$date" }, year: { $year: "$date" } },
+            count: {$sum: 1},
+            totalAmount:{$sum:"$insertions.Amount"},
+            generated:{$sum:{
+                "$cond": [{"$eq":["$insertions.marked",true]},
+                "$insertions.Amount",0]
             }
         }
+    }
+}
+])
+.exec(function(err, releaseOrders){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        ReleaseOrder.count(query, function(err, count){
+            response.send({
+                success:true,
+                releaseOrders:releaseOrders
+            });
+        })
+        
+    }
+});
+};
+
+module.exports.InvoiceData = async function(request, response){
+	var user = response.locals.user;
+    var query = await formQuery( user, request, response);       
+    Invoice.aggregate([
+        {$match:query},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            totalAmount:{$sum:{$add:"$FinalTaxAmount"}},
+            generated:{$sum:"$collectedAmount"}
+            
+        } 
+    }
+])
+.exec(function(err, invoices){
+    if(err){
+        console.log(err+ "");
+        response.send({
+            success:false,
+            msg: err +""
+        });
+    }
+    else{
+        response.send({
+            success:true,
+            invoices: invoices
+        });
+    }
+});
+};
+
+
+module.exports.DueOverdueData = async function(request, response){
+	var user = response.locals.user;
+    var query = await formQuery( user, request, response);       
+    Receipt.aggregate([
+        {$match:query},
+        { $group : {
+            _id:null, 
+            count: {$sum: 1},
+            onCreditAmount:{$sum:{
+                "$cond": [{"$eq":["$paymentType",'Credit']},
+                "$paymentAmount",0]
+            }},
+            totalAmount:{$sum:"$paymentAmount"},
+        }}
     ])
-    .exec(function(err, releaseOrders){
+    .exec(function(err, receipt){
         if(err){
             console.log(err+ "");
             response.send({
@@ -92,312 +143,153 @@ module.exports.ROchartData = function(request, response){
             });
         }
         else{
-            ReleaseOrder.count(query, function(err, count){
+            Receipt.count(query, function(err, count){
                 response.send({
                     success:true,
-                    releaseOrders:releaseOrders
+                    receipt:receipt
                 });
             })
             
         }
     });
-}	
-});
 };
 
-module.exports.InvoiceData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery( user, request, response);       
-            Invoice.aggregate([
-                {$match:query},
-                { $group : { 
-                    _id: null,
-                    count: {$sum: 1},
-                    totalAmount:{$sum:{$add:"$FinalTaxAmount"}},
-                    generated:{$sum:"$collectedAmount"}
-                    
-                } 
-            }
-        ])
-        .exec(function(err, invoices){
-            if(err){
-                console.log(err+ "");
-                response.send({
-                    success:false,
-                    msg: err +""
-                });
-            }
-            else{
+module.exports.ClientPaymentsData = async function(request, response){
+	var user = response.locals.user;
+    var query = await formQuery(user, request);
+    
+    
+    Invoice.aggregate([ 
+        {$match:query},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            
+            shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
+            collectedAmount :{$sum: "$collectedAmount" },
+            completed:{$sum: "$clearedAmount" },
+            totalAmount:{$sum:"$FinalTaxAmount"},
+            pendingAmount:{$sum:"$pendingAmount"}
+            
+            
+        } }
+    ])
+    .exec(function(err, invoices){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            Invoice.count(query, function(err, count){
                 response.send({
                     success:true,
                     invoices: invoices
                 });
-            }
-        });
-    }	
-});
-};
-
-
-module.exports.DueOverdueData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery( user, request, response);       
-            Receipt.aggregate([
-                {$match:query},
-                { $group : {
-                    _id:null, 
-                    count: {$sum: 1},
-                    onCreditAmount:{$sum:{
-                        "$cond": [{"$eq":["$paymentType",'Credit']},
-                        "$paymentAmount",0]
-                    }},
-                    totalAmount:{$sum:"$paymentAmount"},
-                }}
-            ])
-            .exec(function(err, receipt){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    Receipt.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            receipt:receipt
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
-};
-
-module.exports.ClientPaymentsData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery(user, request);
+            })
             
-            
-            Invoice.aggregate([ 
-                {$match:query},
-                { $group : { 
-                    _id: null,
-                    count: {$sum: 1},
-                    
-                    shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-                    collectedAmount :{$sum: "$collectedAmount" },
-                    completed:{$sum: "$clearedAmount" },
-                    totalAmount:{$sum:"$FinalTaxAmount"},
-                    pendingAmount:{$sum:"$pendingAmount"}
-                    
-                    
-                } }
-            ])
-            .exec(function(err, invoices){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    Invoice.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            invoices: invoices
-                        });
-                    })
-                    
-                }
-            });
-        }	
-	});
+        }
+    });
 }
 
-module.exports.MediahouseInvoiceData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery(user, request);
+module.exports.MediahouseInvoiceData = async function(request, response){
+	var user = response.locals.user;
+    var query = await formQuery(user, request);
+    
+    
+    MediaHouseInvoice.aggregate([ 
+        {$match:query},
+        {$unwind:"$insertions"},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            
+            collectedAmount :{$sum: "$insertions.collectedAmount" },
+            totalAmount:{$sum:"$insertions.Amount"},
+            pendingAmount:{$sum:"$insertions.pendingAmount"}
             
             
-            MediaHouseInvoice.aggregate([ 
-                {$match:query},
-                {$unwind:"$insertions"},
-                { $group : { 
-                    _id: null,
-                    count: {$sum: 1},
-                    
-                    collectedAmount :{$sum: "$insertions.collectedAmount" },
-                    totalAmount:{$sum:"$insertions.Amount"},
-                    pendingAmount:{$sum:"$insertions.pendingAmount"}
-                    
-                    
-                } }
-            ])
-            .exec(function(err, mhinvoices){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    MediaHouseInvoice.count(query, function(err, count){
-                        response.send({
-                            success:true,
-                            mhinvoices: mhinvoices
-                        });
-                    })
-                    
-                }
+        } }
+    ])
+    .exec(function(err, mhinvoices){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-        }	
-	});
+        }
+        else{
+            MediaHouseInvoice.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    mhinvoices: mhinvoices
+                });
+            })
+            
+        }
+    });
 }
 
 
 
-module.exports.RecieptsChequeData = function(request, response){
-    var token = userController.getToken(request.headers);
-	var user = userController.getUser(token,request,response, async function(err, user){
-		if(err){
-			console.log(err);
-			response.send({
-				success:false,
-				msg:err
-			});
-		}
-		else if(!user){
-			console.log("User not found");
-			response.send({
-				success:false,
-				msg : "User not found, Please Login"
-			});
-		}
-		else{
-            var query = await formQuery(user, request);
+module.exports.RecieptsChequeData = async function(request, response){
+    var user = response.locals.user;
+    var query = await formQuery(user, request);
+    
+    
+    Receipt.aggregate([ 
+        {$match:query},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            
+            DueChequesAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                "$paymentAmount",0]
+            }},
+            DueChequesNumber:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                1,0]
+            }},
+            CreditAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                "$paymentAmount",0]
+            }},
+            OverDueChequesNumber:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                1,0]
+            }},
+            OverDueChequesAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                "$paymentAmount",0]
+            }},
             
             
-            Receipt.aggregate([ 
-                {$match:query},
-                { $group : { 
-                    _id: null,
-                    count: {$sum: 1},
-                    
-                    DueChequesAmount:{$sum:{
-                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                        "$paymentAmount",0]
-                    }},
-                    DueChequesNumber:{$sum:{
-                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                        1,0]
-                    }},
-                    CreditAmount:{$sum:{
-                        "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
-                        "$paymentAmount",0]
-                    }},
-                    OverDueChequesNumber:{$sum:{
-                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
-                        1,0]
-                    }},
-                    OverDueChequesAmount:{$sum:{
-                        "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
-                        "$paymentAmount",0]
-                    }},
-                    
-                    
-                } }
-            ])
-            .exec(function(err, receipts){
-                if(err){
-                    console.log(err+ "");
-                    response.send({
-                        success:false,
-                        msg: err +""
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        receipts: receipts
-                    });
-                    
-                }
+        } }
+    ])
+    .exec(function(err, receipts){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
             });
-        }	
-	});
+        }
+        else{
+            response.send({
+                success:true,
+                receipts: receipts
+            });
+            
+        }
+    });
 }
 
 module.exports.check= function(request, response, user){
-console.log(response.locals.user);
+    console.log(response.locals.user);
     response.send({
         success:true,
         user:response.locals.user,

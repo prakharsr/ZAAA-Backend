@@ -13,6 +13,12 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
 
+
+var unAuthRoutes = [
+    '/api/user/signup',
+    '/api/user/login',
+];
+
 function getUser(token,req,res, cb){
     var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
         User.findById(decoded.id, function(err, doc) {
@@ -51,25 +57,30 @@ function getToken(headers) {
 }
 
 module.exports = function(req, res, next){
-   
-	var token = getToken(req.headers);
-	var user = getUser(token,req,res, function(err, user){
-		if(err||!user){
-            console.log(err, user)
-			console.log("User not found");
-		}
-		else{
-                var firm = getFirm(user, req, res, function(err, firm){
-                    if(err||!firm){
-                        console.log(err, user)
-                        console.log("Firm not found");
-                    }
-                    else{
-                        res.locals.user = user;
-                        res.locals.firm = firm;
-                        next();
-                    }
-                })
-        }
-    })
+    if(unAuthRoutes.indexOf(req.originalUrl) > -1)
+    {
+        next();
+    }
+    else{
+        var token = getToken(req.headers);
+        var user = getUser(token,req,res, function(err, user){
+            if(err||!user){
+                console.log(err, user)
+                console.log("User not found");
+            }
+            else{
+                    var firm = getFirm(user, req, res, function(err, firm){
+                        if(err||!firm){
+                            console.log(err, user)
+                            console.log("Firm not found");
+                        }
+                        else{
+                            res.locals.user = user;
+                            res.locals.firm = firm;
+                            next();
+                        }
+                    })
+            }
+        })
+    }
 };
