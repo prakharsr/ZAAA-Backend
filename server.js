@@ -33,7 +33,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
-app.use('/api', auth, require('./api/routes/router'));
+app.use('/api', require('./api/routes/router'));
+app.use('/admin', require('./admin/routes/router'));
 //app.use('/admin', require('./admin/routes/router'));
 
 mongoose.connect('mongodb://localhost/zaaaDB', function(err){

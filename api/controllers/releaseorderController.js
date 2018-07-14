@@ -879,54 +879,68 @@ module.exports.generateROPdf = function(request, response) {
                 response.send({
                     success:false,
                     msg: err
-                });
+                })
                 else{
-                    var insData="";
-                    var ins1;
-                    var insertions = releaseOrder.insertions;
-                    var ins = new Array();
-                    insertions.forEach(object => {
-                        var key = object.date.month +'-'+ object.date.year;
-                        ins.push(key);
-                    });
-                    var uins = ins.match(/\b\w/g).join('');
-                    
-                    uins.forEach(object => {
-                        ins1[object] = new Array();
-                    });
-                    
-                    insertions.forEach(object => {
-                        var key = object.date.month +'-'+ object.date.year;
-                        ins1[key].push(object);
-                    });
-                    
-                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                    var namount = releaseOrder.adGrossAmount - damount ;
-                    insertions.forEach(object =>{
-                        insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                    });
-                    var Details = {
-                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                        mediahouse :releaseOrder.publicationName,
-                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                        cname :releaseOrder.clientName,
-                        cgstin :releaseOrder.clientGSTIN.GSTNo,
-                        gstin :releaseOrder.agencyGSTIN,
-                        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                        gamount :releaseOrder.adGrossAmount,
-                        insertions :insData,
-                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                        damount :damount,
-                        namount :namount,
-                        logo: firm.LogoURL
+                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+                    if (releaseOrder.generated==false){
+                        releaseOrder.generated=true;
+                        var date = new Date();
+                        releaseOrder.generatedAt = date
                     }
-                    pdf.generateReleaseOrder(request,response,Details);
+                    releaseOrder.save(function(err){
+                        if(err)
+                        response.send({
+                            success:false,
+                            msg: err
+                        });
+                        else{
+                            var insData="";
+                            var ins1;
+                            var insertions = releaseOrder.insertions;
+                            var ins = new Array();
+                            insertions.forEach(object => {
+                                var key = object.date.month +'-'+ object.date.year;
+                                ins.push(key);
+                            });
+                            var uins = ins.filter((x,i,a) => a.indexOf(x) == i) //get unique keys
+
+                            uins.forEach(object => {
+                                ins1[object] = new Array();
+                            }); //make a JSON with keys and empty arrays
+
+                            insertions.forEach(object => {
+                                var key = object.date.month +'-'+ object.date.year;
+                                ins1[key].push(object);
+                            });//Fill the empty arrays
+                            
+                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                            var namount = releaseOrder.adGrossAmount - damount ;
+                            ins1.forEach(object =>{
+                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                            });
+                            var Details = {
+                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                                mediahouse :releaseOrder.publicationName,
+                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                                cname :releaseOrder.clientName,
+                                cgstin :releaseOrder.clientGSTIN.GSTNo,
+                                gstin :releaseOrder.agencyGSTIN,
+                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                                gamount :releaseOrder.adGrossAmount,
+                                insertions :insData,
+                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+                                damount :damount,
+                                namount :namount,
+                                logo: firm.LogoURL
+                            }
+                            pdf.generateReleaseOrder(request,response,Details);
+                        }
+                    })
                 }
             })
-            
         }
-    })
+    });
 }
 
 module.exports.previewROPdf = async function(request, response) {
