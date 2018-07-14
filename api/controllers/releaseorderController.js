@@ -851,7 +851,7 @@ module.exports.mailROPdf = function(request, response) {
     })
 }
 
-module.exports.generateROPdf = function(request, response) {
+module.exports.generateROPdf = async function(request, response) {
     var user = response.locals.user;
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
@@ -874,7 +874,7 @@ module.exports.generateROPdf = function(request, response) {
                 var date = new Date();
                 releaseOrder.generatedAt = date
             }
-            releaseOrder.save(function(err){
+            releaseOrder.save( async function(err){
                 if(err)
                 response.send({
                     success:false,

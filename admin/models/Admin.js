@@ -133,4 +133,4 @@ transporter.sendMail(mailOptions,cb, function(error, info){
 
 AdminSchema.plugin(timestamps);
         
-module.exports = mongoose.model('User', AdminSchema);
+module.exports = mongoose.model('Admin', AdminSchema);
