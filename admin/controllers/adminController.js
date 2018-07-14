@@ -22,7 +22,7 @@ module.exports.signup = function(req,res){
 			createdOn: Date.now(),
 			name:reqBody.name||reqBody.email.toLowerCase().substring(0, reqBody.email.indexOf("@")),
 			email : reqBody.email.toLowerCase(),
-			password : password,
+			password : reqBody.password,
 			phone:""
         });
         
