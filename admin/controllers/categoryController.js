@@ -1,4 +1,5 @@
 var Admin = require('../models/Admin');
+var Category = require('../models/Category');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
@@ -22,7 +23,7 @@ module.exports.create = function(request, response){
                 });
             }
             else{
-               
+                
                 res.send({
                     success : false,
                     msg : err
@@ -38,3 +39,33 @@ module.exports.create = function(request, response){
         }
     });
 }
+
+module.exports.getCategories = function(request, response){
+    
+    var admin = response.locals.admin;
+    if(request.body.level ==0){
+        var query = {
+            level:0
+        };
+    }
+    else if(request.body.level > 0 && parent !==null)
+    {
+        var query = {
+            level:request.body.level,
+            parent:request.body.parent
+        };
+        
+    }
+    
+    Category.find(query,function(err, categories){ 
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            response.send({
+                success : true,
+                categories: categories
+            }); 
+        }
+    });
+};
