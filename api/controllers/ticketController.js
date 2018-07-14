@@ -50,6 +50,7 @@ function formQuery(date, user, request){
         if(request.body.insertionPeriod){
             var to = new Date()
             var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+            query['createdAt']={$gte: from, $lte:to} 
         }
         resolve(query);    
     })
