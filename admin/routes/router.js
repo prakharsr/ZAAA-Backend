@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var admin = require('../controllers/adminController');
-var ticket = require('../controllers/ticketController')
+var ticket = require('../controllers/ticketController');
+var global = require('../controllers/globalController');
+var category = require('../controllers/categoryController');
 
 router.post('/signup', admin.signup);
 router.post('/login', admin.login);
@@ -22,5 +24,16 @@ router.post('/attachments/other3', admin.OtherAtt3);
 
 router.post('/ticket/list', ticket.listTickets);
 router.post('/ticket/status', ticket.changeStatus);
+
+router.post('/globalmediahouse/create', global.createGMediahouse);
+router.post('/globalmediahouse/update', global.updateGMediahouse);
+router.delete('/globalmediahouse/delete/:id', global.deleteGMediahouse);
+router.post('/globalratecard/create', global.createGRatecard);
+router.post('/globalratecard/create', global.updateGRatecard);
+router.delete('/globalratecard/create', global.deleteGRatecard);
+
+router.get('/category', category.getCategories);
+router.post('/category', category.createCategory);
+
 
 module.exports = router;

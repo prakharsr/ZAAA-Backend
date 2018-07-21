@@ -8,7 +8,7 @@ var path = require('path');
 var bcrypt = require('bcrypt');
 var SALT_WORK_FACTOR = 10;
 
-module.exports.create = function(request, response){
+module.exports.createCategory = function(request, response){
     var category = new category({
         name:request.body.name,
         level:request.body.level,
@@ -69,3 +69,5 @@ module.exports.getCategories = function(request, response){
         }
     });
 };
+
+
