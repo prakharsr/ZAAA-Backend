@@ -107,7 +107,6 @@ async function f(request, response, user)
     
 }
 
-//http://localhost:8000/api/get/plans
 module.exports.createRatecard = function(request,response){
     f(request, response, response.locals.user); 
 };
