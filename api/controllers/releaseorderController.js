@@ -853,6 +853,7 @@ module.exports.mailROPdf = function(request, response) {
 
 module.exports.generateROPdf = async function(request, response) {
     var user = response.locals.user;
+    console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
             console.log(err);
@@ -874,69 +875,72 @@ module.exports.generateROPdf = async function(request, response) {
                 var date = new Date();
                 releaseOrder.generatedAt = date
             }
-            releaseOrder.save( async function(err){
+            releaseOrder.save(async function(err,doc){
                 if(err)
                 response.send({
                     success:false,
                     msg: err
                 })
                 else{
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    if (releaseOrder.generated==false){
-                        releaseOrder.generated=true;
-                        var date = new Date();
-                        releaseOrder.generatedAt = date
-                    }
-                    releaseOrder.save(function(err){
-                        if(err)
-                        response.send({
-                            success:false,
-                            msg: err
-                        });
-                        else{
-                            var insData="";
-                            var ins1;
-                            var insertions = releaseOrder.insertions;
-                            var ins = new Array();
-                            insertions.forEach(object => {
-                                var key = object.date.month +'-'+ object.date.year;
-                                ins.push(key);
-                            });
-                            var uins = ins.filter((x,i,a) => a.indexOf(x) == i) //get unique keys
-
-                            uins.forEach(object => {
-                                ins1[object] = new Array();
-                            }); //make a JSON with keys and empty arrays
-
-                            insertions.forEach(object => {
-                                var key = object.date.month +'-'+ object.date.year;
-                                ins1[key].push(object);
-                            });//Fill the empty arrays
+                    // var insData="";
+                    // var ins1;
+                    // var insertions = releaseOrder.insertions;
+                    // var ins = new Array();
+                    // insertions.forEach(object => {
+                    //     var key = object.date.month +'-'+ object.date.year;
+                    //     ins.push(key);
+                    // });
+                    // var uins = ins.filter((x,i,a) => a.indexOf(x) == i) //get unique keys
+                    
+                    // uins.forEach(object => {
+                    //     ins1[object] = new Array();
+                    // }); //make a JSON with keys and empty arrays
+                    
+                    // insertions.forEach(object => {
+                    //     var key = object.date.month +'-'+ object.date.year;
+                    //     ins1[key].push(object);
+                    // });//Fill the empty arrays
+                    var result = doc.insertions.reduce((grouped, item) => {
+                        var index = grouped.findIndex(m => m.key.month == item.date.month
+                            && m.key.year == item.date.year);
                             
-                            var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                            var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                            var namount = releaseOrder.adGrossAmount - damount ;
-                            ins1.forEach(object =>{
-                                insData+='<tr><td>'+releaseOrder.publicationName+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.date.day+'-'+object.date.month+'-'+object.date.year+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-                            });
-                            var Details = {
-                                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                                mediahouse :releaseOrder.publicationName,
-                                pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                                cname :releaseOrder.clientName,
-                                cgstin :releaseOrder.clientGSTIN.GSTNo,
-                                gstin :releaseOrder.agencyGSTIN,
-                                scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                                gamount :releaseOrder.adGrossAmount,
-                                insertions :insData,
-                                dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                                damount :damount,
-                                namount :namount,
-                                logo: firm.LogoURL
-                            }
-                            pdf.generateReleaseOrder(request,response,Details);
+                        if (index == -1) {
+                            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
                         }
-                    })
+                        else grouped[index].items.push(item);
+                        
+                        return grouped;
+                    }, []);
+
+                    console.log(result);
+                    var releaseOrder = doc;
+                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+                    var insData="";
+                    var insertions = releaseOrder.insertions;
+                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+                    var namount = releaseOrder.adGrossAmount - damount ;
+                    result.forEach(object =>{
+                        var dates = "";
+                        object.items.forEach(obj => {dates += obj.date.day+" "});
+                        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+releaseOrder.size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                    });
+                    var Details = {
+                        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+                        mediahouse :releaseOrder.publicationName,
+                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
+                        cname :releaseOrder.clientName,
+                        cgstin :releaseOrder.clientGSTIN.GSTNo,
+                        gstin :releaseOrder.agencyGSTIN,
+                        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+                        gamount :releaseOrder.adGrossAmount,
+                        insertions :insData,
+                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+                        damount :damount,
+                        namount :namount,
+                        logo: firm.LogoURL
+                    }
+                    pdf.generateReleaseOrder(request,response,Details);
                 }
             })
         }
