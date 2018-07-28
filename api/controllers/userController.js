@@ -166,7 +166,8 @@ module.exports.login = function(req,res){
 };
 
 module.exports.setMobile=function(req, res){
-	var user = response.locals.user;
+	var user = res.locals.user;
+	var reqBody = req.body;
 	user.phone = reqBody.phone;
 	user.save(function(err, doc) {
 		if (err) {

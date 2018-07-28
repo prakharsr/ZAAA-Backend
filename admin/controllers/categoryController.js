@@ -1,5 +1,5 @@
 var Admin = require('../models/Admin');
-var Category = require('../models/Category');
+var Category = require('../models/Categories');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
@@ -41,7 +41,6 @@ module.exports.createCategory = function(request, response){
 }
 
 module.exports.getCategories = function(request, response){
-    
     var admin = response.locals.admin;
     if(request.body.level ==0){
         var query = {
@@ -56,7 +55,6 @@ module.exports.getCategories = function(request, response){
         };
         
     }
-    
     Category.find(query,function(err, categories){ 
         if(err){
             console.log("here" +err);
