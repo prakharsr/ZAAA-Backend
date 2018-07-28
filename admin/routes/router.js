@@ -33,8 +33,8 @@ router.post('/globalratecard/create', global.createGRatecard);
 router.post('/globalratecard/create', global.updateGRatecard);
 router.delete('/globalratecard/create', global.deleteGRatecard);
 
-router.get('/category', category.getCategories);
 router.post('/category', category.createCategory);
+router.post('/category/list', category.getCategories);
 
 router.post('/notifications',notifs.getNotifications);
 router.delete('/notifications',notifs.deleteNotification);

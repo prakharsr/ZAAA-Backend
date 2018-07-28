@@ -106,6 +106,7 @@ router.get('/user/releaseorders/:page', releaseOrder.getReleaseOrders);
 router.get('/user/releaseorder/:id', releaseOrder.getReleaseOrder);
 router.post('/user/releaseorder/generate', releaseOrder.queryGenerated);
 router.delete('/user/releaseorder/:id', releaseOrder.deleteReleaseOrder);
+router.post('/user/releaseorder/categories'. releaseOrder.getCategories);
 
 
 
