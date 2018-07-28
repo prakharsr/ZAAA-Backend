@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
+var Category = require('../../admin/models/Categories');
 var Executive = require('../models/Executive');
 var Client = require('../models/Client');
 var mongoose = require('mongoose');
@@ -1028,4 +1029,31 @@ async function createSheet(data, request, response, title, subject) {
     xlStream.write(wbout);
     
     response.end();
+}
+
+module.exports.getCategories = (request, response) =>{
+    if(request.body.level ==0){
+        var query = {
+            level:0
+        };
+    }
+    else if(request.body.level > 0 && parent !==null)
+    {
+        var query = {
+            level:request.body.level,
+            parent:request.body.parent
+        };
+        
+    }
+    Category.find(query,function(err, categories){ 
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            response.send({
+                success : true,
+                categories: categories
+            }); 
+        }
+    });
 }
