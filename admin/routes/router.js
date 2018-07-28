@@ -26,9 +26,11 @@ router.post('/attachments/other3', admin.OtherAtt3);
 router.post('/ticket/list', ticket.listTickets);
 router.post('/ticket/status', ticket.changeStatus);
 
+router.post('/globalmediahouse', global.getGMediaHouse);
 router.post('/globalmediahouse/create', global.createGMediahouse);
 router.post('/globalmediahouse/update', global.updateGMediahouse);
 router.delete('/globalmediahouse/delete/:id', global.deleteGMediahouse);
+router.post('/globalratecard', global.getGRateCard);
 router.post('/globalratecard/create', global.createGRatecard);
 router.post('/globalratecard/create', global.updateGRatecard);
 router.delete('/globalratecard/create', global.deleteGRatecard);

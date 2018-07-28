@@ -1,5 +1,7 @@
 var Ratecard = require('../../api/models/Ratecard');
 var MediaHouse = require('../../api/models/MediaHouse');
+var MediaHouseController = require('../../api/controllers/mediahouseController');
+var RateCardController = require('../../api/controllers/ratecardController');
 
 module.exports.createGMediahouse = function(request,response){
     var admin = response.locals.admin;
@@ -34,6 +36,8 @@ module.exports.createGMediahouse = function(request,response){
         }
     });    
 };
+
+module.exports.getGMediaHouse = MediaHouseController.getGlobalMediahouses;
 
 module.exports.updateGMediahouse = function(request,response){
     MediaHouse.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouse){
@@ -164,6 +168,8 @@ module.exports.createGRatecard = async function(request,response){
         }
     });
 }
+
+module.exports.getGRateCard = RateCardController.getGlobalRatecards;
 
 module.exports.updateGRatecard = function(request,response){
     RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
