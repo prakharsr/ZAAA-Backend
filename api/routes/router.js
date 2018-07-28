@@ -169,6 +169,8 @@ router.post('/user/reports/clientNote' , reports.clientNoteReports);
 router.post('/user/reports/ratecard' , reports.ratecardReports);
 router.post('/user/reports/insertions', releaseOrder.generateInsertionsSheet);
 
+router.post('/user/token', user.saveToken);
+
 router.post('/user/ticket', ticket.createTicket);
 router.post('/user/ticket/search', ticket.queryUserTickets);
 

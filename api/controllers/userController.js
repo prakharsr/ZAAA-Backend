@@ -673,3 +673,25 @@ module.exports.verifyMobile = function(request, response) {
 		});
 		
 	};
+	
+	module.exports.saveToken = (request,response) =>{
+		var user = response.locals.user;
+		user.deviceTokens.push({
+			token: request.body.token,
+			platform: request.body.platform
+		})
+		user.save(err => {
+			if(err){
+				response.send({
+					success: false,
+					msg: 'Cannot save token'
+				})
+			}
+			else{
+				response.send({
+					success: true,
+					msg: 'token saved'
+				})
+			}
+		})
+	}

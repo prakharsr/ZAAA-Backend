@@ -4,6 +4,7 @@ var admin = require('../controllers/adminController');
 var ticket = require('../controllers/ticketController');
 var global = require('../controllers/globalController');
 var category = require('../controllers/categoryController');
+var notifs = require('../controllers/notificationController');
 
 router.post('/signup', admin.signup);
 router.post('/login', admin.login);
@@ -34,6 +35,11 @@ router.delete('/globalratecard/create', global.deleteGRatecard);
 
 router.get('/category', category.getCategories);
 router.post('/category', category.createCategory);
+
+router.post('/notifications',notifs.getNotifications);
+router.delete('/notifications',notifs.deleteNotification);
+router.post('/notifications/send',notifs.sendNotifs);
+
 
 
 module.exports = router;
