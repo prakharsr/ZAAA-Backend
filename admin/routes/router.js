@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var admin = require('../controllers/adminController');
 var ticket = require('../controllers/ticketController')
+var global = require('../controllers/globalControllers')
 
 router.post('/signup', admin.signup);
 router.post('/login', admin.login);
@@ -22,5 +23,7 @@ router.post('/attachments/other3', admin.OtherAtt3);
 
 router.post('/ticket/list', ticket.listTickets);
 router.post('/ticket/status', ticket.changeStatus);
+
+router.post('/global/media_house', global.createMediahouse);
 
 module.exports = router;
