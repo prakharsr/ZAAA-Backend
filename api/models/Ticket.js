@@ -13,7 +13,11 @@ var TicketSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
-    status: Number
+    status: Number,
+    firm:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Firm"
+    },
 });
 
 TicketSchema.plugin(timestamps);
