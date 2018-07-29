@@ -17,7 +17,7 @@ var AdminSchema = new mongoose.Schema({
     },
     empno :{
         type:String,
-        unique: true
+        //unique: true // agar unique rakhna chahte ho to sabke 20 kyu daal rhe ho?
     },
     name: String,
     dob: {
@@ -54,6 +54,7 @@ var AdminSchema = new mongoose.Schema({
         default:'/images/sign.png'
     },
     designation:String,
+    email: String,
     phone : String,
     authyId:String,
     password : String,
