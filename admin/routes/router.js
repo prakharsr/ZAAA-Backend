@@ -32,8 +32,8 @@ router.post('/globalmediahouse/update', global.updateGMediahouse);
 router.delete('/globalmediahouse/delete/:id', global.deleteGMediahouse);
 router.post('/globalratecard', global.getGRateCard);
 router.post('/globalratecard/create', global.createGRatecard);
-router.post('/globalratecard/create', global.updateGRatecard);
-router.delete('/globalratecard/create', global.deleteGRatecard);
+router.post('/globalratecard/update', global.updateGRatecard);
+router.delete('/globalratecard/delete/:id', global.deleteGRatecard);
 
 router.post('/category', category.createCategory);
 router.post('/category/list', category.getCategories);
