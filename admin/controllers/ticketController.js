@@ -6,7 +6,7 @@ var perPage=20;
 
 function formQuery(request){
     var query = {};
-    if(request.body.status) query['status']=request.body.status
+    if(request.body.status !== undefined) query['status']=request.body.status
     if(request.body.insertionPeriod){
         var to = new Date()
         var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
