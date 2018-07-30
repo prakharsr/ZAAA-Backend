@@ -53,7 +53,11 @@ var UserSchema = new mongoose.Schema({
         Invoice:Number,
         Payment_receipts:Number,
         Accounts:Number
-    }
+    },
+    deviceTokens:[{
+        token: String,
+        platform: String
+    }]
 },
 {
     _id: true // disables the creation of the virtual "id" property

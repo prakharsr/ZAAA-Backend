@@ -166,7 +166,8 @@ module.exports.login = function(req,res){
 };
 
 module.exports.setMobile=function(req, res){
-	var user = response.locals.user;
+	var user = res.locals.user;
+	var reqBody = req.body;
 	user.phone = reqBody.phone;
 	user.save(function(err, doc) {
 		if (err) {
@@ -672,3 +673,25 @@ module.exports.verifyMobile = function(request, response) {
 		});
 		
 	};
+	
+	module.exports.saveToken = (request,response) =>{
+		var user = response.locals.user;
+		user.deviceTokens.push({
+			token: request.body.token,
+			platform: request.body.platform
+		})
+		user.save(err => {
+			if(err){
+				response.send({
+					success: false,
+					msg: 'Cannot save token'
+				})
+			}
+			else{
+				response.send({
+					success: true,
+					msg: 'token saved'
+				})
+			}
+		})
+	}

@@ -1,7 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var admin = require('../controllers/adminController');
-var ticket = require('../controllers/ticketController')
+var ticket = require('../controllers/ticketController');
+var global = require('../controllers/globalController');
+var category = require('../controllers/categoryController');
+var notifs = require('../controllers/notificationController');
 
 router.post('/signup', admin.signup);
 router.post('/login', admin.login);
@@ -22,5 +25,23 @@ router.post('/attachments/other3', admin.OtherAtt3);
 
 router.post('/ticket/list', ticket.listTickets);
 router.post('/ticket/status', ticket.changeStatus);
+
+router.post('/globalmediahouse', global.getGMediaHouse);
+router.post('/globalmediahouse/create', global.createGMediahouse);
+router.post('/globalmediahouse/update', global.updateGMediahouse);
+router.delete('/globalmediahouse/delete/:id', global.deleteGMediahouse);
+router.post('/globalratecard', global.getGRateCard);
+router.post('/globalratecard/create', global.createGRatecard);
+router.post('/globalratecard/update', global.updateGRatecard);
+router.delete('/globalratecard/delete/:id', global.deleteGRatecard);
+
+router.post('/category', category.createCategory);
+router.post('/category/list', category.getCategories);
+
+router.post('/notifications',notifs.getNotifications);
+router.delete('/notifications',notifs.deleteNotification);
+router.post('/notifications/send',notifs.sendNotifs);
+
+
 
 module.exports = router;
