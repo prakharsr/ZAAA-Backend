@@ -5,16 +5,14 @@ var perPage=20;
 
 
 function formQuery(request){
-    return new Promise((resolve, reject) => {
-        var query;
-        if(request.body.status) query[status]=request.body.status
-        if(request.body.insertionPeriod){
-            var to = new Date()
-            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-            query['createdAt']={$gte: from, $lte:to} 
-        }
-        resolve(query);    
-    })
+    var query = {};
+    if(request.body.status) query[status]=request.body.status
+    if(request.body.insertionPeriod){
+        var to = new Date()
+        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+        query['createdAt']={$gte: from, $lte:to} 
+    }
+    return query;
 }
 
 module.exports.listTickets = function(request,response){
