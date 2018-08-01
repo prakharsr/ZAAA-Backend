@@ -490,7 +490,7 @@ module.exports.verifyMobile = function(request, response) {
 		if (request.body.designation)
 		user.designation = request.body.designation;
 		
-		user.save(function(){
+		user.save(function(err){
 			if(err){
 				console.log(err);
 				response.send({
