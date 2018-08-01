@@ -94,6 +94,7 @@ router.get('/user/ratecards/search/:keyword', ratecard.queryRatecards);
 
 router.post('/user/releaseorder', releaseOrder.createRO);
 router.patch('/user/releaseorder', releaseOrder.updateReleaseOrder);
+router.post('/user/releaseorder/cancel', releaseOrder.cancelReleaseOrder);
 router.get('/user/releaseorders/searchByNo/:keyword', releaseOrder.queryReleaseOrderByNo);
 router.post('/user/releaseorders/search', releaseOrder.queryReleaseOrder);
 router.post('/user/releaseorders/insertions/search', releaseOrder.queryInsertions);

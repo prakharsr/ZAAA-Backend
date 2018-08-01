@@ -762,6 +762,45 @@ module.exports.deleteReleaseOrder = function(request, response){
     })
 };
 
+module.exports.cancelReleaseOrder = function(request, response){
+    var user = response.locals.user;
+    ReleaseOrder.findById(mongoose.mongo.ObjectId(request.body.id))
+    .exec(function(err, releaseOrder){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            if (releaseOrder.insertions.some(insertion => insertion.marked)
+            || releaseOrder.mediahouseInvoices.length > 0) {
+                response.send({
+                    success:false,
+                    msg: "Can not cancel ReleaseOrder"
+                });
+            }
+            else{
+                releaseOrder.cancelled = true;
+                releaseOrder.save(function(err){
+                    if(err)
+                    {
+                        console.log(err)
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg: "ReleaseOrder Cancelled"
+                        });
+                    }
+                });
+            }
+        }
+        
+    })
+};
+
 module.exports.updateReleaseOrder = function(request, response){
 	var user = response.locals.user;
     ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){

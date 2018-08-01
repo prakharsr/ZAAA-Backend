@@ -25,7 +25,8 @@ module.exports.createTicket = (request,response) => {
         subject: request.body.subject,
         details: request.body.details,
         status: 0,
-        user: user._id
+        user: user._id,
+        firm:user.firm
     });
     
     ticket.save((err,doc) => {

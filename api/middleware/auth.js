@@ -58,8 +58,9 @@ function getToken(headers) {
 }
 
 module.exports = function(req, res, next){
-    var query = {method:req.method,path:req.originalUrl};
-    if(JSON.stringify(unAuthRoutes).indexOf(JSON.stringify(query)) >= 0)
+    //var query = {method:req.method,path:req.originalUrl};
+    //if(JSON.stringify(unAuthRoutes).indexOf(JSON.stringify(query)) >= 0)
+    if (unAuthRoutes.findIndex(element => element.method == req.method && element.path == req.originalUrl) != -1)
     {
         next();
     }

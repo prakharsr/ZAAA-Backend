@@ -58,10 +58,10 @@ module.exports.ROchartData = async function(request, response){
         { $group : { 
             _id : { day: { $dayOfMonth : "$date" },month: { $month: "$date" }, year: { $year: "$date" } },
             count: {$sum: 1},
-            totalAmount:{$sum:"$insertions.Amount"},
+            totalAmount:{$sum:"$insertions.netAmount"},
             generated:{$sum:{
                 "$cond": [{"$eq":["$insertions.marked",true]},
-                "$insertions.Amount",0]
+                "$insertions.netAmount",0]
             }
         }
     }
@@ -90,16 +90,20 @@ module.exports.ROchartData = async function(request, response){
 module.exports.InvoiceData = async function(request, response){
 	var user = response.locals.user;
     var query = await formQuery( user, request, response);       
-    Invoice.aggregate([
+    ReleaseOrder.aggregate([
+        {$unwind:"$insertions"}, 
         {$match:query},
         { $group : { 
-            _id: null,
+            _id : null,
             count: {$sum: 1},
-            totalAmount:{$sum:{$add:"$FinalTaxAmount"}},
-            generated:{$sum:"$collectedAmount"}
-            
-        } 
+            totalAmount:{$sum:"$insertions.netAmount"},
+            generated:{$sum:{
+                "$cond": [{"$eq":["$insertions.marked",true]},
+                "$insertions.netAmount",0]
+            }
+        }
     }
+}
 ])
 .exec(function(err, invoices){
     if(err){

@@ -30,6 +30,10 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         recieptNumber:String,
         recieptDate:String,
         paymentMode:String,
+        paymentDate:Date,
+        paymentNo:String,
+        paymentAmount:Number,
+        paymentBankName:String,
     }
     ],
     date: {

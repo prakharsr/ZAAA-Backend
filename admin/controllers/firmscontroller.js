@@ -1,30 +1,29 @@
 var Ticket = require('../../api/models/Ticket');
 var User = require('../../api/models/User');
 var Admin = require('../models/Admin');
+var Firm  = require('../../api/models/Firm');
 var perPage=20;
 
 
 function formQuery(request){
-    var query = {};
-    if(request.body.status !== undefined) query['status']=request.body.status
-    if(request.body.insertionPeriod){
-        var to = new Date()
-        var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-        query['createdAt']={$gte: from, $lte:to} 
-        
-    }
-    if(request.body.firm){
-        query['firm'] = request.body.firm;
-    }
-    return query;
+    return new Promise((resolve, reject) => {
+        var query;
+        if(request.body.status) query['FirmStatus']=request.body.status;
+        if(request.body.creationPeriod){
+            var to = new Date()
+            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
+            query['createdAt']={$gte: from, $lte:to} 
+        }
+        resolve(query);    
+    })
 }
 
-module.exports.listTickets = function(request,response){
+module.exports.listFirms = function(request,response){
     var query = formQuery(request);
-    Ticket.find(query)
+    Firm.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
-    .exec(function(err, tickets){
+    .exec(function(err, firms){
         if(err){
             console.log(err+ "");
             response.send({
@@ -33,10 +32,10 @@ module.exports.listTickets = function(request,response){
             });
         }
         else{
-            Ticket.count(query, function(err, count){
+            Firm.count(query, function(err, count){
                 response.send({
                     success:true,
-                    tickets: tickets,
+                    firms: firms,
                     page: request.body.page,
                     perPage:perPage,
                     pageCount: Math.ceil(count/perPage)
@@ -47,16 +46,17 @@ module.exports.listTickets = function(request,response){
     });
 }
 
-module.exports.changeStatus = async function(request,response){
+module.exports.changeFirmStatus = async function(request,response){
     var admin = response.locals.admin;
     try{
-        var ticket = await Ticket.findById(request.body.id);
-        ticket.status=request.body.status;
-        ticket.save(err => {
+        var firm = await Firm.findById(request.body.id);
+        firm.FirmStatus=request.body.status;
+        firm.save(err => {
             if(!err){
                 response.send({
                     success: true,
-                    msg: 'Status Changed Successfully'
+                    msg: 'Status Changed Successfully',
+                    status:firm.FirmStatus
                 })
             }
         })
