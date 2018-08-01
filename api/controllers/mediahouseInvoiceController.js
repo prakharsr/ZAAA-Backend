@@ -33,7 +33,16 @@ module.exports.createMHInvoice = async (request,response) => {
         mediaType:releaseorder.mediaType,
         publicationState:releaseorder.publicationState,
         publicationGSTIN:releaseorder.publicationGSTIN,
-        insertions: request.body.insertions,
+        insertions: request.body.insertions.map(insertion => {
+            return {
+                ...insertion,                
+                paymentMode: releaseorder.paymentType,
+                paymentDate: releaseorder.paymentDate,
+                paymentNo: releaseorder.paymentNo,
+                paymentAmount: releaseorder.paymentAmount,
+                paymentBankName: releaseorder.paymentBankName,
+            }
+        }),
         releaseOrderNo: releaseorder.releaseOrderNo,
         MHINo: request.body.MHINo,
         MHIDate: request.body.MHIDate,
