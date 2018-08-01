@@ -112,9 +112,11 @@ var ReleaseOrderSchema = new mongoose.Schema({
                 type:Number,
                 default:0
             },
-            ISODate: Date, 
-            PaidAmount:Number,
-            netAmount:Number
+            mhimarked:{type:Boolean, default: false},
+            ISODate: Date,
+
+            netAmount:Number,
+            taxAmount:Number
         }
     ],
     adGrossAmount:Number,
@@ -195,7 +197,8 @@ ReleaseOrderSchema.pre('save', function(next){
             var date = element.date;
             element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");            
             element.Amount = ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length ;
-            element.netAmount = (self.netAmountFigures)/insertions.length;
+            element.netAmount = self.taxIncluded?(100*self.netAmountFigures)/(100 + (+self.taxAmount.primary + +self.taxAmount.secondary)) :self.netAmountFigures/insertions.length;
+            element.taxAmount = self.taxIncluded?(self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary))/((100 + (+self.taxAmount.primary + +self.taxAmount.secondary))*insertions.length) :(self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary)/100)/insertions.length;
             next();
         });
     }
