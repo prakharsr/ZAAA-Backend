@@ -757,6 +757,48 @@ module.exports.deleteReceipt = async function(request, response){
 })
 };
 
+
+module.exports.cancelReceipt = async function(request, response){
+	var user = response.locals.user;
+    var receipt = await Receipt.findById(request.params.id);
+    var invoice = await Invoice.findById(receipt.invoiceID);
+    Invoice.update(
+        { $and: [{firm:user.firm}, { _id : receipt.invoiceID }]
+    },
+    { $set: {"clearedAmount": invoice.clearedAmount-receipt.netAmountFigures,
+    "pendingAmount": invoice.pendingAmount+receipt.netAmountFigures }}
+)
+.exec(function(err){
+    if(err){
+        console.log(err);
+        response.send({
+            success:false,
+            msg: err + ""
+        });
+    }
+    else{
+        receipt.isCancelled = true;
+        receipt.save(function(err){
+            if(err){
+                console.log(err);
+                response.send({
+                    success:false,
+                    msg: err + ""
+                });
+            }
+            else{
+                response.send({
+                    success:true,
+                    msg: "Receipt Cancelled"
+                });
+            }
+            
+        })
+    }            
+})
+};
+
+
 module.exports.updateReceipt = function(request, response){
 	var user = response.locals.user;
     Receipt.findByIdAndUpdate(request.params.id,{$set:request.body},function(err, receipt){
@@ -974,6 +1016,6 @@ module.exports.receiptStatus = async function(request, response){
                 }
             });
         }
-    })
-    
+    });
 }
+

@@ -23,6 +23,7 @@ var auth  = require('../middleware/auth')
 
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
+router.post('/user/logout', user.logout);
 router.post('/user/mobile', user.setMobile);
 router.post('/user/verify/mobile', user.verifyMobile);
 router.get('/plans', plan.getPlans);
@@ -134,6 +135,7 @@ router.get('/user/receipt/:id', receipt.getReceipt);
 router.delete('/user/receipt/:id', receipt.deleteReceipt);
 router.patch('/user/receipt/:id', receipt.updateReceipt);
 router.post('/user/receipt/status', receipt.receiptStatus);
+router.post('/user/receipt/cancel', receipt.cancelReceipt);
 
 router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryMediaHouseInvoices);

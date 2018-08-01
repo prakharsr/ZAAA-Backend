@@ -695,3 +695,27 @@ module.exports.verifyMobile = function(request, response) {
 			}
 		})
 	}
+
+	module.exports.logout = (request,response) => {
+		var user = response.locals.user;
+		var tokens = user.deviceTokens;
+
+		for( var i = tokens.length-1; i--;){
+			if ( tokens[i].platform === request.body.platform ) tokens.splice(i, 1);
+		}
+
+		user.save(err => {
+			if(err) {
+				response.send({
+					success : false,
+					msg: "Cannot log out"
+				});
+			}
+			else{
+				response.send({
+					success : true,
+					msg: "Logged out"
+				});
+			}
+		})
+	}

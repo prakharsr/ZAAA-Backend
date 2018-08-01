@@ -9,6 +9,10 @@ var ReceiptSchema = new mongoose.Schema({
     
     advanced:Boolean,
     receiptNO:String,
+    isCancelled :{
+        type: Boolean,
+        default: false
+    },
     invoiceID:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Invoice"
