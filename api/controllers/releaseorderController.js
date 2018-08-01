@@ -596,6 +596,8 @@ module.exports.queryGenerated = function(request, response){
         }
         else{
             releaseOrder.generated = true;
+            var date = new Date();
+            releaseOrder.generatedAt = date;
             releaseOrder.save(function(err){
                 if(err){
                     response.send({
@@ -850,7 +852,7 @@ module.exports.mailROPdf = function(request, response) {
             if (releaseOrder.generated==false){
                 releaseOrder.generated=true;
                 var date = new Date();
-                releaseOrder.generatedAt = date
+                releaseOrder.generatedAt = date;
             }
             releaseOrder.save(function(err){
                 if(err)
@@ -913,7 +915,7 @@ module.exports.generateROPdf = async function(request, response) {
             if (releaseOrder.generated==false){
                 releaseOrder.generated=true;
                 var date = new Date();
-                releaseOrder.generatedAt = date
+                releaseOrder.generatedAt = date;
             }
             releaseOrder.save(async function(err,doc){
                 if(err)

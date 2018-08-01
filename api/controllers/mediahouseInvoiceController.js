@@ -186,6 +186,7 @@ module.exports.querySummarySheet =async function(request, response){
     var mediahouseID =await searchMediahouseID(request, response, user);
     var date = (request.body.date)?(request.body.date):null;
     var query = await formQuery(mediahouseID, date, user, request);
+    query['paymentType']="Credit";
     
     
     MediaHouseInvoice
