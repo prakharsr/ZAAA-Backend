@@ -237,6 +237,47 @@ module.exports.MediahouseInvoiceData = async function(request, response){
     });
 }
 
+module.exports.PaidUnpaidData = async function(request, response){
+	var user = response.locals.user;
+    var query = await formQuery(user, request);
+    
+    
+    MediaHouseInvoice.aggregate([ 
+        {$match:query},
+        {$unwind:"$insertions"},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            
+            UnpaidAmount :{$sum:{
+                "$cond": [{"$eq":["$insertions.paymentMode",'Credit']},
+                "$insertions.Amount",0]
+            }},
+            PaidAmount :{$sum:{
+                "$cond": [{"$or":[{"$eq":["$insertions.paymentMode",'Cash']},{"$eq":["$insertions.paymentMode",'Cheque']}, {"$eq":["$insertions.paymentMode",'NEFT']}]},
+                "$insertions.Amount",0]
+            }}            
+        } }
+    ])
+    .exec(function(err, mhinvoices){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            MediaHouseInvoice.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    mhinvoices: mhinvoices
+                });
+            })
+            
+        }
+    });
+}
 
 
 module.exports.RecieptsChequeData = async function(request, response){

@@ -182,5 +182,6 @@ router.post('/user/dashboard/clientDues', dashboard.DueOverdueData);
 router.post('/user/dashboard/clientPayments', dashboard.ClientPaymentsData);
 router.post('/user/dashboard/mediahouseinvoice', dashboard.MediahouseInvoiceData);
 router.post('/user/dashboard/cheque', dashboard.RecieptsChequeData);
+router.post('/user/dashboard/paidUnpaid', dashboard.PaidUnpaidData);
 router.post('/user/dashboard/check', auth, dashboard.check);
 module.exports = router;
