@@ -24,6 +24,7 @@ module.exports.createTicket = (request,response) => {
     var ticket = new Ticket({
         subject: request.body.subject,
         details: request.body.details,
+        status: 0,
         user: user._id
     });
     
