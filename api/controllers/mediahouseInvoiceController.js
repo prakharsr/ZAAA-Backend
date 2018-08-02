@@ -257,8 +257,6 @@ module.exports.querySummarySheet =async function(request, response){
         
         MediaHouseInvoice
         .find(query)
-        .limit(perPage)
-        .skip((perPage * request.body.page) - perPage)
         .exec(function(err, mediahouseInvoice){
             if(err){
                 console.log(err+ "");
@@ -268,14 +266,9 @@ module.exports.querySummarySheet =async function(request, response){
                 });
             }
             else{
-                MediaHouseInvoice.count(query, function(err, count){
                     response.send({
                         success:true,
                         mediahouseInvoice: mediahouseInvoice,
-                        page: request.body.page,
-                        perPage:perPage,
-                        pageCount: Math.ceil(count/perPage)
-                    });
                 })
                 
             }
