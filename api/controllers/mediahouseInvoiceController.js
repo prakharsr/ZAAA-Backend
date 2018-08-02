@@ -221,8 +221,6 @@ module.exports.querySummarySheet =async function(request, response){
                     "MHITaxAmount":"$MHIAmount"
                 } }
             } },
-            {$limit: perPage},
-            {$skip:(perPage * request.body.page) - perPage}
         ])
         .exec(function(err, insertions){
             if(err){
@@ -234,14 +232,10 @@ module.exports.querySummarySheet =async function(request, response){
             }
             else{
                 console.log(insertions)
-                MediaHouseInvoice.count(query, function(err, count){
                     response.send({
                         success:true,
-                        insertions: insertions,
-                        page: request.body.page,
-                        perPage:perPage,
-                        pageCount: Math.ceil(count/perPage)
-                    });
+                        insertions: insertions
+                    
                 })
                 
             }
@@ -257,6 +251,8 @@ module.exports.querySummarySheet =async function(request, response){
         
         MediaHouseInvoice
         .find(query)
+        .limit(perPage)
+        .skip((perPage * request.body.page) - perPage)
         .exec(function(err, mediahouseInvoice){
             if(err){
                 console.log(err+ "");
@@ -266,9 +262,14 @@ module.exports.querySummarySheet =async function(request, response){
                 });
             }
             else{
+                MediaHouseInvoice.count(query, function(err, count){
                     response.send({
                         success:true,
                         mediahouseInvoice: mediahouseInvoice,
+                        page: request.body.page,
+                        perPage:perPage,
+                        pageCount: Math.ceil(count/perPage)
+                    });
                 })
                 
             }
