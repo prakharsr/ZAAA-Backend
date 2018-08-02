@@ -396,7 +396,9 @@ module.exports.MHIChequeDetailsData = async function(request, response){
     
     MediaHouseInvoice.aggregate([
         {$unwind:"$insertions"}, 
-        {$match:query},
+        {$match:{
+            "insertions.paymentMode":"Cheque"
+        }},
         { $group : { 
             _id: "$insertions.paymentNO",
             count: {$sum: 1},
@@ -423,7 +425,7 @@ module.exports.MHIChequeDetailsData = async function(request, response){
         else{
             response.send({
                 success:true,
-                receipts: mhis
+                mhis: mhis
             });
             
         }

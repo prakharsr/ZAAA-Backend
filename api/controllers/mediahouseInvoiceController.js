@@ -186,7 +186,7 @@ module.exports.querySummarySheet =async function(request, response){
     var mediahouseID =await searchMediahouseID(request, response, user);
     var date = (request.body.date)?(request.body.date):null;
     var query = await formQuery(mediahouseID, date, user, request);
-    query['paymentType']="Credit";
+    query['insertions.paymentMode']="Credit";
     
     
     MediaHouseInvoice
@@ -202,10 +202,14 @@ module.exports.querySummarySheet =async function(request, response){
                     "releaseOrderId":"$releaseOrderId",
                     "publicationName":"$publicationName",
                     "publicationEdition":"$publicationEdition",
-                    "date": "$date", 
+                    "date": "$date",
+                    "pendingAmount":{sum:"$insertions.pendingAmount"},
+                    "collectedAmount":{sum:"$insertions.collectedAmount"},
+                    "generatedAt":"$generatedAt", 
                     "insertions":{
                         "insertionDate": "$insertions.insertionDate", 
                         "Amount":"$insertions.Amount",
+                        "pendingAmount":"$insertions.pendingAmount",
                         "insertionId": "$insertions.insertionId",
                         "collectedAmount":"$insertions.collectedAmount",
                         "_id": "$insertions._id",
@@ -289,11 +293,124 @@ module.exports.querySummarySheet =async function(request, response){
                     invoice.insertions.forEach(mhiInsertion => {
                         mhis.forEach(insertion => {
                             if (mhiInsertion._id == insertion._id) {
-                                mhiInsertion.collectedAmount = insertion.amount;
-                                mhiInsertion.recieptNumber = insertion.recieptNumber;
-                                mhiInsertion.recieptDate = insertion.recieptDate;
-                                mhiInsertion.paymentMode = insertion.paymentMode;
+                                mhiInsertion.collectedAmount += insertion.amount;
+                                mhiInsertion.pendingAmount -=insertion.amount;
                                 
+                            }
+                        });
+                    });
+                    
+                    invoice.save(function(err) {
+                        if (err) {
+                            response.send({
+                                success: false,
+                                msg: "error" + err
+                            });
+                        }
+                    });
+                });
+            });
+        }
+        catch (err) {
+            if (err)
+            console.log(err)
+        }
+        
+        response.send({
+            success:true,
+            msg:"done"
+        })
+    };
+    
+    module.exports.queryMediaHouseReports =async function(request, response){
+        var user = response.locals.user;
+        var mediahouseID =await searchMediahouseID(request, response, user);
+        var date = (request.body.date)?(request.body.date):null;
+        var query = await formQuery(mediahouseID, date, user, request);       
+        
+        MediaHouseInvoice
+        .aggregate([
+            {$unwind: "$insertions"}, 
+            {$match:query},
+            { $group : { 
+                _id: "$releaseOrderId",
+                count: {$sum: 1},
+                entries: { $push:  
+                    {
+                        "_id":"$_id",
+                        "releaseOrderId":"$releaseOrderId",
+                        "publicationName":"$publicationName",
+                        "publicationEdition":"$publicationEdition",
+                        "date": "$date",
+                        "pendingAmount":{sum:"$insertions.pendingAmount"},
+                        "collectedAmount":{sum:"$insertions.collectedAmount"},
+                        "generatedAt":"$generatedAt", 
+                        "insertions":{
+                            "insertionDate": "$insertions.insertionDate", 
+                            "Amount":"$insertions.Amount",
+                            "pendingAmount":"$insertions.pendingAmount",
+                            "insertionId": "$insertions.insertionId",
+                            "collectedAmount":"$insertions.collectedAmount",
+                            "receiptNumber":"$insertions.receiptNumber",
+                            "receiptDate":"$insertions.receiptDate",
+                            "paymentMode":"$insertions.paymentMode",
+                            "paymentDate":"$insertions.paymentDate",
+                            "paymentAmount":"$insertions.paymentAmount",
+                            "paymentNo":"$insertions.paymentNo",
+                            "paymentBankName":"$insertions.paymentBankName",
+                            "_id": "$insertions._id",
+                        },
+                        "releaseOrderNo":"$releaseOrderNo",
+                        "MHINo":"$MHINo",
+                        "MHIDate":"$MHIDate",
+                        "MHIGrossAmount":"$MHIGrossAmount",
+                        "MHITaxAmount":"$MHIAmount"
+                    } }
+                } },
+                {$limit: perPage},
+                {$skip:(perPage * request.body.page) - perPage}
+            ])
+            .exec(function(err, insertions){
+                if(err){
+                    console.log(err+ "");
+                    response.send({
+                        success:false,
+                        msg: err +""
+                    });
+                }
+                else{
+                    console.log(insertions)
+                    MediaHouseInvoice.count(query, function(err, count){
+                        response.send({
+                            success:true,
+                            insertions: insertions,
+                            page: request.body.page,
+                            perPage:perPage,
+                            pageCount: Math.ceil(count/perPage)
+                        });
+                    })
+                    
+                }
+            });
+        };
+    
+    
+    module.exports.updateReceipts = function(request, response){
+        var user = response.locals.user;
+        try {
+            var mhis = request.body.mhis; // { _id, amount: number }[]
+            
+            MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+                invoices.forEach(invoice => {
+                    invoice.insertions.forEach(mhiInsertion => {
+                        mhis.forEach(insertion => {
+                            if (mhiInsertion._id == insertion._id) {
+                                mhiInsertion.receiptDate += insertion.receiptDate;
+                                mhiInsertion.receiptNumber -=insertion.receiptNumber;
+                                mhiInsertion.paymentDate =insertion.paymentDate;
+                                mhiInsertion.paymentNo =insertion.paymentNo;
+                                mhiInsertion.paymentMode =insertion.paymentMode;
+                                mhiInsertion.paymentBankName =insertion.paymentBankName;
                             }
                         });
                     });

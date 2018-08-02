@@ -142,6 +142,8 @@ router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryMediaHouseInvoices);
 router.post('/user/summarySheet/search', mediahouseInvoice.querySummarySheet);
 router.post('/user/summarySheet', mediahouseInvoice.generateSummarySheet);
+router.post('/user/mediahouseReceipts/search', mediahouseInvoice.queryMediaHouseReports);
+router.post('/user/mediahouseReceipts', mediahouseInvoice.updateReceipts);
 router.post('/user/notes/client', notes.createClientNote);
 router.post('/user/notes/mediahouse', notes.createMediaHouseNote);
 router.post('/user/notes/client/search/', notes.queryClientNote);
