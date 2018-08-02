@@ -1,22 +1,11 @@
-var config = require('../../config');
-var RateCard = require('../models/Ratecard');
-var userController = require('./userController');
-var firmController = require('./firmController');
 var pdf = require('./pdf');
-var User = require('../models/User');
-var ReleaseOrder = require('../models/ReleaseOrder');
-var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
-var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
 var Executive = require('../models/Executive');
 var Invoice = require('../models/Invoice');
 var Client = require('../models/Client');
 var Receipt = require('../models/Receipt');
 var mongoose = require('mongoose');
-var multer = require('multer');
-var mkdirp = require('mkdirp');
-var path = require('path');
 var perPage=20;
 
 
@@ -523,6 +512,38 @@ module.exports.getReceipts = function(request, response){
                     page: request.params.page,
                     pageCount : Math.ceil(count/perPage)
                 });
+            })
+        }
+    });    
+};
+
+module.exports.getReceiptsForInvoice = function(request, response){
+    var user = response.locals.user;
+    Receipt.find({
+        "firm":user.firm,
+        "invoiceID": mongoose.mongo.ObjectID(request.body.invoiceID)
+    })
+    .sort(-'receiptNO')
+    .exec(function(err, receipts){
+        if(err){
+            console.log("here");
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else if(receipts.length ==0){
+            console.log("No receipt");
+            response.send({
+                success:false,
+                msg:" No Receipt"
+            });
+        }
+        else{
+            console.log("hi")
+                response.send({
+                    success : true,
+                    receipts : receipts,
             })
         }
     });    

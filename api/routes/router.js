@@ -124,6 +124,7 @@ router.post('/user/invoice/clientPayments', invoice.queryClientPayments);
 router.post('/user/invoice/executivePayments', invoice.queryExecutivePayments);
 
 router.post('/user/receipt', receipt.createReceipt);
+router.post('/user/receipt/pre', receipt.getReceiptsForInvoice);
 router.post('/user/receipt/search/', receipt.queryReceipt);
 router.post('/user/receipt/advanced/search/', receipt.queryAdvancedReceipt);
 router.post('/user/receipt/download', receipt.generateReceiptPdf);
