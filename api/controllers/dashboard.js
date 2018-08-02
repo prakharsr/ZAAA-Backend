@@ -32,11 +32,6 @@ function formQuery(user, request){
             var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
             query['date']={$gte: from, $lte:to} 
         }
-        else{
-            var to = new Date()
-            var from = new Date(1);
-            query['date']={$gte: from, $lte:to} 
-        }
         if(request.body.insertionPeriod){
             var to = new Date()
             var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
@@ -344,6 +339,97 @@ module.exports.RecieptsChequeData = async function(request, response){
         }
     });
 }
+
+module.exports.RecieptsChequeDetailsData = async function(request, response){
+    var user = response.locals.user;
+    var query = await formQuery(user, request);
+    query["paymentType"]="Cheque"
+    console.log(query)
+    
+    var date = new Date();
+    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
+    
+    
+    Receipt.aggregate([ 
+        {$match:query},
+        { $group : { 
+            _id: "$paymentNO",
+            count: {$sum: 1},
+            entries:{
+                $push:{
+                    "ChequeDate":"$paymentDate",
+                    "ChequeAmount":"$paymentAmount",
+                    "ChequeNo":"$paymentNo",
+                    "ChequeBank":"$paymentBankName"
+                }
+            }
+        },
+
+        }
+    ])
+    .exec(function(err, receipts){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                receipts: receipts
+            });
+            
+        }
+    });
+}
+module.exports.MHIChequeDetailsData = async function(request, response){
+    var user = response.locals.user;
+    var query = await formQuery(user, request);
+    query["insertions.paymentType"]="Cheque"
+    console.log(query)
+    
+    var date = new Date();
+    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
+    
+    
+    MediaHouseInvoice.aggregate([
+        {$unwind:"$insertions"}, 
+        {$match:query},
+        { $group : { 
+            _id: "$insertions.paymentNO",
+            count: {$sum: 1},
+            entries:{
+                $push:{
+                    "ChequeDate":"$insetions.paymentDate",
+                    "ChequeAmount":"$insertions.paymentAmount",
+                    "ChequeNo":"$insetions.paymentNo",
+                    "ChequeBank":"$insetions.paymentBankName"
+                }
+            }
+        },
+
+        }
+    ])
+    .exec(function(err, mhis){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                receipts: mhis
+            });
+            
+        }
+    });
+}
+
 
 module.exports.MediaHouseInvoiceChequeData = async function(request, response){
     var user = response.locals.user;
