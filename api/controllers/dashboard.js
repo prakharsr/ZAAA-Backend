@@ -152,10 +152,14 @@ module.exports.DueOverdueData = async function(request, response){
             });
         }
         else{
+            
             Receipt.count(query, function(err, count){
+                var date = new Date();
+                var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));
                 response.send({
                     success:true,
-                    receipt:receipt
+                    receipt:receipt,
+                    last:last
                 });
             })
             
@@ -289,6 +293,9 @@ module.exports.RecieptsChequeData = async function(request, response){
     var user = response.locals.user;
     var query = await formQuery(user, request);
     
+    var date = new Date();
+    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
+    
     
     Receipt.aggregate([ 
         {$match:query},
@@ -297,23 +304,23 @@ module.exports.RecieptsChequeData = async function(request, response){
             count: {$sum: 1},
             
             DueChequesAmount:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",last ]}  ]},
                 "$paymentAmount",0]
             }},
             DueChequesNumber:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",last ]}  ]},
                 1,0]
             }},
             CreditAmount:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",new Date() ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Credit" ] }, {  $lte: ["$paymentDate",last ]}  ]},
                 "$paymentAmount",0]
             }},
             OverDueChequesNumber:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",last ]}  ]},
                 1,0]
             }},
             OverDueChequesAmount:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",new Date() ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $gt: ["$paymentDate",last ]}  ]},
                 "$paymentAmount",0]
             }},
             
@@ -337,6 +344,64 @@ module.exports.RecieptsChequeData = async function(request, response){
         }
     });
 }
+
+module.exports.MediaHouseInvoiceChequeData = async function(request, response){
+    var user = response.locals.user;
+    var query = await formQuery(user, request);
+    
+    var date = new Date();
+    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
+    
+    
+    MediaHouseInvoice.aggregate([ 
+        {$match:query},
+        { $group : { 
+            _id: null,
+            count: {$sum: 1},
+            
+            DueChequesAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$insertions.paymentType","Cheque" ] }, {  $lte: ["$insertions.paymentDate",last ]}  ]},
+                "$insertions.paymentAmount",0]
+            }},
+            DueChequesNumber:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$insertions.paymentType","Cheque" ] }, {  $lte: ["$insertions.paymentDate",last ]}  ]},
+                1,0]
+            }},
+            CreditAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$insertions.paymentType","Credit" ] }, {  $lte: ["$insertions.paymentDate",last ]}  ]},
+                "$insertions.paymentAmount",0]
+            }},
+            OverDueChequesNumber:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$insertions.paymentType","Cheque" ] }, {  $gt: ["$insertions.paymentDate",last ]}  ]},
+                1,0]
+            }},
+            OverDueChequesAmount:{$sum:{
+                "$cond": [{$and: [ {  $eq: ["$insertions.paymentType","Cheque" ] }, {  $gt: ["$insertions.paymentDate",last ]}  ]},
+                "$insertions.paymentAmount",0]
+            }},
+            
+            
+        } }
+    ])
+    .exec(function(err,mhinvoices){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            response.send({
+                success:true,
+                mhinvoices:mhinvoices
+            });
+            
+        }
+    });
+}
+
+
 
 module.exports.check= function(request, response, user){
     console.log(response.locals.user);
