@@ -152,7 +152,7 @@ async function f(request, response, user){
         netAmountWords:request.body.netAmountWords,
         otherCharges:request.body.otherCharges,
         extraCharges:request.body.extraCharges,
-        pendingAmount:request.body.pendingAmount,
+        pendingAmount:request.body.FinalTaxAmount,
         FinalTaxAmount:request.body.FinalTaxAmount,
         
         caption:request.body.caption,

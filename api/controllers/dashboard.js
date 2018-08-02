@@ -125,17 +125,22 @@ module.exports.InvoiceData = async function(request, response){
 
 module.exports.DueOverdueData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery( user, request, response);       
-    Receipt.aggregate([
+    var query = await formQuery( user, request, response);
+    var date = new Date();
+    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));       
+    Invoice.aggregate([
         {$match:query},
         { $group : {
             _id:null, 
             count: {$sum: 1},
-            onCreditAmount:{$sum:{
-                "$cond": [{"$eq":["$paymentType",'Credit']},
-                "$paymentAmount",0]
+            OverDueAmount:{$sum:{
+                "$cond": [{"$gte":["$paymentDate", last]},
+                "$pendingAmount",0]
             }},
-            totalAmount:{$sum:"$paymentAmount"},
+            DueAmount:{$sum:{
+                "$cond": [{"$lt":["$paymentDate", last]},
+                "$pendingAmount",0]
+            }},
         }}
     ])
     .exec(function(err, receipt){
