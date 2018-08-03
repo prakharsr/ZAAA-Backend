@@ -2,7 +2,7 @@ var Notification = require('../models/Notifications');
 var User = require('../../api/models/User');
 var Receipt = require('../../api/models/Receipt');
 var FCM = require('fcm-push');
-var serverkey = '<insert-server-key>';  //
+var serverkey = 'AAAAu8UiRLk:APA91bG_gPsYwr8q2ChL1LRLeYUCasxKPnMumEuCnmUq0oh0MmiISMD6XeTByhg0BNO_bqDKrzUSzW42doeV70Eb-qvnJYzXM455cOEZGWNW-9cdlWVWPnQxVVVOFhham_eGbHpnYw3S';  //
 var fcm = new FCM(serverkey);
 var cron = require('node-cron');
 
@@ -148,14 +148,14 @@ async function sendPaymentReminder(){
         var receipts = await Receipt.find({userID: user._id});
         var sum;
         receipts.forEach(receipt => {
-            if(receipt.status === 0 )
+            if(receipt.status === 1 )
             sum += receipt.FinalAmount;
         });
         var message = {  
             to : user.deviceTokens,
             notification : {
                 title : "Ad Agency Manager",
-                body : 'Today you have to collect '+sum+' amount from your employees'
+                body : 'Today you have to collect '+sum+' amount for your receipts'
             }
         };
         fcm.send(message, function(err,response){  
