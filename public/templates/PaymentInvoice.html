@@ -1,7 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Release Order</title>
+    <title>Invoice</title>
     <style>
         hr.rule1{
             border: 0;
@@ -14,21 +14,18 @@
         b {
             color: rgb(0, 9, 128);
         }
-        img{
-            height: 100px;
-            width: 100px;
-        }
-
     </style>
 </head>
 <body>
-    <img src="{{logoimage}}">
-    <h3 style="text-align:center">Tax Invoice</h3>
+    <img src="{{logoimage}}" style="height:40px; width:40px;">
+    <div class="container" style="">
+        <h3 style="text-align:center">Tax Invoice</h3>
+    </div>
     <hr class="rule1">
     <div class="container">
-        <div class="row">
+        <div class="row" style="width: 500px;">
             <div class="col">
-                <table>
+                <table style="width: 250px; font-size: 6px;">
                     <tr>
                         <td><b>Client</b></td>
                         <td><b>:&nbsp;</b></td>
@@ -52,7 +49,7 @@
                 </table>
             </div>
             <div class="col">
-                <table>
+                <table style="width: 250px; font-size: 6px;">
                         <tr>
                             <td><b>Invoice No.</b></td>
                             <td><b>:&nbsp;</b></td>
@@ -71,7 +68,7 @@
                     </table>
             </div>
         </div>
-        <table class="table table-bordered table">
+        <table class="table table-bordered table" style="width: 500px; font-size: 6px;">
             <tr>
                 <th rowspan="2">
                     Sr. No.

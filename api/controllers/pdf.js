@@ -79,8 +79,8 @@ module.exports.generateInvoice = function(request,response,Details) {
             templateHtml = templateHtml.replace('{{method}}', Details.method)
 
             var options = {
-                width: '100mm',
-                height: '180mm'
+                width: '210mm',
+                height: '297mm'
             }
 
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
@@ -130,8 +130,8 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
             templateHtml = templateHtml.replace('{{damount}}', Details.damount);
             templateHtml = templateHtml.replace('{{namount}}', Details.namount);
             var options = {
-                width: '600mm',
-                height: '400mm'
+                width: '210mm',
+                height: '297mm'
             }
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {
@@ -152,7 +152,7 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
 }
 
 module.exports.generateReleaseOrder =  function(request,response,Details) {
-    var req = http.request('http://www.adagencymanager.com/templates/releaseOrder.html', res => {
+    var req = http.request('http://localhost:8080/templates/releaseOrder.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -170,6 +170,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
             } 
             var today = dd+'/'+mm+'/'+yyyy;
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{sign}}', Details.sign);
             templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
             templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
             templateHtml = templateHtml.replace('{{cname}}', Details.cname);
@@ -182,9 +183,12 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{dper}}', Details.dper);
             templateHtml = templateHtml.replace('{{damount}}', Details.damount);
             templateHtml = templateHtml.replace('{{namount}}', Details.namount);
+            templateHtml = templateHtml.replace('{{username}}', Details.username);
+            templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
+            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
             var options = {
-                width: '600mm',
-                height: '400mm'
+                width: '210mm',
+                height: '297mm'
             }
             pdf.create(templateHtml, options).toStream(function (err, data) {
                 if (err) {
@@ -211,7 +215,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
 
 
 module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request('http://www.adagencymanager.com/templates/PaymentInvoice.html', res => {
+    var req = http.request('http://localhost:8080/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -250,8 +254,8 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
             var options = {
-                width: '600mm',
-                height: '400mm'
+                width: '210mm',
+                height: '297mm'
             }
             pdf.create(templateHtml, options).toStream(function (err, data) {
                 if (err) {
@@ -316,8 +320,8 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
             var options = {
-                width: '600mm',
-                height: '400mm'
+                width: '210mm',
+                height: '297mm'
             }
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {
@@ -368,8 +372,8 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
-                width: '200mm',
-                height: '400mm'
+                width: '210mm',
+                height: '150mm'
             }
             pdf.create(templateHtml, options).toStream(function (err, data) {
                 if (err) {
@@ -425,8 +429,8 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
-                width: '200mm',
-                height: '4000mm'
+                width: '210mm',
+                height: '297mm'
             }
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {
@@ -475,8 +479,8 @@ module.exports.generateClientNote =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             var options = {
-                width: '200mm',
-                height: '400mm'
+                width: '210mm',
+                height: '150mm'
             }
             pdf.create(templateHtml, options).toStream(function (err, data) {
                 if (err) {
@@ -532,8 +536,8 @@ module.exports.mailClientNote =  function(request,response,Details) {
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{details}}', Details.details);
             var options = {
-                width: '200mm',
-                height: '4000mm'
+                width: '210mm',
+                height: '150mm'
             }
             pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
                 if (err) {

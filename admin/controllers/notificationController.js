@@ -1,8 +1,10 @@
 var Notification = require('../models/Notifications');
 var User = require('../../api/models/User');
+var Receipt = require('../../api/models/Receipt');
 var FCM = require('fcm-push');
 var serverkey = '<insert-server-key>';  //
 var fcm = new FCM(serverkey);
+var cron = require('node-cron');
 
 function getUsers(){
     return new Promise((reject,resolve)=>{
@@ -27,7 +29,6 @@ module.exports.sendNotifs = async (request,response) => {
     var tokens = await getUsers();
     var message = {  
         to : tokens,
-        collapse_key : '<insert-collapse-key>', //
         notification : {
             title : request.body.title,
             body : request.body.notifBody
@@ -101,5 +102,74 @@ module.exports.deleteNotification = (request,response) => {
                 msg: "Notification deleted"
             });
         }  
+    })
+}
+
+cron.schedule('* 08 * * *', ()=>{
+    sendShadowReminder();
+    sendPaymentReminder();
+});
+
+async function sendShadowReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var receipts = await Receipt.find({userID: user._id});
+        var sum;
+        receipts.forEach(receipt => {
+            if(receipt.status === 0 )
+            sum += receipt.FinalAmount;
+        });
+        var message = {  
+            to : user.deviceTokens,
+            notification : {
+                title : "Ad Agency Manager",
+                body : 'Today you have to collect '+sum+' amount from your employees'
+            }
+        };
+        fcm.send(message, function(err,response){  
+            if(err) {
+                response.send({
+                    success: false,
+                    msg : "Something has gone wrong! "+err
+                });
+            } else {
+                response.send({
+                    success: true,
+                    msg : "Sent Notifications to users"
+                });
+            }
+        });
+    })
+}
+
+async function sendPaymentReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var receipts = await Receipt.find({userID: user._id});
+        var sum;
+        receipts.forEach(receipt => {
+            if(receipt.status === 0 )
+            sum += receipt.FinalAmount;
+        });
+        var message = {  
+            to : user.deviceTokens,
+            notification : {
+                title : "Ad Agency Manager",
+                body : 'Today you have to collect '+sum+' amount from your employees'
+            }
+        };
+        fcm.send(message, function(err,response){  
+            if(err) {
+                response.send({
+                    success: false,
+                    msg : "Something has gone wrong! "+err
+                });
+            } else {
+                response.send({
+                    success: true,
+                    msg : "Sent Notifications to users"
+                });
+            }
+        });
     })
 }

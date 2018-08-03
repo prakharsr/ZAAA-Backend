@@ -39,6 +39,7 @@ module.exports.clientExcelImport = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
+                try{
                 var client = new Client({
                     OrganizationName:element.organizationName,
                     CompanyName:element.companyName,
@@ -56,14 +57,16 @@ module.exports.clientExcelImport = (request, response) => {
                     Remark:element.Remark,
                     firm : user.firm
                 });
-                client.save((err) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
-                });
+                client.save();
+            }
+            catch(err){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+            }
             });
             response.send({
                 success: true,
@@ -85,6 +88,7 @@ module.exports.ratecardExcelImport = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
+                try{
                 var ratecard = new RateCard({
                     MediaType:element.mediaType,
                     AdType:element.adType,
@@ -118,14 +122,16 @@ module.exports.ratecardExcelImport = (request, response) => {
                     firm :user.firm,
                     global:false
                 });
-                ratecard.save((err) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
-                });
+                ratecard.save();
+            }
+            catch(err){
+                if(err){
+                    response.send({
+                        success: false,
+                        msg: 'Unsuccessful'
+                    });
+                }
+            }
             });
             response.send({
                 success: true,
@@ -147,6 +153,7 @@ module.exports.mediahouseExcelImport = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
+                try{
                 var mediahouse = new MediaHouse({
                     OrganizationName:element.organizationName,
                     PublicationName:element.publicationName,
@@ -163,15 +170,17 @@ module.exports.mediahouseExcelImport = (request, response) => {
                     Remark:element.Remark,
                     firm : user.firm
                 });
-                mediahouse.save((err) => {
+                mediahouse.save();
+                }
+                catch(err){
                     if(err){
                         response.send({
                             success: false,
                             msg: 'Unsuccessful'
                         });
                     }
-                });
-            });
+                }
+                    });
             response.send({
                 success: true,
                 msg: 'Bulk upload successful'
@@ -192,6 +201,7 @@ module.exports.executiveExcelImport = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
+                try{
                 var executive = new Executive({
                     OrganizationName:element.organizationName,
                     CompanyName:element.companyName,
@@ -206,14 +216,16 @@ module.exports.executiveExcelImport = (request, response) => {
                     Remark:element.Remark,    
                     firm : user.firm 
                 });
-                executive.save((err) => {
+                executive.save();
+            }
+            catch(err){
                     if(err){
                         response.send({
                             success: false,
                             msg: 'Unsuccessful'
                         });
                     }
-                });
+                }
             });
             response.send({
                 success: true,
@@ -236,14 +248,15 @@ module.exports.clientExcelUpdate = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
-                Client.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
+            try{
+                Client.findByIdAndUpdate(element._id,{$set: element});
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: 'Unsuccessful'
                 });
+            }
             });
             response.send({
                 success: true,
@@ -265,14 +278,15 @@ module.exports.ratecardExcelUpdate = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
-                RateCard.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
+            try{
+                RateCard.findByIdAndUpdate(element._id,{$set: element});
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: 'Unsuccessful'
                 });
+            }
             });
             response.send({
                 success: true,
@@ -294,14 +308,15 @@ module.exports.mediahouseExcelUpdate = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
-                MediaHouse.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
+            try{
+                MediaHouse.findByIdAndUpdate(element._id,{$set: element});
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: 'Unsuccessful'
                 });
+            }
             });
             response.send({
                 success: true,
@@ -323,14 +338,15 @@ module.exports.executiveExcelUpdate = (request, response) => {
         else{
             var json = convertToJSON(data);
             json.forEach(element => {
-                Executive.findByIdAndUpdate(element._id,{$set: element}, (err, doc) => {
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
+            try{
+                Executive.findByIdAndUpdate(element._id,{$set: element});
+            }
+            catch(err){
+                response.send({
+                    success: false,
+                    msg: 'Unsuccessful'
                 });
+            }
             });
             response.send({
                 success: true,
