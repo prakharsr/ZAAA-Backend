@@ -17,6 +17,7 @@ var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
+var http = require('http');
 
 var XLSX = require('xlsx');
 var base64 = require('base64-stream');
@@ -1071,6 +1072,112 @@ module.exports.previewROPdf = async function(request, response) {
 
     pdf.generateReleaseOrder(request,response,Details);
 };
+
+module.exports.previewROhtml = async function(request, response) {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var releaseOrder = request.body.releaseOrder;
+    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+    var result = releaseOrder.insertions.reduce((grouped, item) => {
+        var index = grouped.findIndex(m => m.key.month == item.date.month
+            && m.key.year == item.date.year);
+            
+        if (index == -1) {
+            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
+        }
+        else grouped[index].items.push(item);
+        
+        return grouped;
+    }, []);
+    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+    var insData="";
+    //var insertions = releaseOrder.insertions;
+    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
+    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+    var namount = releaseOrder.adGrossAmount - damount ;
+    result.forEach(object =>{
+        var dates = "";
+        object.items.forEach(obj => {dates += obj.date.day+" "});
+        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+    });
+    var Details = {
+        image : 'http://www.adagencymanager.com/'+firm.LogoURL,
+        mediahouse :releaseOrder.publicationName,
+        pgstin :'-',
+        cname :releaseOrder.clientName,
+        cgstin :'-',
+        gstin :'-',
+        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+        gamount :releaseOrder.adGrossAmount,
+        insertions :insData,
+        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
+        damount :damount,
+        namount :namount,
+        username: user.name,
+        firmname: firm.FirmName,
+        rno : releaseOrder.releaseOrderNO,
+        logo: firm.LogoURL,
+        sign: 'http://www.adagencymanager.com/'+user.signature
+    }
+    if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
+        Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
+    if(releaseOrder.publicationGSTIN.GSTType !== 'URD')
+        Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo
+    if(releaseOrder.clientGSTIN.GSTType !== 'URD')
+        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
+
+    getROhtml(Details, content => {
+        response.send({
+            content: content
+        });
+    })
+};
+
+function getROhtml(Details, callback) {
+    var req = http.request('http://localhost:8080/templates/releaseOrder.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            var today = new Date(Date.now());
+            var dd = today.getDate();
+            var mm = today.getMonth()+1; 
+            var yyyy = today.getFullYear();
+            if(dd<10){
+                dd='0'+dd;
+            } 
+            if(mm<10){
+                mm='0'+mm;
+            } 
+            var today = dd+'/'+mm+'/'+yyyy;
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
+            templateHtml = templateHtml.replace('{{sign}}', Details.sign);
+            templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
+            templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
+            templateHtml = templateHtml.replace('{{cname}}', Details.cname);
+            templateHtml = templateHtml.replace('{{cgstin}}',Details.cgstin);
+            templateHtml = templateHtml.replace('{{date}}', today);
+            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
+            templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
+            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
+            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
+            templateHtml = templateHtml.replace('{{dper}}', Details.dper);
+            templateHtml = templateHtml.replace('{{damount}}', Details.damount);
+            templateHtml = templateHtml.replace('{{namount}}', Details.namount);
+            templateHtml = templateHtml.replace('{{username}}', Details.username);
+            templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
+            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
+
+            callback(templateHtml);
+        });
+    });
+    req.on('error', e => console.log(e));
+    req.end();
+}
+
+module.exports.getROhtml = getROhtml;
+
 module.exports.queryReleaseOrderByNo = function(request, response){
     var user = response.locals.user;
     ReleaseOrder.find({
