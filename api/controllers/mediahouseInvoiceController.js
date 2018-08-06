@@ -194,27 +194,26 @@ module.exports.querySummarySheet =async function(request, response){
         {$unwind: "$insertions"}, 
         {$match:query},
         { $group : { 
-            _id: "$releaseOrderId",
+            _id: {
+                roId: "$releaseOrderId",
+                "publicationName":"$publicationName",
+                "publicationEdition":"$publicationEdition",
+                "generatedAt":"$generatedAt",
+                "releaseOrderNo":"$releaseOrderNo"
+            },
             count: {$sum: 1},
+            "pendingAmount":{$sum:"$insertions.pendingAmount"},
+            "collectedAmount":{$sum:"$insertions.collectedAmount"},
+            
+            
             entries: { $push:  
                 {
-                    "_id":"$_id",
-                    "releaseOrderId":"$releaseOrderId",
-                    "publicationName":"$publicationName",
-                    "publicationEdition":"$publicationEdition",
-                    "date": "$date",
-                    "pendingAmount":{sum:"$insertions.pendingAmount"},
-                    "collectedAmount":{sum:"$insertions.collectedAmount"},
-                    "generatedAt":"$generatedAt", 
-                    "insertions":{
-                        "insertionDate": "$insertions.insertionDate", 
-                        "Amount":"$insertions.Amount",
-                        "pendingAmount":"$insertions.pendingAmount",
-                        "insertionId": "$insertions.insertionId",
-                        "collectedAmount":"$insertions.collectedAmount",
-                        "_id": "$insertions._id",
-                    },
-                    "releaseOrderNo":"$releaseOrderNo",
+                    "insertionDate": "$insertions.insertionDate", 
+                    "Amount":"$insertions.Amount",
+                    "pendingAmount":"$insertions.pendingAmount",
+                    //"insertionId": "$insertions.insertionId",
+                    "collectedAmount":"$insertions.collectedAmount",
+                    "_id": "$insertions._id",                   
                     "MHINo":"$MHINo",
                     "MHIDate":"$MHIDate",
                     "MHIGrossAmount":"$MHIGrossAmount",
