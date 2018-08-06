@@ -805,8 +805,16 @@ module.exports.cancelReleaseOrder = function(request, response){
 };
 
 module.exports.updateReleaseOrder = function(request, response){
-	var user = response.locals.user;
-    ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id),{$set:request.body},function(err, releaseOrder){
+    var user = response.locals.user;
+    
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
+
+    console.log(request.body);
+    
+    ReleaseOrder.findByIdAndUpdate(mongoose.mongo.ObjectId(request.body.id), {
+        $set: request.body
+    }, function(err, releaseOrder){
         if(err){
             console.log(err);
             response.send({
