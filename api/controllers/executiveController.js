@@ -212,7 +212,9 @@ module.exports.queryExecutiveOrganization = function(request, response){
     }); 
 };
 module.exports.updateExecutive = function(request, response){
-	var user = response.locals.user;
+    var user = response.locals.user;
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     Executive.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, executive){
         if(err){
             console.log(err);

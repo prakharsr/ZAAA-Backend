@@ -650,6 +650,8 @@ module.exports.queryClientPayments = async function(request, response){
     
     module.exports.updateInvoice = function(request, response){
         var user = response.locals.user;
+        delete request.body.createdAt;
+        delete request.body.updatedAt;
         Invoice.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, invoice){
             if(err){
                 console.log(err);

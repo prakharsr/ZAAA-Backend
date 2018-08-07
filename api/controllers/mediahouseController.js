@@ -224,7 +224,9 @@ module.exports.deleteMediahouse = function(request, response){
 };
 
 module.exports.updateMediaHouse = function(request, response){
-	var user = response.locals.user;
+    var user = response.locals.user;
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     MediaHouse.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouses){
         if(err){
             console.log(err);

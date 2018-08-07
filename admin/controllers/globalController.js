@@ -40,6 +40,8 @@ module.exports.createGMediahouse = function(request,response){
 module.exports.getGMediaHouse = MediaHouseController.getGlobalMediahouses;
 
 module.exports.updateGMediahouse = function(request,response){
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     MediaHouse.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, mediahouse){
         if(err){
             console.log(err);
@@ -172,6 +174,8 @@ module.exports.createGRatecard = async function(request,response){
 module.exports.getGRateCard = RateCardController.getGlobalRatecards;
 
 module.exports.updateGRatecard = function(request,response){
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
         if(err){
             console.log(err);
