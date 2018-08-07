@@ -896,7 +896,7 @@ module.exports.mailROPdf = function(request, response) {
                         insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                     });
                     var Details = {
-                        image : config.DOMAIN+'/'+firm.LogoURL,
+                        image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
                         pgstin :'-',
                         cname :releaseOrder.clientName,
@@ -912,7 +912,7 @@ module.exports.mailROPdf = function(request, response) {
                         firmname: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
                         logo: firm.LogoURL,
-                        sign: config.DOMAIN+'/'+user.signature
+                        sign: config.domain+'/'+user.signature
                     }
                     console.log(releaseOrder.agencyGSTIN)
 
@@ -989,7 +989,7 @@ module.exports.generateROPdf = async function(request, response) {
                         insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
                     });
                     var Details = {
-                        image : config.DOMAIN+'/'+firm.LogoURL,
+                        image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
                         pgstin :'-',
                         cname :releaseOrder.clientName,
@@ -1005,7 +1005,7 @@ module.exports.generateROPdf = async function(request, response) {
                         firmname: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
                         logo: firm.LogoURL,
-                        sign: config.DOMAIN+'/'+user.signature
+                        sign: config.domain+'/'+user.signature
                     }
                     console.log(releaseOrder.agencyGSTIN)
 
@@ -1053,7 +1053,7 @@ module.exports.previewROPdf = async function(request, response) {
         insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
     });
     var Details = {
-        image : config.DOMAIN+'/'+firm.LogoURL,
+        image : config.domain+'/'+firm.LogoURL,
         mediahouse :releaseOrder.publicationName,
         pgstin :'-',
         cname :releaseOrder.clientName,
@@ -1069,7 +1069,7 @@ module.exports.previewROPdf = async function(request, response) {
         firmname: firm.FirmName,
         rno : releaseOrder.releaseOrderNO,
         logo: firm.LogoURL,
-        sign: config.DOMAIN+'/'+user.signature
+        sign: config.domain+'/'+user.signature
     }
     if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
         Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
@@ -1109,7 +1109,7 @@ module.exports.previewROhtml = async function(request, response) {
         insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
     });
     var Details = {
-        image : config.DOMAIN+'/'+firm.LogoURL,
+        image : config.domain+'/'+firm.LogoURL,
         mediahouse :releaseOrder.publicationName,
         pgstin :'-',
         cname :releaseOrder.clientName,
@@ -1125,7 +1125,7 @@ module.exports.previewROhtml = async function(request, response) {
         firmname: firm.FirmName,
         rno : releaseOrder.releaseOrderNO,
         logo: firm.LogoURL,
-        sign: config.DOMAIN+'/'+user.signature
+        sign: config.domain+'/'+user.signature
     }
     if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
         Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
@@ -1142,7 +1142,7 @@ module.exports.previewROhtml = async function(request, response) {
 };
 
 function getROhtml(Details, callback) {
-    var req = http.request(config.DOMAIN+'/templates/releaseOrder.html', res => {
+    var req = http.request(config.domain+'/templates/releaseOrder.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;

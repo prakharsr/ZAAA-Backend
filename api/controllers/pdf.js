@@ -47,7 +47,7 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
 };
 
 module.exports.generateInvoice = function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/invoice.html', res => {
+    var req = http.request(config.domain+'/templates/invoice.html', res => {
         var templateHtml = "";
 
         res.on('data', chunk => {
@@ -146,7 +146,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
 }
 
 module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/PaymentInvoice.html', res => {
+    var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -212,7 +212,7 @@ module.exports.generatePaymentInvoice =  function(request,response,Details) {
 
 
 module.exports.mailPaymentInvoice =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/PaymentInvoice.html', res => {
+    var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -273,7 +273,7 @@ module.exports.mailPaymentInvoice =  function(request,response,Details) {
 }
 
 module.exports.generatePaymentReceipt =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/PaymentReceipt.html', res => {
+    var req = http.request(config.domain+'/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -330,7 +330,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
 
 
 module.exports.mailPaymentReceipt =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/PaymentReceipt.html', res => {
+    var req = http.request(config.domain+'/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -382,7 +382,7 @@ module.exports.mailPaymentReceipt =  function(request,response,Details) {
 }
 
 module.exports.generateClientNote =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/Note.html', res => {
+    var req = http.request(config.domain+'/templates/Note.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
@@ -437,7 +437,7 @@ module.exports.generateClientNote =  function(request,response,Details) {
 
 
 module.exports.mailClientNote =  function(request,response,Details) {
-    var req = http.request(config.DOMAIN+'/templates/PaymentReceipt.html', res => {
+    var req = http.request(config.domain+'/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {
             templateHtml += chunk;
