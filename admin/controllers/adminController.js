@@ -689,6 +689,8 @@ module.exports.deleteUser = function(request, response){
 
 module.exports.setUserProfile = function(request, response){
 	var admin = response.locals.admin;
+	delete request.body.createdAt;
+    delete request.body.updatedAt;
 	Admin.findByIdAndUpdate(mongoose.mongo.ObjectId(admin._id),{$set:request.body},function(err, admin){
 		if(err){
 			console.log(err);

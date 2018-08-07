@@ -201,6 +201,8 @@ module.exports.queryClients = function(request, response){
 
 module.exports.updateClient = function(request, response){
     var user =response.locals.user;
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     Client.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, client){
         if(err){
             console.log(err);

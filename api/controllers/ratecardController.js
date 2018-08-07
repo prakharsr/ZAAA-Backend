@@ -208,7 +208,9 @@ module.exports.deleteRatecard = function(request, response){
 };
 
 module.exports.updateRatecard = function(request, response){
-	var user = response.locals.user;
+    var user = response.locals.user;
+    delete request.body.createdAt;
+    delete request.body.updatedAt;
     RateCard.findByIdAndUpdate(request.body.id,{$set:request.body},function(err, ratecard){
         if(err){
             console.log(err);
