@@ -300,8 +300,8 @@ module.exports.generateClientNotePdf = function(request, response) {
             var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+'</td><td>'+note.amount+'</td><td></td></tr>';
             
             var Details = {
-                image : 'http://www.adagencymanager.com/'+firm.LogoURL,
-                sign : 'http://www.adagencymanager.com/'+user.signature,
+                image : config.DOMAIN+'/'+firm.LogoURL,
+                sign : config.DOMAIN+'/'+user.signature,
                 faddress : Address,
                 fcdetails : cdetails,
                 cname : client.OrganizationName,

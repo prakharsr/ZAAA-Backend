@@ -603,7 +603,7 @@ module.exports.verifyMobile = function(request, response) {
 					from: 'AAMan <postmaster@adagencymanager.com>',
 					to: request.body.email,
 					subject: 'Password Reset Link',
-					text: 'http://www.adagencymanager.com/reset_password/'+token,
+					text: config.DOMAIN+'/reset_password/'+token,
 				};
 				
 				mailgun.messages().send(data, function (error, body) {

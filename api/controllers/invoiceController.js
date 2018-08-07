@@ -706,7 +706,7 @@ module.exports.queryClientPayments = async function(request, response){
                 });
                 
                 var Details={
-                    image: 'http://www.adagencymanager.com/'+firm.logoURL, 
+                    image: config.DOMAIN+'/'+firm.logoURL, 
                     clientname: client.OrganizationName,
                     address: client.Address.address,
                     state: client.Address.state,
@@ -768,7 +768,7 @@ module.exports.queryClientPayments = async function(request, response){
                 });
                 
                 var Details={
-                    image: 'http://www.adagencymanager.com/'+firm.logoURL, 
+                    image: config.DOMAIN+'/'+firm.logoURL, 
                     clientname : client.OrganizationName,
                     address: client.Address.address,
                     state: client.Address.state,
