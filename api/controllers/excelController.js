@@ -142,7 +142,7 @@ module.exports.ratecardExcelImport = (request, response) => {
 }
 
 module.exports.mediahouseExcelImport = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -190,7 +190,7 @@ module.exports.mediahouseExcelImport = (request, response) => {
 }
 
 module.exports.executiveExcelImport = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -237,7 +237,7 @@ module.exports.executiveExcelImport = (request, response) => {
 
 
 module.exports.clientExcelUpdate = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -267,7 +267,7 @@ module.exports.clientExcelUpdate = (request, response) => {
 }
 
 module.exports.ratecardExcelUpdate = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -297,7 +297,7 @@ module.exports.ratecardExcelUpdate = (request, response) => {
 }
 
 module.exports.mediahouseExcelUpdate = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -327,7 +327,7 @@ module.exports.mediahouseExcelUpdate = (request, response) => {
 }
 
 module.exports.executiveExcelUpdate = (request, response) => {
-    var token = response.locals.user;
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -357,64 +357,164 @@ module.exports.executiveExcelUpdate = (request, response) => {
 }
 
 module.exports.generateMediaHouseSheet = async function(request, response){
-	var token = response.locals.user;
-    MediaHouse.find({firm : user.firm}, function(err, mediahouses){
-        if(err){
-            console.log(err+ "");
+	var user = response.locals.user;
+    var query = { "firm": user.firm }
+    
+    MediaHouse.find(query, function (err, mediahouses) {
+        if (err) {
+            console.log(err + "");
             response.send({
-                success:false,
-                msg: err +""
+                success: false,
+                msg: err + ""
             });
         }
-        else{
-            var mediahouses_map = mediahouses.map({
-                
-            });
-            createSheet(mediahouses_map, request, response,'MediaHouseExportData', 'excelExport');
+        else {
+            try {
+                var el = mediahouses.map(function (mediahouse) {
+                    var obj = {
+                        "Publication Name": mediahouse.PublicationName ? mediahouse.PublicationName : "-",
+                        "Organization Name": mediahouse.OrganizationName ? mediahouse.OrganizationName : "-",
+                        "Nick Name": mediahouse.NickName ? mediahouse.NickName : "-",
+                        "Media Type": mediahouse.MediaType ? mediahouse.MediaType : "-",
+                        "Language": mediahouse.Language ? mediahouse.Language : "-",
+                        "PIN": mediahouse.Address.pincode ? mediahouse.Address.pincode : "-",
+                        "Edition": mediahouse.Address.edition?mediahouse.Address.edition:"-",
+                        "City": mediahouse.Address.city?mediahouse.Address.city:"-",
+                        "State": mediahouse.Address.state?mediahouse.Address.state:"-",
+                        "Phone": mediahouse.OfficeLandline.std + '-' + mediahouse.OfficeLandline.phone,
+                        "GSTIN": mediahouse.GSTIN.GSTType + '-' + (mediahouse.GSTIN.GSTNo ? mediahouse.GSTIN.GSTNo : "-"),
+                        "Remark": mediahouse.Remark
+                    }
+                    if(mediahouse.pullouts.length > 0)
+                    {
+                        for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
+                            var index = +i + 1
+                            var pullout = mediahouse.pullouts[i];
+                            obj["Pullout" + index] = pullout.Name?pullout.Name:"-";
+                            obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"-";
+                            obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"-";
+                            obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"-";
+                        }
+                    }
+                    if(mediahouse.Scheduling.length > 0)
+                    {
+                        for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
+                            var index = +i + 1
+                            var scheduling = mediahouse.Scheduling[i];
+                            obj["PersonName" + index] = scheduling.Name?scheduling.Name:"-";
+                            obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"-";
+                            obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"-";
+                            obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"-";
+                            obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"-";
+                            obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"-";
+                        }
+                    }
+                    return obj;
+                })
+            }
+            catch (err) {
+                console.log(err)
+            }
+            createSheet(el, request, response, 'MediaHouseExportData', 'excelReport');
         }
-    });
+    })
 };
 
 module.exports.generateClientSheet = async function(request, response){
-	var token = response.locals.user;
-    Client.find({firm : user.firm}, function(err, clients){
-        if(err){
-            console.log(err+ "");
+	var user = response.locals.user;
+    var query = { "firm": user.firm }
+    
+    Client.find(query, function (err, clients) {
+        if (err) {
+            console.log(err + "");
             response.send({
-                success:false,
-                msg: err +""
+                success: false,
+                msg: err + ""
             });
         }
-        else{
-            var clients_map = clients.map({
-                
-            });
-            createSheet(clients_map, request, response,'ClientExportData', 'excelExport');
+        else {
+            try {
+                var el = clients.map(function (client) {
+                    var obj =  {
+                        "Organization Name": client.OrganizationName ? client.OrganizationName : "-",
+                        "Nick Name": client.NickName ? client.NickName : "-",
+                        "Company Name": client.CompanyName ? client.CompanyName : "-",
+                        "Category": client.CategoryType ? client.CategoryType : "-",
+                        "Sub Category": client.SubCategoryType ? client.SubCategoryType : "-",
+                        "PIN": client.Address.pincode ? client.Address.pincode : "-",
+                        "City": client.Address.city,
+                        "Address": client.Address.address,
+                        "State": client.Address.state,
+                        "Phone": client.stdNo + '-' + client.Landline,
+                        "Website": client.Website,
+                        "PAN": client.PanNO,
+                        "GSTIN": client.GSTIN.GSTType + '-' + (client.GSTIN.GSTNo ? client.GSTIN.GSTNo : "-"),
+                        "Remark": client.Remark,
+                    }
+                    if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
+                        var index;
+                        for(var i = 0; i< client.ContactPerson.length && i < 2; ++i){
+                            index = i+1;
+                            var contactPerson = client.ContactPerson[i];
+                            obj["Person Name" + index] = contactPerson.Name;
+                            obj["Person Designation" + index] = contactPerson.Designation;
+                            obj["Person Department" + index] = contactPerson.Department;
+                            obj["Person Mobile" + index] = contactPerson.MobileNo;
+                            obj["Person Phone" + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
+                            obj["Person Email" + index] = contactPerson.EmailId;
+                            obj["Person DOB" + index] = contactPerson.DateOfBirth;
+                            obj["Person Anniversary" + index] = contactPerson.Anniversary;
+                        }
+                    }
+                    return obj
+                })
+            }
+            catch (err) {
+                console.log(err)
+            }
+            createSheet(el, request, response, 'ClientsExportData', 'excelReport');
         }
-    });
+    })
 };
 
 module.exports.generateExecutiveSheet = async function(request, response){
-	var token = response.locals.user;
-    Executive.find({firm : user.firm}, function(err, executives){
-        if(err){
-            console.log(err+ "");
+	var user = response.locals.user;
+    var query = { "firm": user.firm }
+    
+    Executive.find(query, function (err, executives) {
+        if (err) {
+            console.log(err + "");
             response.send({
-                success:false,
-                msg: err +""
+                success: false,
+                msg: err + ""
             });
         }
-        else{
-            var executives_map = executives.map({
-                
-            });
-            createSheet(executives_map, request, response,'ExecutiveExportData', 'excelExport');
+        else {
+            try {
+                var el = executives.map(function (executive) {
+                    return {
+                        "Executive Name": executive.ExecutiveName ? executive.ExecutiveName : "-",
+                        "Organization Name": executive.OrganizationName ? executive.OrganizationName : "-",
+                        "Designation": executive.Designation ? executive.Designation : "-",
+                        "Department": executive.Department ? executive.Department : "-",
+                        "MobileNo": executive.MobileNo,
+                        "Email": executive.EmailId,
+                        "DOB": executive.DateOfBirth,
+                        "Anniversary": executive.Anniversary,
+                        "Remark": executive.Remark,
+                    }
+                })
+            }
+            catch (err) {
+                console.log(err)
+            }
+            createSheet(el, request, response, 'ExecutiveExportData', 'excelReport');
         }
-    });
+    })
 };
 
 module.exports.generateRateCardSheet = async function(request, response){
-	var token = response.locals.user;
+	var user = response.locals.user;
     RateCard.find({firm : user.firm}, function(err, ratecards){
         if(err){
             console.log(err+ "");
@@ -424,7 +524,7 @@ module.exports.generateRateCardSheet = async function(request, response){
             });
         }
         else{
-            var ratecards_map = ratecards.map({
+            var ratecards_map = ratecards.map(ratecard => {
                 
             });
             createSheet(ratecards_map, request, response,'RateCardExportData', 'excelExport');
