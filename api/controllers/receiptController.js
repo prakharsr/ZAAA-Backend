@@ -782,13 +782,13 @@ module.exports.deleteReceipt = async function(request, response){
 
 module.exports.cancelReceipt = async function(request, response){
 	var user = response.locals.user;
-    var receipt = await Receipt.findById(request.params.id);
+    var receipt = await Receipt.findById(request.body.id);
     var invoice = await Invoice.findById(receipt.invoiceID);
     Invoice.update(
         { $and: [{firm:user.firm}, { _id : receipt.invoiceID }]
     },
-    { $set: {"clearedAmount": invoice.clearedAmount-receipt.netAmountFigures,
-    "pendingAmount": invoice.pendingAmount+receipt.netAmountFigures }}
+    { $set: {"clearedAmount": invoice.clearedAmount - receipt.paymentAmount,
+    "pendingAmount": invoice.pendingAmount + receipt.paymentAmount }}
 )
 .exec(function(err){
     if(err){
