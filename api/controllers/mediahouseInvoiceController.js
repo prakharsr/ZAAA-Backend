@@ -25,7 +25,6 @@ module.exports.createMHInvoice = async (request,response) => {
     var executiveID = await searchExecutiveID(request, response, user);
     var releaseorder = await ReleaseOrder.findById(request.body.releaseOrderId);
     var firm = await Firm.findById(user.firm)
-    
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
         publicationName:releaseorder.publicationName,
@@ -35,7 +34,8 @@ module.exports.createMHInvoice = async (request,response) => {
         publicationGSTIN:releaseorder.publicationGSTIN,
         insertions: request.body.insertions.map(insertion => {
             return {
-                ...insertion,                
+                ...insertion,
+                
                 paymentMode: releaseorder.paymentType,
                 paymentDate: releaseorder.paymentDate,
                 paymentNo: releaseorder.paymentNo,
@@ -53,17 +53,12 @@ module.exports.createMHInvoice = async (request,response) => {
         clientID: clientID,
         firm: firm._id
     })
-    releaseorder.insertions.filter(insertion => mhinvoice.insertions.some(ins => ins.insertionId == insertion.insertionId))
-    .forEach(insertion => insertion.mhimarked = true);
-    releaseorder.save((err,doc) => {
-        if(err){
-            request.body.insertions.map(insertion => insertion._id)
-            response.send({
-                success:false,
-                msg: err + "" 
-            });
-        }
-        else{
+
+    var amount = (mhinvoice.MHIGrossAmount + mhinvoice.MHITaxAmount)/mhinvoice.insertions.length;
+    mhinvoice.insertions.forEach(element => {
+        element.Amount = amount;
+        element.pendingAmount = amount;
+    });
             mhinvoice.save((err,doc)=>{
                 if(err){
                     response.send({
@@ -72,16 +67,26 @@ module.exports.createMHInvoice = async (request,response) => {
                     })
                 }
                 else{
-                    response.send({
-                        success:true,
-                        msg:" Mediahouse Invoice saved.",
-                        invoice:doc 
-                    })
-                    
+                    releaseorder.insertions.filter(insertion => mhinvoice.insertions.some(ins => ins.insertionId == insertion.insertionId))
+                    .forEach(insertion => insertion.mhimarked = true);
+                    releaseorder.mediahouseInvoices.push(mhinvoice._id);
+                    releaseorder.save((err,doc) => {
+                        if(err){
+                            response.send({
+                                success:false,
+                                msg: err + "" 
+                            });
+                        }
+                        else{
+                            response.send({
+                                success:true,
+                                msg:" Mediahouse Invoice saved.",
+                                invoice:doc 
+                            })
+
+                        }                    
                 }
-                
-            })
-        }
+            )}
     })
 };
         

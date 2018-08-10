@@ -449,6 +449,9 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         if(request.body.invoiceNO)
         query['invoiceNO'] = request.body.invoiceNO
         
+        if(request.body.hasPendingAmount)
+        query['pendingAmount'] = {$gt : 0}
+        
         resolve(query);
         
     })
