@@ -117,6 +117,7 @@ router.post('/user/releaseorder/categories', releaseOrder.getCategories);
 
 
 router.post('/user/invoice', invoice.createInvoice);
+router.post('/user/invoice/pre', invoice.getInvoicesForRO);
 router.post('/user/invoice/search/', invoice.queryInvoice);
 router.post('/user/invoice/download', invoice.generateInvoicePdf);
 router.post('/user/invoice/email', invoice.mailInvoicePdf);

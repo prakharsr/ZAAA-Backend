@@ -497,6 +497,38 @@ module.exports.queryInvoice = async function(request, response){
         }
     });
 };
+module.exports.getInvoicesForRO = function(request, response){
+    var user = response.locals.user;
+    Invoice.find({
+        "firm":user.firm,
+        "releaseOrderId": mongoose.mongo.ObjectID(request.body.releaseOrderId)
+    })
+    .sort(-'invoiceNO')
+    .exec(function(err, invoices){
+        if(err){
+            console.log("here");
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+        else if(invoices.length ==0){
+            console.log("No Invoices");
+            response.send({
+                success:false,
+                msg:" No Invoices"
+            });
+        }
+        else{
+            console.log("hi")
+                response.send({
+                    success : true,
+                    invoices:invoices,
+            })
+        }
+    });    
+};
+
 
 module.exports.queryClientPayments = async function(request, response){
     var user = response.locals.user;
