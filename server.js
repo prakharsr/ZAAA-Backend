@@ -40,7 +40,7 @@ app.use('/api', auth, require('./api/routes/router'));
 app.use('/adminapi', require('./admin/routes/router'));
 //app.use('/admin', require('./admin/routes/router'));
 
-mongoose.connect('mongodb://localhost:12877/zaaaDB', function(err){
+mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){
 		console.log('FAILED TO CONNECT' + err);
 	}
