@@ -7,6 +7,7 @@ var config = require('./config');
 var port = config.PORT;
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
+var bbodyParser = require('busboy-body-parser');
 var path = require('path');
 var auth  =require('./api/middleware/auth');
 
@@ -32,12 +33,14 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
+// parse multipart-formdata
+app.use(bbodyParser());
 app.use(express.static(__dirname + '/public'));
 app.use('/api', auth, require('./api/routes/router'));
 app.use('/adminapi', require('./admin/routes/router'));
 //app.use('/admin', require('./admin/routes/router'));
 
-mongoose.connect('mongodb://localhost/zaaaDB', function(err){
+mongoose.connect('mongodb://localhost:12877/zaaaDB', function(err){
 	if(err){
 		console.log('FAILED TO CONNECT' + err);
 	}

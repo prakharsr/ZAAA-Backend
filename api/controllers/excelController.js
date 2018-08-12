@@ -28,7 +28,45 @@ function convertToJSON(array){
 
 
 module.exports.clientExcelImport = (request, response) => {
-	var user = response.locals.user;
+    var user = response.locals.user;
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0;
+    var errorstring = '';
+    xlData.forEach(element => {
+        count++;
+        var client = new Client({
+            OrganizationName:element.organizationName,
+            CompanyName:element.companyName,
+            NickName:element.nickName,
+            CategoryType:element.categoryType,
+            SubCategoryType:element.SubCategoryType,
+            IncorporationDate:element.IncorporationDate,
+            Address:element.address,
+            stdNo:element.stdNo,
+            Landline:element.landline,
+            Website:element.website,
+            PanNO:element.panNo,
+            GSTIN:element.GSTIN,
+            ContactPerson:element.contactPerson,
+            Remark:element.Remark,
+            firm : user.firm
+        });
+            client.save(function(err){
+                if(err){
+                    errorstring += 'error at line number '+ count+' '+err;
+                }
+            });
+           
+    });
+        console.log(errorstring)
+        if(errorstring === '') errorstring = 'Bulk upload successful';
+        response.send({
+            success: true,
+            msg: errorstring
+        });
+    var user = response.locals.user;
     xlsx(request.files.excelFile, function(err, data){
         if(err){
             response.send({
@@ -38,7 +76,10 @@ module.exports.clientExcelImport = (request, response) => {
         }
         else{
             var json = convertToJSON(data);
+            var count = 0;
+            var errorstring ='';
             json.forEach(element => {
+                count++;
                 try{
                 var client = new Client({
                     OrganizationName:element.organizationName,
@@ -61,180 +102,153 @@ module.exports.clientExcelImport = (request, response) => {
             }
             catch(err){
                 if(err){
-                    response.send({
-                        success: false,
-                        msg: 'Unsuccessful'
-                    });
+                    errorstring += 'error at line number '+ count+' '+err;
                 }
             }
             });
+            if(errorstring === '') errorstring = 'Bulk upload successful';
             response.send({
                 success: true,
-                msg: 'Bulk upload successful'
+                msg: errorstring
             });
         }
     });
 }
 
 module.exports.ratecardExcelImport = (request, response) => {
-	var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
-                try{
-                var ratecard = new RateCard({
-                    MediaType:element.mediaType,
-                    AdType:element.adType,
-                    AdWords:element.AdWords,
-                    AdWordsMax:element.AdWordsMax,
-                    AdTime:element.AdTime,
-                    RateCardType:element.rateCardType,
-                    BookingCenter:element.bookingCenter,
-                    mediahouseID:mediahouseID,
-                    Category:element.categories,
-                    Rate:element.rate,
-                    Position:element.position,
-                    Hue:element.hue,
-                    MaxSizeLimit: element.maxSizeLimit,
-                    MinSizeLimit:element.minSizeLimit,
-                    FixSize:element.fixSize,
-                    Scheme:element.scheme,
-                    Premium:element.premium,
-                    Tax:element.tax,
-                    ValidFrom:element.validFrom,
-                    ValidTill:element.validTill,
-                    Covered:element.covered,
-                    Remarks:element.remarks,
-                    PremiumCustom:element.PremiumCustom,
-                    PremiumBox:element.PremiumBox,
-                    PremiumBaseColour:element.PremiumBaseColour,
-                    PremiumCheckMark:element.PremiumCheckMark,
-                    PremiumEmailId:element.PremiumEmailId,
-                    PremiumWebsite:element.PremiumWebsite,
-                    PremiumExtraWords:element.PremiumWebsite,
-                    firm :user.firm,
-                    global:false
-                });
-                ratecard.save();
-            }
-            catch(err){
+    var user = response.locals.user;
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0;
+    var errorstring = '';
+    xlData.forEach(element => {
+        count++;
+        var ratecard = new RateCard({
+            MediaType:element.mediaType,
+            AdType:element.adType,
+            AdWords:element.AdWords,
+            AdWordsMax:element.AdWordsMax,
+            AdTime:element.AdTime,
+            RateCardType:element.rateCardType,
+            BookingCenter:element.bookingCenter,
+            mediahouseID:mediahouseID,
+            Category:element.categories,
+            Rate:element.rate,
+            Position:element.position,
+            Hue:element.hue,
+            MaxSizeLimit: element.maxSizeLimit,
+            MinSizeLimit:element.minSizeLimit,
+            FixSize:element.fixSize,
+            Scheme:element.scheme,
+            Premium:element.premium,
+            Tax:element.tax,
+            ValidFrom:element.validFrom,
+            ValidTill:element.validTill,
+            Covered:element.covered,
+            Remarks:element.remarks,
+            PremiumCustom:element.PremiumCustom,
+            PremiumBox:element.PremiumBox,
+            PremiumBaseColour:element.PremiumBaseColour,
+            PremiumCheckMark:element.PremiumCheckMark,
+            PremiumEmailId:element.PremiumEmailId,
+            PremiumWebsite:element.PremiumWebsite,
+            PremiumExtraWords:element.PremiumWebsite,
+            firm :user.firm,
+            global:false
+        });
+            ratecard.save(function(err){
                 if(err){
-                    response.send({
-                        success: false,
-                        msg: 'Unsuccessful'
-                    });
+                    errorstring += 'error at line number '+ count+' '+err;
                 }
-            }
             });
-            response.send({
-                success: true,
-                msg: 'Bulk upload successful'
-            });
-        }
+           
     });
+        console.log(errorstring)
+        if(errorstring === '') errorstring = 'Bulk upload successful';
+        response.send({
+            success: true,
+            msg: errorstring
+        });
 }
 
 module.exports.mediahouseExcelImport = (request, response) => {
     var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0;
+    var errorstring = '';
+    xlData.forEach(element => {
+        count++;
+            var mediahouse = new MediaHouse({
+                OrganizationName:element.organizationName,
+                PublicationName:element.publicationName,
+                NickName:element.nickName,
+                MediaType:element.mediaType,
+                Language:element.Language,
+                Address:element.address,
+                OfficeLandline:element.officeLandline,
+                officeStdNo:element.officeStdNo,
+                Scheduling:element.scheduling,
+                global:false,
+                pullouts:element.pullouts,
+                GSTIN:element.GSTIN,
+                Remark:element.Remark,
+                firm : user.firm
             });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
-                try{
-                var mediahouse = new MediaHouse({
-                    OrganizationName:element.organizationName,
-                    PublicationName:element.publicationName,
-                    NickName:element.nickName,
-                    MediaType:element.mediaType,
-                    Language:element.Language,
-                    Address:element.address,
-                    OfficeLandline:element.officeLandline,
-                    officeStdNo:element.officeStdNo,
-                    Scheduling:element.scheduling,
-                    global:false,
-                    pullouts:element.pullouts,
-                    GSTIN:element.GSTIN,
-                    Remark:element.Remark,
-                    firm : user.firm
-                });
-                mediahouse.save();
+            mediahouse.save(function(err){
+                if(err){
+                    errorstring += 'error at line number '+ count+' '+err;
                 }
-                catch(err){
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
-                }
-                    });
-            response.send({
-                success: true,
-                msg: 'Bulk upload successful'
             });
-        }   
+           
     });
+        console.log(errorstring)
+        if(errorstring === '') errorstring = 'Bulk upload successful';
+        response.send({
+            success: true,
+            msg: errorstring
+        });
 }
 
 module.exports.executiveExcelImport = (request, response) => {
     var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
-                try{
-                var executive = new Executive({
-                    OrganizationName:element.organizationName,
-                    CompanyName:element.companyName,
-                    ExecutiveName:element.executiveName,
-                    Designation:element.designation,
-                    Department:element.department,
-                    MobileNo:element.mobileNo,
-                    EmailId:element.email,
-                    Photo:element.photo,
-                    DateOfBirth:element.dob,
-                    Anniversary:element.anniversary,
-                    Remark:element.Remark,    
-                    firm : user.firm 
-                });
-                executive.save();
-            }
-            catch(err){
-                    if(err){
-                        response.send({
-                            success: false,
-                            msg: 'Unsuccessful'
-                        });
-                    }
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0;
+    var errorstring = '';
+    xlData.forEach(element => {
+        count++;
+        var executive = new Executive({
+            OrganizationName:element.organizationName,
+            CompanyName:element.companyName,
+            ExecutiveName:element.executiveName,
+            Designation:element.designation,
+            Department:element.department,
+            MobileNo:element.mobileNo,
+            EmailId:element.email,
+            Photo:element.photo,
+            DateOfBirth:element.dob,
+            Anniversary:element.anniversary,
+            Remark:element.Remark,    
+            firm : user.firm 
+        });
+            executive.save(function(err){
+                if(err){
+                    errorstring += 'error at line number '+ count+' '+err;
                 }
             });
-            response.send({
-                success: true,
-                msg: 'Bulk upload successful'
-            });
-        }
+           
     });
+        console.log(errorstring)
+        if(errorstring === '') errorstring = 'Bulk upload successful';
+        response.send({
+            success: true,
+            msg: errorstring
+        });
 }
-
 
 module.exports.clientExcelUpdate = (request, response) => {
     var user = response.locals.user;
@@ -524,9 +538,12 @@ module.exports.generateRateCardSheet = async function(request, response){
             });
         }
         else{
-            var ratecards_map = ratecards.map(ratecard => {
-                
-            });
+            try{
+
+            }
+            catch(err){
+                console.log(err)
+            }
             createSheet(ratecards_map, request, response,'RateCardExportData', 'excelExport');
         }
     });
