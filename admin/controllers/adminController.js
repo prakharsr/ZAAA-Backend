@@ -749,13 +749,13 @@ module.exports.changePassword=function(request, response){
 module.exports.getAdmins= async (req,res) => {
 	try{
 		var admins = await Admin.find({});
-		response.send({
+		res.send({
 			success: true,
 			admins: admins
 		})
 	}
 	catch(err){
-		response.send({
+		res.send({
 			success:false,
 			msg: err
 		});
