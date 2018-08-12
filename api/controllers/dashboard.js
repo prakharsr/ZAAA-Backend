@@ -388,16 +388,11 @@ module.exports.MHIChequeDetailsData = async function(request, response){
             "insertions.paymentMode":"Cheque"
         }},
         { $group : { 
-            _id: "$insertions.paymentNo",
-            count: {$sum: 1},
-            entries:{
-                $push:{
-                    "ChequeDate":"$insertions.paymentDate",
-                    "ChequeAmount":"$insertions.paymentAmount",
-                    "ChequeNo":"$insertions.paymentNo",
-                    "ChequeBank":"$insertions.paymentBankName"
-                }
-            }
+            _id: {
+                "ChequeDate":"$insertions.paymentDate",
+                "ChequeAmount":"$insertions.paymentAmount",
+                "ChequeNo":"$insertions.paymentNo",
+                "ChequeBank":"$insertions.paymentBankName"}
         },
 
         }

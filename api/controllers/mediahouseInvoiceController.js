@@ -309,6 +309,11 @@ module.exports.createMHInvoice = async (request,response) => {
                                     if (mhiInsertion._id == insertion._id) {
                                         mhiInsertion.collectedAmount += insertion.amount;
                                         mhiInsertion.pendingAmount -=insertion.amount;
+                                        mhiInsertion.paymentDate =request.body.paymentDate;
+                                        mhiInsertion.paymentNo =request.body.paymentNo;
+                                        mhiInsertion.paymentMode =request.body.paymentType;
+                                        mhiInsertion.paymentAmount = request.body.paymentAmount
+                                        mhiInsertion.paymentBankName =request.body.paymentBankName;
                                         
                                     }
                                 });
@@ -412,10 +417,7 @@ module.exports.createMHInvoice = async (request,response) => {
                                         if (mhiInsertion._id == insertion._id) {
                                             mhiInsertion.receiptDate = insertion.receiptDate;
                                             mhiInsertion.receiptNumber =insertion.receiptNumber;
-                                            // mhiInsertion.paymentDate =insertion.paymentDate;
-                                            // mhiInsertion.paymentNo =insertion.paymentNo;
-                                            // mhiInsertion.paymentMode =insertion.paymentMode;
-                                            // mhiInsertion.paymentBankName =insertion.paymentBankName;
+
                                         }
                                     });
                                 });
