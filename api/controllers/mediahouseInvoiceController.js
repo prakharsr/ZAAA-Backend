@@ -345,42 +345,38 @@ module.exports.createMHInvoice = async (request,response) => {
                     {$unwind: "$insertions"}, 
                     {$match:query},
                     { $group : { 
-                        _id: "$releaseOrderId",
+                        _id: {
+                            roId: "$releaseOrderId",
+                            "publicationName":"$publicationName",
+                            "publicationEdition":"$publicationEdition",
+                            "generatedAt":"$generatedAt",
+                            "releaseOrderNo":"$releaseOrderNo",
+                            "MHINo":"$MHINo"
+                        },
                         count: {$sum: 1},
+                        "pendingAmount":{$sum:"$insertions.pendingAmount"},
+                        "collectedAmount":{$sum:"$insertions.collectedAmount"},
                         entries: { $push:  
-                            {
-                                "_id":"$_id",
-                                "releaseOrderId":"$releaseOrderId",
-                                "publicationName":"$publicationName",
-                                "publicationEdition":"$publicationEdition",
-                                "date": "$date",
-                                "pendingAmount":{sum:"$insertions.pendingAmount"},
-                                "collectedAmount":{sum:"$insertions.collectedAmount"},
-                                "generatedAt":"$generatedAt", 
-                                "insertions":{
-                                    "insertionDate": "$insertions.insertionDate", 
-                                    "Amount":"$insertions.Amount",
-                                    "pendingAmount":"$insertions.pendingAmount",
-                                    "insertionId": "$insertions.insertionId",
-                                    "collectedAmount":"$insertions.collectedAmount",
-                                    "receiptNumber":"$insertions.receiptNumber",
-                                    "receiptDate":"$insertions.receiptDate",
-                                    "paymentMode":"$insertions.paymentMode",
-                                    "paymentDate":"$insertions.paymentDate",
-                                    "paymentAmount":"$insertions.paymentAmount",
-                                    "paymentNo":"$insertions.paymentNo",
-                                    "paymentBankName":"$insertions.paymentBankName",
-                                    "_id": "$insertions._id",
-                                },
-                                "releaseOrderNo":"$releaseOrderNo",
-                                "MHINo":"$MHINo",
+                            {                                
+                                "insertionDate": "$insertions.insertionDate", 
+                                "Amount":"$insertions.Amount",
+                                "pendingAmount":"$insertions.pendingAmount",
+                                //"insertionId": "$insertions.insertionId",
+                                "collectedAmount":"$insertions.collectedAmount",
+                                "receiptNumber":"$insertions.receiptNumber",
+                                "receiptDate":"$insertions.receiptDate",
+                                "paymentMode":"$insertions.paymentMode",
+                                "paymentDate":"$insertions.paymentDate",
+                                "paymentAmount":"$insertions.paymentAmount",
+                                "paymentNo":"$insertions.paymentNo",
+                                "paymentBankName":"$insertions.paymentBankName",
+                                "_id": "$insertions._id",
+
                                 "MHIDate":"$MHIDate",
                                 "MHIGrossAmount":"$MHIGrossAmount",
                                 "MHITaxAmount":"$MHIAmount"
                             } }
-                        } },
-                        {$limit: perPage},
-                        {$skip:(perPage * request.body.page) - perPage}
+                        } }
                     ])
                     .exec(function(err, insertions){
                         if(err){
@@ -392,15 +388,10 @@ module.exports.createMHInvoice = async (request,response) => {
                         }
                         else{
                             console.log(insertions)
-                            MediaHouseInvoice.count(query, function(err, count){
-                                response.send({
-                                    success:true,
-                                    insertions: insertions,
-                                    page: request.body.page,
-                                    perPage:perPage,
-                                    pageCount: Math.ceil(count/perPage)
-                                });
-                            })
+                            response.send({
+                                success:true,
+                                insertions: insertions                               
+                            });
                             
                         }
                     });
@@ -417,12 +408,12 @@ module.exports.createMHInvoice = async (request,response) => {
                                 invoice.insertions.forEach(mhiInsertion => {
                                     mhis.forEach(insertion => {
                                         if (mhiInsertion._id == insertion._id) {
-                                            mhiInsertion.receiptDate += insertion.receiptDate;
-                                            mhiInsertion.receiptNumber -=insertion.receiptNumber;
-                                            mhiInsertion.paymentDate =insertion.paymentDate;
-                                            mhiInsertion.paymentNo =insertion.paymentNo;
-                                            mhiInsertion.paymentMode =insertion.paymentMode;
-                                            mhiInsertion.paymentBankName =insertion.paymentBankName;
+                                            mhiInsertion.receiptDate = insertion.receiptDate;
+                                            mhiInsertion.receiptNumber =insertion.receiptNumber;
+                                            // mhiInsertion.paymentDate =insertion.paymentDate;
+                                            // mhiInsertion.paymentNo =insertion.paymentNo;
+                                            // mhiInsertion.paymentMode =insertion.paymentMode;
+                                            // mhiInsertion.paymentBankName =insertion.paymentBankName;
                                         }
                                     });
                                 });
