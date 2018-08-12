@@ -293,6 +293,8 @@ module.exports.createMHInvoice = async (request,response) => {
                     }
                 });
             };
+
+
             
             
             module.exports.generateSummarySheet = function(request, response){
@@ -439,4 +441,9 @@ module.exports.createMHInvoice = async (request,response) => {
                         msg:"done"
                     })
                 };
+
+                module.exports.generateSummarySheetPdf = (request,response) => {
+                    var Details = {};
+                    pdf.generateSummarySheet(request, response, Details);
+                }
                 
