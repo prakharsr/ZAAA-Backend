@@ -2,6 +2,7 @@ var config = require('../../config');
 var User = require('../models/User');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
+var Notification = require('../../admin/models/Notifications')
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
 var multer = require('multer');
@@ -12,6 +13,7 @@ var api_key = config.mailgun_api_key;
 var DOMAIN = config.DOMAIN;
 var mailgun = require('mailgun-js')({apiKey: api_key, domain: DOMAIN});
 var SALT_WORK_FACTOR = 10;
+var perPage=20;
 
 //POST https://localhost:8000/api/signup
 module.exports.signup = function(req,res){
@@ -719,3 +721,31 @@ module.exports.verifyMobile = function(request, response) {
 			}
 		})
 	}
+
+
+module.exports.getNotifications = (request,response) =>{
+    Notification.find({})
+    .limit(perPage)
+    .skip((perPage * request.body.page) - perPage)
+    .exec(function(err, notifications){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            Notification.count(query, function(err, count){
+                response.send({
+                    success:true,
+                    notifications: notifications,
+                    page: request.body.page,
+                    perPage:perPage,
+                    pageCount: Math.ceil(count/perPage)
+                });
+            })
+            
+        }
+    });
+}

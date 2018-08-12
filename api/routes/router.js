@@ -56,6 +56,7 @@ router.post('/user/changePassword', user.changePassword);
 router.post('/user/forgotPassword', user.sendPasswordResetEmail);
 router.post('/user/resetPassword',user.resetPassword);
 router.delete('/user/co_user/:id', user.deleteUser);
+router.post('/user/notifications', user.getNotifications);
 
 router.post('/user/client', client.createClient);
 router.get('/user/clients/:page', client.getClients);
