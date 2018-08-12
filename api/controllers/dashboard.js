@@ -349,25 +349,12 @@ module.exports.RecieptsChequeDetailsData = async function(request, response){
     var date = new Date();
     var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
     
-    
-    Receipt.aggregate([ 
-        {$match:query},
-        { $group : { 
-            _id: "$paymentNO",
-            count: {$sum: 1},
-            entries:{
-                $push:{
-                    "ChequeDate":"$paymentDate",
-                    "ChequeAmount":"$paymentAmount",
-                    "ChequeNo":"$paymentNo",
-                    "ChequeBank":"$paymentBankName"
-                }
-            }
-        },
-
-        }
-    ])
-    .exec(function(err, receipts){
+    Receipt.find(query, {
+        paymentDate: 1,
+        paymentAmount: 1,
+        paymentNo: 1,
+        paymentBankName: 1
+    }).exec(function(err, receipts){
         if(err){
             console.log(err+ "");
             response.send({
@@ -397,17 +384,18 @@ module.exports.MHIChequeDetailsData = async function(request, response){
     MediaHouseInvoice.aggregate([
         {$unwind:"$insertions"}, 
         {$match:{
+            'firm': user.firm,
             "insertions.paymentMode":"Cheque"
         }},
         { $group : { 
-            _id: "$insertions.paymentNO",
+            _id: "$insertions.paymentNo",
             count: {$sum: 1},
             entries:{
                 $push:{
-                    "ChequeDate":"$insetions.paymentDate",
+                    "ChequeDate":"$insertions.paymentDate",
                     "ChequeAmount":"$insertions.paymentAmount",
-                    "ChequeNo":"$insetions.paymentNo",
-                    "ChequeBank":"$insetions.paymentBankName"
+                    "ChequeNo":"$insertions.paymentNo",
+                    "ChequeBank":"$insertions.paymentBankName"
                 }
             }
         },
