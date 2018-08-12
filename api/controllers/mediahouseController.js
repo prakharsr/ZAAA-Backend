@@ -61,6 +61,7 @@ module.exports.createMediahouseFromRO = function(request,response){
             });
         }
         else if (!mediahouse){
+            var pullout = [{Name:request.body.pulloutName, Frequency:"Daily", Language:"", Remark:""}]
             var mediahouse = new MediaHouse({
                 OrganizationName:request.body.organizationName,
                 PublicationName:request.body.publicationName,
@@ -69,9 +70,9 @@ module.exports.createMediahouseFromRO = function(request,response){
                 Address:request.body.address,
                 OfficeLandline:request.body.officeLandline,
                 officeStdNo:request.body.officeStdNo,
+                pullouts: pullout,
                 Scheduling:request.body.scheduling,
                 global:false,
-                pullouts:request.body.pullouts,
                 GSTIN:request.body.GSTIN,
                 Remark:request.body.Remark,
                 firm : user.firm

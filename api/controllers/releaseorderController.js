@@ -124,7 +124,7 @@ function getMediahouseID(request, response, user){
                     'Address.state':request.body.publicationState,
                     GSTIN:request.body.publicationGSTIN,
                     global:false,
-                    GSTIN:request.body.GSTIN,
+                    pullouts:[{Name:request.body.pulloutName,Frequency:"Daily",Language:"",Remark:""}],
                     firm : user.firm
                 });
                 
