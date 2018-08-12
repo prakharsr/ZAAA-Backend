@@ -57,7 +57,8 @@ var UserSchema = new mongoose.Schema({
     deviceTokens:[{
         token: String,
         platform: String
-    }]
+    }],
+    lastSeen: Date
 },
 {
     _id: true // disables the creation of the virtual "id" property

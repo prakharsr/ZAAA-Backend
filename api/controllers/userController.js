@@ -749,3 +749,30 @@ module.exports.getNotifications = (request,response) =>{
         }
     });
 }
+
+module.exports.getLastSeen = (request,response) => {
+	var user = response.locals.user;
+	response.send({
+		success: true,
+		lastSeen: user.lastSeen
+	});
+}
+
+module.exports.setLastSeen = (request, response) => {
+	var user = response.locals.user;
+	user.lastSeen = new Date();
+	user.save( err => {
+		if(err){
+			response.send({
+                success:false,
+                msg: err +""
+            });
+		}
+		else{
+			response.send({
+                success:true,
+                msg: "Updated"
+            });
+		}
+	})
+}
