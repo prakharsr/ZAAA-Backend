@@ -381,27 +381,54 @@ module.exports.MHIChequeDetailsData = async function(request, response){
     var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
     
     
-    MediaHouseInvoice.aggregate([
-        {$unwind:"$insertions"}, 
-        {$match:{
-            "insertions.paymentMode":"Cheque"
-        }},
-        { $group : { 
-            _id: "$insertions.paymentNO",
-            count: {$sum: 1},
-            entries:{
-                $push:{
-                    "ChequeDate":"$insetions.paymentDate",
-                    "ChequeAmount":"$insertions.paymentAmount",
-                    "ChequeNo":"$insetions.paymentNo",
-                    "ChequeBank":"$insetions.paymentBankName"
-                }
-            }
-        },
+    // MediaHouseInvoice.aggregate([
+    //     {$unwind:"$insertions"}, 
+    //     {$match:{
+    //         'firm': user.firm,
+    //         "insertions.paymentMode":"Cheque"
+    //     }},
+    //     { $group : { 
+    //         _id: "$insertions.paymentNo",
+    //         count: {$sum: 1},
+    //         entries:{
+    //             $push:{
+    //                 "ChequeDate":"$insertions.paymentDate",
+    //                 "ChequeAmount":"$insertions.paymentAmount",
+    //                 "ChequeNo":"$insertions.paymentNo",
+    //                 "ChequeBank":"$insertions.paymentBankName"
+    //             }
+    //         }
+    //     },
 
-        }
-    ])
-    .exec(function(err, mhis){
+    //     }
+    // ])
+    // .exec(function(err, mhis){
+    //     if(err){
+    //         console.log(err+ "");
+    //         response.send({
+    //             success:false,
+    //             msg: err +""
+    //         });
+    //     }
+    //     else{
+    //         response.send({
+    //             success:true,
+    //             mhis: mhis
+    //         });
+            
+    //     }
+    // });
+
+    MediaHouseInvoice.find({
+        'firm': user.firm,
+        "insertions.paymentMode":"Cheque"
+    },
+    {
+        "insertions.paymentDate": 1,
+        "insertions.paymentAmount": 1,
+        "insertions.paymentNo": 1,
+        "insertions.paymentBankName": 1
+    }).exec(function(err, mhis){
         if(err){
             console.log(err+ "");
             response.send({
