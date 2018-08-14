@@ -634,6 +634,7 @@ module.exports.queryInsertions =async function(request, response){
         "publicationName":1,
         "publicationEdition":1, 
         "clientName":1,
+        "releaseOrderNO":1,
         "insertions.date": 1, 
         "insertions.marked": 1,
         "insertions.state": 1,
