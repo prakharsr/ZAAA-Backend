@@ -352,13 +352,14 @@ module.exports.getReleaseOrderInsertions = function(request, response){
     var user = response.locals.user;
     ReleaseOrder
     .aggregate([{$unwind: "$insertions"}, 
-    {$match:{firm:user.firm} },
+    {$match:{firm:user.firm}, generated:true },
     {$project: {
         "_id":1,
         "publicationName":1,
         "publicationEdition":1, 
         "clientName":1,
-        "insertions.date": 1, 
+        "releaseOrderNO":1,
+        "insertions.date": 1,
         "insertions.marked": 1,
         "insertions.state": 1,
         "insertions.ISODate": 1, 
