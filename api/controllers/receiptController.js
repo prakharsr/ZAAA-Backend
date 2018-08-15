@@ -394,6 +394,7 @@ module.exports.linkRecieptToInvoice = async function(request,response){
     var invoice = await Invoice.findById(request.body.invoiceID);
     
     receipt.invoiceID = request.body.invoiceID;
+    receipt.advanced = false;
     receipt.save((err,doc) => {
         if(err){
             console.log(err);
@@ -652,8 +653,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
             var from = new Date(1);
             query['date']={$gte: from, $lte:to} 
         }
-        if(advanced)
-        query['advanced']=advanced;
+        if(advanced !== undefined)
+        query['advanced']=advanced == true;
         if(request.body.userID)
         {
             query['userID'] = request.body.userID;
