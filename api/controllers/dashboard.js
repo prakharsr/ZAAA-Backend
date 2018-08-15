@@ -84,7 +84,8 @@ module.exports.ROchartData = async function(request, response){
 
 module.exports.InvoiceData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery( user, request, response);       
+    var query = await formQuery( user, request, response);   
+    query['generated']=true;    
     ReleaseOrder.aggregate([
         {$unwind:"$insertions"}, 
         {$match:query},
