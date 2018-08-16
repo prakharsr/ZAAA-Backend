@@ -7,7 +7,7 @@ var fcm = new FCM(serverkey);
 var cron = require('node-cron');
 
 function getUsers(){
-    return new Promise((reject,resolve)=>{
+    return new Promise((resolve, reject)=>{
         User.find({}, function(err,users){
             if(err){
                 reject(err);
@@ -34,7 +34,7 @@ module.exports.sendNotifs = async (request,response) => {
             body : request.body.notifBody
         }
     };
-    fcm.send(message, function(err,response){  
+    fcm.send(message, function(err,res){  
         if(err) {
             response.send({
                 success: false,
