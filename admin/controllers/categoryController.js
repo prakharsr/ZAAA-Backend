@@ -72,3 +72,21 @@ module.exports.getCategories = function(request, response){
 };
 
 
+module.exports.searchCategories = function(request, response){
+    var admin = response.locals.admin;
+    
+    Category.find({
+        $and : [ {level:request.params.level},{ 'name': { $regex: request.params.keyword+"", $options:"i" }}]
+    })
+    .exec(function(err, categories){ 
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            response.send({
+                success : true,
+                categories: categories
+            }); 
+        }
+    });
+};
