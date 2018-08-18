@@ -1101,8 +1101,7 @@ module.exports.previewROhtml = async function(request, response) {
     var insData="";
     //var insertions = releaseOrder.insertions;
     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-    var namount = releaseOrder.adGrossAmount - damount ;
+    var damount = (((releaseOrder.adGrossAmount*releaseOrder.publicationDiscount/100)*releaseOrder.agencyDiscount1/100)*releaseOrder.agencyDiscount2/100);
     result.forEach(object =>{
         var dates = "";
         object.items.forEach(obj => {dates += obj.date.day+" "});
@@ -1120,7 +1119,7 @@ module.exports.previewROhtml = async function(request, response) {
         insertions :insData,
         dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
         damount :damount,
-        namount :namount,
+        namount :releaseOrder.netAmountFigures,
         username: user.name,
         firmname: firm.FirmName,
         rno : releaseOrder.releaseOrderNO,

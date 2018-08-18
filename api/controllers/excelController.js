@@ -36,6 +36,22 @@ module.exports.clientExcelImport = (request, response) => {
     var errorstring = '';
     xlData.forEach(element => {
         count++;
+        var contactPerson = [];
+        for(var i = 1; ; i++){
+            if(object["Person Name "+i] !== null){
+                contactPerson.push({
+                    "Name": object["Person Name "+i],
+                    "Designation": object["Person Designation "+i],
+                    "Department": object["Person Department "+i],
+                    "MobileNo": object["Person Mobile "+i],
+                    "stdNo": object["Person Phone "+i].split("-")[0],
+                    "Landline": object["Person Phone "+i].split("-")[1],
+                    "EmailId": object["Person Email "+i],
+                    "DateOfBirth": object["Person DOB "+i],
+                    "Anniversary": object["Person Anniversary "+i],
+                });
+            }
+        }
         var client = new Client({
             OrganizationName:element.organizationName,
             CompanyName:element.companyName,
@@ -60,58 +76,11 @@ module.exports.clientExcelImport = (request, response) => {
             });
            
     });
-        console.log(errorstring)
-        if(errorstring === '') errorstring = 'Bulk upload successful';
-        response.send({
-            success: true,
-            msg: errorstring
-        });
-    var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            var count = 0;
-            var errorstring ='';
-            json.forEach(element => {
-                count++;
-                try{
-                var client = new Client({
-                    OrganizationName:element.organizationName,
-                    CompanyName:element.companyName,
-                    NickName:element.nickName,
-                    CategoryType:element.categoryType,
-                    SubCategoryType:element.SubCategoryType,
-                    IncorporationDate:element.IncorporationDate,
-                    Address:element.address,
-                    stdNo:element.stdNo,
-                    Landline:element.landline,
-                    Website:element.website,
-                    PanNO:element.panNo,
-                    GSTIN:element.GSTIN,
-                    ContactPerson:element.contactPerson,
-                    Remark:element.Remark,
-                    firm : user.firm
-                });
-                client.save();
-            }
-            catch(err){
-                if(err){
-                    errorstring += 'error at line number '+ count+' '+err;
-                }
-            }
-            });
-            if(errorstring === '') errorstring = 'Bulk upload successful';
-            response.send({
-                success: true,
-                msg: errorstring
-            });
-        }
+    console.log(errorstring)
+    if(errorstring === '') errorstring = 'Bulk upload successful';
+    response.send({
+        success: true,
+        msg: errorstring
     });
 }
 
@@ -386,17 +355,17 @@ module.exports.generateMediaHouseSheet = async function(request, response){
             try {
                 var el = mediahouses.map(function (mediahouse) {
                     var obj = {
-                        "Publication Name": mediahouse.PublicationName ? mediahouse.PublicationName : "-",
-                        "Organization Name": mediahouse.OrganizationName ? mediahouse.OrganizationName : "-",
-                        "Nick Name": mediahouse.NickName ? mediahouse.NickName : "-",
-                        "Media Type": mediahouse.MediaType ? mediahouse.MediaType : "-",
-                        "Language": mediahouse.Language ? mediahouse.Language : "-",
-                        "PIN": mediahouse.Address.pincode ? mediahouse.Address.pincode : "-",
-                        "Edition": mediahouse.Address.edition?mediahouse.Address.edition:"-",
-                        "City": mediahouse.Address.city?mediahouse.Address.city:"-",
-                        "State": mediahouse.Address.state?mediahouse.Address.state:"-",
+                        "Publication Name": mediahouse.PublicationName ? mediahouse.PublicationName : "",
+                        "Organization Name": mediahouse.OrganizationName ? mediahouse.OrganizationName : "",
+                        "Nick Name": mediahouse.NickName ? mediahouse.NickName : "",
+                        "Media Type": mediahouse.MediaType ? mediahouse.MediaType : "",
+                        "Language": mediahouse.Language ? mediahouse.Language : "",
+                        "PIN": mediahouse.Address.pincode ? mediahouse.Address.pincode : "",
+                        "Edition": mediahouse.Address.edition?mediahouse.Address.edition:"",
+                        "City": mediahouse.Address.city?mediahouse.Address.city:"",
+                        "State": mediahouse.Address.state?mediahouse.Address.state:"",
                         "Phone": mediahouse.OfficeLandline.std + '-' + mediahouse.OfficeLandline.phone,
-                        "GSTIN": mediahouse.GSTIN.GSTType + '-' + (mediahouse.GSTIN.GSTNo ? mediahouse.GSTIN.GSTNo : "-"),
+                        "GSTIN": mediahouse.GSTIN.GSTType + '-' + (mediahouse.GSTIN.GSTNo ? mediahouse.GSTIN.GSTNo : ""),
                         "Remark": mediahouse.Remark
                     }
                     if(mediahouse.pullouts.length > 0)
@@ -404,10 +373,10 @@ module.exports.generateMediaHouseSheet = async function(request, response){
                         for (var i = 0; i < mediahouse.pullouts.length && i < 2; ++i) {
                             var index = +i + 1
                             var pullout = mediahouse.pullouts[i];
-                            obj["Pullout" + index] = pullout.Name?pullout.Name:"-";
-                            obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"-";
-                            obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"-";
-                            obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"-";
+                            obj["Pullout" + index] = pullout.Name?pullout.Name:"";
+                            obj["PulloutLanguage" + index] = pullout.Language?pullout.Language:"";
+                            obj["PulloutFrequency" + index] = pullout.Frequency?pullout.Frequency:"";
+                            obj["PulloutRemark" + index] = pullout.Remark?pullout.Remark:"";
                         }
                     }
                     if(mediahouse.Scheduling.length > 0)
@@ -415,12 +384,12 @@ module.exports.generateMediaHouseSheet = async function(request, response){
                         for (var i = 0; i < mediahouse.Scheduling.length && i < 2; ++i) {
                             var index = +i + 1
                             var scheduling = mediahouse.Scheduling[i];
-                            obj["PersonName" + index] = scheduling.Name?scheduling.Name:"-";
-                            obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"-";
-                            obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"-";
-                            obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"-";
-                            obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"-";
-                            obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"-";
+                            obj["PersonName" + index] = scheduling.Name?scheduling.Name:"";
+                            obj["Designation" + index] = scheduling.Designation?scheduling.Designation:"";
+                            obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"";
+                            obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"";
+                            obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"";
+                            obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"";
                         }
                     }
                     return obj;
@@ -450,19 +419,19 @@ module.exports.generateClientSheet = async function(request, response){
             try {
                 var el = clients.map(function (client) {
                     var obj =  {
-                        "Organization Name": client.OrganizationName ? client.OrganizationName : "-",
-                        "Nick Name": client.NickName ? client.NickName : "-",
-                        "Company Name": client.CompanyName ? client.CompanyName : "-",
-                        "Category": client.CategoryType ? client.CategoryType : "-",
-                        "Sub Category": client.SubCategoryType ? client.SubCategoryType : "-",
-                        "PIN": client.Address.pincode ? client.Address.pincode : "-",
+                        "Organization Name": client.OrganizationName ? client.OrganizationName : "",
+                        "Nick Name": client.NickName ? client.NickName : "",
+                        "Company Name": client.CompanyName ? client.CompanyName : "",
+                        "Category": client.CategoryType ? client.CategoryType : "",
+                        "Sub Category": client.SubCategoryType ? client.SubCategoryType : "",
+                        "PIN": client.Address.pincode ? client.Address.pincode : "",
                         "City": client.Address.city,
                         "Address": client.Address.address,
                         "State": client.Address.state,
                         "Phone": client.stdNo + '-' + client.Landline,
                         "Website": client.Website,
                         "PAN": client.PanNO,
-                        "GSTIN": client.GSTIN.GSTType + '-' + (client.GSTIN.GSTNo ? client.GSTIN.GSTNo : "-"),
+                        "GSTIN": client.GSTIN.GSTType + '-' + (client.GSTIN.GSTNo ? client.GSTIN.GSTNo : ""),
                         "Remark": client.Remark,
                     }
                     if( client.ContactPerson !==undefined && client.ContactPerson.length> 0){
@@ -470,14 +439,14 @@ module.exports.generateClientSheet = async function(request, response){
                         for(var i = 0; i< client.ContactPerson.length && i < 2; ++i){
                             index = i+1;
                             var contactPerson = client.ContactPerson[i];
-                            obj["Person Name" + index] = contactPerson.Name;
-                            obj["Person Designation" + index] = contactPerson.Designation;
-                            obj["Person Department" + index] = contactPerson.Department;
-                            obj["Person Mobile" + index] = contactPerson.MobileNo;
-                            obj["Person Phone" + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
-                            obj["Person Email" + index] = contactPerson.EmailId;
-                            obj["Person DOB" + index] = contactPerson.DateOfBirth;
-                            obj["Person Anniversary" + index] = contactPerson.Anniversary;
+                            obj["Person Name " + index] = contactPerson.Name?contactPerson.Name:"";
+                            obj["Person Designation " + index] = contactPerson.Designation?contactPerson.Designation:"";
+                            obj["Person Department " + index] = contactPerson.Department?contactPerson.Department:"";
+                            obj["Person Mobile " + index] = contactPerson.MobileNo;
+                            obj["Person Phone " + index] = contactPerson.stdNo + "-" + contactPerson.Landline;
+                            obj["Person Email " + index] = contactPerson.EmailId;
+                            obj["Person DOB " + index] = contactPerson.DateOfBirth;
+                            obj["Person Anniversary " + index] = contactPerson.Anniversary;
                         }
                     }
                     return obj
@@ -507,10 +476,10 @@ module.exports.generateExecutiveSheet = async function(request, response){
             try {
                 var el = executives.map(function (executive) {
                     return {
-                        "Executive Name": executive.ExecutiveName ? executive.ExecutiveName : "-",
-                        "Organization Name": executive.OrganizationName ? executive.OrganizationName : "-",
-                        "Designation": executive.Designation ? executive.Designation : "-",
-                        "Department": executive.Department ? executive.Department : "-",
+                        "Executive Name": executive.ExecutiveName ? executive.ExecutiveName : "",
+                        "Organization Name": executive.OrganizationName ? executive.OrganizationName : "",
+                        "Designation": executive.Designation ? executive.Designation : "",
+                        "Department": executive.Department ? executive.Department : "",
                         "MobileNo": executive.MobileNo,
                         "Email": executive.EmailId,
                         "DOB": executive.DateOfBirth,
@@ -539,12 +508,12 @@ module.exports.generateRateCardSheet = async function(request, response){
         }
         else{
             try{
-
+                
             }
             catch(err){
                 console.log(err)
             }
-            createSheet(ratecards_map, request, response,'RateCardExportData', 'excelExport');
+            createSheet(el, request, response,'RateCardExportData', 'excelExport');
         }
     });
 };
