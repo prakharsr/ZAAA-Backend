@@ -9,9 +9,17 @@ var timestamps = require('mongoose-timestamp');
 
  
 var ExecutiveSchema = new mongoose.Schema({
-    OrganizationName:String,
+    OrganizationName:
+            {
+                type:String,
+                required: true
+            },
     CompanyName:String,
-    ExecutiveName:String,
+    ExecutiveName:
+            {
+                type:String,
+                required: true
+            },
     Designation:String,
     Department:String,
     MobileNo:String,
@@ -30,5 +38,6 @@ var ExecutiveSchema = new mongoose.Schema({
     
 });
 ExecutiveSchema.plugin(timestamps);
+ExecutiveSchema.index({firm:1,OrganizationName: 1, ExecutiveName:1 }, {unique: true});
 module.exports = mongoose.model('Executive', ExecutiveSchema);
 
