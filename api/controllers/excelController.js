@@ -53,7 +53,7 @@ module.exports.clientExcelImport = (request, response) => {
             }
         }
         var client = new Client({
-            OrganizationName:element.organizationName,
+             OrganizationName:element.organizationName,
             CompanyName:element.companyName,
             NickName:element.nickName,
             CategoryType:element.categoryType,
@@ -364,8 +364,8 @@ module.exports.generateMediaHouseSheet = async function(request, response){
                         "Edition": mediahouse.Address.edition?mediahouse.Address.edition:"",
                         "City": mediahouse.Address.city?mediahouse.Address.city:"",
                         "State": mediahouse.Address.state?mediahouse.Address.state:"",
-                        "Phone": mediahouse.OfficeLandline.std + '-' + mediahouse.OfficeLandline.phone,
-                        "GSTIN": mediahouse.GSTIN.GSTType + '-' + (mediahouse.GSTIN.GSTNo ? mediahouse.GSTIN.GSTNo : ""),
+                        "Phone": (mediahouse.OfficeLandline.std ? mediahouse.OfficeLandline.std : "") + '-' + (mediahouse.OfficeLandline.phone ? mediahouse.OfficeLandline.phone: ""),
+                        "GSTIN": (mediahouse.GSTIN.GSTType === 'URD'? "URD": "RD-"+mediahouse.GSTIN.GSTNo),
                         "Remark": mediahouse.Remark
                     }
                     if(mediahouse.pullouts.length > 0)
