@@ -161,16 +161,6 @@ router.post('/user/notes/email', notes.mailClientNotePdf);
 router.post('/user/invoice/tax/', taxation.queryInvoiceTax);
 router.post('/user/invoice/taxSheet/',taxation.generateTaxSheet);
 
-router.post('/user/excel/import/ratecard',excel.ratecardExcelImport);
-router.post('/user/excel/import/client',excel.clientExcelImport);
-router.post('/user/excel/import/executive',excel.executiveExcelImport);
-router.post('/user/excel/import/mediahouse',excel.mediahouseExcelImport);
-router.post('/user/excel/export/ratecard',excel.generateRateCardSheet);
-router.post('/user/excel/export/client',excel.generateClientSheet);
-router.post('/user/excel/export/executive',excel.generateExecutiveSheet);
-router.post('/user/excel/export/mediahouse',excel.generateMediaHouseSheet);
-
-
 router.post('/user/reports/mediahouse' , reports.mediahouseReports);
 router.post('/user/reports/clients' , reports.clientReports);
 router.post('/user/reports/executive' , reports.executiveReports);

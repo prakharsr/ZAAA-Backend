@@ -736,7 +736,7 @@ module.exports.getNotifications = (request,response) =>{
             });
         }
         else{
-            Notification.count(query, function(err, count){
+            Notification.count({}, function(err, count){
                 response.send({
                     success:true,
                     notifications: notifications,
