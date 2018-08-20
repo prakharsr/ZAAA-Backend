@@ -7,7 +7,11 @@ var nodemailer = require('nodemailer');
 var timestamps = require('mongoose-timestamp');
 
 var ClientSchema = new mongoose.Schema({
-    OrganizationName:String,
+    OrganizationName:
+            {
+                type:String,
+                required: true
+            },
     CompanyName:String,
     NickName:String,
     CategoryType:String,
@@ -51,7 +55,8 @@ var ClientSchema = new mongoose.Schema({
     Remark:String,
     firm : {
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Firm"
+        ref:"Firm",
+        required:true
     },
 });
 ClientSchema.index({firm:1,OrganizationName:1}, {unique: true});

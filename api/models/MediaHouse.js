@@ -17,7 +17,11 @@ var scheduling=new mongoose.Schema({
 
 var MediahouseSchema = new mongoose.Schema({
 OrganizationName:String,
-PublicationName:String,
+PublicationName:
+            {
+                type:String,
+                required: true
+            },
 NickName:String,
 MediaType:String,
 Language:String,
@@ -26,7 +30,11 @@ pullouts:[{Name:String, Language:String, Frequency:String, Remark:String}],
 
 Address:{
     pincode:String,
-    edition:String,
+    edition:
+        {
+            type:String,
+            required: true
+        },
     address:String,
     city:String,
     state:String
@@ -44,7 +52,8 @@ Remark:String,
 
 firm : {
     type:mongoose.Schema.Types.ObjectId,
-    ref:"Firm"
+    ref:"Firm",
+    required:true
 },
 global:{
     type:Boolean,
