@@ -984,11 +984,10 @@ module.exports.generateROPdf = async function(request, response) {
                     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                     var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
                     var namount = releaseOrder.adGrossAmount - damount;
-                    var caption = releaseOrder.caption?releaseOrder.caption:"";
+                    var caption = releaseOrder.caption?releaseOrder.caption:"-";
                     //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
                     var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory1];
-                    var categories = releaseOrder.adCategory1 || '';
-
+                    var categories = releaseOrder.adCategory1 || '-';
                     catarray.forEach(element => {
                         if (element) {
                             categories += ' - ' + element;
@@ -1032,7 +1031,7 @@ module.exports.generateROPdf = async function(request, response) {
                         rno : releaseOrder.releaseOrderNO,
                         sign: config.domain+'/'+user.signature,
                         remark: releaseOrder.Remark || "",
-                        jurisdiction: firm.jurisdiction || "",
+                        jurisdiction: firm.jurisdiction?firm.jurisdiction:address.city,
                         paymentDetails: paymentDetails,
                         namountwords: releaseOrder.netAmountFigures || "",
                         gstamount: '',
@@ -1043,10 +1042,11 @@ module.exports.generateROPdf = async function(request, response) {
                         cgst: '',
                         sgst: '',
                         taxamount: '',
+                        namount: releaseOrder.finalAmount,
                         publicationdisc: '',
-                        agenD1: releaseOrder.agencyDiscount1+'%',
-                        agenD2: releaseOrder.agencyDiscount2+'%',
-                        pubD: releaseOrder.publicationDiscount+'%',
+                        agenD1: releaseOrder.agencyDiscount1,
+                        agenD2: releaseOrder.agencyDiscount2,
+                        pubD: releaseOrder.publicationDiscount,
                         edition: releaseOrder.adEdition,
                         adtype:releaseOrder.adType,
                         hue:releaseOrder.adHue,
@@ -1066,21 +1066,14 @@ module.exports.generateROPdf = async function(request, response) {
                     
                     var client = await Client.findById(mongoose.mongo.ObjectId(releaseOrder.clientID));
                     var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(releaseOrder.mediahouseID));
-                    taxamount = adGrossAmount - (publicationDisc + damount1 + damount2);
 
-                    if(client.Address.state === mediahouse.Address.state){
-                        Details['sgst'] = Details['cgst'] = tax/2;
-                        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
-                        Details['gstamount']= (taxamount*tax)/100;
-                    }
-                    else{
-                        Details['igst'] = tax;
-                        Details['igstamount'] = Details['gstamount']= (taxamount*tax)/100;
-                    }
-
-                    Details['publicationdisc'] = adGrossAmount*releaseOrder.publicationDiscount/100;
-                    Details['damount1'] = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
-                    Details['damount2'] = (adGrossAmount - damount1)*(+releaseOrder.agencyDiscount2)/100;
+                    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
+                    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
+                    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
+                    Details['damount2'] = damount2;
+                    Details['damount1'] = damount1;
+                    Details['publicationdisc'] = publicationDisc;
+                    var taxamount = adGrossAmount - (publicationDisc + damount1 + damount2);
                     Details['taxamount'] = taxamount;
 
                     if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
@@ -1090,6 +1083,15 @@ module.exports.generateROPdf = async function(request, response) {
                     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
                         Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
    
+                    if(client.Address.state === mediahouse.Address.state){
+                        Details['sgst'] = Details['cgst'] = tax/2;
+                        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
+                        Details['gstamount']= (taxamount*tax)/100;
+                    }
+                    else{
+                        Details['igst'] = tax;
+                        Details['igstamount'] = Details['gstamount']= (taxamount*tax)/100;
+                    }
                     
                     pdf.generateReleaseOrder(request,response,Details);
                 }
@@ -1101,9 +1103,8 @@ module.exports.generateROPdf = async function(request, response) {
 module.exports.previewROhtml = async function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
-    var releaseOrder = request.body.releaseOrder;
-    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-    var result = releaseOrder.insertions.reduce((grouped, item) => {
+    var doc = request.body.releaseOrder;
+    var result = doc.insertions.reduce((grouped, item) => {
         var index = grouped.findIndex(m => m.key.month == item.date.month
             && m.key.year == item.date.year);
             
@@ -1114,16 +1115,48 @@ module.exports.previewROhtml = async function(request, response) {
         
         return grouped;
     }, []);
-    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
+
+    console.log(result);
+    var releaseOrder = doc;
     var insData="";
-    //var insertions = releaseOrder.insertions;
+    var insertions = releaseOrder.insertions;
     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-    var damount = (((releaseOrder.adGrossAmount*releaseOrder.publicationDiscount/100)*releaseOrder.agencyDiscount1/100)*releaseOrder.agencyDiscount2/100);
+    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
+    var namount = releaseOrder.adGrossAmount - damount;
+    var caption = releaseOrder.caption?releaseOrder.caption:"-";
+    //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
+    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory1];
+    var categories = releaseOrder.adCategory1 || '-';
+
+    catarray.forEach(element => {
+        if (element) {
+            categories += ' - ' + element;
+        }
+    });
+    var count = 0;
     result.forEach(object =>{
         var dates = "";
         object.items.forEach(obj => {dates += obj.date.day+" "});
-        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+        if(count === 0){
+            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category: "+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+            count = 1;
+        }
+        else{
+            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category: "+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
+        }
     });
+    var paymentDetails="";
+    var address = firm.RegisteredAddress;
+
+    if(releaseOrder.paymentType === 'Cash')
+    paymentDetails = "Cash"
+    else if(releaseOrder.paymentType === 'Credit')
+    paymentDetails = "Credit"
+    else if(releaseOrder.paymentType === 'Cheque')
+    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+releaseOrder.paymentDate+" Numbered "+releaseOrder.paymentNo
+    else if(releaseOrder.paymentType === 'NEFT')
+    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
+
     var Details = {
         image : config.domain+'/'+firm.LogoURL,
         mediahouse :releaseOrder.publicationName,
@@ -1132,23 +1165,75 @@ module.exports.previewROhtml = async function(request, response) {
         cgstin :'-',
         gstin :'-',
         scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-        gamount :releaseOrder.adGrossAmount,
         insertions :insData,
-        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-        damount :damount,
-        namount :releaseOrder.netAmountFigures,
         username: user.name,
         firmname: firm.FirmName,
         rno : releaseOrder.releaseOrderNO,
-        logo: firm.LogoURL,
-        sign: config.domain+'/'+user.signature
+        sign: config.domain+'/'+user.signature,
+        remark: releaseOrder.Remark || "",
+        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+        paymentDetails: paymentDetails,
+        namount: '',
+        namountwords: releaseOrder.netAmountWords || "",
+        gstamount: '',
+        sgstamount: '',
+        cgstamount: '',
+        igstamount: '',
+        igst: '',
+        cgst: '',
+        sgst: '',
+        taxamount: '',
+        publicationdisc: '',
+        agenD1: releaseOrder.agencyDiscount1,
+        agenD2: releaseOrder.agencyDiscount2,
+        pubD: releaseOrder.publicationDiscount,
+        edition: releaseOrder.adEdition,
+        adtype:releaseOrder.adType,
+        hue:releaseOrder.adHue,
+        damount1: '',
+        damount2:'',
+        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):''
     }
+
+    var adGrossAmount;
+    var tax = releaseOrder.taxAmount.primary;
+    if(releaseOrder.taxIncluded){
+        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
+    }
+    else{
+        adGrossAmount = releaseOrder.adGrossAmount;
+    }
+    
+    var client = await Client.findById(mongoose.mongo.ObjectId(releaseOrder.clientID));
+    var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(releaseOrder.mediahouseID));
+
+    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
+    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
+    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
+    Details['damount2'] = damount2;
+    Details['damount1'] = damount1;
+    Details['publicationdisc'] = publicationDisc;
+    var taxamount = releaseOrder.netAmountFigures;
+    Details['taxamount'] = taxamount;
+    Details['namount'] = taxamount + (taxamount*tax)/100;
+
     if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
         Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
     if(releaseOrder.publicationGSTIN.GSTType !== 'URD')
         Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo
     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
         Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
+    
+    if(client.Address.state === mediahouse.Address.state){
+        Details['sgst'] = Details['cgst'] = tax/2;
+        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
+        Details['gstamount']= (taxamount*tax)/100;
+    }
+    else{
+        Details['igst'] = tax;
+        Details['igstamount'] = Details['gstamount']= (taxamount*tax)/100;
+    }
+
 
     getROhtml(Details, content => {
         response.send({
@@ -1211,6 +1296,7 @@ function getROhtml(Details, callback) {
             templateHtml = templateHtml.replace('{{paymentDetails}}', Details.paymentDetails);
             templateHtml = templateHtml.replace('{{jurisdiction}}', Details.jurisdiction);
             templateHtml = templateHtml.replace('{{remark}}', Details.remark);
+            templateHtml = templateHtml.replace('{{Address}}', Details.address);
 
             callback(templateHtml);
         });
@@ -1303,16 +1389,16 @@ module.exports.getCategories = (request, response) =>{
 }
 
 function toMonth(a){
-    if(a === 1) return 'Jan';
-    else if(a === 2) return 'Feb';
-    else if(a === 3) return 'Mar';
-    else if(a === 4) return 'Apr';
-    else if(a === 5) return 'May';
-    else if(a === 6) return 'Jun';
-    else if(a === 7) return 'Jul';
-    else if(a === 8) return 'Aug';
-    else if(a === 9) return 'Sept';
-    else if(a === 10) return 'Oct';
-    else if(a === 11) return 'Nov';
-    else if(a === 12) return 'Dec';
+    if(a == 1) return 'Jan';
+    else if(a == 2) return 'Feb';
+    else if(a == 3) return 'Mar';
+    else if(a == 4) return 'Apr';
+    else if(a == 5) return 'May';
+    else if(a == 6) return 'Jun';
+    else if(a == 7) return 'Jul';
+    else if(a == 8) return 'Aug';
+    else if(a == 9) return 'Sept';
+    else if(a == 10) return 'Oct';
+    else if(a == 11) return 'Nov';
+    else if(a == 12) return 'Dec';
 }
