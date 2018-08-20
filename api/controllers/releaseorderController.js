@@ -936,6 +936,7 @@ module.exports.mailROPdf = function(request, response) {
 
 module.exports.generateROPdf = async function(request, response) {
     var user = response.locals.user;
+    var firm = response.locals.firm;
     console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
@@ -952,7 +953,6 @@ module.exports.generateROPdf = async function(request, response) {
             });
         }
         else{
-            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
             if (releaseOrder.generated==false){
                 releaseOrder.generated=true;
                 var date = new Date();
@@ -979,17 +979,45 @@ module.exports.generateROPdf = async function(request, response) {
 
                     console.log(result);
                     var releaseOrder = doc;
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
                     var insData="";
                     var insertions = releaseOrder.insertions;
                     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                     var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                    var namount = releaseOrder.adGrossAmount - damount ;
+                    var namount = releaseOrder.adGrossAmount - damount;
+                    var caption = releaseOrder.caption?releaseOrder.caption:"";
+                    //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
+                    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory1];
+                    var categories = releaseOrder.adCategory1 || '';
+
+                    catarray.forEach(element => {
+                        if (element) {
+                            categories += ' - ' + element;
+                        }
+                    });
+                    var count = 0;
                     result.forEach(object =>{
                         var dates = "";
                         object.items.forEach(obj => {dates += obj.date.day+" "});
-                        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                        if(count === 0){
+                            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category:"+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+                            count = 1;
+                        }
+                        else{
+                            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category:"+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
+                        }
                     });
+                    var paymentDetails="";
+                    var address = firm.RegisteredAddress;
+
+                    if(releaseOrder.paymentType === 'Cash')
+                    paymentDetails = "Cash"
+                    else if(releaseOrder.paymentType === 'Credit')
+                    paymentDetails = "Credit"
+                    else if(releaseOrder.paymentType === 'Cheque')
+                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+releaseOrder.paymentDate+" Numbered "+releaseOrder.paymentNo
+                    else if(releaseOrder.paymentType === 'NEFT')
+                    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
+
                     var Details = {
                         image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
@@ -998,18 +1026,62 @@ module.exports.generateROPdf = async function(request, response) {
                         cgstin :'-',
                         gstin :'-',
                         scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                        gamount :releaseOrder.adGrossAmount,
                         insertions :insData,
-                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                        damount :damount,
-                        namount :namount,
                         username: user.name,
                         firmname: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
-                        logo: firm.LogoURL,
-                        sign: config.domain+'/'+user.signature
+                        sign: config.domain+'/'+user.signature,
+                        remark: releaseOrder.Remark || "",
+                        jurisdiction: firm.jurisdiction || "",
+                        paymentDetails: paymentDetails,
+                        namountwords: releaseOrder.netAmountFigures || "",
+                        gstamount: '',
+                        sgstamount: '',
+                        cgstamount: '',
+                        igstamount: '',
+                        igst: '',
+                        cgst: '',
+                        sgst: '',
+                        taxamount: '',
+                        publicationdisc: '',
+                        agenD1: releaseOrder.agencyDiscount1+'%',
+                        agenD2: releaseOrder.agencyDiscount2+'%',
+                        pubD: releaseOrder.publicationDiscount+'%',
+                        edition: releaseOrder.adEdition,
+                        adtype:releaseOrder.adType,
+                        hue:releaseOrder.adHue,
+                        damount1: '',
+                        damount2:'',
+                        address: address?(address.address+',<br>'+address.city+','+address.state+'<br>PIN code:'+address.pincode):''
                     }
-                    console.log(releaseOrder.agencyGSTIN)
+
+                    var adGrossAmount;
+                    var tax = releaseOrder.taxAmount.primary;
+                    if(releaseOrder.taxIncluded){
+                        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
+                    }
+                    else{
+                        adGrossAmount = releaseOrder.adGrossAmount;
+                    }
+                    
+                    var client = await Client.findById(mongoose.mongo.ObjectId(releaseOrder.clientID));
+                    var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(releaseOrder.mediahouseID));
+                    taxamount = adGrossAmount - (publicationDisc + damount1 + damount2);
+
+                    if(client.Address.state === mediahouse.Address.state){
+                        Details['sgst'] = Details['cgst'] = tax/2;
+                        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
+                        Details['gstamount']= (taxamount*tax)/100;
+                    }
+                    else{
+                        Details['igst'] = tax;
+                        Details['igstamount'] = Details['gstamount']= (taxamount*tax)/100;
+                    }
+
+                    Details['publicationdisc'] = adGrossAmount*releaseOrder.publicationDiscount/100;
+                    Details['damount1'] = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
+                    Details['damount2'] = (adGrossAmount - damount1)*(+releaseOrder.agencyDiscount2)/100;
+                    Details['taxamount'] = taxamount;
 
                     if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
                         Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
@@ -1025,63 +1097,6 @@ module.exports.generateROPdf = async function(request, response) {
         }
     });
 }
-
-module.exports.previewROPdf = async function(request, response) {
-    var user = response.locals.user;
-    var firm = response.locals.firm;
-    var releaseOrder = request.body.releaseOrder;
-    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-    var result = doc.insertions.reduce((grouped, item) => {
-        var index = grouped.findIndex(m => m.key.month == item.date.month
-            && m.key.year == item.date.year);
-            
-        if (index == -1) {
-            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
-        }
-        else grouped[index].items.push(item);
-        
-        return grouped;
-    }, []);
-    var releaseOrder = doc;
-    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-    var insData="";
-    var insertions = releaseOrder.insertions;
-    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-    var namount = releaseOrder.adGrossAmount - damount ;
-    result.forEach(object =>{
-        var dates = "";
-        object.items.forEach(obj => {dates += obj.date.day+" "});
-        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
-    });
-    var Details = {
-        image : config.domain+'/'+firm.LogoURL,
-        mediahouse :releaseOrder.publicationName,
-        pgstin :'-',
-        cname :releaseOrder.clientName,
-        cgstin :'-',
-        gstin :'-',
-        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-        gamount :releaseOrder.adGrossAmount,
-        insertions :insData,
-        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-        damount :damount,
-        namount :namount,
-        username: user.name,
-        firmname: firm.FirmName,
-        rno : releaseOrder.releaseOrderNO,
-        logo: firm.LogoURL,
-        sign: config.domain+'/'+user.signature
-    }
-    if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
-        Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
-    if(releaseOrder.publicationGSTIN.GSTType !== 'URD')
-        Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo
-    if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
-
-    pdf.generateReleaseOrder(request,response,Details);
-};
 
 module.exports.previewROhtml = async function(request, response) {
     var user = response.locals.user;
@@ -1169,14 +1184,33 @@ function getROhtml(Details, callback) {
             templateHtml = templateHtml.replace('{{date}}', today);
             templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
             templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
-            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
             templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
             templateHtml = templateHtml.replace('{{dper}}', Details.dper);
-            templateHtml = templateHtml.replace('{{damount}}', Details.damount);
+            templateHtml = templateHtml.replace('{{damount1}}', Details.damount1);
+            templateHtml = templateHtml.replace('{{damount2}}', Details.damount2);
             templateHtml = templateHtml.replace('{{namount}}', Details.namount);
             templateHtml = templateHtml.replace('{{username}}', Details.username);
             templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
             templateHtml = templateHtml.replace('{{rno}}', Details.rno);
+            templateHtml = templateHtml.replace('{{hue}}', Details.hue);
+            templateHtml = templateHtml.replace('{{adtype}}', Details.adtype);
+            templateHtml = templateHtml.replace('{{edition}}', Details.edition);
+            templateHtml = templateHtml.replace('{{pubD}}', Details.pubD);
+            templateHtml = templateHtml.replace('{{agenD1}}', Details.agenD1);
+            templateHtml = templateHtml.replace('{{agenD2}}', Details.agenD2);
+            templateHtml = templateHtml.replace('{{publicationdisc}}', Details.publicationdisc);
+            templateHtml = templateHtml.replace('{{taxamount}}', Details.taxamount);
+            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
+            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
+            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
+            templateHtml = templateHtml.replace('{{gstamount}}', Details.gstamount);
+            templateHtml = templateHtml.replace('{{igstamount}}', Details.igstamount);
+            templateHtml = templateHtml.replace('{{cgstamount}}', Details.cgstamount);
+            templateHtml = templateHtml.replace('{{sgstamount}}', Details.sgstamount);
+            templateHtml = templateHtml.replace('{{namountwords}}', Details.namountwords);
+            templateHtml = templateHtml.replace('{{paymentDetails}}', Details.paymentDetails);
+            templateHtml = templateHtml.replace('{{jurisdiction}}', Details.jurisdiction);
+            templateHtml = templateHtml.replace('{{remark}}', Details.remark);
 
             callback(templateHtml);
         });
@@ -1266,4 +1300,19 @@ module.exports.getCategories = (request, response) =>{
             }); 
         }
     });
+}
+
+function toMonth(a){
+    if(a === 1) return 'Jan';
+    else if(a === 2) return 'Feb';
+    else if(a === 3) return 'Mar';
+    else if(a === 4) return 'Apr';
+    else if(a === 5) return 'May';
+    else if(a === 6) return 'Jun';
+    else if(a === 7) return 'Jul';
+    else if(a === 8) return 'Aug';
+    else if(a === 9) return 'Sept';
+    else if(a === 10) return 'Oct';
+    else if(a === 11) return 'Nov';
+    else if(a === 12) return 'Dec';
 }
