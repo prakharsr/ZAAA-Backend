@@ -58,6 +58,11 @@ module.exports.createMHInvoice = async (request,response) => {
     mhinvoice.insertions.forEach(element => {
         element.Amount = amount;
         element.pendingAmount = amount;
+        if(element.paymentMode=="Cheque"||element.paymentMode=="Cash"||element.paymentMode=="NEFT")
+        {
+            element.collectedAmount+= amount;
+            element.pendingAmount-=amount;
+        }
     });
             mhinvoice.save((err,doc)=>{
                 if(err){
