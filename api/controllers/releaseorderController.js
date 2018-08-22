@@ -1229,7 +1229,14 @@ module.exports.previewROhtml = async function(request, response) {
     var count = 0;
     result.forEach(object =>{
         var dates = "";
-        object.items.forEach(obj => {dates += obj.date.day+" "});
+        object.items.forEach(obj => {
+                var array = [];
+                array.push(obj.date.day);
+                array.sort();
+                array.forEach(obje => {
+                    dates += obje+' ';
+                })
+        });
         if(count === 0){
             insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
             count = 1;
