@@ -1227,16 +1227,26 @@ module.exports.previewROhtml = async function(request, response) {
     });
     var insData = '';
     var count = 0;
-    result.forEach(object =>{
+    result.sort((a, b) => {
+        if (+a.key.year > +b.key.year)
+          return true;
+        else if (+a.key.year < +b.key.year)
+          return false;
+        else return +a.key.month > +b.key.month;
+    })
+      .forEach(object =>{
+        console.log(object.items);
         var dates = "";
+        var array = [];
         object.items.forEach(obj => {
-                var array = [];
-                array.push(obj.date.day);
-                array.sort();
-                array.forEach(obje => {
-                    dates += obje+' ';
-                })
+            array.push(+obj.date.day);            
         });
+        array.sort((a, b) => +a > +b);
+
+        array.forEach(obj => {
+            dates += obj + " ";
+        })
+
         if(count === 0){
             insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
             count = 1;
@@ -1507,18 +1517,18 @@ module.exports.getCategories = (request, response) =>{
 }
 
 function toMonth(a){
-    if(a == 1) return 'Jan';
-    else if(a == 2) return 'Feb';
-    else if(a == 3) return 'Mar';
-    else if(a == 4) return 'Apr';
-    else if(a == 5) return 'May';
-    else if(a == 6) return 'Jun';
-    else if(a == 7) return 'Jul';
-    else if(a == 8) return 'Aug';
-    else if(a == 9) return 'Sept';
-    else if(a == 10) return 'Oct';
-    else if(a == 11) return 'Nov';
-    else if(a == 12) return 'Dec';
+    return ['Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sept',
+    'Oct',
+    'Nov',
+    'Dec'][a - 1];
 }
 
 function amountToWords(num) {
