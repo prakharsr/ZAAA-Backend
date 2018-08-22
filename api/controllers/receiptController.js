@@ -659,6 +659,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
         {
             query['userID'] = request.body.userID;
         }
+        if(request.body.status === 0||request.body.status === 1||request.body.status === 2||request.body.status === 3)
+        query['status'] = request.body.status
         resolve(query);
         
     })
@@ -971,41 +973,84 @@ module.exports.receiptStatus = async function(request, response){
     }
     var oldStatus = receipt.status;
     var newStatus = +(request.body.status);
-    var coamount = 0, pamount = 0, clamount = 0, amount = receipt.paymentAmount;
+    var coamount = 0, pamount = 0, saamount=0; clamount = 0, amount = receipt.paymentAmount;
     
     /* 0 for collected
     1 for cleared
-    2 for rejected  */
+    2 for rejected
+    3 for shadow  */
     
     if(oldStatus==0 && newStatus==1){
         coamount = invoice.collectedAmount-amount;
         pamount = invoice.pendingAmount;
         clamount = invoice.clearedAmount+amount;
+        saamount = invoice.shadowAmount;
     }
     else if(oldStatus==0 && newStatus==2){
         coamount = invoice.collectedAmount-amount;
         pamount = invoice.pendingAmount+amount;
         clamount = invoice.clearedAmount;
+        saamount = invoice.shadowAmount;
+    }
+    else if(oldStatus==0 && newStatus==3){
+        coamount = invoice.collectedAmount-amount;
+        pamount = invoice.pendingAmount;
+        clamount = invoice.clearedAmount;
+        saamount = invoice.shadowAmount+amount;
     }
     else if(oldStatus==1 && newStatus==0){
         coamount = invoice.collectedAmount+amount;
         pamount = invoice.pendingAmount;
+        saamount = invoice.shadowAmount;
         clamount = invoice.clearedAmount-amount;
     }
     else if(oldStatus==1 && newStatus==2){
         coamount = invoice.collectedAmount;
+        saamount = invoice.shadowAmount;
         pamount = invoice.pendingAmount+amount;
+        clamount = invoice.clearedAmount-amount;
+    }
+    else if(oldStatus==1 && newStatus==3){
+        coamount = invoice.collectedAmount;
+        saamount = invoice.shadowAmount+amount;
+        pamount = invoice.pendingAmount;
         clamount = invoice.clearedAmount-amount;
     }
     else if(oldStatus==2 && newStatus==0){
         coamount = invoice.collectedAmount+amount;
         pamount = invoice.pendingAmount-amount;
+        saamount = invoice.shadowAmount;
         clamount = invoice.clearedAmount;
     }
     else if(oldStatus==2 && newStatus==1){
         coamount = invoice.collectedAmount;
         pamount = invoice.pendingAmount-amount;
         clamount = invoice.clearedAmount+amount;
+        saamount = invoice.shadowAmount;
+    }
+    else if(oldStatus==2 && newStatus==3){
+        coamount = invoice.collectedAmount;
+        pamount = invoice.pendingAmount-amount;
+        clamount = invoice.clearedAmount;
+        saamount = invoice.shadowAmount+amount;
+    }
+    else if(oldStatus==3 && newStatus==0){
+        coamount = invoice.collectedAmount+amount;
+        pamount = invoice.pendingAmount;
+        saamount = invoice.shadowAmount-amount;
+        clamount = invoice.clearedAmount;
+    }
+    else if(oldStatus==3 && newStatus==1){
+        coamount = invoice.collectedAmount;
+        pamount = invoice.pendingAmount;
+        clamount = invoice.clearedAmount+amount;
+        saamount = invoice.shadowAmount-amount;
+    }
+    else if(oldStatus==3 && newStatus==2){
+        coamount = invoice.collectedAmount;
+        pamount = invoice.pendingAmount+amount;
+        clamount = invoice.clearedAmount;
+        saamount = invoice.shadowAmount-amount;
     }
     
     
@@ -1023,7 +1068,8 @@ module.exports.receiptStatus = async function(request, response){
             { $set: {   
                 "collectedAmount" : coamount,
                 "clearedAmount": clamount,
-                "pendingAmount": pamount
+                "pendingAmount": pamount,
+                "shadowAmount": saamount
             }}).exec(err,()=>{
                 if(err){
                     response.send({

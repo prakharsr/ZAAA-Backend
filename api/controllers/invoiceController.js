@@ -545,18 +545,18 @@ module.exports.queryClientPayments = async function(request, response){
             _id: "$clientID",
             count: {$sum: 1},
             
-            shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-            balance :{$sum: "$collectedAmount" },
-            totalBalance:{$sum: "$pendingAmount" },
+            shadow :{$sum:{ $add: [ "$shadowAmount", "$collectedAmount" ] }},
+            balance :{$sum: "$pendingAmount" },
+            totalBalance:{$sum: { $add: [ "$pendingAmount","$shadowAmount", "$collectedAmount" ] } },
             entries: { $push:  
                 {
                     "publicationName":"$publicationName",
                     "publicationEdition":"$publicationEdition", 
                     "clientName":"$clientName",
                     "invoiceNO":"$invoiceNO",
-                    shadow :{ $add: [ "$pendingAmount", "$collectedAmount" ] },
-                    "balance":"$collectedAmount",
-                    "totalBalance":"$pendingAmount",
+                    shadow :{ $add: [ "$shadowAmount", "$collectedAmount" ] },
+                    "balance":"$pendingAmount",
+                    "totalBalance":{ $add: [ "$shadowAmount", "$pendingAmount", "$collectedAmount" ] },
                     "executiveOrg":"$executiveOrg",
                     "executiveName": "$executiveName",
                 } }
@@ -600,18 +600,18 @@ module.exports.queryClientPayments = async function(request, response){
                 _id: "$executiveID",
                 count: {$sum: 1},
                 
-                shadow :{$sum:{ $add: [ "$pendingAmount", "$collectedAmount" ] }},
-                balance :{$sum: "$collectedAmount" },
-                totalBalance:{$sum: "$pendingAmount" },
+            shadow :{$sum:{ $add: [ "$shadowAmount", "$collectedAmount" ] }},
+            balance :{$sum: "$pendingAmount" },
+            totalBalance:{$sum: { $add: [ "$pendingAmount","$shadowAmount", "$collectedAmount" ] } },
                 entries: { $push:  
                     {
                         "publicationName":"$publicationName",
                         "publicationEdition":"$publicationEdition", 
                         "clientName":"$clientName",
                         "invoiceNO":"$invoiceNO",
-                        shadow :{ $add: [ "$pendingAmount", "$collectedAmount" ] },
-                        "balance":"$collectedAmount",
-                        "totalBalance":"$pendingAmount",
+                        shadow :{ $add: [ "$shadowAmount", "$collectedAmount" ] },
+                        "balance":"$pendingAmount",
+                        "totalBalance":{ $add: [ "$shadowAmount", "$pendingAmount", "$collectedAmount" ] },
                         "executiveOrg":"$executiveOrg",
                         "executiveName": "$executiveName",
                     } }

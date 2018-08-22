@@ -113,6 +113,10 @@ var InvoiceSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    shadowAmount:{
+        type: Number,
+        default: 0
+    },
     collectedAmount:{
         type: Number,
         default: 0
