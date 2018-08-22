@@ -152,13 +152,12 @@ async function f (request, response, user){
     var executiveID = await getExecutiveID(request, response, user);
     var date = new Date()
     var sn = firm.ROSerial+1;
-    var fname = firm.FirmName;
-    var shortname = fname.match(/\b\w/g).join('');
-    var city = firm.OfficeAddress.city;
-    var gstin = firm.GSTIN;
-    gstin = gstin.GSTNo.substring(0,1);
     var year = date.getFullYear();
-    var rno = year+''+gstin+''+shortname+''+city+''+sn;
+    var month = date.getMonth()+1;
+    if(month < 10){
+        month = '0'+month;
+    }
+    var rno = month+''+year+'-'+sn;
     console.log(rno);
     
     var releaseOrder = new ReleaseOrder({
