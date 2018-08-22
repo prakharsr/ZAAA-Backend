@@ -163,7 +163,7 @@ async function f (request, response, user){
     if(month < 10){
         month = '0'+month;
     }
-    var rno = month+''+year+'-'+sn;
+    var rno = year+'-'+month+'-'+sn;
     console.log(rno);
     
     var releaseOrder = new ReleaseOrder({
@@ -566,6 +566,7 @@ module.exports.queryReleaseOrder = async function(request, response){
     ReleaseOrder.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort("-createdAt")
     .exec(function(err, releaseOrders){
         if(err){
             console.log(err+ "");

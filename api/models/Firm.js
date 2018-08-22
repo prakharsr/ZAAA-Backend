@@ -85,6 +85,34 @@ var FirmSchema = new mongoose.Schema({
     FirmStatus:{
         type:Number,
         default:0
+    },
+    Jurisdiction:String,
+    ROterms:{
+        Jurisdiction:String,
+        line1:String,
+        line2:String,
+        line3:String,
+        line4:String,
+        line5:String,
+        line6:String
+    },
+    Interms:{
+        Jurisdiction:String,
+        line1:String,
+        line2:String,
+        line3:String,
+        line4:String,
+        line5:String,
+        line6:String
+    },
+    PRterms:{
+        Jurisdiction:String,
+        line1:String,
+        line2:String,
+        line3:String,
+        line4:String,
+        line5:String,
+        line6:String
     }
 });
 

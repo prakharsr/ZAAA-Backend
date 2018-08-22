@@ -47,6 +47,7 @@ router.post('/user/profile', user.setUserProfile);
 router.get('/firm/profile', firm.getFirmProfile);
 router.get('/firm/users', firm.getFirmUsers);
 router.post('/firm/profile', firm.setFirmProfile);
+router.post('/firm/terms', firm.setTermsAndCondition);
 router.post('/firm/logo', firm.logoImage);
 router.delete('/firm/logo', firm.deleteLogoImage);
 router.get('/user', user.getCurrentUser);

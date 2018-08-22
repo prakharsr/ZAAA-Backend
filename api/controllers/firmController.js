@@ -259,6 +259,38 @@ module.exports.getTemplates = function(request, response){
 	})
 };
 
+module.exports.setTermsAndCondition = function(request, response){
+	var user = response.locals.user;
+	var firm = response.locals.firm;
+	Firm.find({ _id: user.firm },function (err, firm) {
+		if(request.body.ROterms)
+		firm.ROterms = request.body.ROterms;
+		if(request.body.INterms)
+		firm.ROterms = request.body.INterms;
+		if(request.body.PRterms)
+		firm.ROterms = request.body.PRterms;
+		if(request.body.Jurisdiction)
+		firm.Jurisdiction = request.body.Jurisdiction;
+
+		firm.save(function(err){
+			if(err)
+			{
+				console.log(err)
+				response.send({
+					success:false,
+					msg:"Error in saving Terms and Condition"
+				})
+			}
+			else{
+				response.send({
+					success:true,
+					msg:"Terms And Conditions Updated"
+				});
+			}
+		})
+	});
+};
+
 module.exports.getFirmUsers = function(request,response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
