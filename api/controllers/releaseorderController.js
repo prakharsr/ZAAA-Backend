@@ -1129,7 +1129,39 @@ module.exports.previewROhtml = async function(request, response) {
     //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
     var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory1];
     var categories = releaseOrder.adCategory1 || '-';
+    var premam = 0;
+    var premium = '';
+    
+    if(releaseOrder.PremiumBox.Included){
+        premam += releaseOrder.PremiumBox.Amount;
+        premium += "Premium Box ";
+    }
 
+    if(releaseOrder.PremiumBaseColour.Included){
+        premam += releaseOrder.PremiumBaseColour.Amount;
+        premium += "Premium Base Colour ";
+    }
+
+    if(releaseOrder.PremiumEmailId.Included){
+        premam += releaseOrder.PremiumEmailId.Amount*releaseOrder.PremiumBaseColour.Quantity;
+        premium += "Premium Email Id ";
+    }
+
+    if(releaseOrder.PremiumCheckMark.Included){
+        premam += releaseOrder.PremiumCheckMark.Amount;
+        premium += "Premium Check Mark ";
+    }
+
+    if(releaseOrder.PremiumWebsite.included){
+        premam += releaseOrder.PremiumBox.Amount*releaseOrder.PremiumBaseColour.Quantity;
+        premium += "Premium website ";
+    }
+
+    if(releaseOrder.PremiumExtraWords.included){
+        premam += releaseOrder.PremiumExtraWords.Amount*releaseOrder.PremiumBaseColour.Quantity;
+        premium += "Premium Extra Words ";
+    }
+    
     catarray.forEach(element => {
         if (element) {
             categories += ' - ' + element;
@@ -1140,13 +1172,14 @@ module.exports.previewROhtml = async function(request, response) {
         var dates = "";
         object.items.forEach(obj => {dates += obj.date.day+" "});
         if(count === 0){
-            insData+='<tr><td>'+caption+'<br>'+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+            insData+='<tr><td>'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
             count = 1;
         }
         else{
             insData+='<tr><td>'+caption+'<br>'+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
         }
     });
+
     var paymentDetails="";
     var address = firm.RegisteredAddress;
     var caddress = client.Address;
@@ -1199,7 +1232,8 @@ module.exports.previewROhtml = async function(request, response) {
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
         caddress: caddress?(caddress.city+"<br>"+caddress.state+'<br>PIN code:'+caddress.pincode):'',
         maddress: maddress?(maddress.city+"<br>"+maddress.state+'<br>PIN code:'+maddress.pincode):'',
-        pullout: releaseOrder.pulloutName
+        pullout: releaseOrder.pulloutName,
+        premam : premam
     }
 
     if(releaseOrder.adSchemeFree === 0);
@@ -1309,6 +1343,9 @@ function getROhtml(Details, callback) {
             templateHtml = templateHtml.replace('{{remark}}', Details.remark);
             templateHtml = templateHtml.replace('{{Address}}', Details.address);
             templateHtml = templateHtml.replace('{{pullout}}', Details.pullout);
+            templateHtml = templateHtml.replace('{{caddress}}', Details.caddress);
+            templateHtml = templateHtml.replace('{{maddress}}', Details.maddress);
+            templateHtml = templateHtml.replace('{{premam}}', Details.premam);
 
             callback(templateHtml);
         });

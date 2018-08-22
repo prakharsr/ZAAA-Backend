@@ -18,9 +18,16 @@
             <thead>
                 <tr>
                     <th colspan="4">
-                        Media House Name: {{mediahouse}}<br>
-                        GSTIN: {{pgstin}}<br>
-                        Pullout Name: {{pullout}}
+                        <div class='row'>
+                            <div class='col'>       
+                                Media House Name: {{mediahouse}}<br>
+                                GSTIN: {{pgstin}}<br>
+                                Pullout Name: {{pullout}}
+                            </div>
+                            <div class='row'>
+                                Address: {{maddress}}
+                            </div>
+                        </div>
                     </th>
                     <th colspan="4">
                         Release Order No: {{rno}}<br>
@@ -31,8 +38,16 @@
                 
                 <tr>
                     <th colspan="4">
-                        Client:{{cname}}<br>
-                        GSTIN:{{cgstin}}
+                        <div class='row'>
+                            <div class='col'>
+                                Client:{{cname}}<br>
+                                GSTIN:{{cgstin}}
+                            </div>
+                            <div class='col'>
+                                Address: {{caddress}}
+                            </div>
+                        </div>
+                       
                     </th>
                     <th colspan="4">
                          <div class="row">
@@ -58,6 +73,11 @@
                     <td>Gross Amount</td>
                 </tr>
                 {{insertions}}
+                <tr>
+                    <td colspan="5"></td>
+                    <td>Premium Amount</td>
+                    <td>{{premam}}</td>
+                </tr>
                 <tr>
                     <td colspan="5" style="text-align: right">Publication Discount: {{pubD}} %</td>
                     <td>Publication Discount</td>
