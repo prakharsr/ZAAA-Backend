@@ -659,6 +659,8 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request, adv
         {
             query['userID'] = request.body.userID;
         }
+        if(request.body.status === 0||request.body.status === 1||request.body.status === 2||request.body.status === 3)
+        query['status'] = request.body.status
         resolve(query);
         
     })
