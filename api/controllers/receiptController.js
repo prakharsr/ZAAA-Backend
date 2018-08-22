@@ -220,7 +220,7 @@ async function f(request, response, user){
         var client = await findClient(invoice.clientID);
         var executive = await findExecutive(invoice.executiveID);
         var counter = invoice.receiptSerial+1;
-        var rno = invoice.invoiceNO+'.'+counter;  
+        var rno = invoice.invoiceNO+'/'+counter;  
     }
     catch(err){
         console.log(err);

@@ -152,6 +152,12 @@ async function f (request, response, user){
     var executiveID = await getExecutiveID(request, response, user);
     var date = new Date()
     var sn = firm.ROSerial+1;
+    if(sn < 10){
+        sn = '00'+sn;
+    }
+    else if(sn < 100){
+        sn = '0'+sn;
+    }
     var year = date.getFullYear();
     var month = date.getMonth()+1;
     if(month < 10){

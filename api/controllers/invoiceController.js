@@ -119,7 +119,7 @@ async function f(request, response, user){
         var client = await findClient(releaseOrder.clientID);
         var executive = await findExecutive(releaseOrder.executiveID);
         var counter = releaseOrder.invoiceSerial+1;
-        var ino = releaseOrder.releaseOrderNO+'.'+counter
+        var ino = releaseOrder.releaseOrderNO+'/'+counter
         
     }
     catch(err){
