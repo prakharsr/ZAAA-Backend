@@ -1247,22 +1247,23 @@ module.exports.previewROhtml = async function(request, response) {
             dates += obj + " ";
         })
 
+        var row = result.length;
+
         if(count === 0){
-            insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+            insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td rowspan='+row+'>'+releaseOrder.adGrossAmount+'</td></tr>';
             count = 1;
         }
         else{
-            insData+='<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
+            insData+='<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td></tr>';
         }
     });
-
-    var remark = "2. "+releaseOrder.remark;
+    
+    var remark = releaseOrder.remark?"2. "+releaseOrder.remark:'';
 
     var paymentDetails="";
     var address = firm.RegisteredAddress;
     var caddress = releaseOrder.clientState;
     var maddress = releaseOrder.publicationState;
-
 
     if(releaseOrder.paymentType === 'Cash')
     paymentDetails = "Cash"
@@ -1272,6 +1273,7 @@ module.exports.previewROhtml = async function(request, response) {
     paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+releaseOrder.paymentDate+" Numbered "+releaseOrder.paymentNo
     else if(releaseOrder.paymentType === 'NEFT')
     paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
+
 
     console.log(releaseOrder.publicationGSTIN);
 
