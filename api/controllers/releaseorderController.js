@@ -1118,6 +1118,8 @@ module.exports.previewROhtml = async function(request, response) {
 
     console.log(result);
     var releaseOrder = doc;
+    var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(releaseOrder.mediahouseID));
+    var client = await Client.findById(mongoose.mongo.ObjectId(releaseOrder.clientID));
     var insData="";
     var insertions = releaseOrder.insertions;
     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
@@ -1138,15 +1140,17 @@ module.exports.previewROhtml = async function(request, response) {
         var dates = "";
         object.items.forEach(obj => {dates += obj.date.day+" "});
         if(count === 0){
-            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category: "+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+            insData+='<tr><td>'+caption+'<br>'+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
             count = 1;
         }
         else{
-            insData+='<tr><td>'+'Caption:'+caption+'<br>'+"Category: "+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
+            insData+='<tr><td>'+caption+'<br>'+categories+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
         }
     });
     var paymentDetails="";
     var address = firm.RegisteredAddress;
+    var caddress = client.Address;
+    var maddress = mediahouse.Address;
 
     if(releaseOrder.paymentType === 'Cash')
     paymentDetails = "Cash"
@@ -1164,7 +1168,7 @@ module.exports.previewROhtml = async function(request, response) {
         cname :releaseOrder.clientName,
         cgstin :'-',
         gstin :'-',
-        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
+        scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
         insertions :insData,
         username: user.name,
         firmname: firm.FirmName,
@@ -1174,26 +1178,32 @@ module.exports.previewROhtml = async function(request, response) {
         jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
         paymentDetails: paymentDetails,
         namount: '',
-        namountwords: releaseOrder.netAmountWords || "",
+        namountwords: '',
         gstamount: '',
-        sgstamount: '',
-        cgstamount: '',
-        igstamount: '',
-        igst: '',
-        cgst: '',
-        sgst: '',
+        sgstamount: '-',
+        cgstamount: '-',
+        igstamount: '-',
+        igst: '-',
+        cgst: '-',
+        sgst: '-',
         taxamount: '',
         publicationdisc: '',
+        damount1: '',
+        damount2:'',
         agenD1: releaseOrder.agencyDiscount1,
         agenD2: releaseOrder.agencyDiscount2,
         pubD: releaseOrder.publicationDiscount,
         edition: releaseOrder.adEdition,
         adtype:releaseOrder.adType,
         hue:releaseOrder.adHue,
-        damount1: '',
-        damount2:'',
-        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):''
+        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+        caddress: caddress?(caddress.city+"<br>"+caddress.state+'<br>PIN code:'+caddress.pincode):'',
+        maddress: maddress?(maddress.city+"<br>"+maddress.state+'<br>PIN code:'+maddress.pincode):'',
+        pullout: releaseOrder.pulloutName
     }
+
+    if(releaseOrder.adSchemeFree === 0);
+    Details['scheme'] = 'NA';
 
     var adGrossAmount;
     var tax = releaseOrder.taxAmount.primary;
@@ -1216,13 +1226,14 @@ module.exports.previewROhtml = async function(request, response) {
     var taxamount = releaseOrder.netAmountFigures;
     Details['taxamount'] = taxamount;
     Details['namount'] = taxamount + (taxamount*tax)/100;
+    Details['namountwords'] = amountToWords(taxamount + (taxamount*tax)/100);
 
-    if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
-        Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
+    if(firm.GSTIN.GSTType !== 'URD')
+        Details['gstin'] =firm.GSTIN.GSTNo;
     if(releaseOrder.publicationGSTIN.GSTType !== 'URD')
-        Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo
+        Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo;
     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
+        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
     
     if(client.Address.state === mediahouse.Address.state){
         Details['sgst'] = Details['cgst'] = tax/2;
@@ -1297,6 +1308,7 @@ function getROhtml(Details, callback) {
             templateHtml = templateHtml.replace('{{jurisdiction}}', Details.jurisdiction);
             templateHtml = templateHtml.replace('{{remark}}', Details.remark);
             templateHtml = templateHtml.replace('{{Address}}', Details.address);
+            templateHtml = templateHtml.replace('{{pullout}}', Details.pullout);
 
             callback(templateHtml);
         });
@@ -1402,3 +1414,41 @@ function toMonth(a){
     else if(a == 11) return 'Nov';
     else if(a == 12) return 'Dec';
 }
+
+function amountToWords(num) {
+    if (!num) {
+      return "Zero Only";
+    }
+
+    var a = [
+      '',
+      'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ',
+      'Ten ',
+      'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '
+    ];
+    
+    var b = [
+      '', '',
+      'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+    ];
+    
+    var c = ['Crore ', 'Lakh ', 'Thousand ', 'Hundred '];
+  
+    if ((num = num.toString()).length > 9)
+      return 'overflow';
+
+    var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    
+    if (!n)
+      return;
+      
+    let str = '';
+
+    for (let i = 0; i < 4; ++i) {
+      str += (n[i + 1] != 0) ? (a[Number(n[i + 1])] || b[n[i + 1][0]] + ' ' + a[n[i + 1][1]]) + c[i] : '';
+    }
+
+    str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only' : '';
+    
+    return str;
+  }
