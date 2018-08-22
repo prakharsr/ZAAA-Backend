@@ -2,11 +2,11 @@ var Notification = require('../models/Notifications');
 var User = require('../../api/models/User');
 var Receipt = require('../../api/models/Receipt');
 var FCM = require('fcm-push');
-var serverkey = 'AAAAu8UiRLk:APA91bG_gPsYwr8q2ChL1LRLeYUCasxKPnMumEuCnmUq0oh0MmiISMD6XeTByhg0BNO_bqDKrzUSzW42doeV70Eb-qvnJYzXM455cOEZGWNW-9cdlWVWPnQxVVVOFhham_eGbHpnYw3S';  //
+var serverkey = 'AAAAvsBQ9YQ:APA91bFjafZx6SqnGXcC3ujNH_qtaOQNFN-gBeqxpsr3MQaUMUdNJIxEL6h-x-dgFajjfP6a2R0nZpHA7TEl1xtflpia_pXVhVPhJwdRJoUDHXgyIGzMJHixvdveMDTbJRHcbiO-5C_R96SzJUafHKSFlZJQ2PmKXw';  //
 var fcm = new FCM(serverkey);
 var CronJob = require('cron').CronJob;
 
-function getUsers(){
+function getTokens(){
     return new Promise((resolve, reject)=>{
         User.find({}, function(err,users){
             if(err){
@@ -26,7 +26,7 @@ function getUsers(){
 }
 
 module.exports.sendNotifs = async (request,response) => {
-    var tokens = await getUsers();
+    var tokens = await getTokens();
     var message = {  
         to : tokens,
         notification : {

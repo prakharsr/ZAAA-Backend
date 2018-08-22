@@ -2,26 +2,41 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Release Order</title>
+    <style>
+        hr.rule1{
+            border: 0;
+            height: 3px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+        }
+    </style>
 </head>
-<body class="container-fluid">
-    <div style="width: 210mm">
-        <div class="row">
+<body class="container-fluid" style="width : 560px;">
+    <div>
+        <div class="row" style="width: 560px;">
             <div class="col">
-                <img src="{{logoimage}}" style="height: 40px; width:40px;">
+                <img src="{{logoimage}}" style="height:60px; width:60px;">
             </div>
-            <div class="col" style="text-align: right; font-size:6px;">
+            <div class="col" style="text-align: right; font-size:6px; margin-top: 20px;">
                 <p>{{Address}}</p>
             </div>
         </div>
-        <h6 class="text-center">Release Order</h6>
-        <table class="table table-bordered table-sm" style="font-size:6px">
+        <h6 style="position: relative; left: 250px;">Release Order</h6>
+        <table class="table table-bordered table-sm" style="font-size:8px; width: 560px;">
             <thead>
                 <tr>
                     <th colspan="4">
-                        Publisher: {{mediahouse}}<br>
-                        GSTIN: {{pgstin}}
+                        <div class='row'>
+                            <div class='col' style="text-align: left;">       
+                                Media House Name: {{mediahouse}}<br>
+                                Pullout Name: {{pullout}}<br>
+                                GSTIN: {{pgstin}}
+                            </div>
+                            <div class='col' style="text-align: left;">
+                                State: {{maddress}}
+                            </div>
+                        </div>
                     </th>
-                    <th colspan="4">
+                    <th colspan="4" style="text-align: left;">
                         Release Order No: {{rno}}<br>
                         Date: {{date}}<br>
                         GSTIN: {{gstin}}
@@ -30,16 +45,24 @@
                 
                 <tr>
                     <th colspan="4">
-                        Client:{{cname}}<br>
-                        GSTIN:{{cgstin}}
+                        <div class='row'>
+                            <div class='col' style="text-align: left;">
+                                Client:{{cname}}<br>
+                                GSTIN:{{cgstin}}
+                            </div>
+                            <div class='col' style="text-align: left;">
+                                State: {{caddress}}
+                            </div>
+                        </div>
+                       
                     </th>
                     <th colspan="4">
                          <div class="row">
-                            <div class="col">
+                            <div class="col" style="text-align: left;">
                                 Scheme: {{scheme}}<br>
                                 Hue: {{hue}}
                             </div>
-                            <div class="col">
+                            <div class="col" style="text-align: left;">
                                 Ad Type: {{adtype}}<br>
                                 Edition: {{edition}}
                             </div>
@@ -49,8 +72,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Description</td>
-                    <td>Edition</td>
+                    <td colspan='2'>Description</td>
                     <td>Ins Date</td>
                     <td>Position</td>
                     <td>Size</td>
@@ -58,6 +80,10 @@
                     <td>Gross Amount</td>
                 </tr>
                 {{insertions}}
+                <tr>
+                    <td colspan="6">Premium Amount</td>
+                    <td>{{premam}}</td>
+                </tr>
                 <tr>
                     <td colspan="5" style="text-align: right">Publication Discount: {{pubD}} %</td>
                     <td>Publication Discount</td>
@@ -98,15 +124,15 @@
                 </tr>
             </tbody>
         </table>
-        <div class='row'>
-            <div class='col-sm-9' style ='font-size: 6px'>
-                <p style="color:crimson">Note/Remark:</p>
-                <p>1.All disputed are subject to {{jurisdiction}} jurisdiction only.</p>
-                <p>{{remark}}</p>
+        <div class='row' style="width: 560px;">
+            <div class='col' style ='font-size: 8px'>
+                <b>Note/Remark:</b><br>
+                1. All disputed are subject to {{jurisdiction}} jurisdiction only.<br>
+                {{remark}}
             </div>
-            <div class='col-sm-3' style ='font-size: 6px'>
-                <h6>Signature:</h6>
-                <img src="{{sign}}" style="height: 40px; width:40px;">
+            <div class='col' style='text-align: right; font-size: 8px'>
+                <b>Signature:</b><br>
+                <img src="{{sign}}" style="height: 60px; width:60px;">
             </div>
         </div>
         <hr>
