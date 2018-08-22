@@ -300,7 +300,7 @@ module.exports.RecieptsChequeData = async function(request, response){
             count: {$sum: 1},
             
             DueChequesAmount:{$sum:{
-                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {  $lte: ["$paymentDate",last ]}  ]},
+                "$cond": [{$and: [ {  $eq: ["$paymentType","Cheque" ] }, {$or:[{$eq: ["$status","3" ] },{$eq: ["$status","3" ] },{  $lte: ["$paymentDate",last ]}]}  ]},
                 "$paymentAmount",0]
             }},
             DueChequesNumber:{$sum:{
@@ -344,13 +344,14 @@ module.exports.RecieptsChequeData = async function(request, response){
 module.exports.RecieptsChequeDetailsData = async function(request, response){
     var user = response.locals.user;
     var query = await formQuery(user, request);
-    query["paymentType"]="Cheque"
+    query["paymentType"]="Cheque";
+    query["status"] = {$in:["0","3"]}
     console.log(query)
     
     var date = new Date();
     var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
-    
     Receipt.find(query, {
+        _id:1,
         paymentDate: 1,
         paymentAmount: 1,
         paymentNo: 1,
