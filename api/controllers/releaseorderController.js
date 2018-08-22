@@ -1310,7 +1310,7 @@ module.exports.getROhtml = getROhtml;
 module.exports.queryReleaseOrderByNo = function(request, response){
     var user = response.locals.user;
     ReleaseOrder.find({
-        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]}, {$or:[{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }}]}]
+        $and : [{$or:[{firm:mongoose.mongo.ObjectId(user.firm)},{global:true}]},{generated:true}, {$or:[{ 'releaseOrderNO': { $regex: request.params.keyword+"", $options:"i" }}]}]
     })
     .sort('releaseOrderNo')
     .limit(5).exec(function(err, releaseOrders){
