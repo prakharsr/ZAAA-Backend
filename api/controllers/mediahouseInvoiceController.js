@@ -386,7 +386,7 @@ var user = response.locals.user;
 var mediahouseID =await searchMediahouseID(request, response, user);
 var date = (request.body.date)?(request.body.date):null;
 var query = await formQuery(mediahouseID, date, user, request);       
-
+query['insertions.paymentMode'] = {$in:["Cheque", "Cash", "NEFT"]} 
 MediaHouseInvoice
 .aggregate([
     {$unwind: "$insertions"}, 

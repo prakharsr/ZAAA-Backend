@@ -802,7 +802,7 @@ module.exports.cancelReceipt = async function(request, response){
         });
     }
     else{
-        receipt.isCancelled = true;
+        receipt.status = 2;
         receipt.save(function(err){
             if(err){
                 console.log(err);
