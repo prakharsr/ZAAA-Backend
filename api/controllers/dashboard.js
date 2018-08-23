@@ -51,7 +51,7 @@ module.exports.ROchartData = async function(request, response){
         {$unwind:"$insertions"}, 
         {$match:query},
         { $group : { 
-            _id : { day: { $dayOfMonth : "$date" },month: { $month: "$date" }, year: { $year: "$date" } },
+            _id : { day: { $dayOfMonth : "$generatedAt" },month: { $month: "$generatedAt" }, year: { $year: "$generatedAt" } },
             count: {$sum: 1},
             totalAmount:{$sum:"$insertions.netAmount"},
             generated:{$sum:{
@@ -178,6 +178,7 @@ module.exports.ClientPaymentsData = async function(request, response){
             collectedAmount :{$sum: "$collectedAmount" },
             completed:{$sum: "$clearedAmount" },
             pendingAmount:{$sum:"$pendingAmount"},
+            totalAmount:{$sum:"$FinalTaxAmount"},
             receivecAmount:{$sum:{ $add:["$collectedAmount", "$shadowAmount", "$clearedAmount"]}}
         } }
     ])
