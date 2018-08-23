@@ -244,6 +244,8 @@ MediaHouseInvoice
             "MHITaxAmount":"$MHIAmount"
         } }
     } },
+    
+    {$sort:{ createdAt : -1, "insertions.insertionDate": 1 }}
 ])
 .exec(function(err, insertions){
     if(err){
@@ -276,6 +278,7 @@ MediaHouseInvoice
 .find(query)
 .limit(perPage)
 .skip((perPage * request.body.page) - perPage)
+// .sort( { "MHIDate": -1,"insertions.insertionDate": 1})
 .exec(function(err, mediahouseInvoice){
     if(err){
         console.log(err+ "");
@@ -423,7 +426,8 @@ MediaHouseInvoice
                 "MHIGrossAmount":"$MHIGrossAmount",
                 "MHITaxAmount":"$MHIAmount"
             } }
-        } }
+        } },
+        {$sort:{ updatedAt : -1, "insertions.insertionDate": 1 }}
     ])
     .exec(function(err, insertions){
         if(err){
