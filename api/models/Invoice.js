@@ -160,7 +160,8 @@ var InvoiceSchema = new mongoose.Schema({
     });
     InvoiceSchema.pre('save', function(next){
         var self = this;
-        self.taxAmount.Amount = ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded);
+        var taxamount = ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded);
+        self.taxAmount.Amount = Math.round(taxamount*100)/100;
         console.log(self.agencyGSTIN, self.clientGSTIN);
         self.taxType = (self.clientState == self.agencyState)?"SGST + CGST": "IGST";
 

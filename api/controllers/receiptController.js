@@ -682,6 +682,7 @@ module.exports.queryReceipt = async function(request, response){
     Receipt.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort({"createdAt": -1})
     .exec(function(err, receipt){
         if(err){
             console.log(err+ "");
@@ -802,7 +803,7 @@ module.exports.cancelReceipt = async function(request, response){
         });
     }
     else{
-        receipt.isCancelled = true;
+        receipt.status = 2;
         receipt.save(function(err){
             if(err){
                 console.log(err);

@@ -474,6 +474,7 @@ module.exports.queryInvoice = async function(request, response){
     Invoice.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort({"createdAt":-1})
     .exec(function(err, invoice){
         if(err){
             console.log(err+ "");
@@ -541,6 +542,7 @@ module.exports.queryClientPayments = async function(request, response){
     
     Invoice.aggregate([ 
         {$match:query},
+        {$sort:{ "createdAt":-1}},
         { $group : { 
             _id: "$clientID",
             count: {$sum: 1},
@@ -559,11 +561,12 @@ module.exports.queryClientPayments = async function(request, response){
                     "totalBalance":{ $add: [ "$shadowAmount", "$pendingAmount", "$collectedAmount" ] },
                     "executiveOrg":"$executiveOrg",
                     "executiveName": "$executiveName",
+                    "createdAt":"$createdAt"
                 } }
                 
             } },
             {$limit: perPage},
-            {$skip:(perPage * request.body.page) - perPage}
+            {$skip:(perPage * request.body.page) - perPage},
         ])
         .exec(function(err, invoices){
             if(err){
@@ -596,6 +599,7 @@ module.exports.queryClientPayments = async function(request, response){
         var query = await formQuery(mediahouseID, clientID, executiveID, date, user, request);
         Invoice.aggregate([ 
             {$match:query},
+            {$sort:{ "createdAt":-1}},
             { $group : { 
                 _id: "$executiveID",
                 count: {$sum: 1},
@@ -614,11 +618,12 @@ module.exports.queryClientPayments = async function(request, response){
                         "totalBalance":{ $add: [ "$shadowAmount", "$pendingAmount", "$collectedAmount" ] },
                         "executiveOrg":"$executiveOrg",
                         "executiveName": "$executiveName",
+                        "createdAt":"$createdAt"
                     } }
                     
                 } },
                 {$limit: perPage},
-                {$skip:(perPage * request.body.page) - perPage}
+                {$skip:(perPage * request.body.page) - perPage},
             ])
             .exec(function(err, invoices){
                 if(err){
