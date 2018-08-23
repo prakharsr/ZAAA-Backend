@@ -850,6 +850,8 @@ module.exports.updateReleaseOrder = function(request, response){
 
 module.exports.mailROPdf = function(request, response) {
     var user = response.locals.user;
+    var firm = response.locals.firm;
+    console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
             console.log(err);
@@ -865,20 +867,19 @@ module.exports.mailROPdf = function(request, response) {
             });
         }
         else{
-            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
             if (releaseOrder.generated==false){
                 releaseOrder.generated=true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
             }
-            releaseOrder.save(async function(err){
+            releaseOrder.save(async function(err,doc){
                 if(err)
                 response.send({
                     success:false,
                     msg: err
-                });
+                })
                 else{
-                    var result = doc.insertions.reduce((grouped, item) => {
+                    var result = releaseOrder.insertions.reduce((grouped, item) => {
                         var index = grouped.findIndex(m => m.key.month == item.date.month
                             && m.key.year == item.date.year);
                             
@@ -889,50 +890,200 @@ module.exports.mailROPdf = function(request, response) {
                         
                         return grouped;
                     }, []);
-
-                    console.log(result);
-                    var releaseOrder = doc;
-                    var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-                    var insData="";
                     var insertions = releaseOrder.insertions;
                     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                     var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                    var namount = releaseOrder.adGrossAmount - damount ;
-                    result.forEach(object =>{
-                        var dates = "";
-                        object.items.forEach(obj => {dates += obj.date.day+" "});
-                        insData+='<tr><td>'+'<<Description>>'+'</td><td>'+releaseOrder.publicationEdition+'</td><td>'+object.key.month+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.rate+'</td></tr>';
+                    var namount = releaseOrder.adGrossAmount - damount;
+                    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
+                    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
+                    var categories = releaseOrder.adCategory1 || '';
+                    var premam = 0;
+                    var premium = '';
+                    
+                    if(releaseOrder.PremiumBox.Included){
+                        premam += releaseOrder.PremiumBox.Amount;
+                        premium += "Premium Box ";
+                    }
+
+                    if(releaseOrder.PremiumBaseColour.Included){
+                        premam += releaseOrder.PremiumBaseColour.Amount;
+                        premium += "Premium Base Colour ";
+                    }
+
+                    if(releaseOrder.PremiumEmailId.Included){
+                        premam += releaseOrder.PremiumEmailId.Amount*releaseOrder.PremiumBaseColour.Quantity;
+                        premium += "Premium Email Id ";
+                    }
+
+                    if(releaseOrder.PremiumCheckMark.Included){
+                        premam += releaseOrder.PremiumCheckMark.Amount;
+                        premium += "Premium Check Mark ";
+                    }
+
+                    if(releaseOrder.PremiumWebsite.included){
+                        premam += releaseOrder.PremiumBox.Amount*releaseOrder.PremiumBaseColour.Quantity;
+                        premium += "Premium website ";
+                    }
+
+                    if(releaseOrder.PremiumExtraWords.included){
+                        premam += releaseOrder.PremiumExtraWords.Amount*releaseOrder.PremiumBaseColour.Quantity;
+                        premium += "Premium Extra Words ";
+                    }
+                    
+                    catarray.forEach(function loop(element){
+                        if(loop.stop){return ;}
+                        if (element) {
+                            categories += '-' + element;
+                        }
+                        else{
+                            categories += "<br>"
+                            loop.stop = true;
+                        }
                     });
+                    var insData = '';
+                    var count = 0;
+                    result.sort((a, b) => {
+                        if (+a.key.year > +b.key.year)
+                        return true;
+                        else if (+a.key.year < +b.key.year)
+                        return false;
+                        else return +a.key.month > +b.key.month;
+                    })
+                    .forEach(object =>{
+                        console.log(object.items);
+                        var dates = "";
+                        var array = [];
+                        object.items.forEach(obj => {
+                            array.push(+obj.date.day);            
+                        });
+                        array.sort((a, b) => +a > +b);
+
+                        array.forEach(obj => {
+                            dates += obj + " ";
+                        })
+
+                        var row = result.length;
+
+                        if(count === 0){
+                            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
+                            count = 1;
+                        }
+                        else{
+                            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
+                        }
+                    });
+                    
+                    var remark = releaseOrder.remark?releaseOrder.remark:'';
+
+                    var paymentDetails="";
+                    var address = firm.RegisteredAddress;
+                    var caddress = releaseOrder.clientState;
+                    var maddress = releaseOrder.publicationState;
+
+                    if(releaseOrder.paymentType === 'Cash')
+                    paymentDetails = "Cash"
+                    else if(releaseOrder.paymentType === 'Credit')
+                    paymentDetails = "Credit"
+                    else if(releaseOrder.paymentType === 'Cheque')
+                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
+                    else if(releaseOrder.paymentType === 'NEFT')
+                    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
+
+
+                    console.log(releaseOrder.publicationGSTIN);
+
                     var Details = {
                         image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
-                        pgstin :'-',
+                        medition : releaseOrder.publicationEdition,
+                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
                         cname :releaseOrder.clientName,
                         cgstin :'-',
                         gstin :'-',
-                        scheme :releaseOrder.adSchemePaid+'-'+releaseOrder.adSchemeFree,
-                        gamount :releaseOrder.adGrossAmount,
+                        scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
                         insertions :insData,
-                        dper :releaseOrder.publicationDiscount+'+'+releaseOrder.agencyDiscount1+'+'+releaseOrder.agencyDiscount2,
-                        damount :damount,
-                        namount :namount,
                         username: user.name,
                         firmname: firm.FirmName,
+                        firmname1: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
-                        logo: firm.LogoURL,
-                        sign: config.domain+'/'+user.signature
+                        sign: config.domain+'/'+user.signature,
+                        remark: releaseOrder.Remark || "",
+                        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+                        paymentDetails: paymentDetails,
+                        namount: '',
+                        namountwords: '',
+                        gstamount: '',
+                        sgstamount: '-',
+                        cgstamount: '-',
+                        igstamount: '-',
+                        igst: '-',
+                        cgst: '-',
+                        sgst: '-',
+                        taxamount: '',
+                        publicationdisc: '',
+                        damount: '',
+                        agenD1: releaseOrder.agencyDiscount1,
+                        agenD2: releaseOrder.agencyDiscount2,
+                        pubD: releaseOrder.publicationDiscount,
+                        edition: releaseOrder.adEdition,
+                        adtype:releaseOrder.adType,
+                        hue:releaseOrder.adHue,
+                        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+                        caddress: caddress || '',
+                        maddress: maddress || '',
+                        pullout: releaseOrder.pulloutName,
+                        premam : "₹ "+addZeroes(""+Math.round(premam)),
+                        remark: remark,
+                        phone: "Phone: "+firm.Mobile || '',
+                        email: "Email: "+firm.Email || ''
                     }
-                    console.log(releaseOrder.agencyGSTIN)
 
-                    if(releaseOrder.agencyGSTIN.GSTType !== 'URD')
-                        Details['gstin'] =releaseOrder.agencyGSTIN.GSTNo
-                    if(releaseOrder.publicationGSTIN.GSTType !== 'URD')
-                        Details['pgstin'] =releaseOrder.publicationGSTIN.GSTNo
+                    if(releaseOrder.adSchemeFree === 0);
+                    Details['scheme'] = 'NA';
+
+                    var adGrossAmount;
+                    var tax = releaseOrder.taxAmount.primary;
+                    if(releaseOrder.taxIncluded){
+                        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
+                    }
+                    else{
+                        adGrossAmount = releaseOrder.adGrossAmount;
+                    }
+
+                    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
+                    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
+                    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
+                    damount1 += damount2;
+                    Details['damount'] = '₹ '+ (damount1.toFixed(2));
+                    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
+                    var taxamount = releaseOrder.netAmountFigures;
+                    var namount = taxamount + (taxamount*tax)/100;
+                    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
+                    Details['namount'] ='₹ '+ (namount.toFixed(2));
+                    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
+
+                    if(firm.GSTIN.GSTType !== 'URD')
+                        Details['gstin'] =firm.GSTIN.GSTNo;
                     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-                        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo
-   
+                        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
+
+                    var g = (taxamount*tax/100).toFixed(2);
                     
-                    pdf.generateReleaseOrder(request,response,Details);
+                    Details['gstamount'] ='₹ '+ g
+                    
+                    if(releaseOrder.publicationState === releaseOrder.clientState){
+                        Details['sgst'] = Details['cgst'] = tax/2;
+                        var t = ((taxamount*tax/2)/100).toFixed(2);
+                        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
+
+                    }
+                    else{
+                        Details['igst'] = tax;
+                        var t = ((taxamount*tax)/100).toFixed(2);
+                        Details['igstamount'] ='₹ '+t;
+                    }
+                    
+                    pdf.mailReleaseOrder(request,response,Details);
                 }
             })
             

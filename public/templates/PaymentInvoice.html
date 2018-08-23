@@ -1,150 +1,137 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Invoice</title>
-    <style>
-        hr.rule1{
-            border: 0;
-            height: 3px;
-            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
-        }
-        th {
-            color: rgb(0, 0, 150);
-        }
-        b {
-            color: rgb(0, 9, 128);
-        }
-    </style>
+    <title>Release Order</title>
 </head>
-<body>
-    <img src="{{logoimage}}" style="height:40px; width:40px;">
-    <div class="container" style="">
-        <h3 style="text-align:center">Tax Invoice</h3>
-    </div>
-    <hr class="rule1">
-    <div class="container">
-        <div class="row" style="width: 500px;">
+<body class="container-fluid" style="width : 560px;">
+    <div>
+        <div class="row" style="width: 560px;">
             <div class="col">
-                <table style="width: 250px; font-size: 6px;">
-                    <tr>
-                        <td><b>Client</b></td>
-                        <td><b>:&nbsp;</b></td>
-                        <td>{{clientname}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Address</b></td>
-                        <td><b>:</b></td>
-                        <td>{{address}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>State</b></td>
-                        <td><b>:</b></td>
-                        <td>{{state}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>PAN</b></td>
-                        <td><b>:</b></td>
-                        <td>{{PAN}}</td>
-                    </tr>
-                </table>
+                <img src="{{logoimage}}" style="height:100px; width:auto;">
             </div>
-            <div class="col">
-                <table style="width: 250px; font-size: 6px;">
-                        <tr>
-                            <td><b>Invoice No.</b></td>
-                            <td><b>:&nbsp;</b></td>
-                            <td>{{ino}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Invoice Date</b></td>
-                            <td><b>:</b></td>
-                            <td>{{date}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>GSTIN</b></td>
-                            <td><b>:</b></td>
-                            <td>{{gstin}}</td>
-                        </tr>
-                    </table>
+            <div class="col" style="text-align: right; font-size:6px; margin-top: 20px;">
+                <p><b>{{firmName}},</b><br> 
+                      {{Address}}<br>
+                      {{phone}}<br>
+                      {{email}}
+                </p>
             </div>
         </div>
-        <table class="table table-bordered table" style="width: 500px; font-size: 6px;">
-            <tr>
-                <th rowspan="2">
-                    Sr. No.
-                </th>
-                <th rowspan="2">
-                    Publication
-                </th>
-                <th rowspan="2">
-                    Edition
-                </th>
-                <th rowspan="2">
-                    Date of Ins
-                </th>
-                <th rowspan="2">
-                    Position
-                </th>
-                <th colspan="2">
-                    Size (cms)
-                </th>
-                <th rowspan="2">
-                    Total Space
-                </th>
-                <th rowspan="2">
-                    Rate <br> Rs/Sq Cms
-                </th>
-                <th rowspan="2">
-                    Total
-                </th>
-            </tr>
-            <tr>
-                <th>Width</th>
-                <th>Height</th>
-            </tr>
-            {{insertions}}
-            <tr>
-                <td rowspan="4" colspan="6">
-                    <b>Terms & Conditions</b>
-                    {{TnC}}
-                </td>
-                <td colspan="3"><b>Gross Amount:</b></td>
-                <td>{{gamount}}</td>
-            </tr>
-            <tr>
-                <td colspan="3"><b>Discount</b></td>
-                <td>{{disc}}</td>
-            </tr>
-            <tr>
-                <td colspan="3"><b>CGST{{cgstper}}</b></td>
-                <td>{{cgst}}</td>
-            </tr>
-            <tr>
-                <td colspan="3">SGST{{sgstper}}</td>
-                <td>{{sgst}}</td>
-            </tr>
-            <tr>
-                <td rowspan="2" colspan="6">
-                    <b>Remark</b>
-                </td>
-                <td colspan="3">IGST{{igstper}}</td>
-                <td>{{igst}}</td>
-            </tr>
-            <tr>
-                <td colspan="3">E.charges</td>
-                <td>{{echarges}}</td>
-            </tr>
-            <tr>
-                <td colspan="6">
-                    <b>In words: </b>{{amtwords}}
-                </td>
-                <td colspan="3"><b>Net Amount:</b></td>
-                <td>{{amtfig}}</td>
-            </tr>
+        <h6 style="position: relative; left: 250px;">Release Order</h6>
+        <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+            <thead>
+                <tr>
+                    <th colspan="3">
+                        <div class='row'>
+                            <div class='col' style="text-align: left;">
+                                To The Advertisement Agency Manager, 
+                                Media House Name: {{mediahouse}}<br>
+                                Media House Edition: {{medition}}<br>
+                                GSTIN: {{pgstin}}
+                            </div>
+                            <div class='col' style="text-align: left;">
+                                <br>
+                                State: {{maddress}}<br>
+                                Pullout Name: {{pullout}}
+                            </div>
+                        </div>
+                    </th>
+                    <th colspan="5" style="text-align: left;">
+                        Release Order No: {{rno}}<br>
+                        Date: {{date}}<br>
+                        GSTIN: {{gstin}}
+                    </th>
+                </tr>
+                
+                <tr>
+                    <th colspan="3">
+                        <div class='row'>
+                            <div class='col' style="text-align: left;">
+                                For Client,<br>
+                                Client:{{cname}}<br>
+                                GSTIN:{{cgstin}}
+                            </div>
+                            <div class='col' style="text-align: left;">
+                                <br>
+                                State: {{caddress}}
+                            </div>
+                        </div>
+                       
+                    </th>
+                    <th colspan="5">
+                         <div class="row">
+                            <div class="col" style="text-align: left;">
+                                Scheme: {{scheme}}<br>
+                                Hue: {{hue}}
+                            </div>
+                            <div class="col" style="text-align: left;">
+                                Ad Type: {{adtype}}<br>
+                                Edition: {{edition}}
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan='3'>Description</td>
+                    <td>Ins Date</td>
+                    <td>Position</td>
+                    <td>Size</td>
+                    <td>Gross Amount</td>
+                </tr>
+                {{insertions}}
+                <tr>
+                    <td colspan="6" style="text-align: right">Premium Amount</td>
+                    <td><b>{{premam}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right">Publication Discount: {{pubD}} %</td>
+                    <td><b>{{publicationdisc}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right">Agency Discount: {{agenD1}} + {{agenD2}} %</td>
+                    <td><b>{{damount}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Taxable Amount: <b>{{taxamount}}</b></td>
+                    <td>IGST %: <b>{{igst}}</b></td>
+                    <td>CGST %: <b>{{cgst}}</b></td>
+                    <td>SGST %: <b>{{sgst}}</b></td>
+                    <td>GST Amount</td>
+                    <td><b>{{gstamount}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td>Amt: <b>{{igstamount}}</b></td>
+                    <td>Amt: <b>{{cgstamount}}</b></td>
+                    <td>Amt: <b>{{sgstamount}}</b></td>
+                    <td>Net Amount</td>
+                    <td><b>{{namount}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="text-center">Amount(in words): <b>{{namountwords}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="2">Payment Details</td>
+                    <td colspan="5"><b>{{paymentDetails}}</b></td>
+                </tr>
+            </tbody>
         </table>
+        <span style="font-size: 6px;">{{remark}}</span>
+        <div class='row' style="width: 560px;">
+            <div class='col' style ='font-size: 8px'>
+                <b>Note/Remark:</b><br>
+                1. All disputed are subject to {{jurisdiction}} jurisdiction only.<br>
+            </div>
+            <div class='col' style='text-align: right; font-size: 8px'>
+                <b>For {{firmName1}}, <br>Signature:</b><br>
+                <img src="{{sign}}" style="height: 60px; width:60px;"><br>
+                Authorised Signatory: {{username}}
+            </div>
+        </div>
+        <hr>
+        <span style="font-size: 6px;">This is a computer generated document generated by AAMan App hence no physical signature is required.</span> 
     </div>
 </body>
 </html>
-
-
-
