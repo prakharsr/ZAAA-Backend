@@ -24,30 +24,6 @@
                     <th colspan="3">
                         <div class='row'>
                             <div class='col' style="text-align: left;">
-                                To The Advertisement Agency Manager, 
-                                Media House Name: {{mediahouse}}<br>
-                                Media House Edition: {{medition}}<br>
-                                GSTIN: {{pgstin}}
-                            </div>
-                            <div class='col' style="text-align: left;">
-                                <br>
-                                State: {{maddress}}<br>
-                                Pullout Name: {{pullout}}
-                            </div>
-                        </div>
-                    </th>
-                    <th colspan="5" style="text-align: left;">
-                        Release Order No: {{rno}}<br>
-                        Date: {{date}}<br>
-                        GSTIN: {{gstin}}
-                    </th>
-                </tr>
-                
-                <tr>
-                    <th colspan="3">
-                        <div class='row'>
-                            <div class='col' style="text-align: left;">
-                                For Client,<br>
                                 Client:{{cname}}<br>
                                 GSTIN:{{cgstin}}
                             </div>
@@ -56,17 +32,32 @@
                                 State: {{caddress}}
                             </div>
                         </div>
-                       
                     </th>
-                    <th colspan="5">
-                         <div class="row">
-                            <div class="col" style="text-align: left;">
-                                Scheme: {{scheme}}<br>
-                                Hue: {{hue}}
+                    <th colspan="5" style="text-align: left;">
+                        Invoice No: {{rno}}<br>
+                        Date: {{date}}<br>
+                        GSTIN: {{gstin}}
+                    </th>
+                </tr>
+                
+                <tr>
+                    <th>
+                        <div class="row">
+                            <div class="col">
+                                Media House Name: {{mediahouse}}
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col" style="text-align: left;">
                                 Ad Type: {{adtype}}<br>
                                 Edition: {{edition}}
+                            </div>
+                            <div class="col" style="text-align: left;">
+                                Pullout Name: {{pullout}}<br>
+                                Scheme: {{scheme}}
+                            </div>
+                            <div class="col" style="text-align: left;">
+                                Hue: {{hue}}
                             </div>
                         </div>
                     </th>
@@ -82,16 +73,20 @@
                 </tr>
                 {{insertions}}
                 <tr>
-                    <td colspan="6" style="text-align: right">Premium Amount</td>
-                    <td><b>{{premam}}</b></td>
+                    <td colspan="6" style="text-align: right">Commission Amount {{cper}}</td>
+                    <td><b>{{cam}}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="text-align: right">Publication Discount: {{pubD}} %</td>
-                    <td><b>{{publicationdisc}}</b></td>
+                    <td colspan="6" style="text-align: right">Additional Charges {{addper}} %</td>
+                    <td><b>{{addam}}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="text-align: right">Agency Discount: {{agenD1}} + {{agenD2}} %</td>
-                    <td><b>{{damount}}</b></td>
+                    <td colspan="6" style="text-align: right">Publication Discount @ {{pubD}} %</td>
+                    <td><b>{{pubam}}</b></td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right">Agency Discount @ {{agenD}} %</td>
+                    <td><b>{{agenam}}</b></td>
                 </tr>
                 <tr>
                     <td colspan="2">Taxable Amount: <b>{{taxamount}}</b></td>

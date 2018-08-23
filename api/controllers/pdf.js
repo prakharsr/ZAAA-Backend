@@ -3,6 +3,7 @@ var pdf = require('html-pdf');
 var path = require('path')
 var config = require('../../config');
 var roController = require('./releaseorderController');
+var invoiceController = require('./invoiceController');
 
 var mailgun = require('mailgun-js')({
     apiKey: config.mailgun_api_key,
@@ -114,7 +115,7 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
                 });
             }
             else {
-                mailFile(request, response, buffer, 'RO_'+Details.rno+'_'+Details.cname+'.pdf', 'pranjalsri092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
+                mailFile(request, response, buffer, 'RO_'+Details.rno+'_'+Details.cname+'.pdf', response.locals.user.email , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
             }
         });
     });
@@ -145,133 +146,51 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
     });
 }
 
-module.exports.generatePaymentInvoice =  function(request,response,Details) {
-    var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
-        var templateHtml = "";
-        res.on('data', chunk => {
-            templateHtml += chunk;
-        });
-        res.on('end', () => {
-            var today = new Date(Date.now());
-            var dd = today.getDate();
-            var mm = today.getMonth()+1; 
-            var yyyy = today.getFullYear();
-            if(dd<10){
-                dd='0'+dd;
-            } 
-            if(mm<10){
-                mm='0'+mm;
-            } 
-            var today = dd+'/'+mm+'/'+yyyy;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
-            templateHtml = templateHtml.replace('{{address}}', Details.address);
-            templateHtml = templateHtml.replace('{{state}}', Details.state);
-            templateHtml = templateHtml.replace('{{PAN}}',Details.pan);
-            templateHtml = templateHtml.replace('{{date}}', today);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{ino}}', Details.ino);
-            templateHtml = templateHtml.replace('{{TnC}}', Details.tnc);
-            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
-            templateHtml = templateHtml.replace('{{disc}}', Details.disc);
-            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
-            templateHtml = templateHtml.replace('{{cgstper}}', Details.cgstper);
-            templateHtml = templateHtml.replace('{{sgstper}}', Details.sgstper);
-            templateHtml = templateHtml.replace('{{igstper}}', Details.igstper);
-            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
-            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
-            templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
-            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
-            templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            var options = {
-                width: '210mm',
-                height: '297mm'
+module.exports.mailinvoice = function(request,response,Details) {
+    invoiceController.getROhtml(Details, content => {
+        var options = {
+            width: '210mm',
+            height: '297mm'
+        }
+        pdf.create(content, options).toBuffer(function (err, buffer) {
+            if (err) {
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg :"cannot create pdf"
+                });
             }
-            pdf.create(templateHtml, options).toStream(function (err, data) {
-                if (err) {
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg :"cannot create pdf"
-                    });
-                }
-                else {
-                    response.writeHead(200, {
-                        'Content-Type': 'application/pdf',
-                        'Content-Disposition': 'attachment; filename="invoice.pdf"'
-                    });
-                    data.pipe(response);
-                }
-            });
+            else {
+                mailFile(request, response, buffer, 'IN_'+Details.rno+'_'+Details.cname+'.pdf', response.locals.user.email , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
+            }
         });
     });
-    req.on('error', e => console.log(e));
-    req.end();
 }
 
-
-module.exports.mailPaymentInvoice =  function(request,response,Details) {
-    var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
-        var templateHtml = "";
-        res.on('data', chunk => {
-            templateHtml += chunk;
-        });
-        res.on('end', () => {
-            var today = new Date(Date.now());
-            var dd = today.getDate();
-            var mm = today.getMonth()+1; 
-            var yyyy = today.getFullYear();
-            if(dd<10){
-                dd='0'+dd;
-            } 
-            if(mm<10){
-                mm='0'+mm;
-            } 
-            var today = dd+'/'+mm+'/'+yyyy;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{clientname}}', Details.clientname);
-            templateHtml = templateHtml.replace('{{address}}', Details.address);
-            templateHtml = templateHtml.replace('{{state}}', Details.state);
-            templateHtml = templateHtml.replace('{{PAN}}',Details.pan);
-            templateHtml = templateHtml.replace('{{date}}', today);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{ino}}', Details.ino);
-            templateHtml = templateHtml.replace('{{TnC}}', Details.tnc);
-            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
-            templateHtml = templateHtml.replace('{{disc}}', Details.disc);
-            templateHtml = templateHtml.replace('{{gamount}}', Details.gamount);
-            templateHtml = templateHtml.replace('{{cgstper}}', Details.cgstper);
-            templateHtml = templateHtml.replace('{{sgstper}}', Details.sgstper);
-            templateHtml = templateHtml.replace('{{igstper}}', Details.igstper);
-            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
-            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
-            templateHtml = templateHtml.replace('{{echarges}}', Details.echarges);
-            templateHtml = templateHtml.replace('{{amtfig}}', Details.amtfig);
-            templateHtml = templateHtml.replace('{{amtwords}}', Details.amtwords);
-            var options = {
-                width: '210mm',
-                height: '297mm'
+module.exports.generateinvoice =  function(request,response,Details) {
+    invoiceController.getROhtml(Details, content => {
+        var options = {
+            width: '210mm',
+            height: '297mm'
+        }
+        pdf.create(content, options).toStream(function (err, data) {
+            if (err) {
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg :"cannot create pdf"
+                });
             }
-            pdf.create(templateHtml, options).toBuffer(function (err, buffer) {
-                if (err) {
-                    console.log(err);
-                    response.send({
-                        success :false,
-                        msg :"cannot create pdf"
-                    });
-                }
-                else {
-                     mailFile(request, response, buffer, 'invoice.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'invoice','Following is the tax invoice');
-                }
-            });
+            else {
+                response.writeHead(200, {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename="IN_'+Details.rno+'_'+Details.cname+'.pdf"'
+                });
+                data.pipe(response);
+            }
         });
     });
-    req.on('error', e => console.log(e));
-    req.end();
 }
-
 module.exports.generatePaymentReceipt =  function(request,response,Details) {
     var req = http.request(config.domain+'/templates/PaymentReceipt.html', res => {
         var templateHtml = "";
