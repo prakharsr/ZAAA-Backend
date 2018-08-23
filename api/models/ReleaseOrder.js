@@ -195,10 +195,13 @@ ReleaseOrderSchema.pre('save', function(next){
     else{
         insertions.forEach(element => {
             var date = element.date;
-            element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");            
-            element.Amount = ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length ;
-            element.netAmount = self.taxIncluded?(100*self.netAmountFigures)/(100 + (+self.taxAmount.primary + +self.taxAmount.secondary)) :self.netAmountFigures/insertions.length;
-            element.taxAmount = self.taxIncluded?(self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary))/((100 + (+self.taxAmount.primary + +self.taxAmount.secondary))*insertions.length) :(self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary)/100)/insertions.length;
+            element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");  
+            var amount =  ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length;
+            var netamount = self.taxIncluded?((100*self.netAmountFigures)/(100 + (+self.taxAmount.primary + +self.taxAmount.secondary))/insertions.length) :self.netAmountFigures/insertions.length;
+            var taxamount = self.taxIncluded?((self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary))/(100 + (+self.taxAmount.primary + +self.taxAmount.secondary)) / insertions.length) :(self.netAmountFigures*(+self.taxAmount.primary + +self.taxAmount.secondary)/100)/insertions.length;         
+            element.Amount = Math.round(amount*100)/100;
+            element.netAmount = Math.round(netamount*100)/100;
+            element.taxAmount = Math.round(taxamount*100)/100;
             next();
         });
     }
