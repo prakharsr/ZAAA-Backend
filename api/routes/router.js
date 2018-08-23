@@ -121,6 +121,7 @@ router.post('/user/invoice/pre', invoice.getInvoicesForRO);
 router.post('/user/invoice/search/', invoice.queryInvoice);
 router.post('/user/invoice/download', invoice.generateInvoicePdf);
 router.post('/user/invoice/email', invoice.mailInvoicePdf);
+router.post('/user/invoice/previewHtml', invoice.previewinvoicehtml);
 router.get('/user/invoices/:page', invoice.getInvoices);
 router.get('/user/invoice/:id', invoice.getInvoice);
 router.delete('/user/invoice/:id', invoice.deleteInvoice);
