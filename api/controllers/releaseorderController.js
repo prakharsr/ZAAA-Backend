@@ -982,16 +982,13 @@ module.exports.generateROPdf = async function(request, response) {
                         
                         return grouped;
                     }, []);
-
-                    console.log(result);
                     var insertions = releaseOrder.insertions;
                     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
                     var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
                     var namount = releaseOrder.adGrossAmount - damount;
-                    var caption = releaseOrder.caption?releaseOrder.caption:"-";
-                    //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
+                    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
                     var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
-                    var categories = releaseOrder.adCategory1 || '-';
+                    var categories = releaseOrder.adCategory1 || '';
                     var premam = 0;
                     var premium = '';
                     
@@ -1025,52 +1022,72 @@ module.exports.generateROPdf = async function(request, response) {
                         premium += "Premium Extra Words ";
                     }
                     
-                    catarray.forEach(element => {
+                    catarray.forEach(function loop(element){
+                        if(loop.stop){return ;}
                         if (element) {
-                            categories += ' - ' + element;
+                            categories += '-' + element;
+                        }
+                        else{
+                            categories += "<br>"
+                            loop.stop = true;
                         }
                     });
                     var insData = '';
                     var count = 0;
-                    result.forEach(object =>{
+                    result.sort((a, b) => {
+                        if (+a.key.year > +b.key.year)
+                        return true;
+                        else if (+a.key.year < +b.key.year)
+                        return false;
+                        else return +a.key.month > +b.key.month;
+                    })
+                    .forEach(object =>{
+                        console.log(object.items);
                         var dates = "";
+                        var array = [];
                         object.items.forEach(obj => {
-                            var array = [];
-                            array.push(obj.date.day);
-                            array.sort();
-                            array.forEach(obje => {
-                                dates += obje+' ';
-                            })
+                            array.push(+obj.date.day);            
                         });
+                        array.sort((a, b) => +a > +b);
+
+                        array.forEach(obj => {
+                            dates += obj + " ";
+                        })
+
+                        var row = result.length;
+
                         if(count === 0){
-                            insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+releaseOrder.adGrossAmount+'</td></tr>';
+                            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
                             count = 1;
                         }
                         else{
-                            insData+='<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td>'+'</td></tr>';
+                            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
                         }
                     });
-
-                    var remark = "2. "+releaseOrder.remark;
+                    
+                    var remark = releaseOrder.remark?releaseOrder.remark:'';
 
                     var paymentDetails="";
                     var address = firm.RegisteredAddress;
                     var caddress = releaseOrder.clientState;
                     var maddress = releaseOrder.publicationState;
 
-
                     if(releaseOrder.paymentType === 'Cash')
                     paymentDetails = "Cash"
                     else if(releaseOrder.paymentType === 'Credit')
                     paymentDetails = "Credit"
                     else if(releaseOrder.paymentType === 'Cheque')
-                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+releaseOrder.paymentDate+" Numbered "+releaseOrder.paymentNo
+                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
                     else if(releaseOrder.paymentType === 'NEFT')
                     paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
+
+
+                    console.log(releaseOrder.publicationGSTIN);
 
                     var Details = {
                         image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
+                        medition : releaseOrder.publicationEdition,
                         pgstin :releaseOrder.publicationGSTIN.GSTNo,
                         cname :releaseOrder.clientName,
                         cgstin :'-',
@@ -1079,6 +1096,7 @@ module.exports.generateROPdf = async function(request, response) {
                         insertions :insData,
                         username: user.name,
                         firmname: firm.FirmName,
+                        firmname1: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
                         sign: config.domain+'/'+user.signature,
                         remark: releaseOrder.Remark || "",
@@ -1095,8 +1113,7 @@ module.exports.generateROPdf = async function(request, response) {
                         sgst: '-',
                         taxamount: '',
                         publicationdisc: '',
-                        damount1: '',
-                        damount2:'',
+                        damount: '',
                         agenD1: releaseOrder.agencyDiscount1,
                         agenD2: releaseOrder.agencyDiscount2,
                         pubD: releaseOrder.publicationDiscount,
@@ -1107,8 +1124,10 @@ module.exports.generateROPdf = async function(request, response) {
                         caddress: caddress || '',
                         maddress: maddress || '',
                         pullout: releaseOrder.pulloutName,
-                        premam : premam,
-                        remark: remark
+                        premam : "₹ "+addZeroes(""+Math.round(premam)),
+                        remark: remark,
+                        phone: "Phone: "+firm.Mobile || '',
+                        email: "Email: "+firm.Email || ''
                     }
 
                     if(releaseOrder.adSchemeFree === 0);
@@ -1126,32 +1145,36 @@ module.exports.generateROPdf = async function(request, response) {
                     publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
                     damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
                     damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
-                    Details['damount2'] = damount2;
-                    Details['damount1'] = damount1;
-                    Details['publicationdisc'] = publicationDisc;
+                    damount1 += damount2;
+                    Details['damount'] = '₹ '+ (damount1.toFixed(2));
+                    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
                     var taxamount = releaseOrder.netAmountFigures;
-                    Details['taxamount'] = taxamount;
-                    Details['namount'] = taxamount + (taxamount*tax)/100;
-                    Details['namountwords'] = amountToWords(Math.ceil(taxamount + (taxamount*tax)/100));
+                    var namount = taxamount + (taxamount*tax)/100;
+                    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
+                    Details['namount'] ='₹ '+ (namount.toFixed(2));
+                    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
 
                     if(firm.GSTIN.GSTType !== 'URD')
                         Details['gstin'] =firm.GSTIN.GSTNo;
                     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
                         Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
+
+                    var g = (taxamount*tax/100).toFixed(2);
                     
-                    Details['gstamount'] = taxamount*tax/100;
+                    Details['gstamount'] ='₹ '+ g
                     
                     if(releaseOrder.publicationState === releaseOrder.clientState){
                         Details['sgst'] = Details['cgst'] = tax/2;
-                        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
+                        var t = ((taxamount*tax/2)/100).toFixed(2);
+                        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
 
                     }
                     else{
                         Details['igst'] = tax;
-                        Details['igstamount'] = (taxamount*tax)/100;
+                        var t = ((taxamount*tax)/100).toFixed(2);
+                        Details['igstamount'] ='₹ '+t;
                     }
 
-                    
                     pdf.generateReleaseOrder(request,response,Details);
                 }
             })
@@ -1175,19 +1198,14 @@ module.exports.previewROhtml = async function(request, response) {
         return grouped;
     }, []);
 
-    console.log(result);
     var releaseOrder = doc;
-    if(releaseOrder.mediahouse)
-    // var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(releaseOrder.mediahouseID));
-    // var client = await Client.findById(mongoose.mongo.ObjectId(releaseOrder.clientID));
     var insertions = releaseOrder.insertions;
     var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
     var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
     var namount = releaseOrder.adGrossAmount - damount;
-    var caption = releaseOrder.caption?releaseOrder.caption:"-";
-    //var categories = (releaseOrder.adCategory1?(releaseOrder.adCategory2?(releaseOrder.adCategory3?(releaseOrder.adCategory4?(releaseOrder.adCategory5?(releaseOrder.adCategory6?releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5+'-'+releaseOrder.adCategory6:releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4+'-'+releaseOrder.adCategory5):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3+'-'+releaseOrder.adCategory4):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2+'-'+releaseOrder.adCategory3):releaseOrder.adCategory1+'-'+releaseOrder.adCategory2):releaseOrder.adCategory1):"-")
+    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
     var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
-    var categories = releaseOrder.adCategory1 || '-';
+    var categories = releaseOrder.adCategory1 || '';
     var premam = 0;
     var premium = '';
     
@@ -1221,9 +1239,14 @@ module.exports.previewROhtml = async function(request, response) {
         premium += "Premium Extra Words ";
     }
     
-    catarray.forEach(element => {
+    catarray.forEach(function loop(element){
+        if(loop.stop){return ;}
         if (element) {
-            categories += ' - ' + element;
+            categories += '-' + element;
+        }
+        else{
+            categories += "<br>"
+            loop.stop = true;
         }
     });
     var insData = '';
@@ -1251,15 +1274,15 @@ module.exports.previewROhtml = async function(request, response) {
         var row = result.length;
 
         if(count === 0){
-            insData += '<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td><td rowspan='+row+'>'+releaseOrder.adGrossAmount+'</td></tr>';
+            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
             count = 1;
         }
         else{
-            insData+='<tr><td colspan="2">'+caption+'<br>'+categories+'<br>'+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td>'+releaseOrder.adPosition+'</td><td>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td>'+size+'</td></tr>';
+            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
         }
     });
     
-    var remark = releaseOrder.remark?"2. "+releaseOrder.remark:'';
+    var remark = releaseOrder.remark?releaseOrder.remark:'';
 
     var paymentDetails="";
     var address = firm.RegisteredAddress;
@@ -1271,7 +1294,7 @@ module.exports.previewROhtml = async function(request, response) {
     else if(releaseOrder.paymentType === 'Credit')
     paymentDetails = "Credit"
     else if(releaseOrder.paymentType === 'Cheque')
-    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+releaseOrder.paymentDate+" Numbered "+releaseOrder.paymentNo
+    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
     else if(releaseOrder.paymentType === 'NEFT')
     paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
 
@@ -1281,6 +1304,7 @@ module.exports.previewROhtml = async function(request, response) {
     var Details = {
         image : config.domain+'/'+firm.LogoURL,
         mediahouse :releaseOrder.publicationName,
+        medition : releaseOrder.publicationEdition,
         pgstin :releaseOrder.publicationGSTIN.GSTNo,
         cname :releaseOrder.clientName,
         cgstin :'-',
@@ -1289,6 +1313,7 @@ module.exports.previewROhtml = async function(request, response) {
         insertions :insData,
         username: user.name,
         firmname: firm.FirmName,
+        firmname1: firm.FirmName,
         rno : releaseOrder.releaseOrderNO,
         sign: config.domain+'/'+user.signature,
         remark: releaseOrder.Remark || "",
@@ -1305,8 +1330,7 @@ module.exports.previewROhtml = async function(request, response) {
         sgst: '-',
         taxamount: '',
         publicationdisc: '',
-        damount1: '',
-        damount2:'',
+        damount: '',
         agenD1: releaseOrder.agencyDiscount1,
         agenD2: releaseOrder.agencyDiscount2,
         pubD: releaseOrder.publicationDiscount,
@@ -1317,8 +1341,10 @@ module.exports.previewROhtml = async function(request, response) {
         caddress: caddress || '',
         maddress: maddress || '',
         pullout: releaseOrder.pulloutName,
-        premam : premam,
-        remark: remark
+        premam : "₹ "+addZeroes(""+Math.round(premam)),
+        remark: remark,
+        phone: "Phone: "+firm.Mobile || '',
+        email: "Email: "+firm.Email || ''
     }
 
     if(releaseOrder.adSchemeFree === 0);
@@ -1336,29 +1362,34 @@ module.exports.previewROhtml = async function(request, response) {
     publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
     damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
     damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
-    Details['damount2'] = damount2;
-    Details['damount1'] = damount1;
-    Details['publicationdisc'] = publicationDisc;
+    damount1 += damount2;
+    Details['damount'] = '₹ '+ (damount1.toFixed(2));
+    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
     var taxamount = releaseOrder.netAmountFigures;
-    Details['taxamount'] = taxamount;
-    Details['namount'] = taxamount + (taxamount*tax)/100;
-    Details['namountwords'] = amountToWords(Math.ceil(taxamount + (taxamount*tax)/100));
+    var namount = taxamount + (taxamount*tax)/100;
+    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
+    Details['namount'] ='₹ '+ (namount.toFixed(2));
+    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
 
     if(firm.GSTIN.GSTType !== 'URD')
         Details['gstin'] =firm.GSTIN.GSTNo;
     if(releaseOrder.clientGSTIN.GSTType !== 'URD')
         Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
+
+    var g = (taxamount*tax/100).toFixed(2);
     
-    Details['gstamount'] = taxamount*tax/100;
+    Details['gstamount'] ='₹ '+ g
     
     if(releaseOrder.publicationState === releaseOrder.clientState){
         Details['sgst'] = Details['cgst'] = tax/2;
-        Details['sgstamount'] = Details['cgstamount'] = (taxamount*tax/2)/100; 
+        var t = ((taxamount*tax/2)/100).toFixed(2);
+        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
 
     }
     else{
         Details['igst'] = tax;
-        Details['igstamount'] = (taxamount*tax)/100;
+        var t = ((taxamount*tax)/100).toFixed(2);
+        Details['igstamount'] ='₹ '+t;
     }
 
 
@@ -1376,58 +1407,52 @@ function getROhtml(Details, callback) {
             templateHtml += chunk;
         });
         res.on('end', () => {
-            var today = new Date(Date.now());
-            var dd = today.getDate();
-            var mm = today.getMonth()+1; 
-            var yyyy = today.getFullYear();
-            if(dd<10){
-                dd='0'+dd;
-            } 
-            if(mm<10){
-                mm='0'+mm;
-            } 
-            var today = dd+'/'+mm+'/'+yyyy;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{sign}}', Details.sign);
-            templateHtml = templateHtml.replace('{{mediahouse}}', Details.mediahouse);
-            templateHtml = templateHtml.replace('{{pgstin}}', Details.pgstin);
-            templateHtml = templateHtml.replace('{{cname}}', Details.cname);
-            templateHtml = templateHtml.replace('{{cgstin}}',Details.cgstin);
-            templateHtml = templateHtml.replace('{{date}}', today);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{scheme}}', Details.scheme);
-            templateHtml = templateHtml.replace('{{insertions}}', Details.insertions);
-            templateHtml = templateHtml.replace('{{dper}}', Details.dper);
-            templateHtml = templateHtml.replace('{{damount1}}', Details.damount1);
-            templateHtml = templateHtml.replace('{{damount2}}', Details.damount2);
-            templateHtml = templateHtml.replace('{{namount}}', Details.namount);
-            templateHtml = templateHtml.replace('{{username}}', Details.username);
-            templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
-            templateHtml = templateHtml.replace('{{rno}}', Details.rno);
-            templateHtml = templateHtml.replace('{{hue}}', Details.hue);
-            templateHtml = templateHtml.replace('{{adtype}}', Details.adtype);
-            templateHtml = templateHtml.replace('{{edition}}', Details.edition);
-            templateHtml = templateHtml.replace('{{pubD}}', Details.pubD);
-            templateHtml = templateHtml.replace('{{agenD1}}', Details.agenD1);
-            templateHtml = templateHtml.replace('{{agenD2}}', Details.agenD2);
-            templateHtml = templateHtml.replace('{{publicationdisc}}', Details.publicationdisc);
-            templateHtml = templateHtml.replace('{{taxamount}}', Details.taxamount);
-            templateHtml = templateHtml.replace('{{igst}}', Details.igst);
-            templateHtml = templateHtml.replace('{{cgst}}', Details.cgst);
-            templateHtml = templateHtml.replace('{{sgst}}', Details.sgst);
-            templateHtml = templateHtml.replace('{{gstamount}}', Details.gstamount);
-            templateHtml = templateHtml.replace('{{igstamount}}', Details.igstamount);
-            templateHtml = templateHtml.replace('{{cgstamount}}', Details.cgstamount);
-            templateHtml = templateHtml.replace('{{sgstamount}}', Details.sgstamount);
-            templateHtml = templateHtml.replace('{{namountwords}}', Details.namountwords);
-            templateHtml = templateHtml.replace('{{paymentDetails}}', Details.paymentDetails);
-            templateHtml = templateHtml.replace('{{jurisdiction}}', Details.jurisdiction);
-            templateHtml = templateHtml.replace('{{remark}}', Details.remark);
-            templateHtml = templateHtml.replace('{{Address}}', Details.address);
-            templateHtml = templateHtml.replace('{{pullout}}', Details.pullout);
-            templateHtml = templateHtml.replace('{{caddress}}', Details.caddress);
-            templateHtml = templateHtml.replace('{{maddress}}', Details.maddress);
-            templateHtml = templateHtml.replace('{{premam}}', Details.premam);
+            var today = toReadableDate(new Date(Date.now()));
+            
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
+              .replace('{{sign}}', Details.sign)
+              .replace('{{mediahouse}}', Details.mediahouse)
+              .replace('{{pgstin}}', Details.pgstin)
+              .replace('{{cname}}', Details.cname)
+              .replace('{{cgstin}}',Details.cgstin)
+              .replace('{{date}}', today)
+              .replace('{{gstin}}', Details.gstin)
+              .replace('{{scheme}}', Details.scheme)
+              .replace('{{insertions}}', Details.insertions)
+              .replace('{{dper}}', Details.dper)
+              .replace('{{damount}}', Details.damount)
+              .replace('{{namount}}', Details.namount)
+              .replace('{{username}}', Details.username)
+              .replace('{{firmName}}', Details.firmname)
+              .replace('{{firmName1}}', Details.firmname1)
+              .replace('{{rno}}', Details.rno)
+              .replace('{{hue}}', Details.hue)
+              .replace('{{adtype}}', Details.adtype)
+              .replace('{{edition}}', Details.edition)
+              .replace('{{pubD}}', Details.pubD)
+              .replace('{{agenD1}}', Details.agenD1)
+              .replace('{{agenD2}}', Details.agenD2)
+              .replace('{{publicationdisc}}', Details.publicationdisc)
+              .replace('{{taxamount}}', Details.taxamount)
+              .replace('{{igst}}', Details.igst)
+              .replace('{{cgst}}', Details.cgst)
+              .replace('{{sgst}}', Details.sgst)
+              .replace('{{gstamount}}', Details.gstamount)
+              .replace('{{igstamount}}', Details.igstamount)
+              .replace('{{cgstamount}}', Details.cgstamount)
+              .replace('{{sgstamount}}', Details.sgstamount)
+              .replace('{{namountwords}}', Details.namountwords)
+              .replace('{{paymentDetails}}', Details.paymentDetails)
+              .replace('{{jurisdiction}}', Details.jurisdiction)
+              .replace('{{remark}}', Details.remark)
+              .replace('{{Address}}', Details.address)
+              .replace('{{pullout}}', Details.pullout)
+              .replace('{{caddress}}', Details.caddress)
+              .replace('{{maddress}}', Details.maddress)
+              .replace('{{premam}}', Details.premam)
+              .replace('{{medition}}', Details.medition)
+              .replace('{{phone}}', Details.phone)
+              .replace('{{email}}', Details.email);
 
             callback(templateHtml);
         });
@@ -1571,3 +1596,27 @@ function amountToWords(num) {
     
     return str;
   }
+
+function toReadableDate(a){
+    var today = a;
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; 
+    var yyyy = today.getFullYear();
+    if(dd<10){
+        dd='0'+dd;
+    } 
+    if(mm<10){
+        mm='0'+mm;
+    } 
+    return dd+'/'+mm+'/'+yyyy;
+}
+
+function addZeroes(num) {
+    var value = Number(num);   
+    var res = num.split(".");     
+    if(res.length == 1 || res[1].length < 3) { 
+        value = value.toFixed(2);
+    }
+    return value;
+}
+    

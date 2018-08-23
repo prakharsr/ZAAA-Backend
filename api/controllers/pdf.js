@@ -114,7 +114,7 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
                 });
             }
             else {
-                mailFile(request, response, buffer, 'releaseOrder.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
+                mailFile(request, response, buffer, 'releaseOrder_'+Details.rno+'_'+Details.cname+'.pdf', 'rockstarpranjal092@gmail.com' , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
             }
         });
     });
@@ -137,7 +137,7 @@ module.exports.generateReleaseOrder =  function(request,response,Details) {
             else {
                 response.writeHead(200, {
                     'Content-Type': 'application/pdf',
-                    'Content-Disposition': 'attachment; filename="ReleaseOrder.pdf"'
+                    'Content-Disposition': 'attachment; filename="ReleaseOrder_'+Details.rno+'_'+Details.cname+'.pdf"'
                 });
                 data.pipe(response);
             }
