@@ -175,11 +175,10 @@ module.exports.ClientPaymentsData = async function(request, response){
             count: {$sum: 1},
             
             shadow :{$sum:{ $add: [ "$collectedAmount", "$shadowAmount" ] }},
-            collectedAmount :{$sum: "$collectedAmount" },
+            collected :{$sum: "$collectedAmount" },
             completed:{$sum: "$clearedAmount" },
-            pendingAmount:{$sum:"$pendingAmount"},
-            totalAmount:{$sum:"$FinalTaxAmount"},
-            receivecAmount:{$sum:{ $add:["$collectedAmount", "$shadowAmount", "$clearedAmount"]}}
+            pending:{$sum:"$pendingAmount"},
+            received:{$sum:{ $add:["$collectedAmount", "$shadowAmount", "$clearedAmount"]}}
         } }
     ])
     .exec(function(err, invoices){
