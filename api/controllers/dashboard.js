@@ -47,6 +47,8 @@ function formQuery(user, request){
 module.exports.ROchartData = async function(request, response){
     var user = response.locals.user;
     var query = await formQuery( user, request, response);
+    var from = new Date(1-10-2011);
+    var upto = new Date(1-10-2019)
     ReleaseOrder.aggregate([
         {$unwind:"$insertions"}, 
         {$match:query},
@@ -58,14 +60,15 @@ module.exports.ROchartData = async function(request, response){
                 "$cond": [{"$eq":["$insertions.marked",true]},
                 "$insertions.netAmount",0]
             },
-            Period1:{$sum:{
-                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", last]},{"$lt":["$generatedAt", last]}]},
-                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
-            }},
-            Period1:{$sum:{
-                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", last]},{"$gte":["$generatedAt", last]}]},
-                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
-            }},
+
+            // Period1:{$sum:{
+            //     "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", from]},{"$lt":["$generatedAt", upto]}]},
+            //     {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            // }},
+            // Period1:{$sum:{
+            //     "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", from]},{"$gte":["$generatedAt", upto]}]},
+            //     {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            // }},
         }
     }
 }
