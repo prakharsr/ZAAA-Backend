@@ -64,6 +64,7 @@ module.exports.getNotifications = (request,response) =>{
     Notification.find({})
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort({createdAt:-1})
     .exec(function(err, notifications){
         if(err){
             console.log(err+ "");
