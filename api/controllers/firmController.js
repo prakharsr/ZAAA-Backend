@@ -258,6 +258,16 @@ module.exports.getTemplates = function(request, response){
 		PRTemplate:AllTemplates.indexOf(firm.PRTemplate),
 	})
 };
+module.exports.getTermsAndCondition = function(request, response){
+	var user = response.locals.user;
+	var firm = response.locals.firm;
+		response.send({
+			success:true,
+			ROterms:firm.ROterms,
+			INterms:firm.INterms,
+			PRterms:firm.PRterms
+		});
+};
 
 module.exports.setTermsAndCondition = function(request, response){
 	var user = response.locals.user;
@@ -266,9 +276,9 @@ module.exports.setTermsAndCondition = function(request, response){
 		if(request.body.ROterms)
 		firm.ROterms = request.body.ROterms;
 		if(request.body.INterms)
-		firm.ROterms = request.body.INterms;
+		firm.INterms = request.body.INterms;
 		if(request.body.PRterms)
-		firm.ROterms = request.body.PRterms;
+		firm.PRterms = request.body.PRterms;
 		if(request.body.Jurisdiction)
 		firm.Jurisdiction = request.body.Jurisdiction;
 
