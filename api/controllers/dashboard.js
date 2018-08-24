@@ -57,7 +57,15 @@ module.exports.ROchartData = async function(request, response){
             generated:{$sum:{
                 "$cond": [{"$eq":["$insertions.marked",true]},
                 "$insertions.netAmount",0]
-            }
+            },
+            Period1:{$sum:{
+                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", last]},{"$lt":["$generatedAt", last]}]},
+                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            }},
+            Period1:{$sum:{
+                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", last]},{"$gte":["$generatedAt", last]}]},
+                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            }},
         }
     }
 }
