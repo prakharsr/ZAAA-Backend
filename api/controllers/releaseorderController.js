@@ -851,7 +851,6 @@ module.exports.updateReleaseOrder = function(request, response){
 module.exports.mailROPdf = function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
-    console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
             console.log(err);
@@ -993,7 +992,6 @@ module.exports.mailROPdf = function(request, response) {
                     console.log(releaseOrder.publicationGSTIN);
 
                     var Details = {
-                        image : config.domain+'/'+firm.LogoURL,
                         mediahouse :releaseOrder.publicationName,
                         medition : releaseOrder.publicationEdition,
                         pgstin :releaseOrder.publicationGSTIN.GSTNo,
@@ -1003,12 +1001,9 @@ module.exports.mailROPdf = function(request, response) {
                         scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
                         insertions :insData,
                         username: user.name,
-                        firmname: firm.FirmName,
-                        firmname1: firm.FirmName,
                         rno : releaseOrder.releaseOrderNO,
                         sign: config.domain+'/'+user.signature,
                         remark: releaseOrder.Remark || "",
-                        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
                         paymentDetails: paymentDetails,
                         namount: '',
                         namountwords: '',
@@ -1028,12 +1023,16 @@ module.exports.mailROPdf = function(request, response) {
                         edition: releaseOrder.adEdition,
                         adtype:releaseOrder.adType,
                         hue:releaseOrder.adHue,
-                        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
                         caddress: caddress || '',
                         maddress: maddress || '',
                         pullout: releaseOrder.pulloutName,
                         premam : "₹ "+addZeroes(""+Math.round(premam)),
                         remark: remark,
+                        image : config.domain+'/'+firm.LogoURL,
+                        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+                        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+                        firmname: firm.FirmName,
+                        firmname1: firm.FirmName,
                         phone: "Phone: "+firm.Mobile || '',
                         email: "Email: "+firm.Email || ''
                     }

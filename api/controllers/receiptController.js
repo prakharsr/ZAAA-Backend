@@ -256,9 +256,9 @@ async function f(request, response, user){
         taxIncluded:invoice.taxIncluded,
         otherCharges:invoice.otherCharges,
         extraCharges:invoice.extraCharges,
-        
         caption:invoice.caption,
         remark:invoice.remark,
+        
         otherRemark:invoice.otherRemark,
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
@@ -394,7 +394,19 @@ module.exports.linkRecieptToInvoice = async function(request,response){
     var invoice = await Invoice.findById(request.body.invoiceID);
     
     receipt.invoiceID = request.body.invoiceID;
+    var counter = invoice.receiptSerial+1;
+    var rno = invoice.invoiceNO+'/'+counter;
     receipt.advanced = false;
+    receipt.receiptNO = rno;
+    receipt.adGrossAmount==invoice.adGrossAmount,
+    receipt.publicationDiscount=invoice.publicationDiscount,
+    receipt.agencyDiscount1=invoice.agencyDiscount1,
+    receipt.taxAmount=invoice.taxAmount,
+    receipt.taxIncluded=invoice.taxIncluded,
+    receipt.otherCharges=invoice.otherCharges,
+    receipt.extraCharges=invoice.extraCharges,
+    receipt.caption=invoice.caption,
+    receipt.remark=invoice.remark,
     receipt.save((err,doc) => {
         if(err){
             console.log(err);
