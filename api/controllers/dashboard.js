@@ -28,15 +28,15 @@ function getFinancialYear(date){
     var period={};
     if(month<=2)
     {
-     var from = new  Date(year-1,03,01);
-     var upto = new Date(year,02,31);
+     var from = new  Date(year-1,03,01);//from 1 april of last year
+     var upto = new Date(year,02,31);// to 31 march of this year
      period['from'] = from;
      period['upto']=upto;   
     }
     else if (month>2)
     {
-     var from = new  Date(year,03,01);
-     var upto = new  Date(year+1,02,31);
+     var from = new  Date(year,03,01);//from 1 april of this year
+     var upto = new  Date(year+1,02,31);// to 31 march of next year
      period['from'] = from;
      period['upto']=upto;   
     }
@@ -44,7 +44,6 @@ function getFinancialYear(date){
     return period;
 }
 function getQuarter(d){
-    d = d || new Date();
     m = d.getMonth();
     var q = Math.floor(m/3)?Math.floor(m/3):4;
   return q;
@@ -83,8 +82,8 @@ function getFinancialQuarter(date){
         }
         case 4:{
             console.log(quarter)
-            var from= new Date(year+1,00,01);
-            var upto = new Date(year+1,02,31);
+            var from= new Date(year,00,01);
+            var upto = new Date(year,02,31);
             period['from']=from;
             period['upto']=upto;
             break;
@@ -175,7 +174,7 @@ module.exports.ROchartData = async function(request, response){
     if(request.body.filter){
         switch(request.body.filter){
             case 1:{
-            period = compareFinancialQuarter(new Date())
+            period = compareFinancialYear(new Date())
             break;}
             case 2:{
             period = compareFinancialQuarter(new Date(new Date().getFullYear(),04,01))
@@ -187,7 +186,10 @@ module.exports.ROchartData = async function(request, response){
             period = compareFinancialQuarter(new Date(new Date().getFullYear(),10,01))
             break;}
             case 5:{
-            period = compareFinancialQuarter(new Date(new Date().getFullYear()+ 1,01,01))
+            if(new Date().getMonth<=2)
+            period = compareFinancialQuarter(new Date(new Date().getFullYear(),01,01));
+            else
+            period = compareFinancialQuarter(new Date(new Date().getFullYear()+1,01,01));
             break;}
         }
     }
@@ -582,7 +584,9 @@ module.exports.RecieptsChequeDetailsData = async function(request, response){
         paymentAmount: 1,
         paymentNo: 1,
         paymentBankName: 1
-    }).exec(function(err, receipts){
+    })
+    .sort({"paymentDate":-1})
+    .exec(function(err, receipts){
         if(err){
             console.log(err+ "");
             response.send({
@@ -625,6 +629,7 @@ module.exports.MHIChequeDetailsData = async function(request, response){
             'firm': user.firm,
             "insertions.paymentMode":"Cheque"
         }},
+        {$sort:{"insertions.paymentDate":1}},
         { $group : { 
             _id: {
                 "ChequeDate":"$insertions.paymentDate",
