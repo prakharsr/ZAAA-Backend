@@ -174,7 +174,7 @@ module.exports.ROchartData = async function(request, response){
     if(request.body.filter){
         switch(request.body.filter){
             case 1:{
-            period = compareFinancialYear(new Date())
+            period = compareFinancialyear(new Date())
             break;}
             case 2:{
             period = compareFinancialQuarter(new Date(new Date().getFullYear(),04,01))
