@@ -90,6 +90,7 @@ var FirmSchema = new mongoose.Schema({
     ROterms:[String],
     INterms:[String],
     PRterms:[String],
+    ARterms:[String] // Advance Receipts
 });
 
 

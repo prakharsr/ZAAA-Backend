@@ -263,22 +263,26 @@ module.exports.getTermsAndCondition = function(request, response){
 	var firm = response.locals.firm;
 		response.send({
 			success:true,
+			Jurisdiction: firm.Jurisdiction,
 			ROterms:firm.ROterms,
 			INterms:firm.INterms,
-			PRterms:firm.PRterms
+			PRterms:firm.PRterms,
+			ARterms:firm.ARterms
 		});
 };
 
 module.exports.setTermsAndCondition = function(request, response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
-	Firm.find({ _id: user.firm },function (err, firm) {
+	//Firm.find({ _id: user.firm },function (err, firm) {
 		if(request.body.ROterms)
 		firm.ROterms = request.body.ROterms;
 		if(request.body.INterms)
 		firm.INterms = request.body.INterms;
 		if(request.body.PRterms)
 		firm.PRterms = request.body.PRterms;
+		if(request.body.ARterms)
+		firm.ARterms = request.body.ARterms;
 		if(request.body.Jurisdiction)
 		firm.Jurisdiction = request.body.Jurisdiction;
 
@@ -298,7 +302,7 @@ module.exports.setTermsAndCondition = function(request, response){
 				});
 			}
 		})
-	});
+	//});
 };
 
 module.exports.getFirmUsers = function(request,response){
