@@ -180,7 +180,15 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    generatedAt: Date
+    generatedAt: Date,
+
+    flogo: String,
+    fsign: String,
+    fjuris: String,
+    faddress: String,
+    fmobile: String,
+    femail: String,
+    tnc: String
 });
 
 ReleaseOrderSchema.pre('save', function(next){

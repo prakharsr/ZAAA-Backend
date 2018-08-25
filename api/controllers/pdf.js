@@ -424,3 +424,21 @@ module.exports.generateSummarySheet =  function(request,response,Details) {
         req.end();
     })
 }
+
+
+module.exports.mailSummarySheet =  function(request,response,Details) {
+    var req = http.request(config.domain+'/templates/summarysheet.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            response.send({
+                success :false,
+                msg :"cannot create pdf"
+            });
+        });
+        req.on('error', e => console.log(e));
+        req.end();
+    })
+}

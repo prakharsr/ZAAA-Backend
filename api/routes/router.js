@@ -150,6 +150,7 @@ router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryMediaHouseI
 router.post('/user/summarySheet/search', mediahouseInvoice.querySummarySheet);
 router.post('/user/summarySheet', mediahouseInvoice.generateSummarySheet);
 router.post('/user/summarySheet/generate', mediahouseInvoice.generateSummarySheetPdf);
+router.post('/user/summarySheet/mail', mediahouseInvoice.mailSummarySheetPdf);
 router.post('/user/mediahouseReceipts/search', mediahouseInvoice.queryMediaHouseReports);
 router.post('/user/mediahouseReceipts', mediahouseInvoice.updateReceipts);
 router.post('/user/notes/client', notes.createClientNote);

@@ -489,6 +489,107 @@ module.exports.updateReceipts = function(request, response){
 };
 
 module.exports.generateSummarySheetPdf = (request,response) => {
-    var Details = {};
-    pdf.generateSummarySheet(request, response, Details);
+    var user = resposne.locals.user;
+    var firm = response.locals.firm;
+    try {
+        var mhis = request.body.mhis; // { _id, amount: number }[]
+        var mhijson = [];
+        
+        MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+            invoices.forEach(invoice => {
+                invoice.insertions.forEach(mhiInsertion => {
+                    mhis.forEach(insertion => {
+                        if (mhiInsertion._id == insertion._id) {
+                            mhiInsertion.collectedAmount += insertion.amount;
+                            mhiInsertion.pendingAmount -=insertion.amount;
+                            mhiInsertion.paymentDate =request.body.paymentDate;
+                            mhiInsertion.paymentNo =request.body.paymentNo;
+                            mhiInsertion.paymentMode =request.body.paymentType;
+                            mhiInsertion.paymentAmount = request.body.paymentAmount
+                            mhiInsertion.paymentBankName =request.body.paymentBankName;
+                            
+                        }
+                    });
+                });
+                
+                invoice.save(function(err, doc) {
+                    if (err) {
+                        response.send({
+                            success: false,
+                            msg: "error" + err
+                        });
+                    }
+                    else{
+                        mhijson.push(doc);
+                    }
+                });
+            });
+            var address = firm.address;
+            var Details = {
+                image : config.domain+'/'+firm.LogoURL,
+                sign: config.domain+'/'+user.signature,
+                jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+                address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+                phone: "Phone: "+firm.Mobile || '',
+                email: "Email: "+firm.Email || ''
+            }
+            pdf.generateSummarySheet(request, response, Details);
+        });
+    }
+    catch (err) {
+        if (err)
+        console.log(err)
+    }
+    
+}
+
+module.exports.mailSummarySheetPdf = (request,response) => {
+    try {
+        var mhis = request.body.mhis; // { _id, amount: number }[]
+        var mhijson = [];
+        
+        MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+            invoices.forEach(invoice => {
+                invoice.insertions.forEach(mhiInsertion => {
+                    mhis.forEach(insertion => {
+                        if (mhiInsertion._id == insertion._id) {
+                            mhiInsertion.collectedAmount += insertion.amount;
+                            mhiInsertion.pendingAmount -=insertion.amount;
+                            mhiInsertion.paymentDate =request.body.paymentDate;
+                            mhiInsertion.paymentNo =request.body.paymentNo;
+                            mhiInsertion.paymentMode =request.body.paymentType;
+                            mhiInsertion.paymentAmount = request.body.paymentAmount
+                            mhiInsertion.paymentBankName =request.body.paymentBankName;
+                            
+                        }
+                    });
+                });
+                invoice.save(function(err, doc) {
+                    if (err) {
+                        response.send({
+                            success: false,
+                            msg: "error" + err
+                        });
+                    }
+                    else{
+                        mhijson.push(doc);
+                    }
+                });
+            });
+            var address = firm.address;
+            var Details = {
+                image : config.domain+'/'+firm.LogoURL,
+                sign: config.domain+'/'+user.signature,
+                jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+                address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+                phone: "Phone: "+firm.Mobile || '',
+                email: "Email: "+firm.Email || ''
+            }
+            pdf.mailSummarySheet(request, response, Details);
+        });
+    }
+    catch (err) {
+        if (err)
+        console.log(err)
+    }
 }

@@ -77,6 +77,7 @@ module.exports.searchCategories = function(request, response){
     Category.find({
         'name': { $regex: request.params.keyword+"", $options:"i" }
     })
+    .limit(5)
     .exec(async function(err, categories){ 
         if(err){
             console.log("here" +err);
