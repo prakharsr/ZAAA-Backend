@@ -592,6 +592,7 @@ module.exports.queryReleaseOrder = async function(request, response){
 };
 module.exports.queryGenerated = function(request, response){
     var user = response.locals.user;
+    var firm = response.locals.firm;
     ReleaseOrder
     .findById(mongoose.mongo.ObjectId(request.body.id))
     .exec(function(err, releaseOrder){
@@ -606,6 +607,19 @@ module.exports.queryGenerated = function(request, response){
             releaseOrder.generated = true;
             var date = new Date();
             releaseOrder.generatedAt = date;
+            releaseOrder.faddress = firm.RegisteredAddress.address;
+            releaseOrder.femail = firm.Email;
+            releaseOrder.fmobile = firm.Mobile;
+            releaseOrder.flogo = firm.LogoURL;
+            releaseOrder.fsign = user.signature;
+            var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+            releaseOrder.fjuris = juris;
+            var i = 0;
+            var tnc ='';
+            for(; i < firm.ROterms.length; i++){
+                tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+            }
+            releaseOrder.tnc = tnc;
             releaseOrder.save(function(err){
                 if(err){
                     response.send({
@@ -812,6 +826,44 @@ module.exports.cancelReleaseOrder = function(request, response){
     })
 };
 
+
+module.exports.searchCategories = function(request, response){
+    Category.find({
+        'name': { $regex: request.params.keyword+"", $options:"i" }
+    })
+    .limit(5)
+    .exec(async function(err, categories){ 
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            var catarray = [];
+            for (var i = 0; i < categories.length; ++i) {
+                var element = categories[i];
+                var array = [];  
+                array.push(element);  
+                var level = element.level;
+                var parent = element.parent;
+                while(level-- > 0){
+                    try{
+                    var category = await Category.findById(mongoose.mongo.ObjectId(parent));
+                    array.push(category);
+                    parent = category.parent;
+                    }
+                    catch(err){
+                        console.log(err);
+                    }
+                }
+                catarray.push(array);
+            }
+            response.send({
+                success : true,
+                categories: catarray
+            }); 
+        }
+    });
+};
+
 module.exports.updateReleaseOrder = function(request, response){
     var user = response.locals.user;
     
@@ -844,710 +896,6 @@ module.exports.updateReleaseOrder = function(request, response){
                 }
             });   
         }
-    })
-};
-
-
-module.exports.mailROPdf = function(request, response) {
-    var user = response.locals.user;
-    var firm = response.locals.firm;
-    console.log(request.body);
-    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
-        if(err){
-            console.log(err);
-            response.send({
-                success :false,
-                msg: err 
-            });
-        }
-        else if(!releaseOrder){
-            response.send({
-                success :false,
-                msg: 'Release order not found' 
-            });
-        }
-        else{
-            if (releaseOrder.generated==false){
-                releaseOrder.generated=true;
-                var date = new Date();
-                releaseOrder.generatedAt = date;
-            }
-            releaseOrder.save(async function(err,doc){
-                if(err)
-                response.send({
-                    success:false,
-                    msg: err
-                })
-                else{
-                    var result = releaseOrder.insertions.reduce((grouped, item) => {
-                        var index = grouped.findIndex(m => m.key.month == item.date.month
-                            && m.key.year == item.date.year);
-                            
-                        if (index == -1) {
-                            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
-                        }
-                        else grouped[index].items.push(item);
-                        
-                        return grouped;
-                    }, []);
-                    var insertions = releaseOrder.insertions;
-                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                    var namount = releaseOrder.adGrossAmount - damount;
-                    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
-                    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
-                    var categories = releaseOrder.adCategory1 || '';
-                    var premam = 0;
-                    var premium = '';
-                    
-                    if(releaseOrder.PremiumBox.Included){
-                        premam += releaseOrder.PremiumBox.Amount;
-                        premium += "Premium Box ";
-                    }
-
-                    if(releaseOrder.PremiumBaseColour.Included){
-                        premam += releaseOrder.PremiumBaseColour.Amount;
-                        premium += "Premium Base Colour ";
-                    }
-
-                    if(releaseOrder.PremiumEmailId.Included){
-                        premam += releaseOrder.PremiumEmailId.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium Email Id ";
-                    }
-
-                    if(releaseOrder.PremiumCheckMark.Included){
-                        premam += releaseOrder.PremiumCheckMark.Amount;
-                        premium += "Premium Check Mark ";
-                    }
-
-                    if(releaseOrder.PremiumWebsite.included){
-                        premam += releaseOrder.PremiumBox.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium website ";
-                    }
-
-                    if(releaseOrder.PremiumExtraWords.included){
-                        premam += releaseOrder.PremiumExtraWords.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium Extra Words ";
-                    }
-                    
-                    catarray.forEach(function loop(element){
-                        if(loop.stop){return ;}
-                        if (element) {
-                            categories += '-' + element;
-                        }
-                        else{
-                            categories += "<br>"
-                            loop.stop = true;
-                        }
-                    });
-                    var insData = '';
-                    var count = 0;
-                    result.sort((a, b) => {
-                        if (+a.key.year > +b.key.year)
-                        return true;
-                        else if (+a.key.year < +b.key.year)
-                        return false;
-                        else return +a.key.month > +b.key.month;
-                    })
-                    .forEach(object =>{
-                        console.log(object.items);
-                        var dates = "";
-                        var array = [];
-                        object.items.forEach(obj => {
-                            array.push(+obj.date.day);            
-                        });
-                        array.sort((a, b) => +a > +b);
-
-                        array.forEach(obj => {
-                            dates += obj + " ";
-                        })
-
-                        var row = result.length;
-
-                        if(count === 0){
-                            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
-                            count = 1;
-                        }
-                        else{
-                            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
-                        }
-                    });
-                    
-                    var remark = releaseOrder.remark?releaseOrder.remark:'';
-
-                    var paymentDetails="";
-                    var address = firm.RegisteredAddress;
-                    var caddress = releaseOrder.clientState;
-                    var maddress = releaseOrder.publicationState;
-
-                    if(releaseOrder.paymentType === 'Cash')
-                    paymentDetails = "Cash"
-                    else if(releaseOrder.paymentType === 'Credit')
-                    paymentDetails = "Credit"
-                    else if(releaseOrder.paymentType === 'Cheque')
-                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
-                    else if(releaseOrder.paymentType === 'NEFT')
-                    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
-
-
-                    console.log(releaseOrder.publicationGSTIN);
-
-                    var Details = {
-                        image : config.domain+'/'+firm.LogoURL,
-                        mediahouse :releaseOrder.publicationName,
-                        medition : releaseOrder.publicationEdition,
-                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                        cname :releaseOrder.clientName,
-                        cgstin :'-',
-                        gstin :'-',
-                        scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
-                        insertions :insData,
-                        username: user.name,
-                        firmname: firm.FirmName,
-                        firmname1: firm.FirmName,
-                        rno : releaseOrder.releaseOrderNO,
-                        sign: config.domain+'/'+user.signature,
-                        remark: releaseOrder.Remark || "",
-                        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-                        paymentDetails: paymentDetails,
-                        namount: '',
-                        namountwords: '',
-                        gstamount: '',
-                        sgstamount: '-',
-                        cgstamount: '-',
-                        igstamount: '-',
-                        igst: '-',
-                        cgst: '-',
-                        sgst: '-',
-                        taxamount: '',
-                        publicationdisc: '',
-                        damount: '',
-                        agenD1: releaseOrder.agencyDiscount1,
-                        agenD2: releaseOrder.agencyDiscount2,
-                        pubD: releaseOrder.publicationDiscount,
-                        edition: releaseOrder.adEdition,
-                        adtype:releaseOrder.adType,
-                        hue:releaseOrder.adHue,
-                        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-                        caddress: caddress || '',
-                        maddress: maddress || '',
-                        pullout: releaseOrder.pulloutName,
-                        premam : "₹ "+addZeroes(""+Math.round(premam)),
-                        remark: remark,
-                        phone: "Phone: "+firm.Mobile || '',
-                        email: "Email: "+firm.Email || ''
-                    }
-
-                    if(releaseOrder.adSchemeFree === 0);
-                    Details['scheme'] = 'NA';
-
-                    var adGrossAmount;
-                    var tax = releaseOrder.taxAmount.primary;
-                    if(releaseOrder.taxIncluded){
-                        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
-                    }
-                    else{
-                        adGrossAmount = releaseOrder.adGrossAmount;
-                    }
-
-                    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
-                    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
-                    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
-                    damount1 += damount2;
-                    Details['damount'] = '₹ '+ (damount1.toFixed(2));
-                    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-                    var taxamount = releaseOrder.netAmountFigures;
-                    var namount = taxamount + (taxamount*tax)/100;
-                    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
-                    Details['namount'] ='₹ '+ (namount.toFixed(2));
-                    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
-
-                    if(firm.GSTIN.GSTType !== 'URD')
-                        Details['gstin'] =firm.GSTIN.GSTNo;
-                    if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-                        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
-
-                    var g = (taxamount*tax/100).toFixed(2);
-                    
-                    Details['gstamount'] ='₹ '+ g
-                    
-                    if(releaseOrder.publicationState === releaseOrder.clientState){
-                        Details['sgst'] = Details['cgst'] = tax/2;
-                        var t = ((taxamount*tax/2)/100).toFixed(2);
-                        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
-
-                    }
-                    else{
-                        Details['igst'] = tax;
-                        var t = ((taxamount*tax)/100).toFixed(2);
-                        Details['igstamount'] ='₹ '+t;
-                    }
-                    
-                    pdf.mailReleaseOrder(request,response,Details);
-                }
-            })
-            
-        }
-    })
-}
-
-module.exports.generateROPdf = async function(request, response) {
-    var user = response.locals.user;
-    var firm = response.locals.firm;
-    console.log(request.body);
-    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
-        if(err){
-            console.log(err);
-            response.send({
-                success :false,
-                msg: err 
-            });
-        }
-        else if(!releaseOrder){
-            response.send({
-                success :false,
-                msg: 'Release order not found' 
-            });
-        }
-        else{
-            if (releaseOrder.generated==false){
-                releaseOrder.generated=true;
-                var date = new Date();
-                releaseOrder.generatedAt = date;
-            }
-            releaseOrder.save(async function(err,doc){
-                if(err)
-                response.send({
-                    success:false,
-                    msg: err
-                })
-                else{
-                    var result = releaseOrder.insertions.reduce((grouped, item) => {
-                        var index = grouped.findIndex(m => m.key.month == item.date.month
-                            && m.key.year == item.date.year);
-                            
-                        if (index == -1) {
-                            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
-                        }
-                        else grouped[index].items.push(item);
-                        
-                        return grouped;
-                    }, []);
-                    var insertions = releaseOrder.insertions;
-                    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-                    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-                    var namount = releaseOrder.adGrossAmount - damount;
-                    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
-                    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
-                    var categories = releaseOrder.adCategory1 || '';
-                    var premam = 0;
-                    var premium = '';
-                    
-                    if(releaseOrder.PremiumBox.Included){
-                        premam += releaseOrder.PremiumBox.Amount;
-                        premium += "Premium Box ";
-                    }
-
-                    if(releaseOrder.PremiumBaseColour.Included){
-                        premam += releaseOrder.PremiumBaseColour.Amount;
-                        premium += "Premium Base Colour ";
-                    }
-
-                    if(releaseOrder.PremiumEmailId.Included){
-                        premam += releaseOrder.PremiumEmailId.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium Email Id ";
-                    }
-
-                    if(releaseOrder.PremiumCheckMark.Included){
-                        premam += releaseOrder.PremiumCheckMark.Amount;
-                        premium += "Premium Check Mark ";
-                    }
-
-                    if(releaseOrder.PremiumWebsite.included){
-                        premam += releaseOrder.PremiumBox.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium website ";
-                    }
-
-                    if(releaseOrder.PremiumExtraWords.included){
-                        premam += releaseOrder.PremiumExtraWords.Amount*releaseOrder.PremiumBaseColour.Quantity;
-                        premium += "Premium Extra Words ";
-                    }
-                    
-                    catarray.forEach(function loop(element){
-                        if(loop.stop){return ;}
-                        if (element) {
-                            categories += '-' + element;
-                        }
-                        else{
-                            categories += "<br>"
-                            loop.stop = true;
-                        }
-                    });
-                    var insData = '';
-                    var count = 0;
-                    result.sort((a, b) => {
-                        if (+a.key.year > +b.key.year)
-                        return true;
-                        else if (+a.key.year < +b.key.year)
-                        return false;
-                        else return +a.key.month > +b.key.month;
-                    })
-                    .forEach(object =>{
-                        console.log(object.items);
-                        var dates = "";
-                        var array = [];
-                        object.items.forEach(obj => {
-                            array.push(+obj.date.day);            
-                        });
-                        array.sort((a, b) => +a > +b);
-
-                        array.forEach(obj => {
-                            dates += obj + " ";
-                        })
-
-                        var row = result.length;
-
-                        if(count === 0){
-                            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
-                            count = 1;
-                        }
-                        else{
-                            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
-                        }
-                    });
-                    
-                    var remark = releaseOrder.remark?releaseOrder.remark:'';
-
-                    var paymentDetails="";
-                    var address = firm.RegisteredAddress;
-                    var caddress = releaseOrder.clientState;
-                    var maddress = releaseOrder.publicationState;
-
-                    if(releaseOrder.paymentType === 'Cash')
-                    paymentDetails = "Cash"
-                    else if(releaseOrder.paymentType === 'Credit')
-                    paymentDetails = "Credit"
-                    else if(releaseOrder.paymentType === 'Cheque')
-                    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
-                    else if(releaseOrder.paymentType === 'NEFT')
-                    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
-
-
-                    console.log(releaseOrder.publicationGSTIN);
-
-                    var Details = {
-                        image : config.domain+'/'+firm.LogoURL,
-                        mediahouse :releaseOrder.publicationName,
-                        medition : releaseOrder.publicationEdition,
-                        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-                        cname :releaseOrder.clientName,
-                        cgstin :'-',
-                        gstin :'-',
-                        scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
-                        insertions :insData,
-                        username: user.name,
-                        firmname: firm.FirmName,
-                        firmname1: firm.FirmName,
-                        rno : releaseOrder.releaseOrderNO,
-                        sign: config.domain+'/'+user.signature,
-                        remark: releaseOrder.Remark || "",
-                        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-                        paymentDetails: paymentDetails,
-                        namount: '',
-                        namountwords: '',
-                        gstamount: '',
-                        sgstamount: '-',
-                        cgstamount: '-',
-                        igstamount: '-',
-                        igst: '-',
-                        cgst: '-',
-                        sgst: '-',
-                        taxamount: '',
-                        publicationdisc: '',
-                        damount: '',
-                        agenD1: releaseOrder.agencyDiscount1,
-                        agenD2: releaseOrder.agencyDiscount2,
-                        pubD: releaseOrder.publicationDiscount,
-                        edition: releaseOrder.adEdition,
-                        adtype:releaseOrder.adType,
-                        hue:releaseOrder.adHue,
-                        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-                        caddress: caddress || '',
-                        maddress: maddress || '',
-                        pullout: releaseOrder.pulloutName,
-                        premam : "₹ "+addZeroes(""+Math.round(premam)),
-                        remark: remark,
-                        phone: "Phone: "+firm.Mobile || '',
-                        email: "Email: "+firm.Email || ''
-                    }
-
-                    if(releaseOrder.adSchemeFree === 0);
-                    Details['scheme'] = 'NA';
-
-                    var adGrossAmount;
-                    var tax = releaseOrder.taxAmount.primary;
-                    if(releaseOrder.taxIncluded){
-                        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
-                    }
-                    else{
-                        adGrossAmount = releaseOrder.adGrossAmount;
-                    }
-
-                    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
-                    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
-                    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
-                    damount1 += damount2;
-                    Details['damount'] = '₹ '+ (damount1.toFixed(2));
-                    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-                    var taxamount = releaseOrder.netAmountFigures;
-                    var namount = taxamount + (taxamount*tax)/100;
-                    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
-                    Details['namount'] ='₹ '+ (namount.toFixed(2));
-                    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
-
-                    if(firm.GSTIN.GSTType !== 'URD')
-                        Details['gstin'] =firm.GSTIN.GSTNo;
-                    if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-                        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
-
-                    var g = (taxamount*tax/100).toFixed(2);
-                    
-                    Details['gstamount'] ='₹ '+ g
-                    
-                    if(releaseOrder.publicationState === releaseOrder.clientState){
-                        Details['sgst'] = Details['cgst'] = tax/2;
-                        var t = ((taxamount*tax/2)/100).toFixed(2);
-                        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
-
-                    }
-                    else{
-                        Details['igst'] = tax;
-                        var t = ((taxamount*tax)/100).toFixed(2);
-                        Details['igstamount'] ='₹ '+t;
-                    }
-
-                    pdf.generateReleaseOrder(request,response,Details);
-                }
-            })
-        }
-    });
-}
-
-module.exports.previewROhtml = async function(request, response) {
-    var user = response.locals.user;
-    var firm = response.locals.firm;
-    var doc = request.body.releaseOrder;
-    var result = doc.insertions.reduce((grouped, item) => {
-        var index = grouped.findIndex(m => m.key.month == item.date.month
-            && m.key.year == item.date.year);
-            
-        if (index == -1) {
-            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
-        }
-        else grouped[index].items.push(item);
-        
-        return grouped;
-    }, []);
-
-    var releaseOrder = doc;
-    var insertions = releaseOrder.insertions;
-    var size = releaseOrder.adSizeL * releaseOrder.adSizeW;
-    var damount = (releaseOrder.publicationDiscount+releaseOrder.agencyDiscount1+releaseOrder.agencyDiscount2)*releaseOrder.adGrossAmount;
-    var namount = releaseOrder.adGrossAmount - damount;
-    var caption = releaseOrder.caption?releaseOrder.caption+'<br>':"";
-    var catarray = [releaseOrder.adCategory2, releaseOrder.adCategory3, releaseOrder.adCategory4, releaseOrder.adCategory5, releaseOrder.adCategory6];
-    var categories = releaseOrder.adCategory1 || '';
-    var premam = 0;
-    var premium = '';
-    
-    if(releaseOrder.PremiumBox.Included){
-        premam += releaseOrder.PremiumBox.Amount;
-        premium += "Premium Box ";
-    }
-
-    if(releaseOrder.PremiumBaseColour.Included){
-        premam += releaseOrder.PremiumBaseColour.Amount;
-        premium += "Premium Base Colour ";
-    }
-
-    if(releaseOrder.PremiumEmailId.Included){
-        premam += releaseOrder.PremiumEmailId.Amount*releaseOrder.PremiumBaseColour.Quantity;
-        premium += "Premium Email Id ";
-    }
-
-    if(releaseOrder.PremiumCheckMark.Included){
-        premam += releaseOrder.PremiumCheckMark.Amount;
-        premium += "Premium Check Mark ";
-    }
-
-    if(releaseOrder.PremiumWebsite.included){
-        premam += releaseOrder.PremiumBox.Amount*releaseOrder.PremiumBaseColour.Quantity;
-        premium += "Premium website ";
-    }
-
-    if(releaseOrder.PremiumExtraWords.included){
-        premam += releaseOrder.PremiumExtraWords.Amount*releaseOrder.PremiumBaseColour.Quantity;
-        premium += "Premium Extra Words ";
-    }
-    
-    catarray.forEach(function loop(element){
-        if(loop.stop){return ;}
-        if (element) {
-            categories += '-' + element;
-        }
-        else{
-            categories += "<br>"
-            loop.stop = true;
-        }
-    });
-    var insData = '';
-    var count = 0;
-    result.sort((a, b) => {
-        if (+a.key.year > +b.key.year)
-          return true;
-        else if (+a.key.year < +b.key.year)
-          return false;
-        else return +a.key.month > +b.key.month;
-    })
-      .forEach(object =>{
-        console.log(object.items);
-        var dates = "";
-        var array = [];
-        object.items.forEach(obj => {
-            array.push(+obj.date.day);            
-        });
-        array.sort((a, b) => +a > +b);
-
-        array.forEach(obj => {
-            dates += obj + " ";
-        })
-
-        var row = result.length;
-
-        if(count === 0){
-            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+releaseOrder.adPosition+'</td><td rowspan='+row+'>'+releaseOrder.adSizeL+'x'+releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(releaseOrder.adGrossAmount))+'</b></td></tr>';
-            count = 1;
-        }
-        else{
-            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
-        }
-    });
-    
-    var remark = releaseOrder.remark?releaseOrder.remark:'';
-
-    var paymentDetails="";
-    var address = firm.RegisteredAddress;
-    var caddress = releaseOrder.clientState;
-    var maddress = releaseOrder.publicationState;
-
-    if(releaseOrder.paymentType === 'Cash')
-    paymentDetails = "Cash"
-    else if(releaseOrder.paymentType === 'Credit')
-    paymentDetails = "Credit"
-    else if(releaseOrder.paymentType === 'Cheque')
-    paymentDetails = "Cheque of "+releaseOrder.paymentBankName+" Dated "+toReadableDate(releaseOrder.paymentDate)+" Numbered "+releaseOrder.paymentNo
-    else if(releaseOrder.paymentType === 'NEFT')
-    paymentDetails = "NEFT TransactionID: "+releaseOrder.paymentNo;
-
-
-    console.log(releaseOrder.publicationGSTIN);
-
-    var Details = {
-        image : config.domain+'/'+firm.LogoURL,
-        mediahouse :releaseOrder.publicationName,
-        medition : releaseOrder.publicationEdition,
-        pgstin :releaseOrder.publicationGSTIN.GSTNo,
-        cname :releaseOrder.clientName,
-        cgstin :'-',
-        gstin :'-',
-        scheme :releaseOrder.adSchemePaid+'+'+releaseOrder.adSchemeFree,
-        insertions :insData,
-        username: user.name,
-        firmname: firm.FirmName,
-        firmname1: firm.FirmName,
-        rno : releaseOrder.releaseOrderNO,
-        sign: config.domain+'/'+user.signature,
-        remark: releaseOrder.Remark || "",
-        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-        paymentDetails: paymentDetails,
-        namount: '',
-        namountwords: '',
-        gstamount: '',
-        sgstamount: '-',
-        cgstamount: '-',
-        igstamount: '-',
-        igst: '-',
-        cgst: '-',
-        sgst: '-',
-        taxamount: '',
-        publicationdisc: '',
-        damount: '',
-        agenD1: releaseOrder.agencyDiscount1,
-        agenD2: releaseOrder.agencyDiscount2,
-        pubD: releaseOrder.publicationDiscount,
-        edition: releaseOrder.adEdition,
-        adtype:releaseOrder.adType,
-        hue:releaseOrder.adHue,
-        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-        caddress: caddress || '',
-        maddress: maddress || '',
-        pullout: releaseOrder.pulloutName,
-        premam : "₹ "+addZeroes(""+Math.round(premam)),
-        remark: remark,
-        phone: "Phone: "+firm.Mobile || '',
-        email: "Email: "+firm.Email || ''
-    }
-
-    if(releaseOrder.adSchemeFree === 0);
-    Details['scheme'] = 'NA';
-
-    var adGrossAmount;
-    var tax = releaseOrder.taxAmount.primary;
-    if(releaseOrder.taxIncluded){
-        adGrossAmount = (releaseOrder.adGrossAmount/(100 + tax))*100;
-    }
-    else{
-        adGrossAmount = releaseOrder.adGrossAmount;
-    }
-
-    publicationDisc = adGrossAmount*releaseOrder.publicationDiscount/100;
-    damount1 = (adGrossAmount - publicationDisc)*(+releaseOrder.agencyDiscount1)/100;
-    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+releaseOrder.agencyDiscount2)/100;
-    damount1 += damount2;
-    Details['damount'] = '₹ '+ (damount1.toFixed(2));
-    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-    var taxamount = releaseOrder.netAmountFigures;
-    var namount = taxamount + (taxamount*tax)/100;
-    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
-    Details['namount'] ='₹ '+ (namount.toFixed(2));
-    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
-
-    if(firm.GSTIN.GSTType !== 'URD')
-        Details['gstin'] =firm.GSTIN.GSTNo;
-    if(releaseOrder.clientGSTIN.GSTType !== 'URD')
-        Details['cgstin'] =releaseOrder.clientGSTIN.GSTNo;
-
-    var g = (taxamount*tax/100).toFixed(2);
-    
-    Details['gstamount'] ='₹ '+ g
-    
-    if(releaseOrder.publicationState === releaseOrder.clientState){
-        Details['sgst'] = Details['cgst'] = tax/2;
-        var t = ((taxamount*tax/2)/100).toFixed(2);
-        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
-
-    }
-    else{
-        Details['igst'] = tax;
-        var t = ((taxamount*tax)/100).toFixed(2);
-        Details['igstamount'] ='₹ '+t;
-    }
-
-
-    getROhtml(Details, content => {
-        response.send({
-            content: content
-        });
     })
 };
 
@@ -1594,7 +942,6 @@ function getROhtml(Details, callback) {
               .replace('{{sgstamount}}', Details.sgstamount)
               .replace('{{namountwords}}', Details.namountwords)
               .replace('{{paymentDetails}}', Details.paymentDetails)
-              .replace('{{jurisdiction}}', Details.jurisdiction)
               .replace('{{remark}}', Details.remark)
               .replace('{{Address}}', Details.address)
               .replace('{{pullout}}', Details.pullout)
@@ -1603,7 +950,8 @@ function getROhtml(Details, callback) {
               .replace('{{premam}}', Details.premam)
               .replace('{{medition}}', Details.medition)
               .replace('{{phone}}', Details.phone)
-              .replace('{{email}}', Details.email);
+              .replace('{{email}}', Details.email)
+              .replace('{{tnc}}', Details.tnc);
 
             callback(templateHtml);
         });
@@ -1613,6 +961,323 @@ function getROhtml(Details, callback) {
 }
 
 module.exports.getROhtml = getROhtml;
+
+
+module.exports.mailROPdf = function(request, response) {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    console.log(request.body);
+    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
+        }
+        else if(!releaseOrder){
+            response.send({
+                success :false,
+                msg: 'Invoice not found' 
+            });
+        }
+        else{
+            if (releaseOrder.generated==false){
+                releaseOrder.faddress = firm.RegisteredAddress;
+                releaseOrder.femail = firm.Email;
+                releaseOrder.fmobile = firm.Mobile;
+                releaseOrder.flogo = firm.LogoURL;
+                releaseOrder.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                releaseOrder.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.ROterms.length; i++){
+                    tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+                }
+                releaseOrder.tnc = tnc;
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                releaseOrder.generated=true;
+                var date = new Date();
+                releaseOrder.generatedAt = date;
+            }
+            releaseOrder.save(async function(err,releaseOrder){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err
+                    })
+                }
+                else{
+                    var Details = createDocument(request,response,releaseOrder);
+                    pdf.mailReleaseOrder(request,response,Details);
+                }
+            })
+        }
+    });
+}
+
+module.exports.generateROPdf = async function(request, response) {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
+        if(err){
+            console.log(err);
+            response.send({
+                success :false,
+                msg: err 
+            });
+        }
+        else if(!releaseOrder){
+            response.send({
+                success :false,
+                msg: 'Invoice not found' 
+            });
+        }
+        else{
+            if (releaseOrder.generated==false){
+                releaseOrder.faddress = firm.RegisteredAddress;
+                releaseOrder.femail = firm.Email;
+                releaseOrder.fmobile = firm.Mobile;
+                releaseOrder.flogo = firm.LogoURL;
+                releaseOrder.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                releaseOrder.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.ROterms.length; i++){
+                    tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+                }
+                releaseOrder.tnc = tnc;
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                releaseOrder.generated=true;
+                var date = new Date();
+                releaseOrder.generatedAt = date;
+            }
+            releaseOrder.save(async function(err,releaseorder){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err
+                    })
+                }
+                else{
+                    var Details = createDocument(request,response,releaseorder);
+                    pdf.generateReleaseOrder(request,response,Details);
+                }
+            })
+        }
+    });
+}
+
+module.exports.previewROhtml = async function(request, response) {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var doc = request.body.releaseOrder;
+    doc['flogo'] = firm.LogoURL;
+    doc['fsign'] = user.signature;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+    doc['faddress'] = firm.RegisteredAddress;
+    doc['fmobile'] = firm.Mobile;
+    doc['femail'] = firm.Email;
+    console.log(doc);
+    var tnc ='';
+    var i = 0;
+    for(; i < firm.ROterms.length; i++){
+        tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+    }
+    doc['tnc'] = tnc;
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+    var Details = createDocument(request,response,doc);
+    getROhtml(Details, content => {
+        response.send({
+            content: content
+        });
+    })
+};
+
+function createDocument(request, response, doc){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var result = doc.insertions.reduce((grouped, item) => {
+        var index = grouped.findIndex(m => m.key.month == item.date.month && m.key.year == item.date.year);
+        if (index == -1) {
+            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
+        }
+        else grouped[index].items.push(item);
+        return grouped;
+    }, []);
+
+    var insertions = doc.insertions;
+    var size = doc.adSizeL * doc.adSizeW;
+    var damount = (doc.publicationDiscount+doc.agencyDiscount1+doc.agencyDiscount2)*doc.adGrossAmount;
+    var namount = doc.adGrossAmount - damount;
+    var caption = doc.caption?doc.caption+'<br>':"";
+    var catarray = [doc.adCategory2, doc.adCategory3, doc.adCategory4, doc.adCategory5, doc.adCategory6];
+    var categories = doc.adCategory1 || '';
+    var premam = 0;
+    var premium = '';
+    
+    catarray.forEach(function loop(element){
+        if(loop.stop){return ;}
+        if (element) {
+            categories += '-' + element;
+        }
+        else{
+            categories += "<br>"
+            loop.stop = true;
+        }
+    });
+    var insData = '';
+    var count = 0;
+    result.sort((a, b) => {
+        if (+a.key.year > +b.key.year)
+          return true;
+        else if (+a.key.year < +b.key.year)
+          return false;
+        else return +a.key.month > +b.key.month;
+    })
+      .forEach(object =>{
+        console.log(object.items);
+        var dates = "";
+        var array = [];
+        object.items.forEach(obj => {
+            array.push(+obj.date.day);            
+        });
+        array.sort((a, b) => +a > +b);
+
+        array.forEach(obj => {
+            dates += obj + " ";
+        })
+
+        var row = result.length;
+
+        if(count === 0){
+            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+            count = 1;
+        }
+        else{
+            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
+        }
+    });
+    
+    var remark = doc.remark?doc.remark:'';
+
+    var paymentDetails="";
+    var address = doc.faddress;
+    var caddress = doc.clientState;
+    var maddress = doc.publicationState;
+
+    if(doc.paymentType === 'Cash')
+    paymentDetails = "Cash"
+    else if(doc.paymentType === 'Credit')
+    paymentDetails = "Credit"
+    else if(doc.paymentType === 'Cheque')
+    paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
+    else if(doc.paymentType === 'NEFT')
+    paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
+    console.log(doc);
+
+
+    console.log(doc.publicationGSTIN);
+
+    var Details = {
+        mediahouse :doc.publicationName,
+        medition : doc.publicationEdition,
+        pgstin :'-',
+        cname :doc.clientName,
+        cgstin :'-',
+        gstin :'-',
+        scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
+        insertions :insData,
+        username: user.name,
+        firmname: firm.FirmName,
+        firmname1: firm.FirmName,
+        rno : doc.releaseOrderNO,
+        remark: doc.Remark || "",
+        paymentDetails: paymentDetails,
+        namount: '',
+        namountwords: '',
+        gstamount: '',
+        sgstamount: '-',
+        cgstamount: '-',
+        igstamount: '-',
+        igst: '-',
+        cgst: '-',
+        sgst: '-',
+        taxamount: '',
+        publicationdisc: '',
+        damount: '',
+        agenD1: doc.agencyDiscount1,
+        agenD2: doc.agencyDiscount2,
+        pubD: doc.publicationDiscount,
+        edition: doc.adEdition,
+        adtype:doc.adType,
+        hue:doc.adHue,
+        caddress: caddress || '',
+        maddress: maddress || '',
+        pullout: doc.pulloutName,
+        premam : "₹ "+addZeroes(""+Math.round(premam)),
+        remark: remark,
+        tnc: doc.tnc,
+        image : config.domain+'/'+doc.flogo,
+        sign: config.domain+'/'+doc.fsign,
+        jurisdiction: doc.fjuris,
+        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+        phone: "Phone: "+doc.fmobile || '',
+        email: "Email: "+doc.femail || ''
+    }
+
+    if(doc.adSchemeFree === 0);
+    Details['scheme'] = 'NA';
+
+    var adGrossAmount;
+    var tax = doc.taxAmount.primary;
+    if(doc.taxIncluded){
+        adGrossAmount = (doc.adGrossAmount/(100 + tax))*100;
+    }
+    else{
+        adGrossAmount = doc.adGrossAmount;
+    }
+
+    publicationDisc = adGrossAmount*doc.publicationDiscount/100;
+    damount1 = (adGrossAmount - publicationDisc)*(+doc.agencyDiscount1)/100;
+    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+doc.agencyDiscount2)/100;
+    damount1 += damount2;
+    Details['damount'] = '₹ '+ (damount1.toFixed(2));
+    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
+    var taxamount = doc.netAmountFigures;
+    var namount = taxamount + (taxamount*tax)/100;
+    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
+    Details['namount'] ='₹ '+ (namount.toFixed(2));
+    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
+
+    if(firm.GSTIN.GSTType !== 'URD')
+        Details['gstin'] =firm.GSTIN.GSTNo;
+    if(doc.clientGSTIN.GSTType !== 'URD')
+        Details['cgstin'] =doc.clientGSTIN.GSTNo;
+    if(doc.publicationGSTIN.GSTType !== 'URD')
+        Details['gstin'] =doc.publicationGSTIN.GSTNo;
+
+    var g = (taxamount*tax/100).toFixed(2);
+    
+    Details['gstamount'] ='₹ '+ g
+    
+    if(doc.publicationState === doc.clientState){
+        Details['sgst'] = Details['cgst'] = tax/2;
+        var t = ((taxamount*tax/2)/100).toFixed(2);
+        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
+
+    }
+    else{
+        Details['igst'] = tax;
+        var t = ((taxamount*tax)/100).toFixed(2);
+        Details['igstamount'] ='₹ '+t;
+    }
+
+    return Details;
+
+}
 
 module.exports.queryReleaseOrderByNo = function(request, response){
     var user = response.locals.user;

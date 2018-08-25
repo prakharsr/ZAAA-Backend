@@ -1,7 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Release Order</title>
+    <title>Invoice</title>
 </head>
 <body class="container-fluid" style="width : 560px;">
     <div>
@@ -17,7 +17,7 @@
                 </p>
             </div>
         </div>
-        <h6 style="position: relative; left: 250px;">Release Order</h6>
+        <h6 style="position: relative; left: 250px;">Tax Invoice</h6>
         <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
             <thead>
                 <tr>
@@ -26,9 +26,6 @@
                             <div class='col' style="text-align: left;">
                                 Client:{{cname}}<br>
                                 GSTIN:{{cgstin}}
-                            </div>
-                            <div class='col' style="text-align: left;">
-                                <br>
                                 State: {{caddress}}
                             </div>
                         </div>
@@ -41,7 +38,7 @@
                 </tr>
                 
                 <tr>
-                    <th>
+                    <th colspan="8">
                         <div class="row">
                             <div class="col">
                                 Media House Name: {{mediahouse}}
@@ -65,7 +62,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td colspan='3'>Description</td>
+                    <td colspan='3'>Description</td> <!--no caption - categories - Premium-->
                     <td>Ins Date</td>
                     <td>Position</td>
                     <td>Size</td>
@@ -73,12 +70,8 @@
                 </tr>
                 {{insertions}}
                 <tr>
-                    <td colspan="6" style="text-align: right">Commission Amount {{cper}}</td>
-                    <td><b>{{cam}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right">Additional Charges {{addper}} %</td>
-                    <td><b>{{addam}}</b></td>
+                    <td colspan="6" style="text-align: right">Other Charges @ {{pubD}} %</td>
+                    <td><b>{{pubam}}</b></td>
                 </tr>
                 <tr>
                     <td colspan="6" style="text-align: right">Publication Discount @ {{pubD}} %</td>
@@ -117,7 +110,7 @@
         <div class='row' style="width: 560px;">
             <div class='col' style ='font-size: 8px'>
                 <b>Note/Remark:</b><br>
-                1. All disputed are subject to {{jurisdiction}} jurisdiction only.<br>
+                {{tnc}}
             </div>
             <div class='col' style='text-align: right; font-size: 8px'>
                 <b>For {{firmName1}}, <br>Signature:</b><br>

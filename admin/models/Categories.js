@@ -13,7 +13,10 @@ var timestamps = require('mongoose-timestamp');
 var CategorySchema = new mongoose.Schema({
     name:String,
     level:Number,
-    parent:String
+    parent:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }
 },
 {
     _id: true // disables the creation of the virtual "id" property

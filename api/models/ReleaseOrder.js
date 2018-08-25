@@ -11,10 +11,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type:Date,
         default:new Date()
     },
-    releaseOrderNO: {
-        type:String,
-        unique:true
-    },
+    releaseOrderNO:String,
     invoiceSerial:{
         type: Number,
         default: 0
@@ -183,7 +180,20 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    generatedAt: Date
+    generatedAt: Date,
+
+    flogo: String,
+    fsign: String,
+    fjuris: String,
+    faddress:{
+        pincode:String,
+        address:String,
+        city:String,
+        state:String
+    },
+    fmobile: String,
+    femail: String,
+    tnc: String
 });
 
 ReleaseOrderSchema.pre('save', function(next){
@@ -207,5 +217,7 @@ ReleaseOrderSchema.pre('save', function(next){
     }
 });
 
+
+ReleaseOrderSchema.index({releaseOrderNO:1,firm: 1}, {unique: true});
 ReleaseOrderSchema.plugin(timestamps);
 module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);

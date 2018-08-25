@@ -35,7 +35,6 @@ module.exports.createCategory = function(request, response){
                 success:true,
                 category:category
             });
-            
         }
     });
 }
@@ -43,7 +42,7 @@ module.exports.createCategory = function(request, response){
 module.exports.getCategories = function(request, response){
     var admin = response.locals.admin;
 
-    var query = {}
+    var query = {};
 
     if(request.body.level == 0){
         query = {
@@ -76,16 +75,38 @@ module.exports.searchCategories = function(request, response){
     var admin = response.locals.admin;
     
     Category.find({
-        $and : [ {level:request.params.level},{ 'name': { $regex: request.params.keyword+"", $options:"i" }}]
+        'name': { $regex: request.params.keyword+"", $options:"i" }
     })
-    .exec(function(err, categories){ 
+    .limit(5)
+    .exec(async function(err, categories){ 
         if(err){
             console.log("here" +err);
         }
         else{
+            var catarray = [];
+            for (var i = 0; i < categories.length; ++i) {
+                var element = categories[i];
+
+                var array = [];  
+                array.push(element);  
+                var level = element.level;
+                var parent = element.parent;
+                while(level-- > 0){
+                    try{
+                    var category = await Category.findById(mongoose.mongo.ObjectId(parent));
+                    array.push(category);
+                    parent = category.parent;
+                    }
+                    catch(err){
+                        console.log(err);
+                    }
+                    
+                }
+                catarray.push(array);
+            }
             response.send({
                 success : true,
-                categories: categories
+                categories: catarray
             }); 
         }
     });

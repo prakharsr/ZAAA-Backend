@@ -113,6 +113,18 @@ var ReceiptSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
     },
+    flogo: String,
+    fsign: String,
+    fjuris: String,
+    faddress:{
+        pincode:String,
+        address:String,
+        city:String,
+        state:String
+    },
+    fmobile: String,
+    femail: String,
+    tnc: String
     });
     
 ReceiptSchema.plugin(timestamps);

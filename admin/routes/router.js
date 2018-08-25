@@ -37,6 +37,7 @@ router.delete('/globalratecard/delete/:id', global.deleteGRatecard);
 
 router.post('/category', category.createCategory);
 router.post('/category/list', category.getCategories);
+router.get('/category/search/:keyword', category.searchCategories);
 
 router.post('/notifications',notifs.getNotifications);
 router.delete('/notifications',notifs.deleteNotification);

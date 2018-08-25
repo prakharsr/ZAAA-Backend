@@ -120,8 +120,13 @@ async function f(request, response, user){
         var client = await findClient(releaseOrder.clientID);
         var executive = await findExecutive(releaseOrder.executiveID);
         var counter = releaseOrder.invoiceSerial+1;
-        var ino = releaseOrder.releaseOrderNO+'/'+counter
-        
+        var ino = releaseOrder.releaseOrderNO+'/'+counter;
+        var tnc ='';
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+        for(; i < firm.INterms.length; i++){
+            tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
+        }
+        tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     }
     catch(err){
         console.log(err);
@@ -168,6 +173,13 @@ async function f(request, response, user){
         mediahouseID : releaseOrder.mediahouseID,
         clientID: releaseOrder.clientID,
         executiveID: releaseOrder.executiveID,
+        faddress: firm.address,
+        femail: firm.Email,
+        fmobile: firm.Mobile,
+        flogo: firm.LogoURL,
+        fsign: user.signature,
+        fjuris: juris,
+        tnc: tnc
     });
     invoice.save(function(err, doc){
         if(err){
@@ -764,6 +776,19 @@ module.exports.queryClientPayments = async function(request, response){
     module.exports.previewinvoicehtml = async function(request, response) {
         console.log(request.body);
         var doc = request.body.invoice;
+        doc['flogo'] = config.domain+'/'+firm.LogoURL;
+        doc['fsign'] = config.domain+'/'+user.signature;
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
+        doc['faddress'] = firm.address;
+        doc['fmobile'] = firm.Mobile;
+        doc['femail'] = firm.Email;
+        var tnc ='';
+        var i = 0;
+        for(; i < firm.ROterms.length; i++){
+            tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+        }
+        doc['tnc'] = tnc;
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
         var Details = createDocument(request,response,doc);
         getinvoicehtml(Details, content => {
             response.send({
@@ -815,7 +840,6 @@ module.exports.queryClientPayments = async function(request, response){
                   .replace('{{sgstamount}}', Details.sgstamount)
                   .replace('{{namountwords}}', Details.namountwords)
                   .replace('{{paymentDetails}}', Details.paymentDetails)
-                  .replace('{{jurisdiction}}', Details.jurisdiction)
                   .replace('{{remark}}', Details.remark)
                   .replace('{{Address}}', Details.address)
                   .replace('{{pullout}}', Details.pullout)
@@ -895,7 +919,7 @@ module.exports.queryClientPayments = async function(request, response){
             var row = result.length;
     
             if(count === 0){
-                insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+                insData += '<tr><td colspan="3" rowspan='+row+'>'+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
                 count = 1;
             }
             else{
@@ -906,7 +930,7 @@ module.exports.queryClientPayments = async function(request, response){
         var remark = doc.remark?doc.remark:'';
     
         var paymentDetails="";
-        var address = firm.RegisteredAddress;
+        var address = doc.faddress;
         var caddress = doc.clientState;
         var maddress = doc.publicationState;
     
@@ -924,7 +948,6 @@ module.exports.queryClientPayments = async function(request, response){
         console.log(doc.publicationGSTIN);
     
         var Details = {
-            image : config.domain+'/'+firm.LogoURL,
             mediahouse :doc.publicationName,
             medition : doc.publicationEdition,
             pgstin :'-',
@@ -936,8 +959,7 @@ module.exports.queryClientPayments = async function(request, response){
             username: user.name,
             firmname: firm.FirmName,
             firmname1: firm.FirmName,
-            rno : doc.docNO,
-            sign: config.domain+'/'+user.signature,
+            rno : doc.invoiceNO,
             remark: doc.Remark || "",
             jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
             paymentDetails: paymentDetails,
@@ -959,14 +981,17 @@ module.exports.queryClientPayments = async function(request, response){
             edition: doc.adEdition,
             adtype:doc.adType,
             hue:doc.adHue,
-            address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
             caddress: caddress || '',
             maddress: maddress || '',
             pullout: doc.pulloutName,
             premam : "₹ "+addZeroes(""+Math.round(premam)),
             remark: remark,
-            phone: "Phone: "+firm.Mobile || '',
-            email: "Email: "+firm.Email || ''
+            tnc: doc.tnc,
+            image : config.domain+'/'+doc.flogo,
+            sign: config.domain+'/'+doc.fsign,
+            address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+            phone: "Phone: "+doc.fmobile || '',
+            email: "Email: "+doc.femail || ''
         }
     
         if(doc.adSchemeFree === 0);

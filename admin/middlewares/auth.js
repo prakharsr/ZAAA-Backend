@@ -9,9 +9,9 @@ var perPage=20;
 
 
 var unAuthRoutes = [
-    {method:'POST',path:'/api/user/signup'},
-    {method:'POST',path:'/api/user/login'},
-    {method:'POST',path:'/api/user/forgotPassword'}
+    {method:'POST',path:'/adminapi/signup'},
+    {method:'POST',path:'/adminapi/login'},
+    {method:'POST',path:'/adminapi/forgotPassword'}
 ];
 
 function getAdmin(token,req,res, cb){
