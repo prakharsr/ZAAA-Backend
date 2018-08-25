@@ -938,13 +938,13 @@ module.exports.mailROPdf = function(request, response) {
                 releaseOrder.flogo = firm.LogoURL;
                 releaseOrder.fsign = user.signature;
                 releaseOrder.fjuris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
-                
+                var i = 0;
                 var tnc ='';
-                for(var i = 0; i < firm.ROterms.length; i++){
+                for(; i < firm.ROterms.length; i++){
                     tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                
                 releaseOrder.tnc = tnc;
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
                 releaseOrder.generated=true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
@@ -991,14 +991,13 @@ module.exports.generateROPdf = async function(request, response) {
                 releaseOrder.flogo = firm.LogoURL;
                 releaseOrder.fsign = user.signature;
                 releaseOrder.fjuris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
-                
+                var i = 0;
                 var tnc ='';
-                for(var i = 0; i < firm.ROterms.length; i++){
+                for(; i < firm.ROterms.length; i++){
                     tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                
                 releaseOrder.tnc = tnc;
-
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
                 releaseOrder.generated=true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
@@ -1025,15 +1024,17 @@ module.exports.previewROhtml = async function(request, response) {
     var doc = request.body.releaseOrder;
     doc['flogo'] = config.domain+'/'+firm.LogoURL;
     doc['fsign'] = config.domain+'/'+user.signature;
-    doc['fjuris'] = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
     doc['faddress'] = firm.address;
     doc['fmobile'] = firm.Mobile;
     doc['femail'] = firm.Email;
     var tnc ='';
-    for(var i = 0; i < firm.ROterms.length; i++){
+    var i = 0;
+    for(; i < firm.ROterms.length; i++){
         tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
     }
     doc['tnc'] = tnc;
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     var Details = createDocument(request,response,doc);
     getROhtml(Details, content => {
         response.send({
