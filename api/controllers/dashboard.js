@@ -22,56 +22,196 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage = 20;
 
-
-function formQuery(user, request){
-    return new Promise((resolve, reject) => {
-        var query = {'firm':user.firm};
-        if(request.body.creationPeriod)
-        {
-            var to = new Date()
-            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.creationPeriod);
-            query['date']={$gte: from, $lte:to} 
-        }
-        if(request.body.insertionPeriod){
-            var to = new Date()
-            var from = new Date( to.getFullYear(), to.getMonth, to.getDay - request.body.insertionPeriod);
-        }
-        
-        resolve(query);
-        
-    })
-    
-    
+function getFinancialYear(date){
+    var month = date.getMonth();
+    var year = date.getFullYear();
+    var period={};
+    if(month<=2)
+    {
+     var from = new  Date(year-1,03,01);
+     var upto = new Date(year,02,31);
+     period['from'] = from;
+     period['upto']=upto;   
+    }
+    else if (month>2)
+    {
+     var from = new  Date(year,03,01);
+     var upto = new  Date(year+1,02,31);
+     period['from'] = from;
+     period['upto']=upto;   
+    }
+    console.log(period);
+    return period;
 }
+function getQuarter(d){
+    d = d || new Date();
+    m = d.getMonth();
+    var q = Math.floor(m/3)?Math.floor(m/3):4;
+  return q;
+}
+function getFinancialQuarter(date){
+    var month = date.getMonth();
+    var year = date.getFullYear();
+    var period={};
+    var quarter= getQuarter(date);
+    switch(quarter){
+        case 1:{
+            console.log(quarter)
+            var from= new Date(year,03,01);
+            var upto = new Date(year,05,30);
+            period['from']=from;
+            period['upto']=upto;
+            break;
+        }
+        case 2:{
+            console.log(quarter)
+            var from= new Date(year,06,01);
+            var upto = new Date(year,08,30);
+            period['from']=from;
+            period['upto']=upto;
+            break;
+
+        }
+        case 3:{
+            console.log(quarter)
+            var from= new Date(year,09,01);
+            var upto = new Date(year,11,31);
+            period['from']=from;
+            period['upto']=upto;
+            break;
+
+        }
+        case 4:{
+            console.log(quarter)
+            var from= new Date(year+1,00,01);
+            var upto = new Date(year+1,02,31);
+            period['from']=from;
+            period['upto']=upto;
+            break;
+        }
+    }
+    console.log(period);
+    return period;
+}
+function getFinancialMonth(date){
+    date = date || new Date()
+    var month = date.getMonth();
+    var year = date.getFullYear();
+    var from = new Date(year, month, 1);
+    var upto = new Date(year, month + 1, 0);
+    var period={
+        from:from,
+        upto:upto
+    }
+    console.log(period);
+    return period;
+}
+function uptoTodayPeriod(date){
+    var date = new Date();
+    var period = {
+        from: new Date(new Date().setMonth(date.getMonth()-3)),
+        upto: date,
+    }
+    console.log(period);
+    return period;
+}
+
+function next7dayPeriod(date){
+    var date = new Date();
+    var period = {
+        from: new Date(new Date().setMonth(date.getMonth()-3)),
+        upto: new Date(new Date().setDate(date.getDate()+7))
+    }
+    console.log(period);
+    return period;
+}
+function next15dayPeriod(date){
+    var date = new Date();
+    var period = {
+        from: new Date(new Date().setMonth(date.getMonth()-3)),
+        upto: new Date(new Date().setDate(date.getDate()+15))
+    }
+    console.log(period);
+    return period;
+}
+function compareFinancialyear(date){
+    var curr = new Date(date);
+    var last = new Date(curr.getFullYear()-1, curr.getMonth(), curr.getDay());
+    var period={
+        period1: getFinancialYear(curr),
+        period2: getFinancialYear(last)
+    };
+    console.log(period);
+    return period;
+}
+function compareFinancialQuarter(date){
+    var curr = new Date(date);
+    var last = new Date(curr.getFullYear()-1, curr.getMonth(), curr.getDay());
+    var period={
+        period1: getFinancialQuarter(curr),
+        period2: getFinancialQuarter(last)
+    };
+    console.log(period);
+    return period;
+}
+function compareFinancialMonth(){
+    var curr = new Date();
+    var last = new Date(curr.getFullYear()-1, curr.getMonth(), curr.getDay());
+    var period={
+        period1: getFinancialMonth(curr),
+        period2: getFinancialMonth(last)
+    };
+    console.log(period);
+    return period;
+}
+
+
+
 
 module.exports.ROchartData = async function(request, response){
     var user = response.locals.user;
-    var query = await formQuery( user, request, response);
-    var from = new Date(1-10-2011);
-    var upto = new Date(1-10-2019)
+    var query = {'firm':user.firm};
+    var period;
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 1:{
+            period = compareFinancialQuarter(new Date())
+            break;}
+            case 2:{
+            period = compareFinancialQuarter(new Date(new Date().getFullYear(),04,01))
+            break;}
+            case 3:{
+            period = compareFinancialQuarter(new Date(new Date().getFullYear(),07,01))
+            break;}
+            case 4:{
+            period = compareFinancialQuarter(new Date(new Date().getFullYear(),10,01))
+            break;}
+            case 5:{
+            period = compareFinancialQuarter(new Date(new Date().getFullYear()+ 1,01,01))
+            break;}
+        }
+    }
     ReleaseOrder.aggregate([
         {$unwind:"$insertions"}, 
         {$match:query},
         { $group : { 
             _id : { day: { $dayOfMonth : "$generatedAt" },month: { $month: "$generatedAt" }, year: { $year: "$generatedAt" } },
             count: {$sum: 1},
-            totalAmount:{$sum:"$insertions.netAmount"},
+            // totalAmount:{$sum:"$insertions.netAmount"},
+            // generated:{$sum:{
+            //     "$cond": [{"$eq":["$insertions.marked",true]},
+            //     "$insertions.netAmount",0]
+            // },
+            totalAmount:{$sum:{
+                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", period.period1.from]},{"$lt":["$generatedAt", period.period1.upto]}]},
+                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            }},
             generated:{$sum:{
-                "$cond": [{"$eq":["$insertions.marked",true]},
-                "$insertions.netAmount",0]
-            },
-
-            // Period1:{$sum:{
-            //     "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", from]},{"$lt":["$generatedAt", upto]}]},
-            //     {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
-            // }},
-            // Period1:{$sum:{
-            //     "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", from]},{"$gte":["$generatedAt", upto]}]},
-            //     {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
-            // }},
+                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", period.period2.from]},{"$gte":["$generatedAt", period.period2.upto]}]},
+                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+            }},
         }
     }
-}
 ])
 .exec(function(err, releaseOrders){
     if(err){
@@ -95,8 +235,24 @@ module.exports.ROchartData = async function(request, response){
 
 module.exports.InvoiceData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery( user, request, response);   
-    query['generated']=true;    
+    var query = {'firm':user.firm};;   
+    query['generated']=true;
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 2:{
+            period = getFinancialYear(new Date())
+            query['generatedAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = getFinancialQuarter(new Date())
+            query['generatedAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 4:{
+            period = getFinancialMonth(new Date())
+            query['generatedAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     ReleaseOrder.aggregate([
         {$unwind:"$insertions"}, 
         {$match:query},
@@ -132,20 +288,34 @@ module.exports.InvoiceData = async function(request, response){
 
 module.exports.DueOverdueData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery( user, request, response);
-    var date = new Date();
-    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));       
+    var query = {'firm':user.firm};
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 2:{
+            period = getFinancialYear(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = getFinancialQuarter(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 4:{
+            period = getFinancialMonth(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }       
     Invoice.aggregate([
         {$match:query},
         { $group : {
             _id:null, 
             count: {$sum: 1},
             OverDueAmount:{$sum:{
-                "$cond": [{"$gte":["$paymentDate", last]},
+                "$cond": [{"$gte":["$paymentDate",new Date()]},
                 "$pendingAmount",0]
             }},
             DueAmount:{$sum:{
-                "$cond": [{"$lt":["$paymentDate", last]},
+                "$cond": [{"$lt":["$paymentDate", new Date()]},
                 "$pendingAmount",0]
             }},
         }}
@@ -161,12 +331,9 @@ module.exports.DueOverdueData = async function(request, response){
         else{
             
             Receipt.count(query, function(err, count){
-                var date = new Date();
-                var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));
                 response.send({
                     success:true,
                     receipt:receipt,
-                    last:last
                 });
             })
             
@@ -176,9 +343,23 @@ module.exports.DueOverdueData = async function(request, response){
 
 module.exports.ClientPaymentsData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery(user, request);
-    
-    
+    var query = {'firm':user.firm};
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 2:{
+            period = getFinancialYear(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = getFinancialQuarter(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 4:{
+            period = getFinancialMonth(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     Invoice.aggregate([ 
         {$match:query},
         { $group : { 
@@ -214,8 +395,23 @@ module.exports.ClientPaymentsData = async function(request, response){
 
 module.exports.MediahouseInvoiceData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery(user, request);
-    
+    var query = {'firm':user.firm};
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 2:{
+            period = getFinancialYear(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = getFinancialQuarter(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 4:{
+            period = getFinancialMonth(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    } 
     
     MediaHouseInvoice.aggregate([ 
         {$match:query},
@@ -253,9 +449,23 @@ module.exports.MediahouseInvoiceData = async function(request, response){
 
 module.exports.PaidUnpaidData = async function(request, response){
 	var user = response.locals.user;
-    var query = await formQuery(user, request);
-    
-    
+    var query = {'firm':user.firm};
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 2:{
+            period = getFinancialYear(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = getFinancialQuarter(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 4:{
+            period = getFinancialMonth(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     MediaHouseInvoice.aggregate([ 
         {$match:query},
         {$unwind:"$insertions"},
@@ -296,12 +506,7 @@ module.exports.PaidUnpaidData = async function(request, response){
 
 module.exports.RecieptsChequeData = async function(request, response){
     var user = response.locals.user;
-    var query = await formQuery(user, request);
-    
-    var date = new Date();
-    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
-    
-    
+    var query = {'firm':user.firm};
     Receipt.aggregate([ 
         {$match:query},
         { $group : { 
@@ -352,13 +557,25 @@ module.exports.RecieptsChequeData = async function(request, response){
 
 module.exports.RecieptsChequeDetailsData = async function(request, response){
     var user = response.locals.user;
-    var query = await formQuery(user, request);
+    var query = {'firm':user.firm};
     query["paymentType"]="Cheque";
     query["status"] = {$in:["0","3"]}
-    console.log(query)
-    
-    var date = new Date();
-    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 1:{
+            period = uptoTodayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 2:{
+            period = next7dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = next15dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     Receipt.find(query, {
         _id:1,
         paymentDate: 1,
@@ -384,14 +601,24 @@ module.exports.RecieptsChequeDetailsData = async function(request, response){
 }
 module.exports.MHIChequeDetailsData = async function(request, response){
     var user = response.locals.user;
-    var query = await formQuery(user, request);
+    var query = {'firm':user.firm};
     query["insertions.paymentType"]="Cheque"
-    console.log(query)
-    
-    var date = new Date();
-    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
-    
-    
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 1:{
+            period = uptoTodayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 2:{
+            period = next7dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = next15dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     MediaHouseInvoice.aggregate([
         {$unwind:"$insertions"}, 
         {$match:{
@@ -405,7 +632,6 @@ module.exports.MHIChequeDetailsData = async function(request, response){
                 "ChequeNo":"$insertions.paymentNo",
                 "ChequeBank":"$insertions.paymentBankName"}
         },
-
         }
     ])
     .exec(function(err, mhis){
@@ -429,12 +655,23 @@ module.exports.MHIChequeDetailsData = async function(request, response){
 
 module.exports.MediaHouseInvoiceChequeData = async function(request, response){
     var user = response.locals.user;
-    var query = await formQuery(user, request);
-    
-    var date = new Date();
-    var last = new Date(date.getTime() + (request.body.duePeriod * 24 * 60 * 60 * 1000));  
-    
-    
+    var query = {'firm':user.firm};
+    if(request.body.filter){
+        switch(request.body.filter){
+            case 1:{
+            period = uptoTodayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 2:{
+            period = next7dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+            case 3:{
+            period = next15dayPeriod(new Date())
+            query['createdAt']={"$gte":period.from,"$lt":period.upto }
+            break;}
+        }
+    }
     MediaHouseInvoice.aggregate([ 
         {$match:query},
         { $group : { 
@@ -487,6 +724,10 @@ module.exports.MediaHouseInvoiceChequeData = async function(request, response){
 
 module.exports.check= function(request, response, user){
     console.log(response.locals.user);
+    uptoTodayPeriod(new Date());
+    next15dayPeriod(new Date());
+    next7dayPeriod(new Date());
+    
     response.send({
         success:true,
         user:response.locals.user,
