@@ -185,7 +185,12 @@ var ReleaseOrderSchema = new mongoose.Schema({
     flogo: String,
     fsign: String,
     fjuris: String,
-    faddress: String,
+    faddress:{
+        pincode:String,
+        address:String,
+        city:String,
+        state:String
+    },
     fmobile: String,
     femail: String,
     tnc: String

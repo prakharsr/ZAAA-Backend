@@ -592,6 +592,7 @@ module.exports.queryReleaseOrder = async function(request, response){
 };
 module.exports.queryGenerated = function(request, response){
     var user = response.locals.user;
+    var firm = response.locals.firm;
     ReleaseOrder
     .findById(mongoose.mongo.ObjectId(request.body.id))
     .exec(function(err, releaseOrder){
@@ -606,6 +607,19 @@ module.exports.queryGenerated = function(request, response){
             releaseOrder.generated = true;
             var date = new Date();
             releaseOrder.generatedAt = date;
+            releaseOrder.faddress = firm.RegisteredAddress.address;
+            releaseOrder.femail = firm.Email;
+            releaseOrder.fmobile = firm.Mobile;
+            releaseOrder.flogo = firm.LogoURL;
+            releaseOrder.fsign = user.signature;
+            var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+            releaseOrder.fjuris = juris;
+            var i = 0;
+            var tnc ='';
+            for(; i < firm.ROterms.length; i++){
+                tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+            }
+            releaseOrder.tnc = tnc;
             releaseOrder.save(function(err){
                 if(err){
                     response.send({
@@ -928,7 +942,6 @@ function getROhtml(Details, callback) {
               .replace('{{sgstamount}}', Details.sgstamount)
               .replace('{{namountwords}}', Details.namountwords)
               .replace('{{paymentDetails}}', Details.paymentDetails)
-              .replace('{{jurisdiction}}', Details.jurisdiction)
               .replace('{{remark}}', Details.remark)
               .replace('{{Address}}', Details.address)
               .replace('{{pullout}}', Details.pullout)
@@ -970,12 +983,12 @@ module.exports.mailROPdf = function(request, response) {
         }
         else{
             if (releaseOrder.generated==false){
-                releaseOrder.faddress = firm.address;
+                releaseOrder.faddress = firm.RegisteredAddress;
                 releaseOrder.femail = firm.Email;
                 releaseOrder.fmobile = firm.Mobile;
                 releaseOrder.flogo = firm.LogoURL;
                 releaseOrder.fsign = user.signature;
-                juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
                 releaseOrder.fjuris = juris;
                 var i = 0;
                 var tnc ='';
@@ -997,7 +1010,7 @@ module.exports.mailROPdf = function(request, response) {
                 }
                 else{
                     var Details = createDocument(request,response,releaseOrder);
-                    pdf.generateinvoice(request,response,Details);
+                    pdf.mailReleaseOrder(request,response,Details);
                 }
             })
         }
@@ -1007,7 +1020,6 @@ module.exports.mailROPdf = function(request, response) {
 module.exports.generateROPdf = async function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
-    console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
             console.log(err);
@@ -1024,12 +1036,13 @@ module.exports.generateROPdf = async function(request, response) {
         }
         else{
             if (releaseOrder.generated==false){
-                releaseOrder.faddress = firm.address;
+                releaseOrder.faddress = firm.RegisteredAddress;
                 releaseOrder.femail = firm.Email;
                 releaseOrder.fmobile = firm.Mobile;
                 releaseOrder.flogo = firm.LogoURL;
                 releaseOrder.fsign = user.signature;
-                releaseOrder.fjuris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                releaseOrder.fjuris = juris;
                 var i = 0;
                 var tnc ='';
                 for(; i < firm.ROterms.length; i++){
@@ -1041,7 +1054,7 @@ module.exports.generateROPdf = async function(request, response) {
                 var date = new Date();
                 releaseOrder.generatedAt = date;
             }
-            releaseOrder.save(async function(err,releaseOrder){
+            releaseOrder.save(async function(err,releaseorder){
                 if(err){
                     response.send({
                         success:false,
@@ -1049,8 +1062,8 @@ module.exports.generateROPdf = async function(request, response) {
                     })
                 }
                 else{
-                    var Details = createDocument(request,response,releaseOrder);
-                    pdf.generateinvoice(request,response,Details);
+                    var Details = createDocument(request,response,releaseorder);
+                    pdf.generateReleaseOrder(request,response,Details);
                 }
             })
         }
@@ -1061,12 +1074,13 @@ module.exports.previewROhtml = async function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
     var doc = request.body.releaseOrder;
-    doc['flogo'] = config.domain+'/'+firm.LogoURL;
-    doc['fsign'] = config.domain+'/'+user.signature;
-    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
-    doc['faddress'] = firm.address;
+    doc['flogo'] = firm.LogoURL;
+    doc['fsign'] = user.signature;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+    doc['faddress'] = firm.RegisteredAddress;
     doc['fmobile'] = firm.Mobile;
     doc['femail'] = firm.Email;
+    console.log(doc);
     var tnc ='';
     var i = 0;
     for(; i < firm.ROterms.length; i++){
@@ -1086,14 +1100,11 @@ function createDocument(request, response, doc){
     var user = response.locals.user;
     var firm = response.locals.firm;
     var result = doc.insertions.reduce((grouped, item) => {
-        var index = grouped.findIndex(m => m.key.month == item.date.month
-            && m.key.year == item.date.year);
-            
+        var index = grouped.findIndex(m => m.key.month == item.date.month && m.key.year == item.date.year);
         if (index == -1) {
             grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
         }
         else grouped[index].items.push(item);
-        
         return grouped;
     }, []);
 

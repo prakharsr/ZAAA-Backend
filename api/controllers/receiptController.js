@@ -884,9 +884,10 @@ module.exports.updateReceipt = function(request, response){
     })
 };
 
-
 module.exports.mailReceiptPdf = function(request, response) {
     var user = response.locals.user;
+    var firm = response.locals.firm;
+    console.log(request.body);
     Receipt.findById(request.body.id, async function(err, receipt){
         if(err){
             console.log(err);
@@ -898,55 +899,21 @@ module.exports.mailReceiptPdf = function(request, response) {
         else if(!receipt){
             response.send({
                 success :false,
-                msg: 'Receipt not found' 
+                msg: 'Invoice not found' 
             });
         }
         else{
-            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-            var client = await Client.findById(receipt.clientID);
-            var invoice = await Invoice.findById(receipt.invoiceID);
-            var Add = firm.OfficeAddress;
-            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-            var Add = client.Address;
-            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-            var cdetails = '';
-            var details='';
-            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-            if(firm.Email) cdetails += ' '+firm.Email;
-            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-            insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-            if(receipt.paymentType == 'NEFT'){
-                details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-            }
-            else if(receipt.paymentType == 'Cheque'){
-                details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-            }
-            else{
-                details+='<p> Payment Date :'+receipt.paymentDate;
-            }
-            
-            var Details = {
-                image : config.domain+'/'+firm.LogoURL,
-                sign : config.domain+'/'+user.signature,
-                faddress : Address,
-                fcdetails : cdetails,
-                cname : client.OrganizationName,
-                address :address,
-                rno :receipt.ReceiptNo,
-                amtwords :receipt.paymentAmountWords,
-                amtfig: receipt.paymentAmount,
-                insertions : insertions,
-                details : details
-            }
-            pdf.mailPaymentReceipt(request,response,Details);
+            var Details = createDocument(request,response,receipt);
+            pdf.mailinvoice(request,response,Details);
         }
-    })
+    });
 }
 
-module.exports.generateReceiptPdf = function(request, response) {
+module.exports.generateReceiptPdf = async function(request, response) {
     var user = response.locals.user;
-    Receipt.findById(request.body.id, async function(err, receipt){
+    var firm = response.locals.firm;
+    console.log(request.body);
+    Invoice.findById(request.body.id, async function(err, invoice){
         if(err){
             console.log(err);
             response.send({
@@ -954,54 +921,291 @@ module.exports.generateReceiptPdf = function(request, response) {
                 msg: err 
             });
         }
-        else if(!receipt){
+        else if(!invoice){
             response.send({
                 success :false,
-                msg: 'Receipt not found' 
+                msg: 'Invoice not found' 
             });
         }
         else{
-            var firm =  await Firm.findById(mongoose.mongo.ObjectId(user.firm));
-            var client = await Client.findById(receipt.clientID);
-            var invoice = await Invoice.findById(receipt.invoiceID);
-            var Add = firm.OfficeAddress;
-            var Address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-            var Add = client.Address;
-            var address = Add.address+', '+Add.city+', '+Add.state+' '+Add.pincode;
-            var cdetails = '';
-            var details='';
-            if(firm.Mobile) cdetails += 'MOB '+firm.Mobile;
-            if(firm.OtherMobile) cdetails += ' '+firm.OtherMobile;
-            if(firm.Email) cdetails += ' '+firm.Email;
-            var insertions = '<tr><td>'+client.OrganizationName+'</td><td>'+invoice.InvoiceNo+'</td><td>'+receipt.paymentAmount+'</td><td></td></tr>';
-            insertions+= '<tr><td>'+receipt.paymentType+'</td><td>'+'</td><td>'+'</td><td>'+receipt.p+'</td><td>';
-            if(receipt.paymentType == 'NEFT'){
-                details+='<p> Payment ID:'+receipt.paymentNo+'</p>\n<p> Payment Date'+ receipt.paymentDate+'</p>';
-            }
-            else if(receipt.paymentType == 'Cheque'){
-                details+='<p> Cheque No. :'+receipt.paymentNo+'</p>\n<p> Payment Date :'+ receipt.paymentDate+'</p>\n<p> Bank :'+receipt.paymentBankName;
-            }
-            else{
-                details+='<p> Payment Date :'+receipt.paymentDate;
-            }
-            
-            var Details = {
-                image : config.domain+'/'+firm.LogoURL,
-                sign : config.domain+'/'+user.signature,
-                faddress : Address,
-                fcdetails : cdetails,
-                cname : client.OrganizationName,
-                address :address,
-                rno :receipt.ReceiptNo,
-                amtwords :receipt.paymentAmountWords,
-                amtfig: receipt.paymentAmount,
-                insertions : insertions,
-                details : details
-            }
-            pdf.generatePaymentReceipt(request,response,Details);
+            var Details = createDocument(request,response,invoice);
+            pdf.generateinvoice(request,response,Details);
         }
-    })
+    });
 }
+
+module.exports.previewinvoicehtml = async function(request, response) {
+    console.log(request.body);
+    var doc = request.body.invoice;
+    doc['flogo'] = config.domain+'/'+firm.LogoURL;
+    doc['fsign'] = config.domain+'/'+user.signature;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
+    doc['faddress'] = firm.address;
+    doc['fmobile'] = firm.Mobile;
+    doc['femail'] = firm.Email;
+    var tnc ='';
+    var i = 0;
+    for(; i < firm.ROterms.length; i++){
+        tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+    }
+    doc['tnc'] = tnc;
+tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+    var Details = createDocument(request,response,doc);
+    getinvoicehtml(Details, content => {
+        response.send({
+            content: content
+        });
+    })
+};
+
+function getinvoicehtml(Details, callback) {
+    var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
+        var templateHtml = "";
+        res.on('data', chunk => {
+            templateHtml += chunk;
+        });
+        res.on('end', () => {
+            var today = toReadableDate(new Date(Date.now()));
+            
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
+              .replace('{{sign}}', Details.sign)
+              .replace('{{mediahouse}}', Details.mediahouse)
+              .replace('{{pgstin}}', Details.pgstin)
+              .replace('{{cname}}', Details.cname)
+              .replace('{{cgstin}}',Details.cgstin)
+              .replace('{{date}}', today)
+              .replace('{{gstin}}', Details.gstin)
+              .replace('{{scheme}}', Details.scheme)
+              .replace('{{insertions}}', Details.insertions)
+              .replace('{{dper}}', Details.dper)
+              .replace('{{damount}}', Details.damount)
+              .replace('{{namount}}', Details.namount)
+              .replace('{{username}}', Details.username)
+              .replace('{{firmName}}', Details.firmname)
+              .replace('{{firmName1}}', Details.firmname1)
+              .replace('{{rno}}', Details.rno)
+              .replace('{{hue}}', Details.hue)
+              .replace('{{adtype}}', Details.adtype)
+              .replace('{{edition}}', Details.edition)
+              .replace('{{pubD}}', Details.pubD)
+              .replace('{{agenD1}}', Details.agenD1)
+              .replace('{{agenD2}}', Details.agenD2)
+              .replace('{{publicationdisc}}', Details.publicationdisc)
+              .replace('{{taxamount}}', Details.taxamount)
+              .replace('{{igst}}', Details.igst)
+              .replace('{{cgst}}', Details.cgst)
+              .replace('{{sgst}}', Details.sgst)
+              .replace('{{gstamount}}', Details.gstamount)
+              .replace('{{igstamount}}', Details.igstamount)
+              .replace('{{cgstamount}}', Details.cgstamount)
+              .replace('{{sgstamount}}', Details.sgstamount)
+              .replace('{{namountwords}}', Details.namountwords)
+              .replace('{{paymentDetails}}', Details.paymentDetails)
+              .replace('{{remark}}', Details.remark)
+              .replace('{{Address}}', Details.address)
+              .replace('{{pullout}}', Details.pullout)
+              .replace('{{caddress}}', Details.caddress)
+              .replace('{{maddress}}', Details.maddress)
+              .replace('{{premam}}', Details.premam)
+              .replace('{{medition}}', Details.medition)
+              .replace('{{phone}}', Details.phone)
+              .replace('{{email}}', Details.email);
+
+            callback(templateHtml);
+        });
+    });
+    req.on('error', e => console.log(e));
+    req.end();
+}
+
+module.exports.getinvoicehtml = getinvoicehtml;
+
+function createDocument(request, response, doc){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var result = doc.insertions.reduce((grouped, item) => {
+        var index = grouped.findIndex(m => m.key.month == item.date.month
+            && m.key.year == item.date.year);
+            
+        if (index == -1) {
+            grouped.push({ key: { month: item.date.month, year: item.date.year }, items: [item] });
+        }
+        else grouped[index].items.push(item);
+        
+        return grouped;
+    }, []);
+
+    var insertions = doc.insertions;
+    var size = doc.adSizeL * doc.adSizeW;
+    var damount = (doc.publicationDiscount+doc.agencyDiscount1+doc.agencyDiscount2)*doc.adGrossAmount;
+    var namount = doc.adGrossAmount - damount;
+    var caption = doc.caption?doc.caption+'<br>':"";
+    var catarray = [doc.adCategory2, doc.adCategory3, doc.adCategory4, doc.adCategory5, doc.adCategory6];
+    var categories = doc.adCategory1 || '';
+    var premam = 0;
+    var premium = '';
+    
+    catarray.forEach(function loop(element){
+        if(loop.stop){return ;}
+        if (element) {
+            categories += '-' + element;
+        }
+        else{
+            categories += "<br>"
+            loop.stop = true;
+        }
+    });
+    var insData = '';
+    var count = 0;
+    result.sort((a, b) => {
+        if (+a.key.year > +b.key.year)
+          return true;
+        else if (+a.key.year < +b.key.year)
+          return false;
+        else return +a.key.month > +b.key.month;
+    })
+      .forEach(object =>{
+        console.log(object.items);
+        var dates = "";
+        var array = [];
+        object.items.forEach(obj => {
+            array.push(+obj.date.day);            
+        });
+        array.sort((a, b) => +a > +b);
+
+        array.forEach(obj => {
+            dates += obj + " ";
+        })
+
+        var row = result.length;
+
+        if(count === 0){
+            insData += '<tr><td colspan="3" rowspan='+row+'>'+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+            count = 1;
+        }
+        else{
+            insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
+        }
+    });
+    
+    var remark = doc.remark?doc.remark:'';
+
+    var paymentDetails="";
+    var address = doc.faddress;
+    var caddress = doc.clientState;
+    var maddress = doc.publicationState;
+
+    if(doc.paymentType === 'Cash')
+    paymentDetails = "Cash"
+    else if(doc.paymentType === 'Credit')
+    paymentDetails = "Credit"
+    else if(doc.paymentType === 'Cheque')
+    paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
+    else if(doc.paymentType === 'NEFT')
+    paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
+    console.log(doc);
+
+
+    console.log(doc.publicationGSTIN);
+
+    var Details = {
+        mediahouse :doc.publicationName,
+        medition : doc.publicationEdition,
+        pgstin :'-',
+        cname :doc.clientName,
+        cgstin :'-',
+        gstin :'-',
+        scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
+        insertions :insData,
+        username: user.name,
+        firmname: firm.FirmName,
+        firmname1: firm.FirmName,
+        rno : doc.invoiceNO,
+        remark: doc.Remark || "",
+        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
+        paymentDetails: paymentDetails,
+        namount: '',
+        namountwords: '',
+        gstamount: '',
+        sgstamount: '-',
+        cgstamount: '-',
+        igstamount: '-',
+        igst: '-',
+        cgst: '-',
+        sgst: '-',
+        taxamount: '',
+        publicationdisc: '',
+        damount: '',
+        agenD1: doc.agencyDiscount1,
+        agenD2: doc.agencyDiscount2,
+        pubD: doc.publicationDiscount,
+        edition: doc.adEdition,
+        adtype:doc.adType,
+        hue:doc.adHue,
+        caddress: caddress || '',
+        maddress: maddress || '',
+        pullout: doc.pulloutName,
+        premam : "₹ "+addZeroes(""+Math.round(premam)),
+        remark: remark,
+        tnc: doc.tnc,
+        image : config.domain+'/'+doc.flogo,
+        sign: config.domain+'/'+doc.fsign,
+        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
+        phone: "Phone: "+doc.fmobile || '',
+        email: "Email: "+doc.femail || ''
+    }
+
+    if(doc.adSchemeFree === 0);
+    Details['scheme'] = 'NA';
+
+    var adGrossAmount;
+    var tax = doc.taxAmount.primary;
+    if(doc.taxIncluded){
+        adGrossAmount = (doc.adGrossAmount/(100 + tax))*100;
+    }
+    else{
+        adGrossAmount = doc.adGrossAmount;
+    }
+
+    publicationDisc = adGrossAmount*doc.publicationDiscount/100;
+    damount1 = (adGrossAmount - publicationDisc)*(+doc.agencyDiscount1)/100;
+    damount2 = (adGrossAmount - damount1 - publicationDisc)*(+doc.agencyDiscount2)/100;
+    damount1 += damount2;
+    Details['damount'] = '₹ '+ (damount1.toFixed(2));
+    Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
+    var taxamount = doc.netAmountFigures;
+    var namount = taxamount + (taxamount*tax)/100;
+    Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
+    Details['namount'] ='₹ '+ (namount.toFixed(2));
+    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
+
+    // if(firm.GSTIN.GSTType !== 'URD')
+    //     Details['gstin'] =firm.GSTIN.GSTNo;
+    // if(doc.clientGSTIN.GSTType !== 'URD')
+    //     Details['cgstin'] =doc.clientGSTIN.GSTNo;
+    // if(doc.publicationGSTIN.GSTType !== 'URD')
+    //     Details['gstin'] =doc.publicationGSTIN.GSTNo;
+
+    var g = (taxamount*tax/100).toFixed(2);
+    
+    Details['gstamount'] ='₹ '+ g
+    
+    if(doc.publicationState === doc.clientState){
+        Details['sgst'] = Details['cgst'] = tax/2;
+        var t = ((taxamount*tax/2)/100).toFixed(2);
+        Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
+
+    }
+    else{
+        Details['igst'] = tax;
+        var t = ((taxamount*tax)/100).toFixed(2);
+        Details['igstamount'] ='₹ '+t;
+    }
+
+    return Details;
+
+}
+
 
 module.exports.receiptStatus = async function(request, response){
     try{
