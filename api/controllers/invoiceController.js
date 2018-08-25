@@ -120,8 +120,13 @@ async function f(request, response, user){
         var client = await findClient(releaseOrder.clientID);
         var executive = await findExecutive(releaseOrder.executiveID);
         var counter = releaseOrder.invoiceSerial+1;
-        var ino = releaseOrder.releaseOrderNO+'/'+counter
-        
+        var ino = releaseOrder.releaseOrderNO+'/'+counter;
+        var tnc ='';
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+        for(; i < firm.INterms.length; i++){
+            tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
+        }
+        tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     }
     catch(err){
         console.log(err);
@@ -168,6 +173,13 @@ async function f(request, response, user){
         mediahouseID : releaseOrder.mediahouseID,
         clientID: releaseOrder.clientID,
         executiveID: releaseOrder.executiveID,
+        faddress: firm.address,
+        femail: firm.Email,
+        fmobile: firm.Mobile,
+        flogo: firm.LogoURL,
+        fsign: user.signature,
+        fjuris: juris,
+        tnc: tnc
     });
     invoice.save(function(err, doc){
         if(err){
@@ -764,6 +776,19 @@ module.exports.queryClientPayments = async function(request, response){
     module.exports.previewinvoicehtml = async function(request, response) {
         console.log(request.body);
         var doc = request.body.invoice;
+        doc['flogo'] = config.domain+'/'+firm.LogoURL;
+        doc['fsign'] = config.domain+'/'+user.signature;
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
+        doc['faddress'] = firm.address;
+        doc['fmobile'] = firm.Mobile;
+        doc['femail'] = firm.Email;
+        var tnc ='';
+        var i = 0;
+        for(; i < firm.ROterms.length; i++){
+            tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+        }
+        doc['tnc'] = tnc;
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
         var Details = createDocument(request,response,doc);
         getinvoicehtml(Details, content => {
             response.send({

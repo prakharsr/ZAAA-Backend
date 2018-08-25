@@ -812,6 +812,44 @@ module.exports.cancelReleaseOrder = function(request, response){
     })
 };
 
+
+module.exports.searchCategories = function(request, response){
+    Category.find({
+        'name': { $regex: request.params.keyword+"", $options:"i" }
+    })
+    .limit(5)
+    .exec(async function(err, categories){ 
+        if(err){
+            console.log("here" +err);
+        }
+        else{
+            var catarray = [];
+            for (var i = 0; i < categories.length; ++i) {
+                var element = categories[i];
+                var array = [];  
+                array.push(element);  
+                var level = element.level;
+                var parent = element.parent;
+                while(level-- > 0){
+                    try{
+                    var category = await Category.findById(mongoose.mongo.ObjectId(parent));
+                    array.push(category);
+                    parent = category.parent;
+                    }
+                    catch(err){
+                        console.log(err);
+                    }
+                }
+                catarray.push(array);
+            }
+            response.send({
+                success : true,
+                categories: catarray
+            }); 
+        }
+    });
+};
+
 module.exports.updateReleaseOrder = function(request, response){
     var user = response.locals.user;
     
@@ -932,12 +970,13 @@ module.exports.mailROPdf = function(request, response) {
         }
         else{
             if (releaseOrder.generated==false){
-                releaseOder.faddress = firm.address;
+                releaseOrder.faddress = firm.address;
                 releaseOrder.femail = firm.Email;
                 releaseOrder.fmobile = firm.Mobile;
                 releaseOrder.flogo = firm.LogoURL;
                 releaseOrder.fsign = user.signature;
-                releaseOrder.fjuris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+                juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+                releaseOrder.fjuris = juris;
                 var i = 0;
                 var tnc ='';
                 for(; i < firm.ROterms.length; i++){
@@ -985,7 +1024,7 @@ module.exports.generateROPdf = async function(request, response) {
         }
         else{
             if (releaseOrder.generated==false){
-                releaseOder.faddress = firm.address;
+                releaseOrder.faddress = firm.address;
                 releaseOrder.femail = firm.Email;
                 releaseOrder.fmobile = firm.Mobile;
                 releaseOrder.flogo = firm.LogoURL;

@@ -157,6 +157,13 @@ var InvoiceSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Firm"
     },
+    flogo: String,
+    fsign: String,
+    fjuris: String,
+    faddress: String,
+    fmobile: String,
+    femail: String,
+    tnc: String
     });
     InvoiceSchema.pre('save', function(next){
         var self = this;

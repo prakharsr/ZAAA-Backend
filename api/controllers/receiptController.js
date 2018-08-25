@@ -221,6 +221,12 @@ async function f(request, response, user){
         var executive = await findExecutive(invoice.executiveID);
         var counter = invoice.receiptSerial+1;
         var rno = invoice.invoiceNO+'/'+counter;  
+        var tnc ='';
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+        for(; i < firm.INterms.length; i++){
+            tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
+        }
+        tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     }
     catch(err){
         console.log(err);
@@ -270,6 +276,13 @@ async function f(request, response, user){
         mediahouseID : invoice.mediahouseID,
         clientID: invoice.clientID,
         executiveID: invoice.executiveID,  
+        faddress: firm.address,
+        femail: firm.Email,
+        fmobile: firm.Mobile,
+        flogo: firm.LogoURL,
+        fsign: user.signature,
+        fjuris: juris,
+        tnc: tnc
     })
     
     
@@ -390,8 +403,15 @@ module.exports.createAdvancedReciept = async function(request,response){
 
 module.exports.linkRecieptToInvoice = async function(request,response){
     var user = response.locals.user;
+    var firm = response.locals.firm;    
     var receipt = await Receipt.findById(request.body.receiptID);
     var invoice = await Invoice.findById(request.body.invoiceID);
+    var tnc ='';
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+    for(; i < firm.INterms.length; i++){
+        tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
+    }
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     
     receipt.invoiceID = request.body.invoiceID;
     var counter = invoice.receiptSerial+1;
@@ -407,6 +427,13 @@ module.exports.linkRecieptToInvoice = async function(request,response){
     receipt.extraCharges=invoice.extraCharges,
     receipt.caption=invoice.caption,
     receipt.remark=invoice.remark,
+    receipt.faddress= firm.address,
+    receipt.femail= firm.Email,
+    receipt.fmobile= firm.Mobile,
+    receipt.flogo= firm.LogoURL,
+    receipt.fsign= user.signature,
+    receipt.fjuris= juris,
+    receipt.tnc= tnc
     receipt.save((err,doc) => {
         if(err){
             console.log(err);
