@@ -1339,7 +1339,7 @@ module.exports.getCategories = (request, response) =>{
             level:0
         };
     }
-    else if(request.body.level > 0 && parent !==null)
+    else if(request.body.level > 0 && request.body.parent !==null)
     {
         var query = {
             level:request.body.level,
