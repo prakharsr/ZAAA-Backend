@@ -6,58 +6,56 @@ var serverkey = 'AAAAvsBQ9YQ:APA91bFjafZx6SqnGXcC3ujNH_qtaOQNFN-gBeqxpsr3MQaUMUd
 var fcm = new FCM(serverkey);
 var CronJob = require('cron').CronJob;
 
-function getTokens(){
-    return new Promise((resolve, reject)=>{
-        User.find({}, function(err,users){
-            if(err){
-                reject(err);
-            }
-            else{
-                var userTokens = [];
-                users.forEach(obj => {
-                    obj.deviceTokens.forEach(object => {
-                        userTokens.push(object.token);
-                    })
-                })
-                resolve(userTokens);
-            }
-        });
-    });
-}
-
 module.exports.sendNotifs = async (request,response) => {
-    var tokens = await getTokens();
-    var message = {  
-        to : tokens,
-        notification : {
-            title : request.body.title,
-            body : request.body.notifBody
+    User.find({}, function(err,users){
+        if(err){
+            reject(err);
         }
-    };
-    fcm.send(message, function(err,res){  
-        if(err) {
-            response.send({
-                success: false,
-                msg : "Something has gone wrong! "+err
-            });
-        } else {
+        else{
+            var suc = '';
+            users.forEach(obj => {
+                obj.deviceTokens.forEach(object => {
+                    var message = {  
+                        to : object,
+                        notification : {
+                            title : request.body.title,
+                            body : request.body.notifBody
+                        }
+                    };
+                    fcm.send(message, function(err,res){  
+                        if(err) {
+                            suc = true;
+                            console.log({
+                                success: false,
+                                msg : "Something has gone wrong! "+err
+                            });
+                        } else {
+                            suc = false;
+                            console.log({
+                                success: true,
+                                msg : "Sent Notifications to users"
+                            });
+                        }
+                    });
+                    if(!request.body.oneTime){
+                        var notification = new Notification({
+                            title : request.body.title,
+                            body : request.body.notifBody
+                        });
+                        notification.save((err) => {
+                            if(err){
+                                comsole.log('Cannot save notification but it was sent');
+                            }
+                        })
+                    }
+                })
+            })
             response.send({
                 success: true,
-                msg : "Sent Notifications to users"
-            });
+                msg: suc ? "Sent Successfully" : "Failed"
+            })
         }
     });
-    if(!request.body.oneTime){
-        var notification = new Notification({
-            title : request.body.title,
-            body : request.body.notifBody
-        });
-        notification.save((err) => {
-            if(err){
-                comsole.log('Cannot save notification but it was sent');
-            }
-        })
-    }
 }
 
 module.exports.getNotifications = (request,response) =>{
