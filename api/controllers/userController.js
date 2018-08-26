@@ -679,8 +679,7 @@ module.exports.verifyMobile = function(request, response) {
 	module.exports.saveToken = (request,response) =>{
 		var user = response.locals.user;
 		user.deviceTokens.push({
-			token: request.body.token,
-			platform: request.body.platform
+			token: request.body.token
 		})
 		user.save(err => {
 			if(err){
