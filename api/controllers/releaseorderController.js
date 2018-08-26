@@ -847,7 +847,7 @@ module.exports.searchCategories = function(request, response){
                 while(level-- > 0){
                     try{
                     var category = await Category.findById(mongoose.mongo.ObjectId(parent));
-                    array.push(category);
+                    array.unshift(category);
                     parent = category.parent;
                     }
                     catch(err){
