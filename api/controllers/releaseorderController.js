@@ -600,38 +600,51 @@ module.exports.queryGenerated = function(request, response){
             console.log(err+ "");
             response.send({
                 success:false,
-                msg: err +""
+                msg: err +" juihjo"
             });
         }
         else{
-            releaseOrder.generated = true;
-            var date = new Date();
-            releaseOrder.generatedAt = date;
-            releaseOrder.faddress = firm.RegisteredAddress.address;
-            releaseOrder.femail = firm.Email;
-            releaseOrder.fmobile = firm.Mobile;
-            releaseOrder.flogo = firm.LogoURL;
-            releaseOrder.fsign = user.signature;
-            var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
-            releaseOrder.fjuris = juris;
-            var i = 0;
-            var tnc ='';
-            for(; i < firm.ROterms.length; i++){
-                tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+            if(releaseOrder.generated){
+                response.send({
+                    success:false,
+                    msg:"Already Generated"
+                })
             }
-            releaseOrder.tnc = tnc;
-            releaseOrder.save(function(err){
-                if(err){
-                    response.send({
-                        success:false
-                    })
+            //don't know the above if is required or not 
+            else{
+                releaseOrder.generated = true;
+                var date = new Date();
+                releaseOrder.generatedAt = date;
+                releaseOrder.faddress = firm.RegisteredAddress;
+                releaseOrder.femail = firm.Email;
+                releaseOrder.fmobile = firm.Mobile;
+                releaseOrder.flogo = firm.LogoURL;
+                releaseOrder.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                releaseOrder.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.ROterms.length; i++){
+                    tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                else{
-                    response.send({
-                        success:true
-                    })
-                }
-            })
+                releaseOrder.tnc = tnc;
+                releaseOrder.save(function(err){
+                    if(err){
+                        console.log(err)
+                        response.send({
+                            success:false,
+                            msg:"Error in Generating RO"
+                        })
+                    }
+                    else{
+                        response.send({
+                            success:true,
+                            msg:"Generated"
+                        })
+                    }
+                })
+    
+            }
         }
     });
 };
