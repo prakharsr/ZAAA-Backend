@@ -610,6 +610,7 @@ module.exports.queryGenerated = function(request, response){
                     msg:"Already Generated"
                 })
             }
+            //don't know the above if is required or not 
             else{
                 releaseOrder.generated = true;
                 var date = new Date();
