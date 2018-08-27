@@ -600,7 +600,7 @@ module.exports.queryGenerated = function(request, response){
             console.log(err+ "");
             response.send({
                 success:false,
-                msg: err +""
+                msg: err +" juihjo"
             });
         }
         else{
@@ -614,7 +614,7 @@ module.exports.queryGenerated = function(request, response){
                 releaseOrder.generated = true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
-                releaseOrder.faddress = firm.RegisteredAddress.address;
+                releaseOrder.faddress = firm.RegisteredAddress;
                 releaseOrder.femail = firm.Email;
                 releaseOrder.fmobile = firm.Mobile;
                 releaseOrder.flogo = firm.LogoURL;
@@ -629,13 +629,16 @@ module.exports.queryGenerated = function(request, response){
                 releaseOrder.tnc = tnc;
                 releaseOrder.save(function(err){
                     if(err){
+                        console.log(err)
                         response.send({
-                            success:false
+                            success:false,
+                            msg:"Error in Generating RO"
                         })
                     }
                     else{
                         response.send({
-                            success:true
+                            success:true,
+                            msg:"Generated"
                         })
                     }
                 })
