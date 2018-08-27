@@ -604,34 +604,43 @@ module.exports.queryGenerated = function(request, response){
             });
         }
         else{
-            releaseOrder.generated = true;
-            var date = new Date();
-            releaseOrder.generatedAt = date;
-            releaseOrder.faddress = firm.RegisteredAddress.address;
-            releaseOrder.femail = firm.Email;
-            releaseOrder.fmobile = firm.Mobile;
-            releaseOrder.flogo = firm.LogoURL;
-            releaseOrder.fsign = user.signature;
-            var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
-            releaseOrder.fjuris = juris;
-            var i = 0;
-            var tnc ='';
-            for(; i < firm.ROterms.length; i++){
-                tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+            if(releaseOrder.generated){
+                response.send({
+                    success:false,
+                    msg:"Already Generated"
+                })
             }
-            releaseOrder.tnc = tnc;
-            releaseOrder.save(function(err){
-                if(err){
-                    response.send({
-                        success:false
-                    })
+            else{
+                releaseOrder.generated = true;
+                var date = new Date();
+                releaseOrder.generatedAt = date;
+                releaseOrder.faddress = firm.RegisteredAddress.address;
+                releaseOrder.femail = firm.Email;
+                releaseOrder.fmobile = firm.Mobile;
+                releaseOrder.flogo = firm.LogoURL;
+                releaseOrder.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                releaseOrder.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.ROterms.length; i++){
+                    tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                else{
-                    response.send({
-                        success:true
-                    })
-                }
-            })
+                releaseOrder.tnc = tnc;
+                releaseOrder.save(function(err){
+                    if(err){
+                        response.send({
+                            success:false
+                        })
+                    }
+                    else{
+                        response.send({
+                            success:true
+                        })
+                    }
+                })
+    
+            }
         }
     });
 };
