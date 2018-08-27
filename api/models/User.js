@@ -55,8 +55,7 @@ var UserSchema = new mongoose.Schema({
         Accounts:Number
     },
     deviceTokens:[{
-        token: String,
-        platform: String
+        token: String
     }],
     lastSeen: Date
 },

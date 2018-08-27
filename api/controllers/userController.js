@@ -680,7 +680,8 @@ module.exports.verifyMobile = function(request, response) {
 		var user = response.locals.user;
 		user.deviceTokens.push({
 			token: request.body.token
-		})
+		});
+		user.deviceTokens.filter((v,i,s) => {return s.indexOf(v) === i});
 		user.save(err => {
 			if(err){
 				response.send({
@@ -701,9 +702,8 @@ module.exports.verifyMobile = function(request, response) {
 		var user = response.locals.user;
 		var tokens = user.deviceTokens;
 
-		for( var i = tokens.length-1; i--;){
-			if ( tokens[i].platform === request.body.platform ) tokens.splice(i, 1);
-		}
+		for(var i = tokens.length-1; i--;)
+			tokens.splice(i, 1);
 
 		user.save(err => {
 			if(err) {

@@ -6,17 +6,40 @@ var serverkey = 'AAAAvsBQ9YQ:APA91bFjafZx6SqnGXcC3ujNH_qtaOQNFN-gBeqxpsr3MQaUMUd
 var fcm = new FCM(serverkey);
 var CronJob = require('cron').CronJob;
 
+function sendNotification(title,body,to){
+    var message = {  
+        to : object,
+        notification : {
+            title : request.body.title,
+            body : request.body.notifBody
+        }
+    };
+    fcm.send(message, function(err,res){  
+        if(err) {
+            console.log({
+                success: false,
+                msg : "Something has gone wrong! "+err
+            });
+        } else {
+            console.log({
+                success: true,
+                msg : "Sent Notifications to users"
+            });
+        }
+    });
+}
+
 module.exports.sendNotifs = async (request,response) => {
     User.find({}, function(err,users){
         if(err){
             reject(err);
         }
         else{
-            var suc = '';
+            var suc;
             users.forEach(obj => {
                 obj.deviceTokens.forEach(object => {
                     var message = {  
-                        to : object,
+                        to : object.token,
                         notification : {
                             title : request.body.title,
                             body : request.body.notifBody
@@ -37,21 +60,21 @@ module.exports.sendNotifs = async (request,response) => {
                             });
                         }
                     });
-                    if(!request.body.oneTime){
-                        var notification = new Notification({
-                            title : request.body.title,
-                            body : request.body.notifBody
-                        });
-                        notification.save((err) => {
-                            if(err){
-                                comsole.log('Cannot save notification but it was sent');
-                            }
-                        })
-                    }
                 })
             })
+            if(!request.body.oneTime){
+                var notification = new Notification({
+                    title : request.body.title,
+                    body : request.body.notifBody
+                });
+                notification.save((err) => {
+                    if(err){
+                        comsole.log('Cannot save notification but it was sent');
+                    }
+                })
+            }
             response.send({
-                success: true,
+                success: suc,
                 msg: suc ? "Sent Successfully" : "Failed"
             })
         }
@@ -115,32 +138,81 @@ var CronJob1 = new CronJob({
 
 async function sendShadowReminder(){
     var users = await User.find({});
+    var suc;
     users.forEach(async user =>{
         var receipts = await Receipt.find({userID: user._id});
         var sum;
         receipts.forEach(receipt => {
-            if(receipt.status === 0 )
+            if(receipt.status === 0 || receipt.status === 3 )
             sum += receipt.FinalAmount;
         });
-        var message = {  
-            to : user.deviceTokens,
-            notification : {
-                title : "Ad Agency Manager",
-                body : 'Today you have to collect '+sum+' amount from your employees'
-            }
-        };
-        fcm.send(message, function(err,response){  
-            if(err) {
-                response.send({
-                    success: false,
-                    msg : "Something has gone wrong! "+err
-                });
-            } else {
-                response.send({
-                    success: true,
-                    msg : "Sent Notifications to users"
-                });
-            }
-        });
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'Today you have to collect '+sum+' amount from your employees'
+                }
+            };
+            fcm.send(message, function(err,response){  
+                if(err) {
+                    suc = false;
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    suc = true;
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
     })
+    response.send({
+        success: suc,
+        msg: suc?'sent successfully':'Failed'
+    });
 }
+
+async function sendInsertionsReminder(){
+    var users = await User.find({});
+    var suc;
+    users.forEach(async user =>{
+        var releaseOrders = await ReleaseOrder.find({userID: user._id});
+        releaseOrders.forEach(ro => {
+            ro.aggregate([{$unwind:'$insertions'}])
+        });
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'Today you have to collect '+sum+' amount from your employees'
+                }
+            };
+            fcm.send(message, function(err,response){  
+                if(err) {
+                    suc = false;
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    suc = true;
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
+    })
+    response.send({
+        success: suc,
+        msg: suc?'sent successfully':'Failed'
+    });
+}
+

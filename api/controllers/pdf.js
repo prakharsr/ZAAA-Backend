@@ -20,7 +20,7 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
         from: from,
         to: to,
         subject: subject,
-        text: text,
+        html: text,
         attachment: attach
     };
 
@@ -115,7 +115,18 @@ module.exports.mailReleaseOrder = function(request,response,Details) {
                 });
             }
             else {
-                mailFile(request, response, buffer, 'RO_'+Details.rno+'_'+Details.cname+'.pdf', response.locals.user.email , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
+                mailFile(
+                    request,
+                    response,
+                    buffer,
+                    'RO_'+Details.rno+'_'+Details.cname+'.pdf',
+                    response.locals.user.email,
+                    request.body.to,
+                    request.body.cc,
+                    request.body.bcc,
+                    'ReleaseOrder_'+Details.rno+'_'+Details.cname,
+                    '<html>To '+Details.mediahouse+',<br>Greetings of the day!<br>Please find the attached Release Order bearing No.'+Details.rno+' and insert advertisement accordingly.<br><br> If any issue/query, kindly let us know immediately.<br><br>Thanks for your kind cooperation.<br><br>Sincerely,<br><img src="'+Details.image+'" height="200px" width="200px"><br>'+Details.username+'<br>'+Details.firmname+'<br>Ph:'+Details.phone+'</html>'
+                );
             }
         });
     });
