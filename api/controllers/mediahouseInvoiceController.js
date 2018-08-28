@@ -223,7 +223,7 @@ MediaHouseInvoice
         "publicationName":"$publicationName",
         "publicationEdition":"$publicationEdition",
         "generatedAt":"$generatedAt",
-        "releaseOrderNO)":"$releaseOrderNO"
+        "releaseOrderNO":"$releaseOrderNO"
     },
     count: {$sum: 1},
     "pendingAmount":{$sum:"$insertions.pendingAmount"},
