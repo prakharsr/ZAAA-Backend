@@ -40,7 +40,7 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         type: Date,
         default: new Date()
     },
-    releaseOrderNo:String,
+    releaseOrderNO:String,
     MHINo:String,
     MHIDate: Date,
     MHIGrossAmount:Number,

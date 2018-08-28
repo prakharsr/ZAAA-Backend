@@ -43,7 +43,7 @@ module.exports.createMHInvoice = async (request,response) => {
                 paymentBankName: releaseorder.paymentBankName,
             }
         }),
-        releaseOrderNo: releaseorder.releaseOrderNo,
+        releaseOrderNO: releaseorder.releaseOrderNO,
         MHINo: request.body.MHINo,
         MHIDate: request.body.MHIDate,
         MHIGrossAmount: request.body.MHIGrossAmount,
@@ -184,8 +184,8 @@ function formQuery(mediahouseID, date, user, request){
         console.log(mediahouseID, date, user)
         if(mediahouseID)
         query['mediahouseID']=mongoose.mongo.ObjectId(mediahouseID);
-        if(request.body.releaseOrderNo){
-            query['releaseOrderNo']=request.body.releaseOrderNo
+        if(request.body.releaseOrderNO){
+            query['releaseOrderNO']=request.body.releaseOrderNO
         }
         
         if(request.body.insertionPeriod){
@@ -223,7 +223,7 @@ MediaHouseInvoice
         "publicationName":"$publicationName",
         "publicationEdition":"$publicationEdition",
         "generatedAt":"$generatedAt",
-        "releaseOrderNo":"$releaseOrderNo"
+        "releaseOrderNO)":"$releaseOrderNO"
     },
     count: {$sum: 1},
     "pendingAmount":{$sum:"$insertions.pendingAmount"},
@@ -400,7 +400,7 @@ MediaHouseInvoice
             "publicationName":"$publicationName",
             "publicationEdition":"$publicationEdition",
             "generatedAt":"$generatedAt",
-            "releaseOrderNo":"$releaseOrderNo",
+            "releaseOrderNO":"$releaseOrderNO",
             "MHINo":"$MHINo"
         },
         count: {$sum: 1},
