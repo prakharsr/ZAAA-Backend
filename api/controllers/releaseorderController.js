@@ -409,11 +409,48 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 module.exports.setInsertionChecks = function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;
-    ReleaseOrder.find({firm:firm,generated:true, cancelled:false,"insertions._id":{"$in":request.body.ids}})
-    .exec(function(releaseOrders){
-        console.log(releaseOrders)
-        }
-    )
+    var list = request.body.ids;
+    ReleaseOrder.find({ firm: user.firm }).then(releaseOrders => {
+        releaseOrders.forEach(releaseOrder => {
+            releaseOrder.insertions.forEach(ROInsertion => {
+                list.forEach(id => {
+                    if (ROInsertion._id == id) {
+                        ROInsertion.state = request.body.state;
+                    }
+                });
+            });
+            
+            releaseOrder.save(function(err) {
+                if (err) {
+                    response.send({
+                        success: false,
+                        msg: "error" + err
+                    });
+                }
+            });
+        });
+    });
+    MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+        invoices.forEach(invoice => {
+            invoice.insertions.forEach(mhiInsertion => {
+                list.forEach(id => {
+                    if (mhiInsertion._id == id) {
+                        mhiInsertion.state = request.body.state;
+                    }
+                });
+            });
+            
+            invoice.save(function(err) {
+                if (err) {
+                    response.send({
+                        success: false,
+                        msg: "error" + err
+                    });
+                }
+            });
+        });
+    });
+
 };
 
 function searchExecutiveID(request, response, user){
