@@ -408,36 +408,31 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 };
 module.exports.setInsertionChecks = function(request, response){
 	var user = response.locals.user;
- try{
-    ReleaseOrder.updateMany(
-        { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-    },
-    { $set: { "insertions.$.state": request.body.state }}
-)
-MediaHouseInvoice.updateMany(
-    { $and: [{firm:user.firm},{"insertions.insertionId:":{$in:request.body.ids}}]
-},
-{ $set: { "insertions.$.state": request.body.state }}
-)
- }
-catch(err){
-    if(err){
-        console.log(err);
-        response.send({
-            success:false,
-            msg: err + ""
-        });
+    try{
+        ReleaseOrder.updateMany(
+            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
+        },
+        { $set: { "insertions.$.state": request.body.state }}
+        )
+        MediaHouseInvoice.updateMany(
+            { $and: [{firm:user.firm},{"insertions.insertionId:":{$in:request.body.ids}}]
+        },
+        { $set: { "insertions.$.state": request.body.state }}
+        )
     }
-    else{
-        
-        response.send({
-            success:true,
-            msg: "Insertions Updated In ReleaseOrders and MHIs."
-        });
-    }
-    
-}
-};
+    catch(err){
+            console.log(err);
+            response.send({
+                success:false,
+                msg: err + ""
+            });
+        }
+            
+            response.send({
+                success:true,
+                msg: "Insertions Updated In ReleaseOrders and MHIs."
+            });
+    };
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
