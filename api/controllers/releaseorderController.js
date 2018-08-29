@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
+var MediaHouseInvoice = require('../models/MediaHouseInvoice');
 var Category = require('../../admin/models/Categories');
 var Executive = require('../models/Executive');
 var Client = require('../models/Client');
@@ -357,7 +358,7 @@ module.exports.getReleaseOrderInsertions = function(request, response){
     var user = response.locals.user;
     ReleaseOrder
     .aggregate([{$unwind: "$insertions"}, 
-    {$match:{firm:user.firm}, generated:true },
+    {$match:{firm:user.firm, generated:true, cancelled:false} },
     {$project: {
         "_id":1,
         "publicationName":1,
@@ -407,12 +408,19 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 };
 module.exports.setInsertionChecks = function(request, response){
 	var user = response.locals.user;
+ try{
     ReleaseOrder.updateMany(
         { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
     },
     { $set: { "insertions.$.state": request.body.state }}
 )
-.exec(function(err){
+MediaHouseInvoice.updateMany(
+    { $and: [{firm:user.firm},{"insertions.insertionId:":{$in:request.body.ids}}]
+},
+{ $set: { "insertions.$.state": request.body.state }}
+)
+ }
+catch(err){
     if(err){
         console.log(err);
         response.send({
@@ -421,13 +429,14 @@ module.exports.setInsertionChecks = function(request, response){
         });
     }
     else{
+        
         response.send({
             success:true,
-            msg: "ReleaseOrder Insertions Updated"
+            msg: "Insertions Updated In ReleaseOrders and MHIs."
         });
     }
     
-})
+}
 };
 
 function searchExecutiveID(request, response, user){

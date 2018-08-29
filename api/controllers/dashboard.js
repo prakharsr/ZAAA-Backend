@@ -169,7 +169,11 @@ function compareFinancialMonth(){
 
 module.exports.ROchartData = async function(request, response){
     var user = response.locals.user;
-    var query = {'firm':user.firm};
+    var query = {
+        'firm':user.firm,
+        "generated":true,
+        "cancelled":false
+    };
     var period;
     if(request.body.filter){
         switch(request.body.filter){
@@ -199,17 +203,12 @@ module.exports.ROchartData = async function(request, response){
         { $group : { 
             _id : { day: { $dayOfMonth : "$generatedAt" },month: { $month: "$generatedAt" }, year: { $year: "$generatedAt" } },
             count: {$sum: 1},
-            // totalAmount:{$sum:"$insertions.netAmount"},
-            // generated:{$sum:{
-            //     "$cond": [{"$eq":["$insertions.marked",true]},
-            //     "$insertions.netAmount",0]
-            // },
             totalAmount:{$sum:{
-                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", period.period1.from]},{"$lt":["$generatedAt", period.period1.upto]}]},
+                "$cond": [{"$and":[{"$gte":["$generatedAt", period.period1.from]},{"$lt":["$generatedAt", period.period1.upto]}]},
                 {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
             }},
             generated:{$sum:{
-                "$cond": [{"$and":[{"$eq":["$insertions.marked",true]},{"$gte":["$generatedAt", period.period2.from]},{"$gte":["$generatedAt", period.period2.upto]}]},
+                "$cond": [{"$and":[{"$gte":["$generatedAt", period.period2.from]},{"$lt":["$generatedAt", period.period2.upto]}]},
                 {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
             }},
         }

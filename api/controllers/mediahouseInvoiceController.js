@@ -25,6 +25,7 @@ module.exports.createMHInvoice = async (request,response) => {
     var executiveID = await searchExecutiveID(request, response, user);
     var releaseorder = await ReleaseOrder.findById(request.body.releaseOrderId);
     var firm = await Firm.findById(user.firm)
+    console.log(request.body.insertions)
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
         publicationName:releaseorder.publicationName,
@@ -237,6 +238,7 @@ MediaHouseInvoice
             "pendingAmount":"$insertions.pendingAmount",
             //"insertionId": "$insertions.insertionId",
             "collectedAmount":"$insertions.collectedAmount",
+            "state":"$insertions.state",
             "_id": "$insertions._id",                   
             "MHINo":"$MHINo",
             "MHIDate":"$MHIDate",

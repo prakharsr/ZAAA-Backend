@@ -25,6 +25,7 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         insertionId:{type:mongoose.Schema.Types.ObjectId, ref:"ReleaseOrder.insertions.$"},
         insertionDate: Date,
         Amount:Number,
+        state:Number,
         collectedAmount:Number,
         pendingAmount:Number,
         receiptNumber:String,
