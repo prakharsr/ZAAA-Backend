@@ -407,32 +407,14 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 });
 };
 module.exports.setInsertionChecks = function(request, response){
-	var user = response.locals.user;
-    try{
-        ReleaseOrder.updateMany(
-            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-        },
-        { $set: { "insertions.$.state": request.body.state }}
-        )
-        MediaHouseInvoice.updateMany(
-            { $and: [{firm:user.firm},{"insertions.insertionId:":{$in:request.body.ids}}]
-        },
-        { $set: { "insertions.$.state": request.body.state }}
-        )
-    }
-    catch(err){
-            console.log(err);
-            response.send({
-                success:false,
-                msg: err + ""
-            });
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    ReleaseOrder.find({firm:firm,generated:true, cancelled:false,"insertions._id":{"$in":request.body.ids}})
+    .exec(function(releaseOrders){
+        console.log(releaseOrders)
         }
-            
-            response.send({
-                success:true,
-                msg: "Insertions Updated In ReleaseOrders and MHIs."
-            });
-    };
+    )
+};
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {

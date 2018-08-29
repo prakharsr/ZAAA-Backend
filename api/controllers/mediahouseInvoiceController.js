@@ -36,6 +36,7 @@ module.exports.createMHInvoice = async (request,response) => {
         insertions: request.body.insertions.map(insertion => {
             return {
                 ...insertion,
+                _id:undefined,
                 insertionId:insertion._id,
                 paymentMode: releaseorder.paymentType,
                 paymentDate: releaseorder.paymentDate,
