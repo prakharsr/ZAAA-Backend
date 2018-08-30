@@ -410,6 +410,8 @@ module.exports.setInsertionChecks = function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;
     var list = request.body.ids;
+    var success = true;
+try{
     ReleaseOrder.find({ firm: user.firm }).then(releaseOrders => {
         releaseOrders.forEach(releaseOrder => {
             releaseOrder.insertions.forEach(ROInsertion => {
@@ -422,19 +424,17 @@ module.exports.setInsertionChecks = function(request, response){
             
             releaseOrder.save(function(err) {
                 if (err) {
-                    response.send({
-                        success: false,
-                        msg: "error" + err
-                    });
+                    success = false;
                 }
             });
         });
     });
     MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+        console.log(invoices)
         invoices.forEach(invoice => {
             invoice.insertions.forEach(mhiInsertion => {
                 list.forEach(id => {
-                    if (mhiInsertion._id == id) {
+                    if (mhiInsertion.insertionId == id) {
                         mhiInsertion.state = request.body.state;
                     }
                 });
@@ -442,14 +442,23 @@ module.exports.setInsertionChecks = function(request, response){
             
             invoice.save(function(err) {
                 if (err) {
-                    response.send({
-                        success: false,
-                        msg: "error" + err
-                    });
+                    success = false;
                 }
             });
         });
     });
+}
+catch(err){
+    success = false;
+    console.log((error))
+}
+finally{
+    response.send({
+        success:success,
+        msg:"Yes"
+    })
+
+}
 
 };
 
