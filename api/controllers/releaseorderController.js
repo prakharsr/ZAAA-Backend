@@ -1267,7 +1267,7 @@ function createDocument(request, response, doc){
     var namount = taxamount + (taxamount*tax)/100;
     Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
     Details['namount'] ='₹ '+ (namount.toFixed(2));
-    Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
+    Details['namountwords'] = amountToWords(Math.ceil(taxamount + (taxamount*tax)/100));
 
     if(firm.GSTIN.GSTType !== 'URD')
         Details['gstin'] =firm.GSTIN.GSTNo;

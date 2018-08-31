@@ -24,8 +24,12 @@
                     <th colspan="3">
                         <div class='row'>
                             <div class='col' style="text-align: left;">
+                                For Client,<br>
                                 Client:{{cname}}<br>
                                 GSTIN:{{cgstin}}
+                            </div>
+                            <div class='col' style="text-align: left;">
+                                <br>
                                 State: {{caddress}}
                             </div>
                         </div>
@@ -70,15 +74,11 @@
                 </tr>
                 {{insertions}}
                 <tr>
-                    <td colspan="6" style="text-align: right">Other Charges @ {{pubD}} %</td>
+                    <td colspan="6" style="text-align: right">Publication Discount {{pubD}}</td>
                     <td><b>{{pubam}}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="6" style="text-align: right">Publication Discount @ {{pubD}} %</td>
-                    <td><b>{{pubam}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right">Agency Discount @ {{agenD}} %</td>
+                    <td colspan="6" style="text-align: right">Agency Discount {{agenD}}</td>
                     <td><b>{{agenam}}</b></td>
                 </tr>
                 <tr>

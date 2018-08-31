@@ -742,8 +742,42 @@ module.exports.queryClientPayments = async function(request, response){
                 });
             }
             else{
-                var Details = createDocument(request,response,invoice);
-                pdf.mailinvoice(request,response,Details);
+                if(invoice.faddress){
+                    var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(invoice.releaseOrderId));
+                    invoice['releaseOrder'] = releaseOrder;
+                    var Details = createDocument(request,response,invoice);
+                    pdf.generateinvoice(request,response,Details);
+                }
+                else{
+                    invoice.faddress = firm.RegisteredAddress;
+                    invoice.femail = firm.Email;
+                    invoice.fmobile = firm.Mobile;
+                    invoice.flogo = firm.LogoURL;
+                    invoice.fsign = user.signature;
+                    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                    invoice.fjuris = juris;
+                    var i = 0;
+                    var tnc ='';
+                    for(; i < firm.ROterms.length; i++){
+                        tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+                    }
+                    invoice.tnc = tnc;
+                    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                    invoice.save(async (err,doc) => {
+                        if(err){
+                            response.save({
+                                success: false,
+                                msg: 'Sorry, cannot save invoice'
+                            });
+                        }
+                        else{
+                            var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
+                            invoice['releaseOrder'] = releaseOrder;
+                            var Details = createDocument(request,response,invoice);
+                            pdf.generateinvoice(request,response,Details);
+                        }
+                    })
+                }
             }
         });
     }
@@ -767,19 +801,54 @@ module.exports.queryClientPayments = async function(request, response){
                 });
             }
             else{
-                var Details = createDocument(request,response,invoice);
-                pdf.generateinvoice(request,response,Details);
+                if(invoice.faddress){
+                    var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(invoice.releaseOrderId));
+                    invoice['releaseOrder'] = releaseOrder;
+                    var Details = createDocument(request,response,invoice);
+                    pdf.generateinvoice(request,response,Details);
+                }
+                else{
+                    invoice.faddress = firm.RegisteredAddress;
+                    invoice.femail = firm.Email;
+                    invoice.fmobile = firm.Mobile;
+                    invoice.flogo = firm.LogoURL;
+                    invoice.fsign = user.signature;
+                    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                    invoice.fjuris = juris;
+                    var i = 0;
+                    var tnc ='';
+                    for(; i < firm.ROterms.length; i++){
+                        tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+                    }
+                    invoice.tnc = tnc;
+                    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                    invoice.save(async (err,doc) =>{
+                        if(err){
+                            response.save({
+                                success: false,
+                                msg: 'Sorry, cannot save invoice'
+                            });
+                        }
+                        else{
+                            var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
+                            invoice['releaseOrder'] = releaseOrder;
+                            var Details = createDocument(request,response,invoice);
+                            pdf.generateinvoice(request,response,Details);
+                        }
+                    })
+                }
             }
         });
     }
     
     module.exports.previewinvoicehtml = async function(request, response) {
-        console.log(request.body);
+        var firm = response.locals.firm;
+        var user = response.locals.user;
         var doc = request.body.invoice;
-        doc['flogo'] = config.domain+'/'+firm.LogoURL;
-        doc['fsign'] = config.domain+'/'+user.signature;
-        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
-        doc['faddress'] = firm.address;
+        doc['flogo'] = firm.LogoURL;
+        doc['fsign'] = user.signature;
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;;
+        doc['faddress'] = firm.RegisteredAddress;
         doc['fmobile'] = firm.Mobile;
         doc['femail'] = firm.Email;
         var tnc ='';
@@ -788,6 +857,9 @@ module.exports.queryClientPayments = async function(request, response){
             tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
         }
         doc['tnc'] = tnc;
+        var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
+        doc['releaseOrder'] = releaseOrder;
+        console.log(doc);
     tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
         var Details = createDocument(request,response,doc);
         getinvoicehtml(Details, content => {
@@ -827,9 +899,9 @@ module.exports.queryClientPayments = async function(request, response){
                   .replace('{{adtype}}', Details.adtype)
                   .replace('{{edition}}', Details.edition)
                   .replace('{{pubD}}', Details.pubD)
-                  .replace('{{agenD1}}', Details.agenD1)
-                  .replace('{{agenD2}}', Details.agenD2)
-                  .replace('{{publicationdisc}}', Details.publicationdisc)
+                  .replace('{{agenD}}', Details.agenD)
+                  .replace('{{pubam}}', Details.pubam)
+                  .replace('{{agenam}}', Details.agenam)
                   .replace('{{taxamount}}', Details.taxamount)
                   .replace('{{igst}}', Details.igst)
                   .replace('{{cgst}}', Details.cgst)
@@ -860,8 +932,9 @@ module.exports.queryClientPayments = async function(request, response){
     module.exports.getinvoicehtml = getinvoicehtml;
 
     function createDocument(request, response, doc){
-        var user = response.locals.user;
+        var user = response.locals.user;   
         var firm = response.locals.firm;
+        var gamount = doc.adGrossAmount;
         var result = doc.insertions.reduce((grouped, item) => {
             var index = grouped.findIndex(m => m.key.month == item.date.month
                 && m.key.year == item.date.year);
@@ -878,9 +951,9 @@ module.exports.queryClientPayments = async function(request, response){
         var size = doc.adSizeL * doc.adSizeW;
         var damount = (doc.publicationDiscount+doc.agencyDiscount1+doc.agencyDiscount2)*doc.adGrossAmount;
         var namount = doc.adGrossAmount - damount;
-        var caption = doc.caption?doc.caption+'<br>':"";
-        var catarray = [doc.adCategory2, doc.adCategory3, doc.adCategory4, doc.adCategory5, doc.adCategory6];
-        var categories = doc.adCategory1 || '';
+        var caption = doc.releaseOrder.caption?doc.releaseOrder.caption+'<br>':"";
+        var catarray = [doc.releaseOrder.adCategory2, doc.releaseOrder.adCategory3, doc.releaseOrder.adCategory4, doc.releaseOrder.adCategory5, doc.releaseOrder.adCategory6];
+        var categories = doc.releaseOrder.adCategory1 || '';
         var premam = 0;
         var premium = '';
         
@@ -917,9 +990,9 @@ module.exports.queryClientPayments = async function(request, response){
             })
     
             var row = result.length;
-    
+                
             if(count === 0){
-                insData += '<tr><td colspan="3" rowspan='+row+'>'+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+                insData += '<tr><td colspan="3" rowspan='+row+'>'+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.releaseOrder.adPosition+'</td><td rowspan='+row+'>'+doc.releaseOrder.adSizeL+'x'+doc.releaseOrder.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(gamount))+'</b></td></tr>';
                 count = 1;
             }
             else{
@@ -931,35 +1004,30 @@ module.exports.queryClientPayments = async function(request, response){
     
         var paymentDetails="";
         var address = doc.faddress;
-        var caddress = doc.clientState;
-        var maddress = doc.publicationState;
+        var caddress = doc.releaseOrder.clientState;
+        var maddress = doc.releaseOrder.publicationState;
     
-        if(doc.paymentType === 'Cash')
+        if(doc.releaseOrder.paymentType === 'Cash')
         paymentDetails = "Cash"
-        else if(doc.paymentType === 'Credit')
+        else if(doc.releaseOrder.paymentType === 'Credit')
         paymentDetails = "Credit"
-        else if(doc.paymentType === 'Cheque')
-        paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
-        else if(doc.paymentType === 'NEFT')
-        paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
+        else if(doc.releaseOrder.paymentType === 'Cheque')
+        paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
+        else if(doc.releaseOrder.paymentType === 'NEFT')
+        paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
         console.log(doc);
     
-    
-        console.log(doc.publicationGSTIN);
-    
         var Details = {
-            mediahouse :doc.publicationName,
-            medition : doc.publicationEdition,
-            pgstin :'-',
-            cname :doc.clientName,
+            mediahouse :doc.releaseOrder.publicationName,
+            cname :doc.releaseOrder.clientName,
             cgstin :'-',
             gstin :'-',
-            scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
+            scheme :doc.releaseOrder.adSchemePaid+'+'+doc.releaseOrder.adSchemeFree,
             insertions :insData,
             username: user.name,
             firmname: firm.FirmName,
             firmname1: firm.FirmName,
-            rno : doc.invoiceNO,
+            rno : doc.invoiceNO || '-',
             remark: doc.Remark || "",
             jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
             paymentDetails: paymentDetails,
@@ -973,18 +1041,16 @@ module.exports.queryClientPayments = async function(request, response){
             cgst: '-',
             sgst: '-',
             taxamount: '',
-            publicationdisc: '',
-            damount: '',
-            agenD1: doc.agencyDiscount1,
-            agenD2: doc.agencyDiscount2,
-            pubD: doc.publicationDiscount,
-            edition: doc.adEdition,
-            adtype:doc.adType,
-            hue:doc.adHue,
+            pubD: '',
+            pubam: '',
+            agenD: '',
+            agenam: '',
+            edition: doc.releaseOrder.adEdition,
+            adtype:doc.releaseOrder.adType,
+            hue:doc.releaseOrder.adHue,
             caddress: caddress || '',
             maddress: maddress || '',
-            pullout: doc.pulloutName,
-            premam : "₹ "+addZeroes(""+Math.round(premam)),
+            pullout: doc.releaseOrder.pulloutName,
             remark: remark,
             tnc: doc.tnc,
             image : config.domain+'/'+doc.flogo,
@@ -996,48 +1062,28 @@ module.exports.queryClientPayments = async function(request, response){
     
         if(doc.adSchemeFree === 0);
         Details['scheme'] = 'NA';
-    
-        var adGrossAmount;
+        Details['pubam'] = doc.publicationDiscount.percentage ? "₹ "+(gamount*doc.publicationDiscount.amount)/100 : "₹ "+doc.publicationDiscount.amount;  
+        Details['agenam'] = doc.agencyDiscount1.percentage ? "₹ "+(gamount*doc.agencyDiscount1.amount)/100 : "₹ "+doc.agencyDiscount1.amount;  
+        Details['pubD']= doc.publicationDiscount.percentage ? '@ '+doc.publicationDiscount.amount+' %': '';  
+        Details['agenD']= doc.agencyDiscount1.percentage ? '@ '+doc.agencyDiscount1.amount+' %': '';
         var tax = doc.taxAmount.primary;
-        if(doc.taxIncluded){
-            adGrossAmount = (doc.adGrossAmount/(100 + tax))*100;
-        }
-        else{
-            adGrossAmount = doc.adGrossAmount;
-        }
-    
-        publicationDisc = adGrossAmount*doc.publicationDiscount/100;
-        damount1 = (adGrossAmount - publicationDisc)*(+doc.agencyDiscount1)/100;
-        damount2 = (adGrossAmount - damount1 - publicationDisc)*(+doc.agencyDiscount2)/100;
-        damount1 += damount2;
-        Details['damount'] = '₹ '+ (damount1.toFixed(2));
-        Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-        var taxamount = doc.netAmountFigures;
-        var namount = taxamount + (taxamount*tax)/100;
-        Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
-        Details['namount'] ='₹ '+ (namount.toFixed(2));
-        Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));
-    
-        // if(firm.GSTIN.GSTType !== 'URD')
-        //     Details['gstin'] =firm.GSTIN.GSTNo;
-        // if(doc.clientGSTIN.GSTType !== 'URD')
-        //     Details['cgstin'] =doc.clientGSTIN.GSTNo;
-        // if(doc.publicationGSTIN.GSTType !== 'URD')
-        //     Details['gstin'] =doc.publicationGSTIN.GSTNo;
-    
-        var g = (taxamount*tax/100).toFixed(2);
+        var g = (doc.netAmountFigures*tax/100).toFixed(2);
+        Details['taxamount'] = "₹ "+doc.netAmountFigures;
+        Details['namount'] = "₹ "+doc.FinalTaxAmount;
+        Details['namountwords'] = "₹ "+amountToWords(Math.ceil(doc.FinalTaxAmount));
+
         
         Details['gstamount'] ='₹ '+ g
         
         if(doc.publicationState === doc.clientState){
             Details['sgst'] = Details['cgst'] = tax/2;
-            var t = ((taxamount*tax/2)/100).toFixed(2);
+            var t = ((gamount*tax/2)/100).toFixed(2);
             Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
     
         }
         else{
             Details['igst'] = tax;
-            var t = ((taxamount*tax)/100).toFixed(2);
+            var t = ((gamount*tax)/100).toFixed(2);
             Details['igstamount'] ='₹ '+t;
         }
 
