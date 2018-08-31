@@ -78,7 +78,7 @@ module.exports = function(req, res, next){
                         if(err||!firm){
                             res.send({
                                 succes:false,
-                                msg:"User Not Found"
+                                msg:"Firm Not Found"
                             })
                         }
                         else{
