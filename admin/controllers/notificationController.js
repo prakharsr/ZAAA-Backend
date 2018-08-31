@@ -139,7 +139,6 @@ var CronJob1 = new CronJob({
 
 async function sendShadowReminder(){
     var users = await User.find({});
-    var suc;
     users.forEach(async user =>{
         var receipts = await Receipt.find({userID: user._id});
         var sum=0;
@@ -155,32 +154,24 @@ async function sendShadowReminder(){
                     body : 'Today you have to collect '+sum+' amount from your employees'
                 }
             };
-            fcm.send(message, function(err,response){  
+            fcm.send(message, function(err){  
                 if(err) {
-                    suc = false;
                     console.log({
                         success: false,
                         msg : "Something has gone wrong! "+err
                     });
                 } else {
-                    suc = true;
                     console.log({
-                        success: true,
                         msg : "Sent Notifications to users"
                     });
                 }
             });
         })
     })
-    response.send({
-        success: suc,
-        msg: suc?'sent successfully':'Failed'
-    });
 }
 
 async function sendInsertionsReminder(){
     var users = await User.find({});
-    var suc;
     users.forEach(async user =>{
         var releaseOrders = await ReleaseOrder.find({userID: user._id});
         releaseOrders.forEach(ro => {
@@ -194,15 +185,13 @@ async function sendInsertionsReminder(){
                     body : 'Today you have to collect '+sum+' amount from your employees'
                 }
             };
-            fcm.send(message, function(err,response){  
+            fcm.send(message, function(err){  
                 if(err) {
-                    suc = false;
                     console.log({
                         success: false,
                         msg : "Something has gone wrong! "+err
                     });
                 } else {
-                    suc = true;
                     console.log({
                         success: true,
                         msg : "Sent Notifications to users"
@@ -211,9 +200,5 @@ async function sendInsertionsReminder(){
             });
         })
     })
-    response.send({
-        success: suc,
-        msg: suc?'sent successfully':'Failed'
-    });
 }
 

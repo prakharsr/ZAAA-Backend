@@ -1074,7 +1074,6 @@ module.exports.queryClientPayments = async function(request, response){
         Details['namount'] = "₹ "+doc.FinalTaxAmount;
         Details['namountwords'] = "₹ "+amountToWords(Math.ceil(doc.FinalTaxAmount));
 
-        
         Details['gstamount'] ='₹ '+ g
         
         if(doc.publicationState === doc.clientState){
@@ -1088,9 +1087,7 @@ module.exports.queryClientPayments = async function(request, response){
             var t = ((doc.netAmountFigures*tax)/100).toFixed(2);
             Details['igstamount'] ='₹ '+t;
         }
-
         return Details;
-    
     }
     
 
