@@ -188,6 +188,7 @@ async function f (request, response, user){
         rate:request.body.rate,
         fixRate: request.body.fixRate,
         unit:request.body.unit,
+        sac:request.body.sac,
         adCategory1:request.body.adCategory1,
         adCategory2:request.body.adCategory2,
         adCategory3:request.body.adCategory3,
@@ -1198,7 +1199,7 @@ function createDocument(request, response, doc){
         var row = result.length;
 
         if(count === 0){
-            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
             count = 1;
         }
         else{
@@ -1233,6 +1234,7 @@ function createDocument(request, response, doc){
         cname :doc.clientName,
         cgstin :'-',
         gstin :'-',
+        sac:doc.sac|| '',
         scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
         insertions :insData,
         username: user.name,
@@ -1291,8 +1293,8 @@ function createDocument(request, response, doc){
     damount1 += damount2;
     Details['damount'] = '₹ '+ (damount1.toFixed(2));
     Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-    var taxamount = doc.netAmountFigures;
-    var namount = taxamount + (taxamount*tax)/100;
+    var taxamount = doc.adGrossAmount + premam - publicationDisc - damount1;
+    var namount = doc.netAmountFigures;
     Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
     Details['namount'] ='₹ '+ (namount.toFixed(2));
     Details['namountwords'] = amountToWords(Math.round(taxamount + (taxamount*tax)/100));

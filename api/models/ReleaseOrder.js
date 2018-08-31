@@ -16,6 +16,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    sac:Number,
     agencyName: String,
     agencyGSTIN: String,
     agencyPin:String,
