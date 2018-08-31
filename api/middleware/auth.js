@@ -68,14 +68,18 @@ module.exports = function(req, res, next){
         var token = getToken(req.headers);
         var user = getUser(token,req,res, function(err, user){
             if(err||!user){
-                console.log(err, user)
-                console.log("User not found");
+                res.send({
+                    succes:false,
+                    msg:"User Not Found"
+                })
             }
             else{
                     var firm = getFirm(user, req, res, function(err, firm){
                         if(err||!firm){
-                            console.log(err, user)
-                            console.log("Firm not found");
+                            res.send({
+                                succes:false,
+                                msg:"User Not Found"
+                            })
                         }
                         else{
                             res.locals.user = user;
