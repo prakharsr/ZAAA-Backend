@@ -128,11 +128,12 @@ module.exports.deleteNotification = (request,response) => {
 }
 
 var CronJob1 = new CronJob({
-    cronTime: '00 00 09 * * * ',
+    cronTime: '00 00 20  * * ',
     onTick: function () {
         sendShadowReminder();
     },
     start: true,
+    timeZone: 'Asia/Kolkata',
     runOnInit: false
 });
 
