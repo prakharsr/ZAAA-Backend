@@ -7,6 +7,7 @@ var PlanSchema = new mongoose.Schema({
     maxUsers : Number,
     maxAdmins : Number,
     description : String,
+    duration : Number,
     validAgain: Boolean
 });
 

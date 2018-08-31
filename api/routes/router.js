@@ -21,6 +21,8 @@ var excel = require('../controllers/excelController');
 var ticket = require('../controllers/ticketController');
 var auth  = require('../middleware/auth')
 
+
+router.get('/user/check', user.getCurrentUserDetails);
 router.post('/user/signup', user.signup);
 router.post('/user/login', user.login);
 router.post('/user/logout', user.logout);

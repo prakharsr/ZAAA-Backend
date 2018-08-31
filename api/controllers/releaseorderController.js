@@ -188,6 +188,7 @@ async function f (request, response, user){
         rate:request.body.rate,
         fixRate: request.body.fixRate,
         unit:request.body.unit,
+        sac:request.body.sac,
         adCategory1:request.body.adCategory1,
         adCategory2:request.body.adCategory2,
         adCategory3:request.body.adCategory3,
@@ -407,32 +408,60 @@ module.exports.getReleaseOrderInsertions = function(request, response){
 });
 };
 module.exports.setInsertionChecks = function(request, response){
-	var user = response.locals.user;
-    try{
-        ReleaseOrder.updateMany(
-            { $and: [{firm:user.firm}, {"insertions._id":{$in:request.body.ids}}]
-        },
-        { $set: { "insertions.$.state": request.body.state }}
-        )
-        MediaHouseInvoice.updateMany(
-            { $and: [{firm:user.firm},{"insertions.insertionId:":{$in:request.body.ids}}]
-        },
-        { $set: { "insertions.$.state": request.body.state }}
-        )
-    }
-    catch(err){
-            console.log(err);
-            response.send({
-                success:false,
-                msg: err + ""
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var list = request.body.ids;
+    var success = true;
+try{
+    ReleaseOrder.find({ firm: user.firm }).then(releaseOrders => {
+        releaseOrders.forEach(releaseOrder => {
+            releaseOrder.insertions.forEach(ROInsertion => {
+                list.forEach(id => {
+                    if (ROInsertion._id == id) {
+                        ROInsertion.state = request.body.state;
+                    }
+                });
             });
-        }
             
-            response.send({
-                success:true,
-                msg: "Insertions Updated In ReleaseOrders and MHIs."
+            releaseOrder.save(function(err) {
+                if (err) {
+                    success = false;
+                }
             });
-    };
+        });
+    });
+    MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+        console.log(invoices)
+        invoices.forEach(invoice => {
+            invoice.insertions.forEach(mhiInsertion => {
+                list.forEach(id => {
+                    if (mhiInsertion.insertionId == id) {
+                        mhiInsertion.state = request.body.state;
+                    }
+                });
+            });
+            
+            invoice.save(function(err) {
+                if (err) {
+                    success = false;
+                }
+            });
+        });
+    });
+}
+catch(err){
+    success = false;
+    console.log((error))
+}
+finally{
+    response.send({
+        success:success,
+        msg:"Yes"
+    })
+
+}
+
+};
 
 function searchExecutiveID(request, response, user){
     return new Promise((resolve, reject) => {
@@ -1170,7 +1199,7 @@ function createDocument(request, response, doc){
         var row = result.length;
 
         if(count === 0){
-            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+doc.adSizeL+'x'+doc.adSizeW+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
             count = 1;
         }
         else{
@@ -1205,6 +1234,7 @@ function createDocument(request, response, doc){
         cname :doc.clientName,
         cgstin :'-',
         gstin :'-',
+        sac:doc.sac|| '',
         scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
         insertions :insData,
         username: user.name,
@@ -1263,8 +1293,8 @@ function createDocument(request, response, doc){
     damount1 += damount2;
     Details['damount'] = '₹ '+ (damount1.toFixed(2));
     Details['publicationdisc'] ='₹ '+ (publicationDisc.toFixed(2));
-    var taxamount = doc.netAmountFigures;
-    var namount = taxamount + (taxamount*tax)/100;
+    var taxamount = doc.adGrossAmount + premam - publicationDisc - damount1;
+    var namount = doc.netAmountFigures;
     Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
     Details['namount'] ='₹ '+ (namount.toFixed(2));
     Details['namountwords'] = amountToWords(Math.ceil(taxamount + (taxamount*tax)/100));

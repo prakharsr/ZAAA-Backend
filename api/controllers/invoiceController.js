@@ -160,6 +160,7 @@ async function f(request, response, user){
         extraCharges:request.body.extraCharges,
         pendingAmount:request.body.FinalTaxAmount,
         FinalTaxAmount:request.body.FinalTaxAmount,
+        paymentDate:request.body.paymentDate,
         
         caption:request.body.caption,
         remark:request.body.remark,

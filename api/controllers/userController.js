@@ -533,25 +533,25 @@ module.exports.verifyMobile = function(request, response) {
 		
 	};
 	
-	module.exports.getCurrentUser=function(request, response){
-		var token = getToken(request.headers);
-		var user = getUser(token,request,response, function(err, user){
-			if(err||!user){
-				console.log("User not found");
-				response.send({
-					success:false,
-					msg:err
-				});
-			}
-			else{
-				response.send({
-					success:true,
-					user:user
-				});
-			}
-		});
-		
-	};
+module.exports.getCurrentUser=function(request, response){
+	var token = getToken(request.headers);
+	var user = getUser(token,request,response, function(err, user){
+		if(err||!user){
+			console.log("User not found");
+			response.send({
+				success:false,
+				msg:err
+			});
+		}
+		else{
+			response.send({
+				success:true,
+				user:user
+			});
+		}
+	});
+	
+};
 	
 	module.exports.changePassword=function(request, response){
 		var user = response.locals.user;
@@ -775,3 +775,15 @@ module.exports.setLastSeen = (request, response) => {
 		}
 	})
 }
+module.exports.getCurrentUserDetails= function(request, response){
+	var user = response.locals.user;
+	var firm = response.locals.firm;
+	Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
+		response.json({
+			success:true,
+			user:user,
+			firm:firm,
+			plan:plan
+		});
+	})
+}; 

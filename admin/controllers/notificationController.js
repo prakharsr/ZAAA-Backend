@@ -128,11 +128,12 @@ module.exports.deleteNotification = (request,response) => {
 }
 
 var CronJob1 = new CronJob({
-    cronTime: '00 00 09 * * * ',
+    cronTime: '00 00 20  * * ',
     onTick: function () {
         sendShadowReminder();
     },
     start: true,
+    timeZone: 'Asia/Kolkata',
     runOnInit: false
 });
 
@@ -141,10 +142,10 @@ async function sendShadowReminder(){
     var suc;
     users.forEach(async user =>{
         var receipts = await Receipt.find({userID: user._id});
-        var sum;
+        var sum=0;
         receipts.forEach(receipt => {
             if(receipt.status === 0 || receipt.status === 3 )
-            sum += receipt.FinalAmount;
+            sum += receipt.paymentAmount;
         });
         user.deviceTokens.forEach(object => {
             var message = {  

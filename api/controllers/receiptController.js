@@ -109,25 +109,8 @@ function getMediahouseID(request, response, user){
             }
             else if (mediahouse.length == 0)
             {
-                console.log('no mediahouse found');
-                console.log(request.body)
-                var newMediahouse = new MediaHouse({
-                    OrganizationName:request.body.organizationName,
-                    PublicationName:request.body.publicationName,
-                    'Address.edition':request.body.publicationEdition,
-                    MediaType:request.body.mediaType,
-                    'Address.state':request.body.publicationState,
-                    GSTIN:request.body.publicationGSTIN,
-                    global:false,
-                    GSTIN:request.body.GSTIN,
-                    firm : user.firm
-                });
                 
-                newMediahouse.save(function(err, doc){
-                    console.log('mediahouse saved');
-                    mediahouseID = newMediahouse._id;
-                    resolve(mediahouseID)
-                })
+                resolve(null)
             }
             else{
                 console.log("mediahouse found");
@@ -360,17 +343,17 @@ module.exports.createAdvancedReciept = async function(request,response){
         clientName:client.OrganizationName,
         clientGSTIN:client.GSTIN,
         clientState:client.Address.state,
-        publicationName:mediahouse.PublicationName,
-        publicationEdition:mediahouse.Address.edition,
-        mediaType:mediahouse.MediaType,
-        publicationState:mediahouse.Address.state,
-        publicationGSTIN:mediahouse.GSTIN,
+        publicationName:mediahouse?mediahouse.PublicationName:"",
+        publicationEdition:mediahouse?mediahouse.Address.edition:"",
+        mediaType:mediahouse?mediahouse.MediaType:"",
+        publicationState:mediahouse?mediahouse.Address.state:"",
+        publicationGSTIN:mediahouse?mediahouse.GSTIN:"",
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
         exceedingAmount: 0,
         template: firm.ROTemplate,
         firm:user.firm,
-        mediahouseID : mediahouseID,
+        mediahouseID : mediahouse?mediahouseID:null,
         clientID: clientID,
         executiveID: executiveID
     });
@@ -407,7 +390,8 @@ module.exports.linkRecieptToInvoice = async function(request,response){
     var receipt = await Receipt.findById(request.body.receiptID);
     var invoice = await Invoice.findById(request.body.invoiceID);
     var tnc ='';
-    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+    var i=0;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
     for(; i < firm.INterms.length; i++){
         tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
     }

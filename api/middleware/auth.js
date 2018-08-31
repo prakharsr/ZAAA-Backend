@@ -22,14 +22,19 @@ var unAuthRoutes = [
 
 function getUser(token,req,res, cb){
     var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
-        User.findById(decoded.id, function(err, doc) {
-            if (err || !doc) {
-                return  cb(err,null);
-            }
-            else{
-                return cb(null, doc);
-            }
-        });
+        if (!decoded) {
+            cb(null, null);
+        }
+        else {
+            User.findById(decoded.id, function(err, doc) {
+                if (err || !doc) {
+                    return  cb(err,null);
+                }
+                else{
+                    return cb(null, doc);
+                }
+            });
+        }
     });
 }
 function getFirm(user,req,res, cb){
@@ -68,14 +73,18 @@ module.exports = function(req, res, next){
         var token = getToken(req.headers);
         var user = getUser(token,req,res, function(err, user){
             if(err||!user){
-                console.log(err, user)
-                console.log("User not found");
+                res.send({
+                    succes:false,
+                    msg:"User Not Found"
+                })
             }
             else{
                     var firm = getFirm(user, req, res, function(err, firm){
                         if(err||!firm){
-                            console.log(err, user)
-                            console.log("Firm not found");
+                            res.send({
+                                succes:false,
+                                msg:"Firm Not Found"
+                            })
                         }
                         else{
                             res.locals.user = user;
