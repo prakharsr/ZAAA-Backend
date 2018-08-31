@@ -22,14 +22,19 @@ var unAuthRoutes = [
 
 function getUser(token,req,res, cb){
     var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
-        User.findById(decoded.id, function(err, doc) {
-            if (err || !doc) {
-                return  cb(err,null);
-            }
-            else{
-                return cb(null, doc);
-            }
-        });
+        if (!decoded) {
+            cb(null, null);
+        }
+        else {
+            User.findById(decoded.id, function(err, doc) {
+                if (err || !doc) {
+                    return  cb(err,null);
+                }
+                else{
+                    return cb(null, doc);
+                }
+            });
+        }
     });
 }
 function getFirm(user,req,res, cb){
