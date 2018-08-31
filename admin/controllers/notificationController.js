@@ -172,10 +172,6 @@ async function sendShadowReminder(){
             });
         })
     })
-    response.send({
-        success: suc,
-        msg: suc?'sent successfully':'Failed'
-    });
 }
 
 async function sendInsertionsReminder(){
@@ -211,9 +207,5 @@ async function sendInsertionsReminder(){
             });
         })
     })
-    response.send({
-        success: suc,
-        msg: suc?'sent successfully':'Failed'
-    });
 }
 
