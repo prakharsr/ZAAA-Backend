@@ -90,12 +90,12 @@ module.exports.deleteLogoImage = function(request,response){
 		}
 	});
 }	
-module.exports.setPlan = function(request,response){
+module.exports.setPlan = async function(request,response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
 	firm.plan.planID = request.body.planID;
 	firm.plan.createdOn = Date.now();
-	var plan = Plan.findById(request.body.planID);
+	var plan = await Plan.findById(request.body.planID);
 	var today = new Date()
 	firm.plan.expiresOn = new Date().setDate(today.getDate() + plan.duration)
 	firm.plan.validAgain=false;
