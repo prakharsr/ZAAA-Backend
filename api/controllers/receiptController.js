@@ -407,7 +407,8 @@ module.exports.linkRecieptToInvoice = async function(request,response){
     var receipt = await Receipt.findById(request.body.receiptID);
     var invoice = await Invoice.findById(request.body.invoiceID);
     var tnc ='';
-    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+    var i=0;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
     for(; i < firm.INterms.length; i++){
         tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
     }
