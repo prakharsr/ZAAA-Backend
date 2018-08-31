@@ -779,27 +779,11 @@ module.exports.getCurrentUserDetails= function(request, response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
 	Plan.findById(mongoose.mongo.ObjectID(firm.plan.planID), function(err,plan){
-		if(err){
-			response.send({
-				success:false,
-				msg:"error in finding plan" + err,
-				
-			})
-		}
-		if(!plan){
-			response.json({
-				success:false,
-				msg:"plan not found for the firm ",
-				firm:firm
-			});
-		}
-		else{
-			response.json({
-				success:true,
-				user:user,
-				firm:firm,
-				plan:plan
-			});
-		}
+		response.json({
+			success:true,
+			user:user,
+			firm:firm,
+			plan:plan
+		});
 	})
 }; 
