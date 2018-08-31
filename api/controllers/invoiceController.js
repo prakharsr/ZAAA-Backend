@@ -122,7 +122,7 @@ async function f(request, response, user){
         var counter = releaseOrder.invoiceSerial+1;
         var ino = releaseOrder.releaseOrderNO+'/'+counter;
         var tnc ='';
-        var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;
+        var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
         for(; i < firm.INterms.length; i++){
             tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
         }
@@ -173,7 +173,7 @@ async function f(request, response, user){
         mediahouseID : releaseOrder.mediahouseID,
         clientID: releaseOrder.clientID,
         executiveID: releaseOrder.executiveID,
-        faddress: firm.address,
+        faddress: firm.RegisteredAddress,
         femail: firm.Email,
         fmobile: firm.Mobile,
         flogo: firm.LogoURL,
@@ -219,7 +219,7 @@ async function f(request, response, user){
                         console.log(mongoose.mongo.ObjectId(request.body.releaseOrderId), request.body.insertions.map(insertion => mongoose.mongo.ObjectId(insertion._id)))
                         response.send({
                             success:true,
-                            msg:"Invoice saved.",
+                            msg:doc._id,
                             invoice:doc 
                         })
                     }
@@ -1062,8 +1062,9 @@ module.exports.queryClientPayments = async function(request, response){
     
         if(doc.adSchemeFree === 0);
         Details['scheme'] = 'NA';
-        Details['pubam'] = doc.publicationDiscount.percentage ? "₹ "+(gamount*doc.publicationDiscount.amount)/100 : "₹ "+doc.publicationDiscount.amount;  
-        Details['agenam'] = doc.agencyDiscount1.percentage ? "₹ "+(gamount*doc.agencyDiscount1.amount)/100 : "₹ "+doc.agencyDiscount1.amount;  
+        var pubam = doc.publicationDiscount.percentage ? (gamount*doc.publicationDiscount.amount)/100 : doc.publicationDiscount.amount;  
+        Details['pubam'] ="₹ "+pubam;
+        Details['agenam'] = doc.agencyDiscount1.percentage ? "₹ "+((gamount-pubam)*doc.agencyDiscount1.amount)/100 : "₹ "+doc.agencyDiscount1.amount;  
         Details['pubD']= doc.publicationDiscount.percentage ? '@ '+doc.publicationDiscount.amount+' %': '';  
         Details['agenD']= doc.agencyDiscount1.percentage ? '@ '+doc.agencyDiscount1.amount+' %': '';
         var tax = doc.taxAmount.primary;
@@ -1077,13 +1078,13 @@ module.exports.queryClientPayments = async function(request, response){
         
         if(doc.publicationState === doc.clientState){
             Details['sgst'] = Details['cgst'] = tax/2;
-            var t = ((gamount*tax/2)/100).toFixed(2);
+            var t = ((doc.netAmountFigures*tax/2)/100).toFixed(2);
             Details['sgstamount'] = Details['cgstamount'] = '₹ ' + t;
     
         }
         else{
             Details['igst'] = tax;
-            var t = ((gamount*tax)/100).toFixed(2);
+            var t = ((doc.netAmountFigures*tax)/100).toFixed(2);
             Details['igstamount'] ='₹ '+t;
         }
 
