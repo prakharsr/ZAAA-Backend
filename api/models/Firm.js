@@ -75,6 +75,7 @@ var FirmSchema = new mongoose.Schema({
     plan : {
         createdOn: Date,
         paymentID : String,
+        expiresOn : Date,
         planID : {type:mongoose.Schema.Types.ObjectId, ref:"Plan"} 
     },
     Socials:{

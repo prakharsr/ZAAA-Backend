@@ -19,12 +19,14 @@ module.exports.getPlans = function(request,response){
                     cost : 0,
                     maxUsers : 3,
                     maxAdmins : 1,
+                    duration:15
                 });
                 plan1 = new Plan({
                     name : "Small",
                     cost : 5000,
                     maxUsers : 2,
                     maxAdmins : 1,
+                    duration:30
                 });
                 
                 plan2 = new Plan({
@@ -32,6 +34,7 @@ module.exports.getPlans = function(request,response){
                     cost : 10000,
                     maxUsers : 5,
                     maxAdmins : 2,
+                    duration:45
                 });
                 
                 plan3 = new Plan({
@@ -39,6 +42,7 @@ module.exports.getPlans = function(request,response){
                     cost : 15000,
                     maxUsers : 11,
                     maxAdmins : 3,
+                    duration:90
                 });
                 plan0.save();
                 plan1.save();
