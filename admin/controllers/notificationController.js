@@ -131,6 +131,8 @@ var CronJob1 = new CronJob({
     cronTime: '* * * * *',
     onTick: function () {
         sendShadowReminder();
+        sendDailyInsertionsReminder();
+        sendUptoInsertionsReminder();
     },
     start: true,
     timeZone: 'Asia/Kolkata',
@@ -142,16 +144,18 @@ async function sendShadowReminder(){
     users.forEach(async user =>{
         var receipts = await Receipt.find({userID: user._id});
         var sum=0;
+        var count=0;
         receipts.forEach(receipt => {
             if(receipt.status === 0 || receipt.status === 3 )
             sum += receipt.paymentAmount;
+            count+=1;
         });
         user.deviceTokens.forEach(object => {
             var message = {  
                 to : object.token,
                 notification : {
                     title : "Ad Agency Manager",
-                    body : 'Today you have to collect '+sum+' amount from your employees'
+                    body : 'You have '+count+' collected or shadow receipts with an total amount of ₹'+sum+' only.'
                 }
             };
             fcm.send(message, function(err){  
@@ -170,19 +174,25 @@ async function sendShadowReminder(){
     })
 }
 
-async function sendInsertionsReminder(){
+async function sendDailyInsertionsReminder(){
     var users = await User.find({});
     users.forEach(async user =>{
-        var releaseOrders = await ReleaseOrder.find({userID: user._id});
+        var count=0;
+        var releaseOrders = await ReleaseOrder.find({firm:user.firm});
         releaseOrders.forEach(ro => {
-            ro.aggregate([{$unwind:'$insertions'}])
+            ro.insertions.forEach(ins=>{
+                if(ins.ISODate.toDateString() == new Date().toDateString() )
+                {
+                    count++;
+                }
+            })
         });
         user.deviceTokens.forEach(object => {
             var message = {  
                 to : object.token,
                 notification : {
                     title : "Ad Agency Manager",
-                    body : 'Today you have to collect '+sum+' amount from your employees'
+                    body : 'You have '+count+' insertions for today, Mark their status if advertised.'
                 }
             };
             fcm.send(message, function(err){  
@@ -202,3 +212,95 @@ async function sendInsertionsReminder(){
     })
 }
 
+async function sendUptoInsertionsReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var count=0;
+        var releaseOrders = await ReleaseOrder.find({firm:user.firm,"insertions.state":0,"insertions.ISODate":{$lte: new Date()}});
+        var count = releaseOrders.length;
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
+                }
+            };
+            fcm.send(message, function(err){  
+                if(err) {
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
+    })
+}
+
+async function sendUptoInsertionsReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var count=0;
+        var releaseOrders = await ReleaseOrder.find({firm:user.firm,"insertions.state":0,"insertions.ISODate":{$lte: new Date()}});
+        var count = releaseOrders.length;
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
+                }
+            };
+            fcm.send(message, function(err){  
+                if(err) {
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
+    })
+}
+
+async function sendUptoInsertionsReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var count=0;
+        var count = releaseOrders.length;
+        var firm = await Firm.find({_id:user.firm})
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'Your firms plan is going to expire on '+firm.plan.expiresOn.toLocaleDateString()+' Please renew to continue using our services.'
+                }
+            };
+            fcm.send(message, function(err){  
+                if(err) {
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
+    })
+}
