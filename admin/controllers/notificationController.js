@@ -133,6 +133,7 @@ var CronJob1 = new CronJob({
         sendShadowReminder();
         sendDailyInsertionsReminder();
         sendUptoInsertionsReminder();
+        sendPlanReminder();
     },
     start: true,
     timeZone: 'Asia/Kolkata',
@@ -243,38 +244,7 @@ async function sendUptoInsertionsReminder(){
     })
 }
 
-async function sendUptoInsertionsReminder(){
-    var users = await User.find({});
-    users.forEach(async user =>{
-        var count=0;
-        var releaseOrders = await ReleaseOrder.find({firm:user.firm,"insertions.state":0,"insertions.ISODate":{$lte: new Date()}});
-        var count = releaseOrders.length;
-        user.deviceTokens.forEach(object => {
-            var message = {  
-                to : object.token,
-                notification : {
-                    title : "Ad Agency Manager",
-                    body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
-                }
-            };
-            fcm.send(message, function(err){  
-                if(err) {
-                    console.log({
-                        success: false,
-                        msg : "Something has gone wrong! "+err
-                    });
-                } else {
-                    console.log({
-                        success: true,
-                        msg : "Sent Notifications to users"
-                    });
-                }
-            });
-        })
-    })
-}
-
-async function sendUptoInsertionsReminder(){
+async function sendPlanReminder(){
     var users = await User.find({});
     users.forEach(async user =>{
         var count=0;
