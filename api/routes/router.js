@@ -139,6 +139,7 @@ router.post('/user/receipt/search/', receipt.queryReceipt);
 router.post('/user/receipt/advanced/search/', receipt.queryAdvancedReceipt);
 router.post('/user/receipt/download', receipt.generateReceiptPdf);
 router.post('/user/receipt/email', receipt.mailReceiptPdf);
+router.post('/user/receipt/previewHtml', receipt.previewreceipthtml);
 router.post('/user/receipt/advanced', receipt.createAdvancedReciept);
 router.post('/user/receipt/advanced/link', receipt.linkRecieptToInvoice);
 router.get('/user/receipts/:page', receipt.getReceipts);

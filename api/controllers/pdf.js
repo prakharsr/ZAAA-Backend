@@ -5,6 +5,7 @@ var fs = require('fs');
 var config = require('../../config');
 var roController = require('./releaseorderController');
 var invoiceController = require('./invoiceController');
+var receiptController = require('./receiptController');
 
 var mailgun = require('mailgun-js')({
     apiKey: config.mailgun_api_key,
@@ -201,7 +202,7 @@ module.exports.generateinvoice =  function(request,response,Details) {
 }
 
 module.exports.mailPaymentReceipt = function(request,response,Details) {
-    invoiceController.getROhtml(Details, content => {
+    receiptController.getreceipthtml(Details, content => {
         var options = {
             width: '210mm',
             height: '297mm'
@@ -215,14 +216,14 @@ module.exports.mailPaymentReceipt = function(request,response,Details) {
                 });
             }
             else {
-                mailFile(request, response, buffer, 'IN_'+Details.rno+'_'+Details.cname+'.pdf', response.locals.user.email , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
+                mailFile(request, response, buffer, 'RE_'+Details.rno+'_'+Details.cname+'.pdf', response.locals.user.email , request.body.to, request.body.cc, request.body.bcc ,'Release Order','Following is the release order');
             }
         });
     });
 }
 
 module.exports.generatePaymentReceipt =  function(request,response,Details) {
-    invoiceController.getROhtml(Details, content => {
+    receiptController.getreceipthtml(Details, content => {
         var options = {
             width: '210mm',
             height: '297mm'
@@ -238,7 +239,7 @@ module.exports.generatePaymentReceipt =  function(request,response,Details) {
             else {
                 response.writeHead(200, {
                     'Content-Type': 'application/pdf',
-                    'Content-Disposition': 'attachment; filename="IN_'+Details.rno+'_'+Details.cname+'.pdf"'
+                    'Content-Disposition': 'attachment; filename="RE_'+Details.rno+'_'+Details.cname+'.pdf"'
                 });
                 data.pipe(response);
             }
