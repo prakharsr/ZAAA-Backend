@@ -731,15 +731,10 @@ module.exports.check= function(request, response, user){
     uptoTodayPeriod(new Date());
     next15dayPeriod(new Date());
     next7dayPeriod(new Date());
-
-    var path = require("path");
-    var fs = require("fs");
-    var file = fs.readFileSync(path.resolve(__dirname, '../../public/templates/invoice.html'), 'utf8');
     
     response.send({
         success:true,
         user:response.locals.user,
-        firm:response.locals.firm,
-        file: file
+        firm:response.locals.firm
     })
 };
