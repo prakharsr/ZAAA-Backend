@@ -130,12 +130,13 @@ module.exports.deleteNotification = (request,response) => {
 }
 
 var CronJob1 = new CronJob({
-    cronTime: '* * * * *',
+    cronTime: '*/15 * * * *',
     onTick: function () {
         sendShadowReminder();
         sendDailyInsertionsReminder();
         sendUptoInsertionsReminder();
         sendPlanReminder();
+        sendInvoiceReminder();
     },
     start: true,
     timeZone: 'Asia/Kolkata',
@@ -256,6 +257,39 @@ async function sendPlanReminder(){
                 notification : {
                     title : "Ad Agency Manager",
                     body : 'Your firms plan is going to expire on '+firm.plan.expiresOn.toLocaleDateString()+' Please renew to continue using our services.'
+                }
+            };
+            fcm.send(message, function(err){  
+                if(err) {
+                    console.log({
+                        success: false,
+                        msg : "Something has gone wrong! "+err
+                    });
+                } else {
+                    console.log({
+                        success: true,
+                        msg : "Sent Notifications to users"
+                    });
+                }
+            });
+        })
+    })
+}
+
+async function sendInvoiceReminder(){
+    var users = await User.find({});
+    users.forEach(async user =>{
+        var invoice = await Invoice.find({_id:user.firm,"createdOn":new Date(new Date().getDate()-7),"pendingAmount":{$gt:0}})
+        invoice.forEach(inv=>{
+            count+=1;
+            sum+=inv.pendingAmount;
+        })
+        user.deviceTokens.forEach(object => {
+            var message = {  
+                to : object.token,
+                notification : {
+                    title : "Ad Agency Manager",
+                    body : 'You have '+count+' invoices upto last week with pending amount of ₹'+sum+" only."
                 }
             };
             fcm.send(message, function(err){  
