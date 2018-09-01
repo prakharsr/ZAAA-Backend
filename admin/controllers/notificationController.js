@@ -247,8 +247,6 @@ async function sendUptoInsertionsReminder(){
 async function sendPlanReminder(){
     var users = await User.find({});
     users.forEach(async user =>{
-        var count=0;
-        var count = releaseOrders.length;
         var firm = await Firm.find({_id:user.firm})
         user.deviceTokens.forEach(object => {
             var message = {  
