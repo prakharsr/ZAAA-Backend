@@ -1002,7 +1002,7 @@ function getreceipthtml(Details, callback) {
     req.end();
 }
 
-module.exports.getinvoicehtml = getinvoicehtml;
+module.exports.getreceipthtml = getreceipthtml;
 
 function createDocument(request, response, doc){
     var user = response.locals.user;
