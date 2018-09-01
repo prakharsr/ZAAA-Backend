@@ -1,6 +1,8 @@
 var Notification = require('../models/Notifications');
 var User = require('../../api/models/User');
 var Receipt = require('../../api/models/Receipt');
+var Firm = require('../../api/models/Firm');
+var ReleaseOrder = require('../../api/models/ReleaseOrder');
 var FCM = require('fcm-push');
 var serverkey = 'AAAAvsBQ9YQ:APA91bFjafZx6SqnGXcC3ujNH_qtaOQNFN-gBeqxpsr3MQaUMUdNJIxEL6h-x-dgFajjfP6a2R0nZpHA7TEl1xtflpia_pXVhVPhJwdRJoUDHXgyIGzMJHixvdveMDTbJRHcbiO-5C_R96SzJUafHKSFlZJQ2PmKXw';  //
 var fcm = new FCM(serverkey);
