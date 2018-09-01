@@ -131,7 +131,7 @@ module.exports.deleteNotification = (request,response) => {
 }
 
 var CronJob1 = new CronJob({
-    cronTime: '* */10 * * * *',
+    cronTime: '0,10,20,30,40,50 * * * *',
     onTick: function () {
         sendShadowReminder();
         sendDailyInsertionsReminder();
