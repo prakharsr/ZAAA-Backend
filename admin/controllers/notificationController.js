@@ -155,7 +155,7 @@ async function sendShadowReminder(){
             sum += receipt.paymentAmount;
             count+=1;
         });
-        if(count){
+        if(count!==0){
             user.deviceTokens.forEach(object => {
                 var message = {  
                     to : object.token,
@@ -195,7 +195,7 @@ async function sendDailyInsertionsReminder(){
                 }
             })
         });
-        if(count){
+        if(count!==0){
         user.deviceTokens.forEach(object => {
             var message = {  
                 to : object.token,
@@ -229,7 +229,7 @@ async function sendUptoInsertionsReminder(){
         var count=0;
         var releaseOrders = await ReleaseOrder.find({firm:user.firm,"insertions.state":0,"insertions.ISODate":{$lte: new Date()}});
         var count = releaseOrders.length;
-        if(count){
+        if(count!==0){
             user.deviceTokens.forEach(object => {
                 var message = {  
                     to : object.token,
@@ -304,7 +304,7 @@ async function sendInvoiceReminder(){
             count+=1;
             sum+=inv.pendingAmount;
         })
-        if(count){
+        if(count!==0){
             user.deviceTokens.forEach(object => {
                 var message = {  
                     to : object.token,
