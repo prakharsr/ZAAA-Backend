@@ -263,7 +263,6 @@ async function sendPlanReminder(){
             var timeDiff = Math.abs(firm.plan.expiresOn.getTime() - new Date().getTime());
             var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
             if(diffDays<=15){
-                firms.forEach(async firm =>{
                     var users = await User.find({firm:firm._id})
                     users.forEach(user=>{
                         var expiryDate = firm.plan.expiresOn.toLocaleString();
@@ -291,8 +290,7 @@ async function sendPlanReminder(){
                             });
                         })
                     })
-                })
-            }
+                }
         })
 }
 

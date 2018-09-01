@@ -678,10 +678,11 @@ module.exports.getCurrentUser=function(request, response){
 	
 	module.exports.saveToken = (request,response) =>{
 		var user = response.locals.user;
-		user.deviceTokens.push({
-			token: request.body.token
-		});
-		user.deviceTokens.filter((v,i,s) => {return s.indexOf(v) === i});
+		if(user.deviceTokens.indexOf(request.body.token)==-1){
+			user.deviceTokens.push({
+				token: request.body.token
+			});
+		}
 		user.save(err => {
 			if(err){
 				response.send({
@@ -700,11 +701,7 @@ module.exports.getCurrentUser=function(request, response){
 
 	module.exports.logout = (request,response) => {
 		var user = response.locals.user;
-		var tokens = user.deviceTokens;
-
-		for(var i = tokens.length-1; i--;)
-			tokens.splice(i, 1);
-
+		user.deviceTokens  = user.deviceTokens.filter(tokens=>tokens!==request.body.token)
 		user.save(err => {
 			if(err) {
 				response.send({
