@@ -678,25 +678,26 @@ module.exports.getCurrentUser=function(request, response){
 	
 	module.exports.saveToken = (request,response) =>{
 		var user = response.locals.user;
-		if(user.deviceTokens.indexOf(request.body.token)==-1){
+		if(user.deviceTokens.findIndex(M => M.token == request.body.token)==-1){
 			user.deviceTokens.push({
 				token: request.body.token
 			});
+
+			user.save(err => {
+				if(err){
+					response.send({
+						success: false,
+						msg: 'Cannot save token'
+					})
+				}
+				else{
+					response.send({
+						success: true,
+						msg: 'token saved'
+					})
+				}
+			})
 		}
-		user.save(err => {
-			if(err){
-				response.send({
-					success: false,
-					msg: 'Cannot save token'
-				})
-			}
-			else{
-				response.send({
-					success: true,
-					msg: 'token saved'
-				})
-			}
-		})
 	}
 
 	module.exports.logout = (request,response) => {
