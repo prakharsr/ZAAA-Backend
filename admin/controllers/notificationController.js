@@ -257,7 +257,7 @@ async function sendPlanReminder(){
                 to : object.token,
                 notification : {
                     title : "Ad Agency Manager",
-                    body : 'Your firms plan is going to expire on '+firm.plan.expiresOn.toLocaleDateString()+' Please renew to continue using our services.'
+                    body : 'Your firms plan is going to expire on '+firm.plan.expiresOn.toLocaleString()+' Please renew to continue using our services.'
                 }
             };
             fcm.send(message, function(err){  
