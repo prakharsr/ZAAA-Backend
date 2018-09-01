@@ -577,7 +577,7 @@ function formQuery(mediahouseID, clientID, executiveID, date, user, request){
         if(request.body.marked)
         query['insertions.marked'] = false;
         if(request.body.insertionStatus!==undefined)
-        query['insertions.status'] = request.body.insertionStatus;
+        query['insertions.state'] = request.body.insertionStatus;
         
         console.log(query);
         resolve(query);
