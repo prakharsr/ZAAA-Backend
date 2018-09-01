@@ -19,6 +19,7 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var perPage=20;
 var http = require('http');
+var fs = require('fs');
 
 var XLSX = require('xlsx');
 var base64 = require('base64-stream');
@@ -946,12 +947,11 @@ module.exports.updateReleaseOrder = function(request, response){
 };
 
 function getROhtml(Details, callback) {
-    var req = http.request(config.domain+'/templates/releaseOrder.html', res => {
-        var templateHtml = "";
-        res.on('data', chunk => {
-            templateHtml += chunk;
-        });
-        res.on('end', () => {
+    fs.readFile(path.resolve(__dirname, '../../public/templates/releaseOrder.html'),'utf8', (err, templateHtml) => {
+        if(err){
+            console.log(err);
+        }
+        else{
             var today = toReadableDate(new Date(Date.now()));
             
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
@@ -998,12 +998,10 @@ function getROhtml(Details, callback) {
               .replace('{{phone}}', Details.phone)
               .replace('{{email}}', Details.email)
               .replace('{{tnc}}', Details.tnc);
-
-            callback(templateHtml);
-        });
+              
+              callback(templateHtml);
+        }
     });
-    req.on('error', e => console.log(e));
-    req.end();
 }
 
 module.exports.getROhtml = getROhtml;
@@ -1012,7 +1010,6 @@ module.exports.getROhtml = getROhtml;
 module.exports.mailROPdf = function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
-    console.log(request.body);
     ReleaseOrder.findById(request.body.id, async function(err, releaseOrder){
         if(err){
             console.log(err);
@@ -1222,10 +1219,6 @@ function createDocument(request, response, doc){
     paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
     else if(doc.paymentType === 'NEFT')
     paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
-    console.log(doc);
-
-
-    console.log(doc.publicationGSTIN);
 
     var Details = {
         mediahouse :doc.publicationName,
@@ -1321,9 +1314,7 @@ function createDocument(request, response, doc){
         var t = ((taxamount*tax)/100).toFixed(2);
         Details['igstamount'] ='₹ '+t;
     }
-
     return Details;
-
 }
 
 module.exports.queryReleaseOrderByNo = function(request, response){

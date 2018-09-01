@@ -1,6 +1,7 @@
 var http = require('http');
 var pdf = require('html-pdf');
-var path = require('path')
+var path = require('path');
+var fs = require('fs');
 var config = require('../../config');
 var roController = require('./releaseorderController');
 var invoiceController = require('./invoiceController');
@@ -48,13 +49,11 @@ var mailFile=function (request, response, buffer, filename, from, to, cc, bcc, s
 };
 
 module.exports.generateInvoice = function(request,response,Details) {
-    var req = http.request(config.domain+'/templates/invoice.html', res => {
-        var templateHtml = "";
-
-        res.on('data', chunk => {
-            templateHtml += chunk;
-        });
-        res.on('end', () => {
+    fs.readFile(path.resolve(__dirname, '../../public/templates/invoice.html'), 'utf8', (err, templateHtml) => {
+        if(err){
+            console.log(err);
+        }
+        else{
             var today = new Date(Date.now());
             var dd = today.getDate();
             var mm = today.getMonth()+1; 
@@ -67,18 +66,18 @@ module.exports.generateInvoice = function(request,response,Details) {
             } 
             var today = dd+'/'+mm+'/'+yyyy;
             var total = Details.price + Details.fee + Details.tax;
-            var address = Details.add+',<br>'+Details.city+','+Details.state;
-            templateHtml = templateHtml.replace('{{logoimage}}', Details.image);
-            templateHtml = templateHtml.replace('{{firmName}}', Details.firmname);
-            templateHtml = templateHtml.replace('{{paymentId}}', Details.paymentId);
-            templateHtml = templateHtml.replace('{{gstin}}', Details.gstin);
-            templateHtml = templateHtml.replace('{{registeredAddress}}',address);
-            templateHtml = templateHtml.replace('{{date}}', today)
-            templateHtml = templateHtml.replace('{{price}}', Details.price)
-            templateHtml = templateHtml.replace('{{fee}}', Details.fee)
-            templateHtml = templateHtml.replace('{{tax}}', Details.tax)
-            templateHtml = templateHtml.replace('{{total}}', total)
-            templateHtml = templateHtml.replace('{{method}}', Details.method)
+            var address = Details.add+',<br>'+Details.city+','+Details.state
+             .replace('{{logoimage}}', Details.image)
+             .replace('{{firmName}}', Details.firmname)
+             .replace('{{paymentId}}', Details.paymentId)
+             .replace('{{gstin}}', Details.gstin)
+             .replace('{{registeredAddress}}',address)
+             .replace('{{date}}', today)
+             .replace('{{price}}', Details.price)
+             .replace('{{fee}}', Details.fee)
+             .replace('{{tax}}', Details.tax)
+             .replace('{{total}}', total)
+             .replace('{{method}}', Details.method)
 
             var options = {
                 width: '210mm',
@@ -93,10 +92,8 @@ module.exports.generateInvoice = function(request,response,Details) {
                     mailFile(request, response, buffer, 'invoice.pdf', 'Zenedo India <postmaster@adagencymanager.com>', Details.email ,'','','ZAAA Invoice','Following is the invoice of the plan you subscribe at ZAAA');
                 }
             });
-        });
+        }
     });
-    req.on('error', e => console.log(e));
-    req.end();
 }
 
 

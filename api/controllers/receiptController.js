@@ -888,7 +888,7 @@ module.exports.mailReceiptPdf = function(request, response) {
         }
         else{
             var Details = createDocument(request,response,receipt);
-            pdf.mailinvoice(request,response,Details);
+            pdf.mailreceipt(request,response,Details);
         }
     });
 }
@@ -913,12 +913,12 @@ module.exports.generateReceiptPdf = async function(request, response) {
         }
         else{
             var Details = createDocument(request,response,invoice);
-            pdf.generateinvoice(request,response,Details);
+            pdf.generatereceipt(request,response,Details);
         }
     });
 }
 
-module.exports.previewinvoicehtml = async function(request, response) {
+module.exports.previewreceipthtml = async function(request, response) {
     console.log(request.body);
     var doc = request.body.invoice;
     doc['flogo'] = config.domain+'/'+firm.LogoURL;
@@ -935,14 +935,14 @@ module.exports.previewinvoicehtml = async function(request, response) {
     doc['tnc'] = tnc;
 tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     var Details = createDocument(request,response,doc);
-    getinvoicehtml(Details, content => {
+    getreceipthtml(Details, content => {
         response.send({
             content: content
         });
     })
 };
 
-function getinvoicehtml(Details, callback) {
+function getreceipthtml(Details, callback) {
     var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
         var templateHtml = "";
         res.on('data', chunk => {

@@ -17,6 +17,8 @@ var multer = require('multer');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var http = require('http');
+var fs = require('fs');
+var path = require('path');
 var perPage=20;
 
 
@@ -871,12 +873,11 @@ module.exports.queryClientPayments = async function(request, response){
     };
     
     function getinvoicehtml(Details, callback) {
-        var req = http.request(config.domain+'/templates/PaymentInvoice.html', res => {
-            var templateHtml = "";
-            res.on('data', chunk => {
-                templateHtml += chunk;
-            });
-            res.on('end', () => {
+        fs.readFile(path.resolve(__dirname, '../../public/templates/PaymentInvoice.html'),'utf8', (err, templateHtml) => {
+            if(err){
+                console.log(err);
+            }
+            else{
                 var today = toReadableDate(new Date(Date.now()));
                 
                 templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
@@ -924,10 +925,8 @@ module.exports.queryClientPayments = async function(request, response){
                   .replace('{{email}}', Details.email);
     
                 callback(templateHtml);
-            });
+            }
         });
-        req.on('error', e => console.log(e));
-        req.end();
     }
     
     module.exports.getinvoicehtml = getinvoicehtml;
