@@ -155,28 +155,30 @@ async function sendShadowReminder(){
             sum += receipt.paymentAmount;
             count+=1;
         });
-        user.deviceTokens.forEach(object => {
-            var message = {  
-                to : object.token,
-                notification : {
-                    title : "Ad Agency Manager",
-                    body : 'You have '+count+' collected or shadow receipts with an total amount of ₹'+sum+' only.'
-                }
-            };
-            console.log(message);
-            fcm.send(message, function(err){  
-                if(err) {
-                    console.log({
-                        success: false,
-                        msg : "Something has gone wrong! "+err
-                    });
-                } else {
-                    console.log({
-                        msg : "Sent Notifications to users"
-                    });
-                }
-            });
-        })
+        if(count){
+            user.deviceTokens.forEach(object => {
+                var message = {  
+                    to : object.token,
+                    notification : {
+                        title : "Ad Agency Manager",
+                        body : 'You have '+count+' collected or shadow receipts with an total amount of ₹'+sum+' only.'
+                    }
+                };
+                console.log(message);
+                fcm.send(message, function(err){  
+                    if(err) {
+                        console.log({
+                            success: false,
+                            msg : "Something has gone wrong! "+err
+                        });
+                    } else {
+                        console.log({
+                            msg : "Sent Notifications to users"
+                        });
+                    }
+                });
+            })
+        }
     })
 }
 
@@ -193,6 +195,7 @@ async function sendDailyInsertionsReminder(){
                 }
             })
         });
+        if(count){
         user.deviceTokens.forEach(object => {
             var message = {  
                 to : object.token,
@@ -216,6 +219,7 @@ async function sendDailyInsertionsReminder(){
                 }
             });
         })
+        }
     })
 }
 
@@ -225,62 +229,70 @@ async function sendUptoInsertionsReminder(){
         var count=0;
         var releaseOrders = await ReleaseOrder.find({firm:user.firm,"insertions.state":0,"insertions.ISODate":{$lte: new Date()}});
         var count = releaseOrders.length;
-        user.deviceTokens.forEach(object => {
-            var message = {  
-                to : object.token,
-                notification : {
-                    title : "Ad Agency Manager",
-                    body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
-                }
-            };
-            console.log(message);
-            fcm.send(message, function(err){  
-                if(err) {
-                    console.log({
-                        success: false,
-                        msg : "Something has gone wrong! "+err
-                    });
-                } else {
-                    console.log({
-                        success: true,
-                        msg : "Sent Notifications to users"
-                    });
-                }
-            });
-        })
+        if(count){
+            user.deviceTokens.forEach(object => {
+                var message = {  
+                    to : object.token,
+                    notification : {
+                        title : "Ad Agency Manager",
+                        body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
+                    }
+                };
+                console.log(message);
+                fcm.send(message, function(err){  
+                    if(err) {
+                        console.log({
+                            success: false,
+                            msg : "Something has gone wrong! "+err
+                        });
+                    } else {
+                        console.log({
+                            success: true,
+                            msg : "Sent Notifications to users"
+                        });
+                    }
+                });
+            })
+        }
     })
 }
 
 async function sendPlanReminder(){
     var firms = await Firm.find({});
         firms.forEach(async firm =>{
-            var users = await User.find({firm:firm._id})
-            users.forEach(user=>{
-                var expiryDate = firm.plan.expiresOn.toLocaleString();
-                user.deviceTokens.forEach(object => {
-                    var message = {  
-                        to : object.token,
-                        notification : {
-                            title : "Ad Agency Manager",
-                            body : 'Your firms plan is going to expire on '+expiryDate+' Please renew to continue using our services.'
-                        }
-                    };
-                    console.log(message);
-                    fcm.send(message, function(err){  
-                        if(err) {
-                            console.log({
-                                success: false,
-                                msg : "Something has gone wrong! "+err
+            var timeDiff = Math.abs(firm.plan.expiresOn.getTime() - new Date().getTime());
+            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            if(diffDays<=15){
+                firms.forEach(async firm =>{
+                    var users = await User.find({firm:firm._id})
+                    users.forEach(user=>{
+                        var expiryDate = firm.plan.expiresOn.toLocaleString();
+                        user.deviceTokens.forEach(object => {
+                            var message = {  
+                                to : object.token,
+                                notification : {
+                                    title : "Ad Agency Manager",
+                                    body : 'Your firms plan is going to expire on '+expiryDate+' Please renew to continue using our services.'
+                                }
+                            };
+                            console.log(message);
+                            fcm.send(message, function(err){  
+                                if(err) {
+                                    console.log({
+                                        success: false,
+                                        msg : "Something has gone wrong! "+err
+                                    });
+                                } else {
+                                    console.log({
+                                        success: true,
+                                        msg : "Sent Notifications to users"
+                                    });
+                                }
                             });
-                        } else {
-                            console.log({
-                                success: true,
-                                msg : "Sent Notifications to users"
-                            });
-                        }
-                    });
+                        })
+                    })
                 })
-            })
+            }
         })
 }
 
@@ -294,28 +306,30 @@ async function sendInvoiceReminder(){
             count+=1;
             sum+=inv.pendingAmount;
         })
-        user.deviceTokens.forEach(object => {
-            var message = {  
-                to : object.token,
-                notification : {
-                    title : "Ad Agency Manager",
-                    body : 'You have '+count+' invoices upto last week with pending amount of ₹'+sum+" only."
-                }
-            };
-            console.log(message);
-            fcm.send(message, function(err){  
-                if(err) {
-                    console.log({
-                        success: false,
-                        msg : "Something has gone wrong! "+err
-                    });
-                } else {
-                    console.log({
-                        success: true,
-                        msg : "Sent Notifications to users"
-                    });
-                }
-            });
-        })
+        if(count){
+            user.deviceTokens.forEach(object => {
+                var message = {  
+                    to : object.token,
+                    notification : {
+                        title : "Ad Agency Manager",
+                        body : 'You have '+count+'invoices upto last week with pending amount of ₹'+sum+' only.'
+                    }
+                };
+                console.log(message);
+                fcm.send(message, function(err){  
+                    if(err) {
+                        console.log({
+                            success: false,
+                            msg : "Something has gone wrong! "+err
+                        });
+                    } else {
+                        console.log({
+                            success: true,
+                            msg : "Sent Notifications to users"
+                        });
+                    }
+                });
+            })
+        }
     })
 }

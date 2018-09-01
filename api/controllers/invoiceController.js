@@ -15,7 +15,6 @@ var Client = require('../models/Client');
 var mongoose = require('mongoose');
 var multer = require('multer');
 var mkdirp = require('mkdirp');
-var path = require('path');
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
