@@ -141,7 +141,7 @@ var CronJob1 = new CronJob({
     },
     start: true,
     timeZone: 'Asia/Kolkata',
-    runOnInit: false
+    runOnInit: true
 });
 
 async function sendShadowReminder(){
@@ -163,6 +163,7 @@ async function sendShadowReminder(){
                     body : 'You have '+count+' collected or shadow receipts with an total amount of ₹'+sum+' only.'
                 }
             };
+            console.log(message);
             fcm.send(message, function(err){  
                 if(err) {
                     console.log({
@@ -200,6 +201,7 @@ async function sendDailyInsertionsReminder(){
                     body : 'You have '+count+' insertions for today, Mark their status if advertised.'
                 }
             };
+            console.log(message);
             fcm.send(message, function(err){  
                 if(err) {
                     console.log({
@@ -231,6 +233,7 @@ async function sendUptoInsertionsReminder(){
                     body : 'You have '+count+' insertions not marked upto today, Mark their status if resolved.'
                 }
             };
+            console.log(message);
             fcm.send(message, function(err){  
                 if(err) {
                     console.log({
@@ -249,38 +252,42 @@ async function sendUptoInsertionsReminder(){
 }
 
 async function sendPlanReminder(){
-    var users = await User.find({});
-    users.forEach(async user =>{
-        var firm = await Firm.find({_id:user.firm})
-        user.deviceTokens.forEach(object => {
-            var message = {  
-                to : object.token,
-                notification : {
-                    title : "Ad Agency Manager",
-                    body : 'Your firms plan is going to expire on '+firm.plan.expiresOn.toLocaleString()+' Please renew to continue using our services.'
-                }
-            };
-            fcm.send(message, function(err){  
-                if(err) {
-                    console.log({
-                        success: false,
-                        msg : "Something has gone wrong! "+err
+    var firms = await Firm.find({});
+        firms.forEach(async firm =>{
+            var users = await User.find({firm:firm._id})
+            users.forEach(user=>{
+                var expiryDate = firm.plan.expiresOn.toLocaleString();
+                user.deviceTokens.forEach(object => {
+                    var message = {  
+                        to : object.token,
+                        notification : {
+                            title : "Ad Agency Manager",
+                            body : 'Your firms plan is going to expire on '+expiryDate+' Please renew to continue using our services.'
+                        }
+                    };
+                    console.log(message);
+                    fcm.send(message, function(err){  
+                        if(err) {
+                            console.log({
+                                success: false,
+                                msg : "Something has gone wrong! "+err
+                            });
+                        } else {
+                            console.log({
+                                success: true,
+                                msg : "Sent Notifications to users"
+                            });
+                        }
                     });
-                } else {
-                    console.log({
-                        success: true,
-                        msg : "Sent Notifications to users"
-                    });
-                }
-            });
+                })
+            })
         })
-    })
 }
 
 async function sendInvoiceReminder(){
     var users = await User.find({});
     users.forEach(async user =>{
-        var invoice = await Invoice.find({firm:user.firm,"createdOn":new Date(new Date().getDate()-7),"pendingAmount":{$gt:0}})
+        var invoice = await Invoice.find({firm:user.firm,"createdOn":new Date(new Date().getDate()-7),"pendingAmount":{$gt:0}});
         invoice.forEach(inv=>{
             count+=1;
             sum+=inv.pendingAmount;
@@ -293,6 +300,7 @@ async function sendInvoiceReminder(){
                     body : 'You have '+count+' invoices upto last week with pending amount of ₹'+sum+" only."
                 }
             };
+            console.log(message);
             fcm.send(message, function(err){  
                 if(err) {
                     console.log({
