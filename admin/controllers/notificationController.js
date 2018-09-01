@@ -280,7 +280,7 @@ async function sendPlanReminder(){
 async function sendInvoiceReminder(){
     var users = await User.find({});
     users.forEach(async user =>{
-        var invoice = await Invoice.find({_id:user.firm,"createdOn":new Date(new Date().getDate()-7),"pendingAmount":{$gt:0}})
+        var invoice = await Invoice.find({firm:user.firm,"createdOn":new Date(new Date().getDate()-7),"pendingAmount":{$gt:0}})
         invoice.forEach(inv=>{
             count+=1;
             sum+=inv.pendingAmount;

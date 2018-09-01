@@ -10,7 +10,7 @@ cfg.authyKey = process.env.AUTHY_API_KEY || "D9wNhG7vy0FadGLM6p0ztQNmsy2mPvu7";
 cfg.enableValidationSMS=1;
 cfg.mailgun_api_key = 'key-510704fc134355458f91b11bb7a98a57';
 cfg.DOMAIN = 'adagencymanager.com';
-cfg.domain = 'http://adagencymanager.com'
+cfg.domain = 'http://localhost:8080'
 
 
 module.exports = cfg;
