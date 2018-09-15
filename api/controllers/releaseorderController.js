@@ -431,6 +431,23 @@ try{
             });
         });
     });
+    Invoice.find({ firm: user.firm }).then(invoices => {
+        invoices.forEach(invoice => {
+            invoice.insertions.forEach(INinsertion => {
+                list.forEach(id => {
+                    if (INiInsertion._id == id) {
+                        INinsertion.state = request.body.state;
+                    }
+                });
+            });
+            
+            invoice.save(function(err) {
+                if (err) {
+                    success = false;
+                }
+            });
+        });
+    });
     MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
         console.log(invoices)
         invoices.forEach(invoice => {
