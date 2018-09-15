@@ -174,6 +174,7 @@ async function f(request, response, user){
         firm:user.firm,
         mediahouseID : releaseOrder.mediahouseID,
         clientID: releaseOrder.clientID,
+        sac:releaseOrder.sac,
         executiveID: releaseOrder.executiveID,
         faddress: firm.RegisteredAddress,
         femail: firm.Email,

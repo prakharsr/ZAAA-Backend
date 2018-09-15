@@ -51,6 +51,7 @@ var InvoiceSchema = new mongoose.Schema({
     executiveName:String,
     executiveOrg:String,
 
+    sac:Number,
 
     /*fields of release order to come */
     adGrossAmount:String,
