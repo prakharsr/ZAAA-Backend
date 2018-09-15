@@ -218,7 +218,5 @@ ReleaseOrderSchema.pre('save', function(next){
     }
 });
 
-
-ReleaseOrderSchema.index({releaseOrderNO:1,firm: 1});
 ReleaseOrderSchema.plugin(timestamps);
 module.exports = mongoose.model('ReleaseOrder', ReleaseOrderSchema);
