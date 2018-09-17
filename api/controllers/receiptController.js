@@ -959,13 +959,16 @@ function getreceipthtml(Details, callback) {
               .replace('{{gstin}}', Details.gstin)
               .replace('{{Address}}', Details.address)
               .replace('{{firmName}}', Details.firmname)
-              .replace('{{firmName1}}', Details.firmname1)
+              .replace('{{firmName1}}', Details.firmname)
               .replace('{{username}}', Details.username)
               .replace('{{mediahouse}}', Details.mediahouse)
               .replace('{{cname}}', Details.cname)
               .replace('{{amountw}}', Details.amount)
               .replace('{{receiptText}}', Details.receiptText)
-              .replace('{{tbody}}', Details.tbody);
+              .replace('{{tbody}}', Details.tbody)
+              .replace('{{tnc}}', Details.tnc)
+              .replace('{{rno}}', Details.rno)
+              .replace('{{date}}', Details.date);
             //   .replace('{{cgstin}}',Details.cgstin)
             //   .replace('{{date}}', today)
             //   .replace('{{scheme}}', Details.scheme)
@@ -1005,50 +1008,46 @@ function getreceipthtml(Details, callback) {
 
 module.exports.getreceipthtml = getreceipthtml;
 
-function createDocument(request, response, doc){
+async function createDocument(request, response, doc){
     var user = response.locals.user;
     var firm = response.locals.firm;
     var address= doc.faddress;
+    var paymentDetails="";
+    var table = "";
+    
+    if(doc.releaseOrder.paymentType === 'Cash')
+        paymentDetails = "Cash"
+    else if(doc.releaseOrder.paymentType === 'Credit')
+        paymentDetails = "Credit"
+    else if(doc.releaseOrder.paymentType === 'Cheque')
+        paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
+    else if(doc.releaseOrder.paymentType === 'NEFT')
+        paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
+        
+    
+    if(doc.advanced){
+        receiptText="in advance against code of ____________________________________________________."
+    }
+    else{
+        var inv = await Invoice.findById(mongoose.mongo.ObjectId(doc.invoiceID));
+        receiptText = "by "+paymentDetails+" against"+inv.invoiceNO;
+        table+="<table><tr><th>Invoice Amount</th><th>Invoice Date</th><th>Received Amount</th><th>Balance Amount</th></tr>";
+        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+doc.createdOn+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
+    }
     
     return {
-        mediahouse :doc.publicationName,
-        medition : doc.publicationEdition,
-        pgstin :'-',
         cname :doc.clientName,
-        cgstin :'-',
-        gstin :'-',
-        scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
-        username: user.name,
-        firmname: firm.FirmName,
-        firmname1: firm.FirmName,
-        rno : doc.invoiceNO,
-        remark: doc.Remark || "",
-        jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-        namount: '',
-        namountwords: '',
-        gstamount: '',
-        sgstamount: '-',
-        cgstamount: '-',
-        igstamount: '-',
-        igst: '-',
-        cgst: '-',
-        sgst: '-',
-        taxamount: '',
-        publicationdisc: '',
-        damount: '',
-        agenD1: doc.agencyDiscount1,
-        agenD2: doc.agencyDiscount2,
-        pubD: doc.publicationDiscount,
-        edition: doc.adEdition,
-        adtype:doc.adType,
-        hue:doc.adHue,
-        pullout: doc.pulloutName,
-        tnc: doc.tnc,
+        date: toReadableDate(doc.createdOn),
+        amountw: doc.netAmountWords,
+        receiptText: receiptText,
+        tbody: table,
+        tnc: tnc,
         image : config.domain+'/'+doc.flogo,
         sign: config.domain+'/'+doc.fsign,
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
         phone: "Phone: "+doc.fmobile || '',
-        email: "Email: "+doc.femail || ''
+        email: "Email: "+doc.femail || '',
+        firmname: firm.FirmName
     }
 
 }
