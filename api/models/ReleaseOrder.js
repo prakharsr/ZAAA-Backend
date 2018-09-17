@@ -126,6 +126,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
         secondary:Number
     },
     taxIncluded:Boolean,
+    clientPayment:Number,
     netAmountFigures:Number,
     netAmountWords:String,
     caption:String,

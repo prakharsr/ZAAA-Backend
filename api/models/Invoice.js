@@ -130,7 +130,13 @@ var InvoiceSchema = new mongoose.Schema({
     /*          */
     
     /* only marked insertions , kept for date purpose for invoice*/
-    insertions:[{date:{day:String,month:String,year:String}, marked:Boolean}],
+    insertions:[
+        {
+            date:{day:String,month:String,year:String},
+            marked:Boolean,
+            state:{type:Number, default: 0}
+        }
+    ],
 
  
 
