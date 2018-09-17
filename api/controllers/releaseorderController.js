@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
+var Invoice = require('../models/Invoice');
 var MediaHouseInvoice = require('../models/MediaHouseInvoice');
 var Category = require('../../admin/models/Categories');
 var Executive = require('../models/Executive');
@@ -228,6 +229,7 @@ async function f (request, response, user){
         taxIncluded:request.body.taxIncluded,
         netAmountFigures:request.body.netAmountFigures,
         netAmountWords:request.body.netAmountWords,
+        clientPayment:request.body.clientPayment,
         caption:request.body.caption,
         remark:request.body.remark,
         paymentType:request.body.paymentType,
@@ -435,7 +437,7 @@ try{
         invoices.forEach(invoice => {
             invoice.insertions.forEach(INinsertion => {
                 list.forEach(id => {
-                    if (INiInsertion._id == id) {
+                    if (INinsertion._id == id) {
                         INinsertion.state = request.body.state;
                     }
                 });
@@ -469,7 +471,7 @@ try{
 }
 catch(err){
     success = false;
-    console.log((error))
+    console.log((err))
 }
 finally{
     response.send({
