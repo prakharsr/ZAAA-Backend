@@ -973,7 +973,7 @@ function getROhtml(Details, callback) {
             console.log(err);
         }
         else{
-            var today = toReadableDate(new Date(Date.now()));
+            var today = toReadableDate(Details.createdAt);
             
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
               .replace('{{sign}}', Details.sign)
@@ -1018,7 +1018,8 @@ function getROhtml(Details, callback) {
               .replace('{{medition}}', Details.medition)
               .replace('{{phone}}', Details.phone)
               .replace('{{email}}', Details.email)
-              .replace('{{tnc}}', Details.tnc);
+              .replace('{{tnc}}', Details.tnc)
+              .replace('{{sac}}', Details.sac);
               
               callback(templateHtml);
         }
@@ -1284,6 +1285,7 @@ function createDocument(request, response, doc){
         image : config.domain+'/'+doc.flogo,
         sign: config.domain+'/'+doc.fsign,
         jurisdiction: doc.fjuris,
+        createdAt: doc.createdAt,
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
         phone: "Phone: "+doc.fmobile || '',
         email: "Email: "+doc.femail || ''
@@ -1311,7 +1313,7 @@ function createDocument(request, response, doc){
     var namount = doc.netAmountFigures;
     Details['taxamount'] ='₹ '+ (taxamount.toFixed(2));
     Details['namount'] ='₹ '+ (namount.toFixed(2));
-    Details['namountwords'] = amountToWords(Math.ceil(taxamount + (taxamount*tax)/100));
+    Details['namountwords'] = '₹ '+ (amountToWords(Math.ceil(taxamount + (taxamount*tax)/100)));
 
     if(firm.GSTIN.GSTType !== 'URD')
         Details['gstin'] =firm.GSTIN.GSTNo;
