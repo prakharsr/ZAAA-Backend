@@ -224,7 +224,7 @@ async function f(request, response, user){
         paymentAmount:request.body.paymentAmount,
         paymentBankName:request.body.paymentBankName,
         paymentAmountWords:request.body.paymentAmountWords,
-        
+        originalAmount:request.body.paymentAmount,
         invoiceID :request.body.invoiceID,
         receiptNO: rno,
         agencyName: firm.FirmName,
@@ -331,10 +331,13 @@ module.exports.createAdvancedReciept = async function(request,response){
     var receipt = new Receipt({
         advanced: true,
         receiptNO: rno,
+        originalReceiptNo : rno,
+        originalReceiptDate : new Date(),
         paymentType:request.body.paymentType,
         paymentDate:request.body.paymentDate,
         paymentNo:request.body.paymentNo,
         paymentAmount:request.body.paymentAmount,
+        originalAmount:request.body.paymentAmount,
         paymentBankName:request.body.paymentBankName,
         paymentAmountWords:request.body.paymentAmountWords,  
         remark:request.body.remark,              
@@ -353,8 +356,7 @@ module.exports.createAdvancedReciept = async function(request,response){
         publicationGSTIN:mediahouse?mediahouse.GSTIN:"",
         executiveName:executive.ExecutiveName,
         executiveOrg:executive.OrganizationName,
-        exceedingAmount: 0,
-        template: firm.ROTemplate,
+        template: firm.PRTemplate,
         firm:user.firm,
         mediahouseID : mediahouse?mediahouseID:null,
         clientID: clientID,
@@ -387,11 +389,8 @@ module.exports.createAdvancedReciept = async function(request,response){
     }) 
 }
 
-module.exports.linkRecieptToInvoice = async function(request,response){
-    var user = response.locals.user;
-    var firm = response.locals.firm;    
-    var receipt = await Receipt.findById(request.body.receiptID);
-    var invoice = await Invoice.findById(request.body.invoiceID);
+function linkWithHigherAmount(request, response,user, firm, receipt, invoice)
+{
     var tnc ='';
     var i=0;
     var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
@@ -399,10 +398,122 @@ module.exports.linkRecieptToInvoice = async function(request,response){
         tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
     }
     tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+        var counter = invoice.receiptSerial+1;
+        var rno = invoice.invoiceNO+'/'+counter;
+        var newReceipt = new Receipt({
+                advanced: false,
+                paymentType:receipt.paymentType,
+                paymentDate:receipt.paymentDate,
+                paymentNo:receipt.paymentNo,
+                paymentAmount:invoice.pendingAmount,
+                originalAmount:receipt.originalAmount,
+                originalReceiptDate: receipt.originalReceiptDate,
+                originalReceiptNo:receipt.originalReceiptNo,
+                linked:true,
+                paymentBankName:receipt.paymentBankName,
+                invoiceID : invoice._id,
+                paymentAmountWords:receipt.paymentAmountWords,  
+                remark:receipt.remark,              
+                receiptNO: rno,
+                agencyName: firm.FirmName,
+                agencyGSTIN: firm.GSTIN,
+                agencyPerson: user.name,
+                signature: user.signature,
+                
+                publicationName:invoice.publicationName,
+                publicationEdition:invoice.publicationEdition,
+                mediaType:invoice.mediaType,
+                publicationState:invoice.publicationState,
+                publicationGSTIN:invoice.publicationGSTIN,
+
+                clientName:receipt.clientName,
+                clientGSTIN:receipt.clientGSTIN,
+                clientState:receipt.clientState,
+                executiveName:receipt.executiveName,
+                executiveOrg:receipt.executiveOrg,
+                template: firm.ROTemplate,
+                firm:user.firm,
+                mediahouseID : invoice.mediahouseID,
+                clientID: invoice.clientID,
+                executiveID: invoice.executiveID,
+
+                
+
+                adGrossAmount:invoice.adGrossAmount,
+                publicationDiscount:invoice.publicationDiscount,
+                agencyDiscount1:invoice.agencyDiscount1,
+                taxAmount:invoice.taxAmount,
+                taxIncluded:invoice.taxIncluded,
+                otherCharges:invoice.otherCharges,
+                extraCharges:invoice.extraCharges,
+                caption:invoice.caption,
+                remark:invoice.remark,
+                faddress: firm.RegisteredAddress,
+                femail: firm.Email,
+                fmobile: firm.Mobile,
+                flogo: firm.LogoURL,
+                fsign: user.signature,
+                fjuris: juris,
+                tnc: tnc,
+                
+            });
+            newReceipt.save((err,doc) => {
+                if(err){
+                    console.log(err);
+                    response.send({
+                        success:false,
+                        msg: "Error! in saving Receipt" + err
+                    })
+                }
+                else{
+                    Invoice.update({ $and: [{firm:user.firm}, {"_id":invoice._id}]},
+                    { $set: { "collectedAmount": invoice.collectedAmount +  invoice.pendingAmount,
+                    "pendingAmount": 0
+                }}).exec(err,function(){
+                    if(err){
+                        response.send({
+                            success:false,
+                            msg:"Error in updating invoice details"
+                        });
+                    }
+                    else{
+                        Receipt.update({ $and: [{firm:user.firm}, {"_id":receipt._id}]},
+                        { $set: { "paymentAmount": receipt.paymentAmount - doc.paymentAmount
+                    }}).exec(function(err){
+                        if(err){
+                            response.send({
+                                success:false,
+                                msg:"error in saving advance reciept"
+                            })
+                        }
+                        else{  
+                                response.send({
+                                    success:true,
+                                    msg:"Receipt saved.",
+                                    receipt: receipt
+                                });
+                            }
+                        })
+                    }
+                });
+            }
+        });
+    }
+
+function linkWithLowerAmount( request, response, receipt, invoice){
+    var tnc ='';
+    var i=0;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+    for(; i < firm.INterms.length; i++){
+        tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
+    }
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+      
     
     receipt.invoiceID = request.body.invoiceID;
     var counter = invoice.receiptSerial+1;
     var rno = invoice.invoiceNO+'/'+counter;
+    receipt.linked = true;
     receipt.advanced = false;
     receipt.receiptNO = rno;
     receipt.adGrossAmount==invoice.adGrossAmount,
@@ -430,28 +541,6 @@ module.exports.linkRecieptToInvoice = async function(request,response){
             })
         }
         else{
-            if(receipt.paymentAmount > invoice.pendingAmount){
-                Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
-                { $set: { "collectedAmount": invoice.collectedAmount+invoice.pendingAmount,
-                "pendingAmount": 0,
-                "exceedingAmount":receipt.paymentAmount - invoice.pendingAmount
-            }}).exec(err,function(){
-                if(err){
-                    response.send({
-                        success:false,
-                        msg:"Error in updating invoice details"
-                    });
-                }
-                else{
-                    response.send({
-                        success:true,
-                        msg:"Receipt saved.",
-                        receipt: receipt
-                    });
-                }
-            });
-        }
-        else{
             Invoice.update({ $and: [{firm:user.firm}, {"_id":request.body.invoiceID}]},
             { $set: { "collectedAmount": invoice.collectedAmount + receipt.paymentAmount,
             "pendingAmount": invoice.pendingAmount - receipt.paymentAmount
@@ -471,8 +560,31 @@ module.exports.linkRecieptToInvoice = async function(request,response){
             }
         });
     }
-}
 });
+}
+
+module.exports.linkRecieptToInvoice = async function(request,response){
+    var user = response.locals.user;
+    var firm = response.locals.firm;    
+    var receipt = await Receipt.findById(request.body.receiptID);
+    var invoice = await Invoice.findById(request.body.invoiceID);
+    
+    if((invoice.clientID.equals(receipt.clientID))&&(invoice.executiveID.equals(receipt.executiveID))){
+        if(receipt.paymentAmount  > invoice.pendingAmount){
+            linkWithHigherAmount(request, response,user,firm,receipt,invoice);
+            return;
+        }
+        else{
+            linkWithLowerAmount(request, response, user, firm , receipt, invoice);
+            return;
+        }    
+    }
+    else{
+        response.send({
+            success:false,
+            msg:"Invoice contains different client or executive than reciept."
+        })
+    }
 }
 
 module.exports.getReceipt = function(request,response){
