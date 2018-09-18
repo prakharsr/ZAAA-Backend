@@ -84,6 +84,13 @@ var ReceiptSchema = new mongoose.Schema({
     paymentDate:Date,
     paymentNo:String,
     paymentAmount:Number,
+    originalAmount:Number,
+    originalReceiptNo : String,
+    originalReceiptDate: Date,
+    linked: {
+        type: Boolean,
+        default:false
+    },
     paymentBankName:String,
     paymentAmountWords:String,
 
