@@ -392,6 +392,8 @@ module.exports.createAdvancedReciept = async function(request,response){
 
 function linkWithHigherAmount(request, response,user, firm, receipt, invoice)
 {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
     var tnc ='';
     var i=0;
     var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
