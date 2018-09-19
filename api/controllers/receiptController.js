@@ -627,7 +627,7 @@ module.exports.getReceipts = function(request, response){
     Receipt.find({firm:user.firm})
     .limit(perPage)
     .skip((perPage*request.params.page) - perPage)
-    .sort(-'date')
+    .sort(-'createdAt')
     .exec(function(err, receipt){
         if(err){
             console.log("here");
@@ -859,6 +859,7 @@ module.exports.queryAdvancedReceipt = async function(request, response){
     Receipt.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort({"createdAt":-1})
     .exec(function(err, receipt){
         if(err){
             console.log(err+ "");
