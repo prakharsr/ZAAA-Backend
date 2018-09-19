@@ -366,11 +366,16 @@ module.exports.clientInvoiceReports = function (request, response) {
                         var index;
                         var index = +i + 1
                         var otherCharge = invoice.otherCharges[i];
+                        if(otherCharge.length > 0)
+                        {
+                            
                         var otherChargesString = "";
                         for(var i = 0; i< otherCharge.length && i < 8; ++i){
                             index = i+1;
                             otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
                         } 
+                        
+                        }
                         obj["Other Charges"] =otherChargesString;
                     }
                     if(invoice.insertions.length> 0){
