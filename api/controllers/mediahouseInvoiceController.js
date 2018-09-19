@@ -416,7 +416,7 @@ function saveSummarySheet(request, response){
 }
 
 
-module.exports.generateSummarySheet = function(request, response){
+module.exports.generateSummarySheet = async function(request, response){
 var user = response.locals.user;
 var firm = response.locals.firm;
     try {
