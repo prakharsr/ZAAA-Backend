@@ -371,6 +371,8 @@ module.exports.getMHInvoicesForRO = function(request, response){
 
 
 function saveSummarySheet(request, response){
+    var user = response.locals.user;
+var firm = response.locals.firm;
 
     return new Promise((resolve, reject) => {
             
@@ -417,8 +419,6 @@ function saveSummarySheet(request, response){
 
 
 module.exports.generateSummarySheet = async function(request, response){
-var user = response.locals.user;
-var firm = response.locals.firm;
     try {
         var done = await saveSummarySheet(request, response);
         if(done){
