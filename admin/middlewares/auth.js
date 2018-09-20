@@ -15,7 +15,7 @@ var unAuthRoutes = [
 ];
 
 function getAdmin(token,req,res, cb){
-    var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
+    jwt.verify(token, config.SECRET, function(err,decoded){
         Admin.findById(decoded.id, function(err, doc) {
             if (err || !doc) {
                 return  cb(err,null);

@@ -42,6 +42,7 @@ router.get('/category/search/:keyword', category.searchCategories);
 router.post('/notifications',notifs.getNotifications);
 router.delete('/notifications',notifs.deleteNotification);
 router.post('/notifications/send',notifs.sendNotifs);
+router.post('/ticker/send',notifs.tickerNotification);
 
 
 

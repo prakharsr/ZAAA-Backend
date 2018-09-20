@@ -65,23 +65,33 @@ module.exports.sendNotifs = async (request,response) => {
                     });
                 })
             })
-            if(!request.body.oneTime){
-                var notification = new Notification({
-                    title : request.body.title,
-                    body : request.body.notifBody
-                });
-                notification.save((err) => {
-                    if(err){
-                        comsole.log('Cannot save notification but it was sent');
-                    }
-                })
-            }
             response.send({
                 success: suc,
                 msg: suc ? "Sent Successfully" : "Failed"
             })
         }
     });
+}
+
+module.exports.tickerNotification = (request,response) =>{
+    var notification = new Notification({
+        title : request.body.title,
+        body : request.body.notifBody
+    });
+    notification.save((err) => {
+        if(err){
+            response.send({
+                success: false,
+                msg: "Cannot send notification"
+            })
+        }
+        else{      
+            response.send({
+                success: true,
+                msg: "Notification Sent"
+            })
+        }
+    })
 }
 
 module.exports.getNotifications = (request,response) =>{
@@ -131,7 +141,7 @@ module.exports.deleteNotification = (request,response) => {
 }
 
 var CronJob1 = new CronJob({
-    cronTime: '0,10,20,30,40,50 * * * *',
+    cronTime: '00 00 09 * * *',
     onTick: function () {
         sendShadowReminder();
         sendDailyInsertionsReminder();
@@ -141,7 +151,7 @@ var CronJob1 = new CronJob({
     },
     start: true,
     timeZone: 'Asia/Kolkata',
-    runOnInit: true
+    runOnInit: false
 });
 
 async function sendShadowReminder(){

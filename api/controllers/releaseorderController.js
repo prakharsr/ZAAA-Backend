@@ -1245,10 +1245,10 @@ function createDocument(request, response, doc){
     var Details = {
         mediahouse :doc.publicationName,
         medition : doc.publicationEdition,
-        pgstin :'-',
+        pgstin :'Unregistered',
         cname :doc.clientName,
-        cgstin :'-',
-        gstin :'-',
+        cgstin :'Unregistered',
+        gstin :'Unregistered',
         sac:doc.sac|| '',
         scheme :doc.adSchemePaid+'+'+doc.adSchemeFree,
         insertions :insData,
@@ -1286,9 +1286,9 @@ function createDocument(request, response, doc){
         sign: config.domain+'/'+doc.fsign,
         jurisdiction: doc.fjuris,
         createdAt: doc.createdAt,
-        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-        phone: "Phone: "+doc.fmobile || '',
-        email: "Email: "+doc.femail || ''
+        address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
+        phone: "Contact: "+doc.fmobile || '',
+        email: "Email: "+doc.femail+"<br>"+(firm.Website || '') || '-'
     }
 
     if(doc.adSchemeFree === 0);

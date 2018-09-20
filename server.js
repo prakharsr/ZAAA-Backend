@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var bbodyParser = require('busboy-body-parser');
 var path = require('path');
 var auth  =require('./api/middleware/auth');
+var adauth  =require('./admin/middleware/auth');
 
 var corsOptions = {
     "origin": "*",
@@ -36,7 +37,7 @@ app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 app.use('/api', auth, require('./api/routes/router'));
 app.use('/api', auth, bbodyParser(), require('./api/routes/excelrouter'));
-app.use('/adminapi', require('./admin/routes/router'));
+app.use('/adminapi',adauth, require('./admin/routes/router'));
 
 mongoose.connect('mongodb://localhost/zaaaDB', function(err){
 	if(err){
