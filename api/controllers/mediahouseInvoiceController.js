@@ -189,6 +189,9 @@ function formQuery(mediahouseID, date, user, request){
         if(request.body.releaseOrderNO){
             query['releaseOrderNO']=request.body.releaseOrderNO
         }
+        if((request.body.batchID !== undefined)&&(request.body.batchID != -1)){
+            query['insertions.batchID'] = request.body.batchID;
+        }
         
         if(request.body.insertionPeriod){
             to = new Date();
@@ -205,6 +208,33 @@ function formQuery(mediahouseID, date, user, request){
         resolve(query);
         
     })
+}
+
+module.exports.getBatchIDs = function(request, response){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    MediaHouseInvoice.find(
+        { firm: firm},
+        {
+            "insertions.batchID":1,
+        }
+    )
+    .sort({"insertions.batchIDs":1})
+    .exec(function(err, batchIDs){
+        if(err){
+            response.send({
+                success:false,
+                msg:"Error in Finding BatchIDs"
+            })
+        }
+        else{
+            response.send({
+                success:true,
+                batchIDs: batchIDs
+            })
+        }
+    })
+
 }
         
 module.exports.querySummarySheet =async function(request, response){
@@ -340,14 +370,14 @@ module.exports.getMHInvoicesForRO = function(request, response){
 };
 
 
+function saveSummarySheet(request, response){
+    var user = response.locals.user;
+var firm = response.locals.firm;
 
-
-
-module.exports.generateSummarySheet = function(request, response){
-var user = response.locals.user;
-try {
+    return new Promise((resolve, reject) => {
+            
     var mhis = request.body.mhis; // { _id, amount: number }[]
-    
+    var batchID = "SummarySheet-"+firm.SSSerial;
     MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
         invoices.forEach(invoice => {
             invoice.insertions.forEach(mhiInsertion => {
@@ -360,6 +390,7 @@ try {
                         mhiInsertion.paymentMode =request.body.paymentType;
                         mhiInsertion.paymentAmount = request.body.paymentAmount
                         mhiInsertion.paymentBankName =request.body.paymentBankName;
+                        mhiInsertion.batchID = batchID;
                         
                     }
                 });
@@ -367,24 +398,42 @@ try {
             
             invoice.save(function(err) {
                 if (err) {
-                    response.send({
-                        success: false,
-                        msg: "error" + err
+                    reject(err)
+                }
+                else{
+                    firm.SSSerial += 1;
+                    firm.save(function(err){
+                        if(err){
+                            reject(err);
+                        }
+                        else{
+                            resolve(true);
+                        }
                     });
                 }
             });
         });
     });
-}
-catch (err) {
-    if (err)
-    console.log(err)
+})   
 }
 
-response.send({
-    success:true,
-    msg:"done"
-})
+
+module.exports.generateSummarySheet = async function(request, response){
+    try {
+        var done = await saveSummarySheet(request, response);
+        if(done){
+            response.send({
+                success:true,
+                msg:"Done"
+            })
+        }
+    }
+    catch (err) {
+            response.send({
+                success:false,
+                msg:"Error in saving Summay Sheet data"
+            })
+    }
 };
 
 module.exports.queryMediaHouseReports =async function(request, response){
@@ -424,6 +473,7 @@ MediaHouseInvoice
                 "paymentNo":"$insertions.paymentNo",
                 "paymentBankName":"$insertions.paymentBankName",
                 "_id": "$insertions._id",
+                "batchID":"$insertions.batchID",
 
                 "MHIDate":"$MHIDate",
                 "MHIGrossAmount":"$MHIGrossAmount",

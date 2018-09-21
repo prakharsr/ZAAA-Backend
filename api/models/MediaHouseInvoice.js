@@ -35,6 +35,7 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
         paymentNo:String,
         paymentAmount:Number,
         paymentBankName:String,
+        batchID:String
     }
     ],
     date: {

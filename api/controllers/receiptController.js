@@ -207,6 +207,7 @@ async function f(request, response, user){
         var counter = invoice.receiptSerial+1;
         var rno = invoice.invoiceNO+'/'+counter;  
         var tnc ='';
+        var i = 0;
         var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
         for(; i < firm.INterms.length; i++){
             tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
@@ -391,6 +392,8 @@ module.exports.createAdvancedReciept = async function(request,response){
 
 function linkWithHigherAmount(request, response,user, firm, receipt, invoice)
 {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
     var tnc ='';
     var i=0;
     var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
@@ -501,6 +504,8 @@ function linkWithHigherAmount(request, response,user, firm, receipt, invoice)
     }
 
 function linkWithLowerAmount( request, response, receipt, invoice){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
     var tnc ='';
     var i=0;
     var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
@@ -627,7 +632,7 @@ module.exports.getReceipts = function(request, response){
     Receipt.find({firm:user.firm})
     .limit(perPage)
     .skip((perPage*request.params.page) - perPage)
-    .sort(-'date')
+    .sort(-'createdAt')
     .exec(function(err, receipt){
         if(err){
             console.log("here");
@@ -859,6 +864,7 @@ module.exports.queryAdvancedReceipt = async function(request, response){
     Receipt.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
+    .sort({"createdAt":-1})
     .exec(function(err, receipt){
         if(err){
             console.log(err+ "");

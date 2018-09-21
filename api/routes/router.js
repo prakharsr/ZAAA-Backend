@@ -149,6 +149,7 @@ router.patch('/user/receipt/:id', receipt.updateReceipt);
 router.post('/user/receipt/status', receipt.receiptStatus);
 router.post('/user/receipt/cancel', receipt.cancelReceipt);
 
+router.post('/user/batchID', mediahouseInvoice.getBatchIDs);
 router.post('/user/mediahouseinvoice/', mediahouseInvoice.createMHInvoice);
 router.post('/user/mediahouseinvoice/pre', mediahouseInvoice.getMHInvoicesForRO);
 router.post('/user/mediahouseinvoice/search', mediahouseInvoice.queryMediaHouseInvoices);

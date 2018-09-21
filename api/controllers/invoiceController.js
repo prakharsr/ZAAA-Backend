@@ -683,7 +683,6 @@ module.exports.queryClientPayments = async function(request, response){
                 });
             }
             else{
-                
                 Invoice.findByIdAndRemove(request.params.id,function(err){
                     if(err){
                         console.log(err);
@@ -878,7 +877,7 @@ module.exports.queryClientPayments = async function(request, response){
                 console.log(err);
             }
             else{
-                var today = toReadableDate(new Date(Date.now()));
+                var today = toReadableDate(Details.createdAt);
                 
                 templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
                   .replace('{{sign}}', Details.sign)
@@ -922,7 +921,8 @@ module.exports.queryClientPayments = async function(request, response){
                   .replace('{{premam}}', Details.premam)
                   .replace('{{medition}}', Details.medition)
                   .replace('{{phone}}', Details.phone)
-                  .replace('{{email}}', Details.email);
+                  .replace('{{email}}', Details.email)
+                  .replace('{{payday}}', Details.payday);
     
                 callback(templateHtml);
             }
@@ -1016,12 +1016,17 @@ module.exports.queryClientPayments = async function(request, response){
         else if(doc.releaseOrder.paymentType === 'NEFT')
         paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
         console.log(doc);
+
+        var payday="";
+        if(doc.paymentDate)
+            payday = (doc.paymentDate - doc.createdAt)/864000000;
     
         var Details = {
             mediahouse :doc.releaseOrder.publicationName,
             cname :doc.releaseOrder.clientName,
-            cgstin :'-',
-            gstin :'-',
+            cgstin :'Unregistered',
+            gstin :'Unregistered',
+            createdAt: doc.createdAt,
             scheme :doc.releaseOrder.adSchemePaid+'+'+doc.releaseOrder.adSchemeFree,
             insertions :insData,
             username: user.name,
@@ -1053,14 +1058,16 @@ module.exports.queryClientPayments = async function(request, response){
             pullout: doc.releaseOrder.pulloutName,
             remark: remark,
             tnc: doc.tnc,
+            sac: doc.releaseOrder.sac,
             image : config.domain+'/'+doc.flogo,
             sign: config.domain+'/'+doc.fsign,
-            address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-            phone: "Phone: "+doc.fmobile || '',
-            email: "Email: "+doc.femail || ''
+            address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
+            phone: "Contact: "+doc.fmobile || '',
+            email: "Email: "+doc.femail+"<br>"+(firm.Website || '') || '-',
+            payday: payday
         }
     
-        if(doc.adSchemeFree === 0);
+        if(doc.adSchemeFree === 0)
         Details['scheme'] = 'NA';
         var pubam = doc.publicationDiscount.percentage ? (gamount*doc.publicationDiscount.amount)/100 : doc.publicationDiscount.amount;  
         Details['pubam'] ="₹ "+pubam;
