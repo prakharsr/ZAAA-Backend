@@ -1002,7 +1002,7 @@ module.exports.mailReceiptPdf = function(request, response) {
             });
         }
         else{
-            var Details = createDocument(request,response,receipt);
+            var Details = await createDocument(request,response,receipt);
             pdf.mailPaymentReceipt(request,response,Details);
         }
     });
@@ -1012,7 +1012,7 @@ module.exports.generateReceiptPdf = async function(request, response) {
     var user = response.locals.user;
     var firm = response.locals.firm;
     console.log(request.body);
-    Receipt.findById(request.body.id, async function(err, invoice){
+    Receipt.findById(request.body.id, async function(err, receipt){
         if(err){
             console.log(err);
             response.send({
@@ -1020,36 +1020,38 @@ module.exports.generateReceiptPdf = async function(request, response) {
                 msg: err 
             });
         }
-        else if(!invoice){
+        else if(!receipt){
             response.send({
                 success :false,
                 msg: 'Receipt not found' 
             });
         }
         else{
-            var Details = createDocument(request,response,invoice);
+            var Details = await createDocument(request,response,invoice);
             pdf.generatePaymentReceipt(request,response,Details);
         }
     });
 }
 
 module.exports.previewreceipthtml = async function(request, response) {
-    console.log(request.body);
-    var doc = request.body.invoice;
-    doc['flogo'] = config.domain+'/'+firm.LogoURL;
-    doc['fsign'] = config.domain+'/'+user.signature;
-    var juris = firm.Jurisdication ? firm.Jurisdication: firm.address.city;;
+    var doc = request.body.receipt;
+    var firm = response.locals.firm;
+    var user = response.locals.user;
+    doc['flogo'] = config.domain+''+firm.LogoURL;
+    doc['fsign'] = config.domain+''+user.signature;
+    var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;;
     doc['faddress'] = firm.RegisteredAddress;
     doc['fmobile'] = firm.Mobile;
     doc['femail'] = firm.Email;
     var tnc ='';
     var i = 0;
-    for(; i < firm.ROterms.length; i++){
-        tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+    for(; i < firm.PRterms.length; i++){
+        tnc += (i+1)+'.'+firm.PRterms[i]+'<br>';
     }
     doc['tnc'] = tnc;
 tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
-    var Details = createDocument(request,response,doc);
+    var Details = await createDocument(request,response,doc);
+    console.log(Details);
     getreceipthtml(Details, content => {
         response.send({
             content: content
@@ -1063,8 +1065,6 @@ function getreceipthtml(Details, callback) {
             console.log(err);
         }
         else{
-            var today = toReadableDate(new Date(Date.now()));
-            
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
               .replace('{{sign}}', Details.sign)
               .replace('{{email}}', Details.email)
@@ -1082,37 +1082,6 @@ function getreceipthtml(Details, callback) {
               .replace('{{tnc}}', Details.tnc)
               .replace('{{rno}}', Details.rno)
               .replace('{{date}}', Details.date);
-            //   .replace('{{cgstin}}',Details.cgstin)
-            //   .replace('{{date}}', today)
-            //   .replace('{{scheme}}', Details.scheme)
-            //   .replace('{{insertions}}', Details.insertions)
-            //   .replace('{{dper}}', Details.dper)
-            //   .replace('{{damount}}', Details.damount)
-            //   .replace('{{namount}}', Details.namount)
-            //   .replace('{{rno}}', Details.rno)
-            //   .replace('{{hue}}', Details.hue)
-            //   .replace('{{adtype}}', Details.adtype)
-            //   .replace('{{edition}}', Details.edition)
-            //   .replace('{{pubD}}', Details.pubD)
-            //   .replace('{{agenD1}}', Details.agenD1)
-            //   .replace('{{agenD2}}', Details.agenD2)
-            //   .replace('{{publicationdisc}}', Details.publicationdisc)
-            //   .replace('{{taxamount}}', Details.taxamount)
-            //   .replace('{{igst}}', Details.igst)
-            //   .replace('{{cgst}}', Details.cgst)
-            //   .replace('{{sgst}}', Details.sgst)
-            //   .replace('{{gstamount}}', Details.gstamount)
-            //   .replace('{{igstamount}}', Details.igstamount)
-            //   .replace('{{cgstamount}}', Details.cgstamount)
-            //   .replace('{{sgstamount}}', Details.sgstamount)
-            //   .replace('{{namountwords}}', Details.namountwords)
-            //   .replace('{{paymentDetails}}', Details.paymentDetails)
-            //   .replace('{{remark}}', Details.remark)
-            //   .replace('{{pullout}}', Details.pullout)
-            //   .replace('{{caddress}}', Details.caddress)
-            //   .replace('{{maddress}}', Details.maddress)
-            //   .replace('{{premam}}', Details.premam)
-            //   .replace('{{medition}}', Details.medition)
 
             callback(templateHtml);
         }
@@ -1122,41 +1091,46 @@ function getreceipthtml(Details, callback) {
 module.exports.getreceipthtml = getreceipthtml;
 
 async function createDocument(request, response, doc){
+    console.log(doc);
     var user = response.locals.user;
     var firm = response.locals.firm;
     var address= doc.faddress;
     var paymentDetails="";
     var table = "";
+    var receiptText = "";
     
-    if(doc.releaseOrder.paymentType === 'Cash')
-        paymentDetails = "Cash"
-    else if(doc.releaseOrder.paymentType === 'Credit')
-        paymentDetails = "Credit"
-    else if(doc.releaseOrder.paymentType === 'Cheque')
-        paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
-    else if(doc.releaseOrder.paymentType === 'NEFT')
-        paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
+    // if(doc.releaseOrder.paymentType === 'Cash')
+    //     paymentDetails = "Cash"
+    // else if(doc.releaseOrder.paymentType === 'Credit')
+    //     paymentDetails = "Credit"
+    // else if(doc.releaseOrder.paymentType === 'Cheque')
+    //     paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
+    // else if(doc.releaseOrder.paymentType === 'NEFT')
+    //     paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
         
     
     if(doc.advanced){
-        receiptText="in advance against code of ____________________________________________________."
+        receiptText="in advance against code of _______________________________________________________________.";
+        doc.createdAt = new Date(Date.now())
     }
     else{
         var inv = await Invoice.findById(mongoose.mongo.ObjectId(doc.invoiceID));
         receiptText = "by "+paymentDetails+" against"+inv.invoiceNO;
         table+="<table><tr><th>Invoice Amount</th><th>Invoice Date</th><th>Received Amount</th><th>Balance Amount</th></tr>";
-        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+doc.createdOn+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
+        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+doc.createdAt+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
     }
+
+    console.log(doc.createdAt)
     
     return {
         cname :doc.clientName,
-        date: toReadableDate(doc.createdOn),
-        amountw: doc.netAmountWords,
+        date: doc.createdAt? toReadableDate(doc.createdAt): '',
+        amountw: amountToWords(doc.paymentAmountWords),
         receiptText: receiptText,
         tbody: table,
-        tnc: tnc,
-        image : config.domain+'/'+doc.flogo,
-        sign: config.domain+'/'+doc.fsign,
+        tnc: doc.tnc,
+        image : doc.flogo,
+        sign: doc.fsign,
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
         phone: "Phone: "+doc.fmobile || '',
         email: "Email: "+doc.femail || '',
@@ -1305,3 +1279,42 @@ function toReadableDate(a){
     } 
     return dd+'/'+mm+'/'+yyyy;
 }
+
+
+function amountToWords(num) {
+    if (!num) {
+      return "Zero Only";
+    }
+
+    var a = [
+      '',
+      'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ',
+      'Ten ',
+      'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '
+    ];
+    
+    var b = [
+      '', '',
+      'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+    ];
+    
+    var c = ['Crore ', 'Lakh ', 'Thousand ', 'Hundred '];
+  
+    if ((num = num.toString()).length > 9)
+      return 'overflow';
+
+    var n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    
+    if (!n)
+      return;
+      
+    let str = '';
+
+    for (let i = 0; i < 4; ++i) {
+      str += (n[i + 1] != 0) ? (a[Number(n[i + 1])] || b[n[i + 1][0]] + ' ' + a[n[i + 1][1]]) + c[i] : '';
+    }
+
+    str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only' : '';
+    
+    return str;
+  }
