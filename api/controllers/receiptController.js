@@ -1122,8 +1122,8 @@ async function createDocument(request, response, doc){
     else{
         var inv = await Invoice.findById(mongoose.mongo.ObjectId(doc.invoiceID));
         receiptText = "by "+paymentDetails+" against"+inv.invoiceNO;
-        table+="<table><tr><th>Invoice Amount</th><th>Invoice Date</th><th>Received Amount</th><th>Balance Amount</th></tr>";
-        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+doc.createdAt+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
+        table+="<table class='table table-bordered table-sm' style='font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;'><tr><th style='background: rgb(128, 128, 204)'>Invoice Amount</th><th style='background: rgb(128, 128, 204)>Invoice Date</th><th style='background: rgb(128, 128, 204)'>Received Amount</th><th style='background: rgb(128, 128, 204)'>Balance Amount</th></tr>";
+        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+toReadableDate(new Date(doc.createdAt))+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
     }
 
     console.log(doc.createdAt)
