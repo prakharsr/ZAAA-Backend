@@ -14,15 +14,15 @@
             <img src="{{logoimage}}" style="height:150px; max-width:240px; margin-top: 20px; margin-left: 20px;">
         </div>
         <div class="col" style="text-align: right; font-size:12px; margin-top: 20px;">
-            <p><h6>{{firmName}},</h6><br> 
+            <p><h6>{{firmName}},</h6>
                 {{Address}}<br>
                 {{phone}}<br>
                 {{email}}
             </p>
         </div>
     </div>
-    <div style="position: relative; left: 250px; padding: 20px; background: rgb(128, 128, 204)"><h5>Invoice</h5></div>
-    <table class="table table-bordered table-sm" style="font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+    <div style="position: relative; left: 230px; width:150px; padding: 10px; margin-bottom: 10px; background: rgb(167, 167, 211)"><h5>Release Order</h5></div>
+    <table class="table table-bordered table-sm" style="font-size:10px; width: 560px; margin-bottom: 10px; padding-bottom: 5px;">
         <tr>
             <th colspan="3">
                 <div class='row'>
@@ -64,26 +64,26 @@
                 <div class="row">
                     <div class="col" style="text-align: left;">
                         Advertisement Details: 
-                        Ad Type      : {{adtype}}<br>
-                        Pullout Name : {{pullout}}<br>
-                        Edition      : {{edition}}
+                        <span class="unbold">Ad Type      :</span> {{adtype}}<br>
+                        <span class="unbold">Pullout Name :</span> {{pullout}}<br>
+                        <span class="unbold">Edition      :</span> {{edition}}
                     </div>
                     <div class="col" style="text-align: left;">
                         <br>
-                        <span class="unbold"> Scheme : {{scheme}}<br>
-                            <span class="unbold"> Hue    : {{hue}}
-                            </div>
+                        <span class="unbold"> Scheme :</span> {{scheme}}<br>
+                        <span class="unbold"> Hue    :</span> {{hue}}
+                    </div>
                         </div>
                     </th>
                 </tr>
             </table>
-            <table class="table table-bordered table-sm" style="font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+            <table class="table table-bordered table-sm" style="font-size:10px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
                 <tr>
-                    <th colspan='4' style="background: rgb(128, 128, 204)">Description</th>
-                    <th colspan='2' style="background: rgb(128, 128, 204)">Ins Date</th>
-                    <th colspan='2' style="background: rgb(128, 128, 204)">Position</th>
-                    <th colspan='2' style="background: rgb(128, 128, 204)">Size</th>
-                    <th colspan='2' style="background: rgb(128, 128, 204)">Amount</th>
+                    <th colspan='4' style="background: rgb(167, 167, 211)">Description</th>
+                    <th colspan='2' style="background: rgb(167, 167, 211)">Ins Date</th>
+                    <th colspan='2' style="background: rgb(167, 167, 211)">Position</th>
+                    <th colspan='2' style="background: rgb(167, 167, 211)">Size</th>
+                    <th colspan='2' style="background: rgb(167, 167, 211)">Amount</th>
                 </tr>
                 {{insertions}}
                 <tr>
