@@ -1130,7 +1130,7 @@ async function createDocument(request, response, doc){
     
     return {
         cname :doc.clientName,
-        date: doc.createdAt? toReadableDate(doc.createdAt): '',
+        date: doc.createdAt? toReadableDate(new Date(doc.createdAt)): '',
         amountw: amountToWords(doc.paymentAmountWords),
         receiptText: receiptText,
         tbody: table,

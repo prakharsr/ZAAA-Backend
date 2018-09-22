@@ -4,123 +4,123 @@
     <title>Invoice</title>
 </head>
 <body class="container-fluid" style="width : 560px; border: 1px black solid">
-        <div>
-            <div class="row" style="width: 560px;">
-                <div class="col">
-                    <img src="{{logoimage}}" style="height:150px; max-width:240px; margin-top: 20px; margin-left: 20px;">
-                </div>
-                <div class="col" style="text-align: right; font-size:12px; margin-top: 20px;">
-                    <p><h6>{{firmName}},</h6><br> 
-                          {{Address}}<br>
-                          {{phone}}<br>
-                          {{email}}
-                    </p>
-                </div>
-            </div>
-        <h6 style="position: relative; left: 250px;">Invoice</h6>
-        <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
-                <tr>
-                    <th colspan="3">
-                        <div class='row'>
-                            <div class='col' style="text-align: left;">
-                                To the Client<br>
-                                Client : {{cname}}<br>
-                                State  : {{caddress}}
-                            </div>
-                            <div class='col' style="text-align: left;">
-                                <br>
-                                GSTIN : {{cgstin}}
-                            </div>
-                        </div>
-                    </th>
-                    <th colspan="5" style="text-align: left;">
-                        Inv No   : {{rno}}<br>
-                        Inv Date : {{date}}<br>
-                        GSTIN    : {{gstin}}<br>
-                        SAC      : {{sac}} 
-                    </th>
-                </tr>
-                
-                <tr>
-                    <th colspan="8">
-                        <div class="row">
-                            <div class="col" style="text-align: left;">
-                                Media House Name : {{mediahouse}}<br>
-                                Pullout Name     : {{pullout}}
-                            </div>
-                            <div class="col" style="text-align: left;">
-                                Ad Type : {{adtype}}<br>
-                                Edition : {{edition}}
-                            </div>
-                            <div class="col" style="text-align: left;">
-                                Scheme : {{scheme}}
-                                Hue    : {{hue}}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col" style="text-align: left;">
-                            </div>
-                            
-                        </div>
-                    </th>
-                </tr>
-            </table>
-            <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
-                <tr>
-                    <th colspan='4'>Description</td> <!--no caption - categories - Premium-->
-                    <th colspan='2'>Ins Date</td>
-                    <th colspan='2'>Position</td>
-                    <th colspan='2'>Size</td>
-                    <th colspan='2'>Amount</td>
-                </tr>
-                {{insertions}}
-                <tr>
-                    <td colspan="6" style="text-align: right">Publication Discount {{pubD}}</td>
-                    <td><b>{{pubam}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right">Agency Discount {{agenD}}</td>
-                    <td><b>{{agenam}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="2">Taxable Amount: <b>{{taxamount}}</b></td>
-                    <td>IGST %: <b>{{igst}}</b></td>
-                    <td>CGST %: <b>{{cgst}}</b></td>
-                    <td>SGST %: <b>{{sgst}}</b></td>
-                    <td>GST Amount</td>
-                    <td><b>{{gstamount}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="2"></td>
-                    <td>Amt: <b>{{igstamount}}</b></td>
-                    <td>Amt: <b>{{cgstamount}}</b></td>
-                    <td>Amt: <b>{{sgstamount}}</b></td>
-                    <td>Net Amount</td>
-                    <td><b>{{namount}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="7" class="text-center">Amount(in words): <b>{{namountwords}}</b></td>
-                </tr>
-                <tr>
-                    <td colspan="2">Payment Details</td>
-                    <td colspan="5"><b>{{payday}}</b></td>
-                </tr>
-            </tbody>
-        </table>
-        <span style="font-size: 6px;">{{remark}}</span>
-        <div class='row' style="width: 560px;">
-            <div class='col' style ='font-size: 8px'>
-                <b>Note/Remark:</b><br>
-                {{tnc}}
-            </div>
-            <div class='col' style='text-align: right; font-size: 8px'>
-                <b>For {{firmName1}}, <br>Signature:</b><br>
-                <img src="{{sign}}" style="height: 60px; width:60px;"><br>
-                Authorised Signatory: {{username}}
-            </div>
+    <div class="row" style="width: 560px;">
+        <div class="col">
+            <img src="{{logoimage}}" style="height:150px; max-width:240px; margin-top: 20px; margin-left: 20px;">
         </div>
-        <hr>
-        <span style="font-size: 6px;">This is a computer generated document generated by AAMan App hence no physical signature is required.</span> 
+        <div class="col" style="text-align: right; font-size:12px; margin-top: 20px;">
+            <p><h6>{{firmName}},</h6><br> 
+                {{Address}}<br>
+                {{phone}}<br>
+                {{email}}
+            </p>
+        </div>
     </div>
+    <div style="position: relative; left: 250px; padding: 20px; background: rgb(128, 128, 204)"><h6>Invoice</h6></div>
+    <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+        <tr>
+            <th colspan="3">
+                <div class='row'>
+                    <div class='col' style="text-align: left;">
+                        To the Client<br>
+                        Client : {{cname}}<br>
+                        State  : {{caddress}}
+                    </div>
+                    <div class='col' style="text-align: left;">
+                        <br>
+                        GSTIN : {{cgstin}}
+                    </div>
+                </div>
+            </th>
+            <th colspan="5" style="text-align: left;">
+                Inv No   : {{rno}}<br>
+                Inv Date : {{date}}<br>
+                GSTIN    : {{gstin}}<br>
+                SAC      : {{sac}} 
+            </th>
+        </tr>
+        <tr>
+            <th colspan="8">
+                <div class="row">
+                    <div class="col" style="text-align: left;">
+                        Media House Name : {{mediahouse}}<br>
+                        Pullout Name     : {{pullout}}
+                    </div>
+                    <div class="col" style="text-align: left;">
+                        Ad Type : {{adtype}}<br>
+                        Edition : {{edition}}
+                    </div>
+                    <div class="col" style="text-align: left;">
+                        Scheme : {{scheme}}
+                        Hue    : {{hue}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col" style="text-align: left;">
+                    </div>
+                    
+                </div>
+            </th>
+        </tr>
+    </table>
+    <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+        <tr>
+            <th colspan='4' style="background: rgb(128, 128, 204);">Description</th> <!--no caption - categories - Premium-->
+            <th colspan='2' style="background: rgb(128, 128, 204);">Ins Date</th>
+            <th colspan='2' style="background: rgb(128, 128, 204);">Position</th>
+            <th colspan='2' style="background: rgb(128, 128, 204);">Size</th>
+            <th colspan='2' style="background: rgb(128, 128, 204);">Amount</th>
+        </tr>
+        {{insertions}}
+        <tr>
+            <td colspan="5" rowspan="3">Remark: {{remark}}</td>
+            <td colspan="5" style="text-align: right">Publication Discount {{pubD}}</td>
+            <td colspan="2"><b>{{pubam}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="5" style="text-align: right">{{Other}}</td>
+            <td colspan="2"><b>{{otherCharges}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="5" style="text-align: right">Agency Discount {{agenD}}</td>
+            <td colspan="2"><b>{{agenam}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2">Taxable Amount: <b>{{taxamount}}</b></td>
+            <td colspan="2">IGST %: <b>{{igst}}</b></td>
+            <td colspan="2">CGST %: <b>{{cgst}}</b></td>
+            <td colspan="2">SGST %: <b>{{sgst}}</b></td>
+            <td colspan="2">GST Amount</td>
+            <td colspan="2"><b>{{gstamount}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="2">Amt: <b>{{igstamount}}</b></td>
+            <td colspan="2">Amt: <b>{{cgstamount}}</b></td>
+            <td colspan="2">Amt: <b>{{sgstamount}}</b></td>
+            <td colspan="2">Net Amount</td>
+            <td colspan="2"><b>{{namount}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="12">Amount(in words): <b>{{namountwords}}</b></td>
+        </tr>
+        <tr>
+            <td colspan="4">Payment Details</td>
+            <td colspan="8"><b>{{payday}}</b></td>
+        </tr>
+    </table>
+    <div class='row' style="width: 560px;">
+        <div class='col' style ='font-size: 8px'>
+            <b>Note/Remark:</b><br>
+            {{tnc}}
+        </div>
+        <div class='col' style='text-align: right; font-size: 8px'>
+            <b><br>Signature:</b><br>
+            <img src="{{sign}}" style="height: 60px; width:60px;"><br>
+            Authorised Signatory: {{username}}
+        </div>
+    </div>
+    <hr>
+    <span style="font-size: 6px;">This is a computer generated document hence no physical signature is required.</span> 
+</div>
 </body>
 </html>

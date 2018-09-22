@@ -877,7 +877,7 @@ module.exports.queryClientPayments = async function(request, response){
                 console.log(err);
             }
             else{
-                var today = toReadableDate(Details.createdAt);
+                var today = toReadableDate(new Date(Details.createdAt));
                 
                 templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
                   .replace('{{sign}}', Details.sign)
