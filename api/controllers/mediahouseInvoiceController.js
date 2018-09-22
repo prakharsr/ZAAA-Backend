@@ -214,7 +214,7 @@ module.exports.getBatchIDs = function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;
     MediaHouseInvoice.find(
-        { firm: firm},
+        {$and: [{firm:firm},{ 'batchIDs': { $regex: request.body.batchIDs+"", $options:"i" }}]},
         {
             "insertions.batchID":1,
         }
@@ -228,9 +228,10 @@ module.exports.getBatchIDs = function(request, response){
             })
         }
         else{
+            var batchIDList = batchIDs.map(batchID => batchID.batchIDs);
             response.send({
                 success:true,
-                batchIDs: batchIDs
+                batchIDs: batchIDList
             })
         }
     })

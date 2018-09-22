@@ -50,7 +50,7 @@ var FirmSchema = new mongoose.Schema({
     },
     SSSerial:{
         type: Number,
-        default: 0
+        default: 1
     },
     AdvReceiptSerial:{
         type: Number,
