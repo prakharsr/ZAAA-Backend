@@ -130,7 +130,6 @@ module.exports.login = function(req,res){
 				});
 			}	
 		});
-		
 	}
 	else if (req.body.email){
 		var user =	User.findOne({email:req.body.email.toLowerCase()}, function(err, user){

@@ -10,7 +10,7 @@ var bodyParser = require('body-parser');
 var bbodyParser = require('busboy-body-parser');
 var path = require('path');
 var auth  =require('./api/middleware/auth');
-var adauth  =require('./admin/middleware/auth');
+var adauth  =require('./admin/middlewares/auth');
 
 var corsOptions = {
     "origin": "*",

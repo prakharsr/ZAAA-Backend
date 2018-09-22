@@ -973,7 +973,7 @@ function getROhtml(Details, callback) {
             console.log(err);
         }
         else{
-            var today = toReadableDate(Details.createdAt);
+            var today = toReadableDate(new Date(Details.createdAt));
             
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
               .replace('{{sign}}', Details.sign)
@@ -1218,7 +1218,7 @@ function createDocument(request, response, doc){
         var row = result.length;
 
         if(count === 0){
-            insData += '<tr><td colspan="3" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.adPosition+'</td><td rowspan='+row+'>'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
+            insData += '<tr><td colspan="4" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td colspan="2">'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+' colspan="2">'+doc.adPosition+'</td><td rowspan='+row+' colspan ="2" >'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+' colspan="2"><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
             count = 1;
         }
         else{
