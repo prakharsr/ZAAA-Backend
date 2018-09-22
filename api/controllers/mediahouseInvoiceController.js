@@ -224,9 +224,16 @@ module.exports.getBatchIDs = function(request, response){
                 msg:"Error in Finding BatchIDs"
             })
         }
-            response.send({
+       var invoice = [];
+       mhinvoices.forEach(mhinvoice=> mhinvoice.insertions.forEach(insertion=>{
+           if((invoice.indexOf(insertion.batchID >-1))&&((insertion.batchID !=null)&&(insertion.batchID !=undefined)&&(insertion.batchID !=''))){
+               invoice.push(insertion.batchID)
+           }
+       }))
+        response.send({
                 success:true,
-                batchIDs: mhinvoices
+                mhinvoices: mhinvoices,
+                batchIDs:invoice.filter((v, i, a) => a.indexOf(v) === i)
             })
         })
     
