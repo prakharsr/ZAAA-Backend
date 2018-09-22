@@ -214,27 +214,22 @@ module.exports.getBatchIDs = function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;
     MediaHouseInvoice.find(
-        {$and: [{firm:firm},{ 'batchIDs': { $regex: request.body.batchIDs+"", $options:"i" }}]},
-        {
-            "insertions.batchID":1,
-        }
+        {$and: [{firm:firm},{ 'insertions.batchID': { $regex: request.body.batchID+"", $options:"i" }}]},{"insertions.batchID":1}
     )
     .sort({"insertions.batchIDs":1})
-    .exec(function(err, batchIDs){
+    .exec(function(err, mhinvoices){
         if(err){
             response.send({
                 success:false,
                 msg:"Error in Finding BatchIDs"
             })
         }
-        else{
-            var batchIDList = batchIDs.map(batchID => batchID.batchIDs);
             response.send({
                 success:true,
-                batchIDs: batchIDList
+                batchIDs: mhinvoices
             })
-        }
-    })
+        })
+    
 
 }
         
