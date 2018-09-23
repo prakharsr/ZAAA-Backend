@@ -1,10 +1,6 @@
-var config = require('../../config');
 var User = require('../models/User');
-var Firm = require('../models/Firm');
 var Plan = require('../models/Plan');
-var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
-var userController = require('./userController');
 
 
 module.exports.createCoUser=function(request,response){
