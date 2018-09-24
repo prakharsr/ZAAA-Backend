@@ -175,6 +175,8 @@ function hasPermissions(request, user){
         else
         return false;
     }
+
+    return true;
     
 }
 
