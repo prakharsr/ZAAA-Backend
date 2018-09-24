@@ -1,8 +1,5 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
-var bcrypt = require('bcrypt');
-var authy = require('authy')(config.authyKey);
-var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var timestamps = require('mongoose-timestamp');
 
 var RatecardSchema = new mongoose.Schema({

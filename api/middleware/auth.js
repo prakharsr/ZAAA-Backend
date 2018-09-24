@@ -1,24 +1,15 @@
 var config = require('../../config');
-var RateCard = require('../models/Ratecard');
-var userController = require('../controllers/userController');
-var firmController = require('../controllers/firmController');
 var User = require('../models/User');
 var jwt = require('jsonwebtoken');
-var MediaHouse = require('../models/MediaHouse');
 var Firm = require('../models/Firm');
-var Plan = require('../models/Plan');
-var mongoose = require('mongoose');
-var multer = require('multer');
-var mkdirp = require('mkdirp');
-var path = require('path');
-var perPage=20;
+
 
 
 var unAuthRoutes = [
     {method:'POST',path:'/api/user/signup'},
     {method:'POST',path:'/api/user/login'},
     {method:'POST',path:'/api/user/forgotPassword'}
-];
+    ];
 
 function getUser(token,req,res, cb){
     var decoded = jwt.verify(token, config.SECRET, function(err,decoded){
@@ -61,6 +52,131 @@ function getToken(headers) {
         return null;
     }
 }
+var roCreateRoutes = [
+
+    ];
+var roBlockRoutes = [
+
+    ];
+var roViewRoutes = [
+
+    ];
+var inCreateRoutes = [
+
+    ];
+var inBlockRoutes = [
+
+    ];
+var inViewRoutes = [
+
+    ];
+var prCreateRoutes = [
+
+    ];
+var prBlockRoutes = [
+
+    ];
+var prViewRoutes = [
+
+    ];
+
+var accCreateRoutes = [
+
+    ];
+var accBlockRoutes = [
+   
+    ];
+var accViewRoutes = [
+   
+    ];
+
+function hasPermissions(request, user){
+    if(roCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Release_order == 1)
+        return true;
+        else
+        return false;
+    }
+    if(roViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Release_order == 2)
+        return true;
+        else
+        return false;
+    }
+    if(roBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Release_order == 3)
+        return true;
+        else
+        return false;
+    }
+    if(inCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Invoice == 1)
+        return true;
+        else
+        return false;
+    }
+    if(inViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Invoice == 2)
+        return true;
+        else
+        return false;
+    }
+    if(inBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Invoice == 3)
+        return true;
+        else
+        return false;
+    }
+    if(prCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Payment_receipts == 1)
+        return true;
+        else
+        return false;
+    }
+    if(prBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Payment_receipts == 2)
+        return true;
+        else
+        return false;
+    }
+    if(prViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Payment_receipts == 3)
+        return true;
+        else
+        return false;
+    }
+    if(accCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Accounts == 1)
+        return true;
+        else
+        return false;
+    }
+    if(accViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Accounts == 2)
+        return true;
+        else
+        return false;
+    }
+    if(accBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
+    {
+        if(user.roles.Accounts == 3)
+        return true;
+        else
+        return false;
+    }
+    
+}
 
 module.exports = function(req, res, next){
     //var query = {method:req.method,path:req.originalUrl};
@@ -79,6 +195,7 @@ module.exports = function(req, res, next){
                 })
             }
             else{
+                if(hasPermissions(user, req)){
                     var firm = getFirm(user, req, res, function(err, firm){
                         if(err||!firm){
                             res.send({
@@ -92,6 +209,13 @@ module.exports = function(req, res, next){
                             next();
                         }
                     })
+                }
+                else{
+                    res.send({
+                        succes:false,
+                        msg:"You don't have permissions for this module."
+                    })
+                }
             }
         })
     }

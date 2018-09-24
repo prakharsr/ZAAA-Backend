@@ -1,8 +1,5 @@
-var config = require('../../config');
 var Plan = require('../models/Plan');
-var userController = require('./userController');
-var User = require('../models/User');
-var jwt = require('jsonwebtoken');
+
 
 //http://localhost:8000/api/get/plans
 

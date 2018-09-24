@@ -1,9 +1,5 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
-var bcrypt = require('bcrypt');
-var ReleaseOrder = require('./ReleaseOrder');
-var authy = require('authy')(config.authyKey);
-var twilioClient = require('twilio')(config.accountSid, config.authToken);
 var timestamps = require('mongoose-timestamp');
 
 var MediaHouseInvoiceSchema = new mongoose.Schema({

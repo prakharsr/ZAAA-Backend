@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var config = require('../../config');
 var timestamps = require('mongoose-timestamp');
 var MediaHouseNoteSchema = new mongoose.Schema({
     publicationName: String,

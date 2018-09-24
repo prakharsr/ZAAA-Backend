@@ -1,13 +1,5 @@
-var config = require('../../config');
 var RateCard = require('../models/Ratecard');
-var userController = require('./userController');
-var firmController = require('./firmController');
-var pdf = require('./pdf');
-var User = require('../models/User');
 var ReleaseOrder = require('../models/ReleaseOrder');
-var jwt = require('jsonwebtoken');
-var Firm = require('../models/Firm');
-var Plan = require('../models/Plan');
 var MediaHouse = require('../models/MediaHouse');
 var Invoice = require('../models/Invoice');
 var Receipt = require('../models/Receipt');
@@ -16,12 +8,6 @@ var MediaHouseNotes = require('../models/MediaHouseNotes');
 var ClientNotes = require('../models/ClientNotes');
 var Executive = require('../models/Executive');
 var Client = require('../models/Client');
-var mongoose = require('mongoose');
-var multer = require('multer');
-var mkdirp = require('mkdirp');
-var path = require('path');
-var perPage = 20;
-
 var XLSX = require('xlsx');
 var base64 = require('base64-stream');
 var stream = require('stream');

@@ -17,7 +17,6 @@ var taxation = require('../controllers/taxation');
 var receipt = require('../controllers/receiptController');
 var dashboard = require('../controllers/dashboard');
 var notes = require('../controllers/creditDebit');
-var excel = require('../controllers/excelController');
 var ticket = require('../controllers/ticketController');
 var auth  = require('../middleware/auth')
 

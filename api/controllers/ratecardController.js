@@ -1,16 +1,6 @@
-var config = require('../../config');
 var RateCard = require('../models/Ratecard');
-var userController = require('./userController');
-var firmController = require('./firmController');
-var User = require('../models/User');
-var jwt = require('jsonwebtoken');
 var MediaHouse = require('../models/MediaHouse');
-var Firm = require('../models/Firm');
-var Plan = require('../models/Plan');
 var mongoose = require('mongoose');
-var multer = require('multer');
-var mkdirp = require('mkdirp');
-var path = require('path');
 var perPage=20;
 
 function getMediahouseID(request, response, user){
