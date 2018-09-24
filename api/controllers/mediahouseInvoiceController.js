@@ -425,7 +425,7 @@ module.exports.generateSummarySheet = async function(request, response){
     catch (err) {
             response.send({
                 success:false,
-                msg:"Error in saving Summay Sheet data"
+                msg:"Error in saving Summay Sheet data"+ err
             })
     }
 };
