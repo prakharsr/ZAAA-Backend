@@ -186,6 +186,9 @@ module.exports.generateTaxSheet = async function(request, response){
     .aggregate([ 
         {$match:query },
         {$project: { 
+            "publicationState":1,
+            "publicationName":1,
+            "publicationGSTIN":1,
             "clientName":1,
             "clientState":1,
             "invoiceNO":1,
@@ -213,13 +216,30 @@ module.exports.generateTaxSheet = async function(request, response){
         });
     }
     else{
-        console.log(invoices);
-        var inv = invoices.map(function(invoice){
+        var inv = {};
+         inv.data1 = invoices.map(function(invoice){
             var obj = {                                
                 "Client Name": invoice.clientName,
                 "Client State":invoice.clientState,
                 "GST Status":invoice.clientGSTIN.GSTType,
                 "GST No.":invoice.clientGSTIN.GSTType=="RD"?invoice.clientGSTIN.GSTNo:"NA",
+                "Invoice No": invoice.invoiceNO,
+                "Invoice Date": invoice.date.toLocaleDateString(),
+                "Invoice Value":invoice.FinalTaxAmount,
+                "Net Amount":invoice.netAmountFigures,
+                "Tax Percentage":+invoice.taxAmount.primary + +invoice.taxAmount.secondary,
+                "SGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                "CGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                "IGST ":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
+            };
+            return obj;
+        })
+        inv.data2 = invoices.map(function(invoice){
+            var obj = {                                
+                "Publication Name": invoice.publicationName,
+                "State":invoice.publicationState,
+                "GST Status":invoice.publicationGSTIN.GSTType,
+                "GST No.":invoice.publicationGSTIN.GSTType=="RD"?invoice.publicationGSTIN.GSTNo:"NA",
                 "Invoice No": invoice.invoiceNO,
                 "Invoice Date": invoice.date.toLocaleDateString(),
                 "Invoice Value":invoice.FinalTaxAmount,
@@ -247,9 +267,12 @@ async function createSheet(data, request, response){
         CreatedDate: new Date(2017,12,19)
     };
     
-    var ws = XLSX.utils.json_to_sheet(data);
+    var GSTR1 = XLSX.utils.json_to_sheet(data.data1);
     
-    XLSX.utils.book_append_sheet(wb, ws, "MONTHLY SHEET");
+    var ITC = XLSX.utils.json_to_sheet(data.data2);
+    
+    XLSX.utils.book_append_sheet(wb, GSTR1, "GSTR-1");
+    XLSX.utils.book_append_sheet(wb, ITC, "ITC");
     
     var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'base64'});
     
