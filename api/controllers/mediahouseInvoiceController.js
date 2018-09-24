@@ -364,71 +364,65 @@ module.exports.getMHInvoicesForRO = function(request, response){
 };
 
 
-function saveSummarySheet(request, response){
-    var user = response.locals.user;
-var firm = response.locals.firm;
 
-    return new Promise((resolve, reject) => {
-            
-    var mhis = request.body.mhis; // { _id, amount: number }[]
-    var batchID = "SummarySheet-"+firm.SSSerial;
-    MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
-        invoices.forEach(invoice => {
-            invoice.insertions.forEach(mhiInsertion => {
-                mhis.forEach(insertion => {
-                    if (mhiInsertion._id == insertion._id) {
-                        mhiInsertion.collectedAmount += insertion.amount;
-                        mhiInsertion.pendingAmount -=insertion.amount;
-                        mhiInsertion.paymentDate =request.body.paymentDate;
-                        mhiInsertion.paymentNo =request.body.paymentNo;
-                        mhiInsertion.paymentMode =request.body.paymentType;
-                        mhiInsertion.paymentAmount = request.body.paymentAmount
-                        mhiInsertion.paymentBankName =request.body.paymentBankName;
-                        mhiInsertion.batchID = batchID;
-                        
+module.exports.generateSummarySheet = function(request, response){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    try {
+        var mhis = request.body.mhis; // { _id, amount: number }[]
+        var batchID = "SummarySheet-"+firm.SSSerial;
+        MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
+            invoices.forEach(invoice => {
+                invoice.insertions.forEach(mhiInsertion => {
+                    mhis.forEach(insertion => {
+                        if (mhiInsertion._id == insertion._id) {
+                            mhiInsertion.collectedAmount += insertion.amount;
+                            mhiInsertion.pendingAmount -=insertion.amount;
+                            mhiInsertion.paymentDate =request.body.paymentDate;
+                            mhiInsertion.paymentNo =request.body.paymentNo;
+                            mhiInsertion.paymentMode =request.body.paymentType;
+                            mhiInsertion.paymentAmount = request.body.paymentAmount
+                            mhiInsertion.paymentBankName =request.body.paymentBankName;                        
+                            mhiInsertion.batchID = batchID;
+                            
+                        }
+                    });
+                });
+                
+                invoice.save(function(err) {
+                    if (err) {
+                        response.send({
+                            success: false,
+                            msg: "error" + err
+                        });
                     }
                 });
             });
-            
-            invoice.save(function(err) {
-                if (err) {
-                    reject(err)
-                }
-                else{
-                    firm.SSSerial += 1;
-                    firm.save(function(err){
-                        if(err){
-                            reject(err);
-                        }
-                        else{
-                            resolve(true);
-                        }
-                    });
-                }
-            });
         });
-    });
-})   
-}
-
-
-module.exports.generateSummarySheet = async function(request, response){
-    try {
-        var done = await saveSummarySheet(request, response);
-        if(done){
-            response.send({
-                success:true,
-                msg:"Done"
-            })
-        }
     }
     catch (err) {
-            response.send({
-                success:false,
-                msg:"Error in saving Summay Sheet data"+ err
-            })
+        if (err)
+        console.log(err)
+    }
+    finally{
+        firm.SSSerial+=1;
+        firm.save(function(err){
+            if(err){
+                response.send({
+                    success:false,
+                    msg:"Error in updating SummarySheet Counter"
+                })
+            }
+            else{
+                response.send({
+                    success:true,
+                    msg:"done"
+                })
+            }
+        })
     }
 };
+
 
 module.exports.queryMediaHouseReports =async function(request, response){
 var user = response.locals.user;
