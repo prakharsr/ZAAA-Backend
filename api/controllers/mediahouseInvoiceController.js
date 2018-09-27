@@ -370,7 +370,7 @@ module.exports.generateSummarySheet = function(request, response){
     var firm = response.locals.firm;
     try {
         var mhis = request.body.mhis; // { _id, amount: number }[]
-        var batchID = "SummarySheet-"+firm.SSSerial;
+        var batchID = new Date().toLocaleDateString().slice(-10)+firm.SSSerial;
         MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
             invoices.forEach(invoice => {
                 invoice.insertions.forEach(mhiInsertion => {
