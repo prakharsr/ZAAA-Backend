@@ -21,15 +21,18 @@
             </p>
         </div>
     </div>
-    <div style="position: relative; left: 230px; width:150px; padding: 10px; margin-bottom: 10px; background: rgb(167, 167, 211)"><h5>Release Order</h5></div>
-    <table class="table table-bordered table-sm" style="font-size:10px; width: 560px; margin-bottom: 10px; padding-bottom: 5px;">
+    <div style="position:relative; left:230px;">
+        <span class="d-inline-block mb-2 bg-info px-3 py-2">Release Order</span>
+    </div>
+
+    <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 10px; padding-bottom: 5px;">
         <tr>
             <th colspan="3">
                 <div class='row'>
                     <div class='col' style="text-align: left;">
                         To The Manager, <br>
-                        <span class="unbold">Name    :</span>{{mediahouse}}<br>
-                        <span class="unbold">Edition :</span>{{medition}}
+                        <span class="unbold">Name    :</span> {{mediahouse}}<br>
+                        <span class="unbold">Edition :</span> {{medition}}
                     </div>
                     <div class='col' style="text-align: left;">
                         <br>
@@ -77,26 +80,26 @@
                     </th>
                 </tr>
             </table>
-            <table class="table table-bordered table-sm" style="font-size:10px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+            <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
                 <tr>
-                    <th colspan='4' style="background: rgb(167, 167, 211)">Description</th>
-                    <th colspan='2' style="background: rgb(167, 167, 211)">Ins Date</th>
-                    <th colspan='2' style="background: rgb(167, 167, 211)">Position</th>
-                    <th colspan='2' style="background: rgb(167, 167, 211)">Size</th>
-                    <th colspan='2' style="background: rgb(167, 167, 211)">Amount</th>
+                    <th colspan='4' style="background:rgb(167, 167, 211)">Description</th>
+                    <th colspan='2' style="background:rgb(167, 167, 211)">Ins Date</th>
+                    <th colspan='2' style="background:rgb(167, 167, 211)">Position</th>
+                    <th colspan='2' style="background:rgb(167, 167, 211)">Size</th>
+                    <th colspan='2' style="background:rgb(167, 167, 211)">Amount</th>
                 </tr>
                 {{insertions}}
                 <tr>
                     <td colspan="8" rowspan="3">Remark: <b>{{remark}}</b></td>
-                    <td colspan="2" style="text-align: right">Premium Amount</td>
+                    <td colspan="2">Premium Amount</td>
                     <td colspan="2"><b>{{premam}}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="text-align: right">Publication Discount: {{pubD}} %</td>
+                    <td colspan="2">Publication Discount: {{pubD}} %</td>
                     <td colspan="2"><b>{{publicationdisc}}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="text-align: right">Agency Discount: {{agenD1}} + {{agenD2}} %</td>
+                    <td colspan="2">Agency Discount: {{agenD1}} + {{agenD2}} %</td>
                     <td colspan="2"><b>{{damount}}</b></td>
                 </tr>
                 <tr>
@@ -123,11 +126,11 @@
                 </tr>
             </table>
             <div class='row' style="width: 560px;">
-                <div class='col' style ='font-size: 8px'>
+                <div class='col' style ='font-size: 7px'>
                     <b>Note/Remark:</b><br>
                     {{tnc}}
                 </div>
-                <div class='col' style='text-align: right; font-size: 12px'>
+                <div class='col-auto' style='font-size: 10px'>
                     Signature:</b><br>
                     <img src="{{sign}}" style="height: 60px; width:60px;"><br>
                     Authorised Signatory: {{username}}

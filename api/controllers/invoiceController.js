@@ -983,11 +983,11 @@ module.exports.queryClientPayments = async function(request, response){
             var row = result.length;
                 
             if(count === 0){
-                insData += '<tr><td colspan="3" rowspan='+row+'>'+categories+''+premium+'</td><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+'>'+doc.releaseOrder.adPosition+'</td><td rowspan='+row+'>'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(gamount))+'</b></td></tr>';
+                insData += '<tr><td colspan="4" rowspan='+row+'>'+categories+''+premium+'</td><td colspan="2">'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td colspan="2" rowspan='+row+'>'+doc.releaseOrder.adPosition+'</td><td colspan="2" rowspan='+row+'>'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td colspan="2" rowspan='+row+'><b>₹ '+addZeroes(""+Math.round(gamount))+'</b></td></tr>';
                 count = 1;
             }
             else{
-                insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
+                insData+='<tr><td colspan="2">'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
             }
         });
         
