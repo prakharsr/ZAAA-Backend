@@ -19,6 +19,7 @@ module.exports.createMHInvoice = async (request,response) => {
     console.log(request.body.insertions)
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
+        taxType: releaseorder.taxType,
         publicationName:releaseorder.publicationName,
         publicationEdition:releaseorder.publicationEdition,
         mediaType:releaseorder.mediaType,
