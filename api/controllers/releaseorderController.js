@@ -964,6 +964,7 @@ function getROhtml(Details, callback) {
         }
         else{
             var today = toReadableDate(new Date(Details.createdAt));
+            console.log(today);
             
             templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
               .replace('{{sign}}', Details.sign)
@@ -1135,7 +1136,6 @@ module.exports.previewROhtml = async function(request, response) {
     doc['faddress'] = firm.RegisteredAddress;
     doc['fmobile'] = firm.Mobile;
     doc['femail'] = firm.Email;
-    console.log(doc);
     var tnc ='';
     var i = 0;
     for(; i < firm.ROterms.length; i++){
@@ -1471,6 +1471,7 @@ function amountToWords(num) {
 
 function toReadableDate(a){
     var today = a;
+    if(today == 'Invalid Date') today = new Date(Date.now());
     var dd = today.getDate();
     var mm = today.getMonth()+1; 
     var yyyy = today.getFullYear();

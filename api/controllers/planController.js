@@ -65,7 +65,6 @@ module.exports.getPlans = function(request,response){
     });
 };
 
-
 module.exports.getCurrentPlan=function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;

@@ -19,6 +19,7 @@ module.exports.createMHInvoice = async (request,response) => {
     console.log(request.body.insertions)
     var mhinvoice = new MediaHouseInvoice({
         releaseOrderId: releaseorder._id,
+        taxType: releaseorder.taxType,
         publicationName:releaseorder.publicationName,
         publicationEdition:releaseorder.publicationEdition,
         mediaType:releaseorder.mediaType,
@@ -370,7 +371,7 @@ module.exports.generateSummarySheet = function(request, response){
     var firm = response.locals.firm;
     try {
         var mhis = request.body.mhis; // { _id, amount: number }[]
-        var batchID = "SummarySheet-"+firm.SSSerial;
+        var batchID = new Date().toLocaleDateString().slice(-10)+firm.SSSerial;
         MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
             invoices.forEach(invoice => {
                 invoice.insertions.forEach(mhiInsertion => {

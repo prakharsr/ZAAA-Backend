@@ -43,7 +43,7 @@ var MediaHouseInvoiceSchema = new mongoose.Schema({
     MHIDate: Date,
     MHIGrossAmount:Number,
     MHITaxAmount:Number,
-
+    taxType:String,
     mediahouseID: {
         type:mongoose.Schema.Types.ObjectId,
         ref:"MediaHouse"

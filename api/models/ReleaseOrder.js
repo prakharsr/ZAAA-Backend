@@ -122,6 +122,7 @@ var ReleaseOrderSchema = new mongoose.Schema({
         secondary:Number
     },
     taxIncluded:Boolean,
+    taxType:String,
     clientPayment:Number,
     netAmountFigures:Number,
     netAmountWords:String,
@@ -213,6 +214,8 @@ ReleaseOrderSchema.pre('save', function(next){
             next();
         });
     }
+    self.taxType = (self.publicationState == self.agencyState)?"SGST + CGST": "IGST";
+
 });
 
 ReleaseOrderSchema.plugin(timestamps);

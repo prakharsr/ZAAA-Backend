@@ -76,6 +76,7 @@ var FirmSchema = new mongoose.Schema({
         default:"images/PaymentReceipt-1.jpg"
     },
     plan : {
+        name:String,
         createdOn: Date,
         paymentID : String,
         expiresOn : Date,
