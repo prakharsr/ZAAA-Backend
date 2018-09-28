@@ -1172,6 +1172,7 @@ function createDocument(request, response, doc){
     var categories = doc.adCategory1 || '';
     var premam = 0;
     var premium = '';
+    var row = result.length;
     
     catarray.forEach(function loop(element){
         if(loop.stop){return ;}
@@ -1205,8 +1206,6 @@ function createDocument(request, response, doc){
             dates += obj + " ";
         })
 
-        var row = result.length;
-
         if(count === 0){
             insData += '<tr><td colspan="4" rowspan='+row+'>'+caption+''+categories+''+premium+'</td><td colspan="2">'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td><td rowspan='+row+' colspan="2">'+doc.adPosition+'</td><td rowspan='+row+' colspan ="2" >'+(doc.adSizeL?doc.adSizeL:'0')+'x'+(doc.adSizeW?doc.adSizeW:'0')+'</td><td rowspan='+row+' colspan="2"><b>₹ '+addZeroes(""+Math.round(doc.adGrossAmount))+'</b></td></tr>';
             count = 1;
@@ -1215,6 +1214,12 @@ function createDocument(request, response, doc){
             insData+='<tr><td>'+toMonth(object.key.month)+'-'+object.key.year+'<br>Dates: '+dates+'</td></tr>';
         }
     });
+
+    if(row < 5){
+        for(var i = 0; i < (5-row); i++){
+            insData+='<tr><td colspan="4"><br><br></td><td colspan="2"></td><td colspan="2"></td><td colspan="2"></td><td colspan="2"></td></tr>'
+        }
+    }
     
     var remark = doc.remark?doc.remark:'';
 
