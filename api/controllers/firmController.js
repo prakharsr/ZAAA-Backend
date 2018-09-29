@@ -97,7 +97,7 @@ module.exports.setPlan = async function(request,response){
 	var today = new Date()
 	firm.plan.expiresOn = new Date().setDate(today.getDate() + plan.duration);
 	firm.plan.validAgain=false;
-	frim.plan.name = plan.name;
+	firm.plan.name = plan.name;
 	if(request.body.cost != 0){
 		firm.FirmName = request.body.firmName;
 		firm.plan.paymentID = request.body.paymentID;
@@ -153,69 +153,19 @@ function savePlanInFirm(firm,plan){
     })
 
 }
-// module.exports.setPlan2 = async function(request,response){
-// 	var user = response.locals.user;
-// 	var firm = response.locals.firm;
-// 	var plan = await Plan.findById(request.body.planID);
-// 	if(firm.plan.planID ==null || firm.plan.planID== undefined){
-// 		firm.Plan = {
-// 			planID = plan._id,
-// 			createdOn = new Date(),
-// 			expiresOn = new Date().setDate(today.getDate() + plan.duration),
-// 			validAgain=false,
-// 			name = plan.name,
-// 		}
-// 		if(request.body.cost != 0){
-// 			firm.FirmName = request.body.firmName;
-// 			firm.plan.paymentID = request.body.paymentID;
-// 			firm.GSTIN = request.body.GSTIN;
-// 			firm.RegisteredAddress = request.body.billingAddress;
-// 			instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
-// 				console.log(request.body.cost)
-// 				console.log(data);
-// 				var Details={
-// 					email: user.email,
-// 					firmname:firm.FirmName,
-// 					paymentId:firm.plan.paymentID,
-// 					gstin:firm.GSTIN.GSTNo,
-// 					add:firm.RegisteredAddress.address,
-// 					city: firm.RegisteredAddress.city,
-// 					state:firm.RegisteredAddress.state,
-// 					price: data.amount,
-// 					fee: data.fee,
-// 					tax: data.tax,
-// 					date: data.created_at,
-// 					method:data.method
-// 				}					
-// 				pdf.generateInvoice(request,response,Details);
-// 			}).catch((err) => {
-// 				console.error(err + "b")
-// 			})
-// 			firm.plan.validAgain=true;
-// 		}
-// 		firm.save(function(err, doc) {
-// 			if (err) {
-// 				response.send({
-// 					success: false,
-// 					msg: err
-// 				});
-// 			} else {
-// 				response.send({
-// 					success: true,
-// 					msg:doc._id +"   " + doc
-// 				});
-// 			}
-// 		});
-	
+module.exports.setPlan2 = async function(request,response){
+	var user = response.locals.user;
+	var firm = response.locals.firm;
+	var plan = await Plan.findById(request.body.planID);
+	if(firm.plan.planID ==null || firm.plan.planID== undefined){
+	}
+	else if (firm.plan.name == 'Trial'){
 
-// 	}
-// 	else if (firm.plan.name == 'Trial'){
+	}
+	else{
 
-// 	}
-// 	else{
-
-// 	}
-// };
+	}
+};
 module.exports.setFirmProfile = function(request, response){
 	var token = userController.getToken(request.headers);
 	var user = response.locals.user;
