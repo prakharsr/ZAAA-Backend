@@ -51,7 +51,7 @@ module.exports.createClientNote = function(request,response){
 }
 
 module.exports.createMediaHouseNote = function(request,response){
-    var user = reponse.locals.user;
+    var user = response.locals.user;
     ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO, firm:user.firm}, (err,releaseorder) => {
         var mediaHouseNote = new MediaHouseNote({
             publicationName: releaseorder.publicationName,
