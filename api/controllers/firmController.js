@@ -156,15 +156,45 @@ function savePlanInFirm(firm,plan){
 module.exports.setPlan2 = async function(request,response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
-	var plan = await Plan.findById(request.body.planID);
-	if(firm.plan.planID ==null || firm.plan.planID== undefined){
-	}
-	else if (firm.plan.name == 'Trial'){
-
-	}
-	else{
-
-	}
+	firm.plan.name = request.body.plan.name;
+	firm.plan.createdOn = request.body.dur.from;
+	firm.plan.expiresOn = request.body.dur.upto;
+	firm.plan.planID = request.body.plan._id;
+	// instance.payments.capture(request.body.paymentID, request.body.plan.cost*100).then((data) => {
+	// 	console.log(request.body.plan.cost)
+	// 	console.log(data);
+	// 	var Details={
+	// 		email: user.email,
+	// 		firmname:firm.FirmName,
+	// 		paymentId:firm.plan.paymentID,
+	// 		gstin:firm.GSTIN.GSTNo,
+	// 		add:firm.RegisteredAddress.address,
+	// 		city: firm.RegisteredAddress.city,
+	// 		state:firm.RegisteredAddress.state,
+	// 		price: data.amount,
+	// 		fee: data.fee,
+	// 		tax: data.tax,
+	// 		date: data.created_at,
+	// 		method:data.method
+	// 	}					
+	// 	pdf.generateInvoice(request,response,Details);
+	// }).catch((err) => {
+	// 	console.error(err + "b")
+	// })
+	firm.save( err => {
+		if(err){
+			response.send({
+				success: false,
+				msg: "ERROR:" + err
+			})
+		}
+		else{
+			response.send({
+				success: true,
+				msg: "Done with it"
+			})
+		}
+	})
 };
 module.exports.setFirmProfile = function(request, response){
 	var token = userController.getToken(request.headers);

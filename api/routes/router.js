@@ -29,7 +29,7 @@ router.post('/user/mobile', user.setMobile);
 router.post('/user/verify/mobile', user.verifyMobile);
 router.get('/plans', plan.getPlans2);
 router.get('/plans2', plan.getPlans);
-router.post('/user/plan', firm.setPlan);
+router.post('/user/plan', firm.setPlan2);
 router.post('/user/plan/invoice', pdf.generateRazorpayInvoice);
 router.post('/user/co_user', coUser.createCoUser);
 router.get('/user/co_user', coUser.getCoUsers);
