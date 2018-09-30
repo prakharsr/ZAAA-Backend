@@ -191,7 +191,7 @@ module.exports.queryClientNote = async function(request, response){
 module.exports.queryMediaHouseNoteForRO = async function(request, response){
 	var user =response.locals.user;
 
-    MediaHouseNote.find({firm:user.firm, DocId: request.body.DocId, releaseOrderNO: request.body.releaseOrderNO} )
+    MediaHouseNote.find({firm:user.firm, DocId: request.body.DocId} )
     .sort('-createdAt')
     .exec(function(err, note){
         if(err){
@@ -202,10 +202,10 @@ module.exports.queryMediaHouseNoteForRO = async function(request, response){
             });
         }
         else{
-                console.log(note, count)
+                console.log(note, note.length);
                 response.send({
                     success:true,
-                    notes: notes,
+                    notes: note,
                 });            
         }
     });
