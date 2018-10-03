@@ -12,7 +12,7 @@ var perPage=20;
 
 module.exports.createClientNote = function(request,response){
     var user =reponse.locals.user;
-    Invoice.findOne({invoiceNO: request.body.invoiceNO}, (err,invoice) => {
+    Invoice.findOne({invoiceNO: request.body.invoiceNO, firm:user.firm}, (err,invoice) => {
         if(err){
             response.send({
                 success: false,
@@ -51,8 +51,8 @@ module.exports.createClientNote = function(request,response){
 }
 
 module.exports.createMediaHouseNote = function(request,response){
-    var user = reponse.locals.user;
-    ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO}, (err,releaseorder) => {
+    var user = response.locals.user;
+    ReleaseOrder.findOne({releaseOrderNO: request.body.releaseOrderNO, firm:user.firm}, (err,releaseorder) => {
         var mediaHouseNote = new MediaHouseNote({
             publicationName: releaseorder.publicationName,
             publicationState: releaseorder.publicationState,
@@ -184,6 +184,30 @@ module.exports.queryClientNote = async function(request, response){
                 });
             })
             
+        }
+    });
+};
+
+
+module.exports.queryMediaHouseNoteForRO = async function(request, response){
+	var user =response.locals.user;
+
+    MediaHouseNote.find({firm:user.firm, DocId: request.body.DocId} )
+    .sort('-createdAt')
+    .exec(function(err, note){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+                console.log(note, note.length);
+                response.send({
+                    success:true,
+                    notes: note,
+                });            
         }
     });
 };
