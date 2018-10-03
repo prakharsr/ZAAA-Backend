@@ -6,11 +6,8 @@ var MediaHouseNoteSchema = new mongoose.Schema({
     releaseOrderNO: String,
     amount: Number,
     remark: String,
-    date: {
-        day:String,
-        month:String,
-        year:String
-    },
+    MHNDate: Date,
+    MHNNo: String,
     // Since releaseOrderNO is unique; it can be used for identification
     DocId: {
         type:mongoose.Schema.Types.ObjectId,
