@@ -481,21 +481,85 @@ function convertElementToExecutive(user, element) {
 }
 
 function convertElementToClient(user, element) {
+
+    var contactPerson = [];
+    for(var i = 1; element["Person Name "+i]; i++){
+        var stdn, phonn;
+        var phonb = element['Person Phone '+i].split('-');
+        if(phonb.length === 0) {
+            stdn = '',
+            phonn = ''
+        }
+        else if(phonb.length === 1){
+            stdn = '',
+            phonn = phone[0]
+        }
+        else if(phonb.length === 2){
+            stdn = phone[0],
+            phonn = phone[1]
+        }
+        contactPerson.push({
+            "Name": element["Person Name "+i],
+            "Designation": element["Person Designation "+i],
+            "Department": element["Person Department "+i],
+            "MobileNo": element["Person Mobile "+i],
+            "stdNo": stdn,
+            "Landline": phonn,
+            "EmailId": element["Person Email "+i],
+            "DateOfBirth": element["Person DOB "+i],
+            "Anniversary": element["Person Annivarsary "+i]
+        });
+    }
+
+    var phono, std;
+    var gsttype = '', gstno = '';
+    var phone = element['Phone'].split('-');
+    var gstin = element['GSTIN'].split('-');
+
+    if(phone.length === 0) {
+        std = '',
+        phono = ''
+    }
+    else if(phone.length === 1){
+        std = '',
+        phono = phone[0]
+    }
+    else if(phone.length === 2){
+        std = phone[0],
+        phono = phone[1]
+    }
+
+    if(gstin.length === 1){
+        gsttype = 'URD';
+    }
+    if(gstin.length === 2){
+        gsttype = 'RD';
+        gstno = gstin[1];
+    }
+
+
     var result = {
-        OrganizationName:element.organizationName,
-        CompanyName:element.companyName,
-        NickName:element.nickName,
-        CategoryType:element.categoryType,
-        SubCategoryType:element.SubCategoryType,
-        IncorporationDate:element.IncorporationDate,
-        Address:element.address,
-        stdNo:element.stdNo,
-        Landline:element.landline,
-        Website:element.website,
-        PanNO:element.panNo,
-        GSTIN:element.GSTIN,
-        ContactPerson:element.contactPerson,
-        Remark:element.Remark,
+        OrganizationName:element["Organization Name"],
+        NickName:element["Nick Name"],
+        CompanyName:element["Company Name"],
+        CategoryType:element["Category"],
+        SubCategoryType:element["Sub Category"],
+        Address:{
+            address: element["Address"],
+            city: element["City"],
+            state: element["State"],
+            pincode: element["PIN"]
+        },
+        stdNo:std,
+        Landline:phono,
+        Website:element["Website"],
+        PanNO:element["PAN"],
+        GSTIN:{
+            GSTType : gsttype,
+            GSTNo : gstno
+        },
+        ContactPerson:contactPerson,
+        Remark:element["Remark"],
         firm : user.firm
     };
     return result;
