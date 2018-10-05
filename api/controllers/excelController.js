@@ -357,7 +357,7 @@ module.exports.generateRateCardSheet = async function(request, response){
                     });
                     var obj =  {
                         "ID": ratecard._id,
-                        "Media type": ratecard.MediaType ? ratecard.MediaType : "",
+                        "Media Type": ratecard.MediaType ? ratecard.MediaType : "",
                         "Ad Type": ratecard.AdType ? ratecard.AdType : "",
                         "Ad Words": ratecard.AdWords ? ratecard.AdWords : "",
                         "Ad Words Max": ratecard.AdWordsMax ? ratecard.AdWordsMax : "",
@@ -388,7 +388,8 @@ module.exports.generateRateCardSheet = async function(request, response){
                         for(var i = 0; i< ratecard.FixSize.length && i < 2; ++i){
                             index = i+1;
                             var FixSize = ratecard.FixSize[i];
-                            obj["Fix Size " + index] = FixSize.Length+'x'+FixSize.Width+' Amount:'+FixSize.Amount;
+                            obj["Fix Size " + index] = FixSize.Length+'x'+FixSize.Width;
+                            obj["Fix Size " + index + " Amount"] = FixSize.Amount;
                         }
                     }
                     if( ratecard.Scheme !== undefined && ratecard.Scheme.length> 0){
@@ -396,7 +397,8 @@ module.exports.generateRateCardSheet = async function(request, response){
                         for(var i = 0; i< ratecard.Scheme.length && i < 2; ++i){
                             index = i+1;
                             var Scheme = ratecard.Scheme[i];
-                            obj["Scheme " + index] = Scheme.paid+'-'+Scheme.Free+' Timelimit:'+Scheme.TimeLimit;
+                            obj["Scheme " + index] = Scheme.paid+'-'+Scheme.Free;
+                            obj["Scheme "+ index + " Timelimit"] = Scheme.TimeLimit;
                         }
                     }
                     if( ratecard.Remarks !== undefined && ratecard.Remarks.length> 0){
@@ -420,7 +422,7 @@ module.exports.generateRateCardSheet = async function(request, response){
                         for(var i = 0; i< ratecard.Tax.length && i < 2; ++i){
                             index = i+1;
                             var Tax = ratecard.Tax[i];
-                            obj["Tax " + index] = Tax.TaxRate +''+(Tax.Included?'%(included)':'%(excluded )');
+                            obj["Tax " + index] = Tax.TaxRate +''+(Tax.Included?'%(included)':'%(excluded)');
                         }
                     }
                     return obj
@@ -648,29 +650,77 @@ function convertElementToClient(user, element) {
 }
 
 function convertElementToRateCard(user, element) {
+    var FixSize = [];
+    var Scheme = [];
+    var Remarks = [];
+    var Tax = [];
+    var Covered = [];
+    for(var i = 1; element["Fix Size "+i]; i++){
+        FixSize.push({
+            "Length": element["Fix Size "+i].split('x')[0],
+            "Width": element["Fix Size "+i].split('x')[1],
+            "Amount": element["Fix Size "+i+" Amount"]
+        })
+    }
+    for(var i = 1; element["Scheme "+i]; i++){
+        Scheme.push({
+            "paid": element["Scheme "+i].split('-')[0],
+            "Free": element["Scheme "+i].split('-')[1],
+            "TimeLimit": element["Scheme "+i+" Timelimit"]
+        })
+    }
+    for(var i = 1; element["Remarks "+i]; i++){
+        Remarks.push({
+            "remark": element["Remarks "+i]
+        })
+    }
+    for(var i = 1; element["Covered "+i]; i++){
+        Covered.push({
+            "mediaHouse": element["Covered "+i].split('-')[0],
+            "EditionArea": element["Covered "+i].split('-')[1]
+        })
+    }
+    for(var i = 1; element["Tax "+i]; i++){
+        Tax.push({
+            "TaxRate": element["Tax "+i].split('%')[0],
+            "Included": (element["Tax "+i].split('%')[1] === '(included)' ? true : false)
+        })
+    }
+    
+
+    var mediahouseID =  await getMediahouseID(request,response,user);
+    var bookingCenter = {
+        MediaHouseName: element["BookingCenter.MediaHouseName"],
+        Edition: element["BookingCenter.Edition"],
+        PulloutName: element["BookingCenter.PulloutName"]
+    };
+    var rate = {
+        rateQuantity: element["Rate"],
+        unit: '',
+        unitQuantity: ''
+    };
     var result ={
-        MediaType:element.mediaType,
-        AdType:element.adType,
-        AdWords:element.AdWords,
-        AdWordsMax:element.AdWordsMax,
-        AdTime:element.AdTime,
-        RateCardType:element.rateCardType,
-        BookingCenter:element.bookingCenter,
+        MediaType:element["Media Type"],
+        AdType:element["Ad Type"],
+        AdWords:element["Ad Words"],
+        AdWordsMax:element["Ad Words Max"],
+        AdTime:element["Ad Time"],
+        Position:element["Ad Position"],
+        Hue:element["Ad Hue"],
+        RateCardType:element["Rate Card Type"],
+        BookingCenter: bookingCenter,
         mediahouseID:mediahouseID,
-        Category:element.categories,
-        Rate:element.rate,
-        Position:element.position,
-        Hue:element.hue,
-        MaxSizeLimit: element.maxSizeLimit,
-        MinSizeLimit:element.minSizeLimit,
-        FixSize:element.fixSize,
-        Scheme:element.scheme,
-        Premium:element.premium,
-        Tax:element.tax,
-        ValidFrom:element.validFrom,
-        ValidTill:element.validTill,
-        Covered:element.covered,
-        Remarks:element.remarks,
+        Rate:rate,
+        MaxSizeLimit:{
+            "Length" : element[MaxSizeLimit] !== '' ? element[MaxSizeLimit].split('x')[0] : '' ,
+            "Width" : element[MaxSizeLimit] !== '' ? element[MaxSizeLimit].split('x')[1] : ''
+        } ,
+        MinSizeLimit:{
+            "Length" : element[MinSizeLimit] !== '' ? element[MinSizeLimit].split('x')[0] : '' ,
+            "Width" : element[MinSizeLimit] !== '' ? element[MinSizeLimit].split('x')[1] : ''
+        } ,
+        ValidFrom:element.ValidFrom,
+        ValidTill:element.ValidTill, 
         PremiumCustom:element.PremiumCustom,
         PremiumBox:element.PremiumBox,
         PremiumBaseColour:element.PremiumBaseColour,
@@ -678,8 +728,53 @@ function convertElementToRateCard(user, element) {
         PremiumEmailId:element.PremiumEmailId,
         PremiumWebsite:element.PremiumWebsite,
         PremiumExtraWords:element.PremiumWebsite,
+        FixSize: FixSize,
+        Scheme: Scheme,
+        Remarks: Remarks,
+        Covered: Covered,
+        Tax: Tax,
         firm :user.firm,
         global:false
     };
     return result;
+}
+
+function getMediahouseID(request, response, user){
+    return new Promise((resolve, reject) => {
+        MediaHouse.find({$and: [
+            {PublicationName:request.body.bookingCenter.MediaHouseName},
+            {"Address.edition":request.body.bookingCenter.Edition}
+        ]}).exec( function(err, mediahouse){
+            if(err)
+            {
+                console.log(err);
+                reject(err);
+                return;
+            }
+            else if (mediahouse.length == 0)
+            {
+                console.log('no mediahouse found');
+                var newMediahouse = new MediaHouse({
+                    OrganizationName:request.body.organizationName,
+                    PublicationName:request.body.publicationName,
+                    Address:request.body.address,
+                    global:false,
+                    GSTIN:request.body.GSTIN,
+                    firm : user.firm
+                });
+                
+                newMediahouse.save(function(err, doc){
+                    console.log('mediahouse saved');
+                    mediahouseID = newMediahouse._id;
+                    resolve(mediahouseID)
+                })
+            }
+            if(mediahouse.length!==0){
+                console.log("mediahouse found");
+                console.log(mediahouse)
+                mediahouseID =  mediahouse[0]._id;
+                resolve(mediahouseID)
+            }
+        });
+    })
 }
