@@ -11,9 +11,6 @@ var perPage=20;
 
 module.exports.createMHInvoice = async (request,response) => {
     var user = response.locals.user;
-    var mediahouseID =await searchMediahouseID(request, response, user);
-    var clientID = await searchClientID(request, response, user);
-    var executiveID = await searchExecutiveID(request, response, user);
     var releaseorder = await ReleaseOrder.findById(request.body.releaseOrderId);
     var firm = await Firm.findById(user.firm)
     console.log(request.body.insertions)
@@ -42,9 +39,9 @@ module.exports.createMHInvoice = async (request,response) => {
         MHIDate: request.body.MHIDate,
         MHIGrossAmount: request.body.MHIGrossAmount,
         MHITaxAmount: request.body.MHITaxAmount,
-        mediahouseID: mediahouseID,
-        executiveID: executiveID,
-        clientID: clientID,
+        mediahouseID: releaseorder.mediahouseID,
+        executiveID: releaseorder.executiveID,
+        clientID: releaseorder.clientID,
         firm: firm._id
     })
 
@@ -173,7 +170,7 @@ function searchMediahouseID(request, response, user){
 
 function formQuery(mediahouseID, date, user, request){
     return new Promise((resolve, reject) => {
-        var query = {'firm':user.firm};
+        var query = {'firm':mongoose.mongo.ObjectId(user.firm)};
         console.log(query)
         console.log(mediahouseID, date, user)
         if(mediahouseID)
@@ -181,21 +178,16 @@ function formQuery(mediahouseID, date, user, request){
         if(request.body.releaseOrderNO){
             query['releaseOrderNO']=request.body.releaseOrderNO
         }
+        console.log(request.body)
         if((request.body.batchID !== undefined)&&(request.body.batchID != -1)){
             query['insertions.batchID'] = request.body.batchID;
         }
         
         if(request.body.insertionPeriod){
-            to = new Date();
-            from =  new Date(to.getTime() - (request.body.insertionPeriod)*24*60*60*1000);
+            var to = new Date();
+            var from =  new Date(to.getTime() - (request.body.insertionPeriod)*24*60*60*1000);
             query['insertions.insertionDate'] = {$lte:to, $gte:from}
         }
-        else{
-            to = new Date()
-            from = new Date(1);
-            //   query['insertions.insertionDate'] = {$lte:to, $gte:from}
-        }
-        console.log(to, from);
         console.log(query)
         resolve(query);
         
@@ -306,7 +298,7 @@ MediaHouseInvoice
 .find(query)
 .limit(perPage)
 .skip((perPage * request.body.page) - perPage)
-// .sort( { "MHIDate": -1,"insertions.insertionDate": 1})
+.sort( { "MHIDate": -1,"insertions.insertionDate": 1})
 .exec(function(err, mediahouseInvoice){
     if(err){
         console.log(err+ "");
@@ -316,6 +308,7 @@ MediaHouseInvoice
         });
     }
     else{
+        console.log(mediahouseInvoice)
         MediaHouseInvoice.count(query, function(err, count){
             response.send({
                 success:true,
