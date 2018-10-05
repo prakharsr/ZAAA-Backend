@@ -156,6 +156,9 @@ async function f (request, response, user){
     if(month < 10){
         month = '0'+month;
     }
+    else{
+        month = ''+month;
+    }
     var rno = month+year+'-'+sn;
     console.log(rno);
     
