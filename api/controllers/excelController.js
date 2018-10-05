@@ -388,7 +388,7 @@ module.exports.generateRateCardSheet = async function(request, response){
                         for(var i = 0; i< ratecard.FixSize.length && i < 2; ++i){
                             index = i+1;
                             var FixSize = ratecard.FixSize[i];
-                            obj["Fix Size " + index] = FixSize.Length+'x'+FixSize.Width+':'+FixSize.Amount;
+                            obj["Fix Size " + index] = FixSize.Length+'x'+FixSize.Width+' Amount:'+FixSize.Amount;
                         }
                     }
                     if( ratecard.Scheme !== undefined && ratecard.Scheme.length> 0){
@@ -420,7 +420,7 @@ module.exports.generateRateCardSheet = async function(request, response){
                         for(var i = 0; i< ratecard.Tax.length && i < 2; ++i){
                             index = i+1;
                             var Tax = ratecard.Tax[i];
-                            obj["Tax " + index] = Tax.TaxRate +''+(Tax.Included?'(included)':'(excluded )');
+                            obj["Tax " + index] = Tax.TaxRate +''+(Tax.Included?'%(included)':'%(excluded )');
                         }
                     }
                     return obj
