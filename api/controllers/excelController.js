@@ -24,61 +24,40 @@ function convertToJSON(array){
     return jsonData;
 }
 
-
 module.exports.clientExcelImport = (request, response) => {
     var user = response.locals.user;
     var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
     var sheet_name_list = workbook.SheetNames;
     var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-    var count = 0;
-    var errorstring = '';
-    xlData.forEach(element => {
-        count++;
-        var contactPerson = [];
-        for(var i = 1; ; i++){
-            if(object["Person Name "+i] !== null){
-                contactPerson.push({
-                    "Name": object["Person Name "+i],
-                    "Designation": object["Person Designation "+i],
-                    "Department": object["Person Department "+i],
-                    "MobileNo": object["Person Mobile "+i],
-                    "stdNo": object["Person Phone "+i].split("-")[0],
-                    "Landline": object["Person Phone "+i].split("-")[1],
-                    "EmailId": object["Person Email "+i],
-                    "DateOfBirth": object["Person DOB "+i],
-                    "Anniversary": object["Person Anniversary "+i],
-                });
+    var count = 0; 
+    var errorline = '';
+    for(var i = 0; i < xlData.length; i++){
+        var element = xlData[i];
+        var model = convertElementToClient(user, element);
+        console.log(model);
+        if(element.ID){
+            try{
+                Client.findByIdAndUpdate(mongoose.mongo.ObjectId(element.ID),{$set: model});
+            }
+            catch(err){
+                errorline += " ,"+ (i+1);
             }
         }
-        var client = new Client({
-             OrganizationName:element.organizationName,
-            CompanyName:element.companyName,
-            NickName:element.nickName,
-            CategoryType:element.categoryType,
-            SubCategoryType:element.SubCategoryType,
-            IncorporationDate:element.IncorporationDate,
-            Address:element.address,
-            stdNo:element.stdNo,
-            Landline:element.landline,
-            Website:element.website,
-            PanNO:element.panNo,
-            GSTIN:element.GSTIN,
-            ContactPerson:element.contactPerson,
-            Remark:element.Remark,
-            firm : user.firm
-        });
-            client.save(function(err){
-                if(err){
-                    errorstring += 'error at line number '+ count+' '+err;
-                }
-            });
-           
-    });
-    console.log(errorstring)
-    if(errorstring === '') errorstring = 'Bulk upload successful';
+        else{
+            try{
+                var client = new Client(model);
+                client.save();
+            }
+            catch(err){
+                errorline += " ,"+ i+1;
+            }
+        }
+    }   
+    console.log(errorline);
     response.send({
         success: true,
-        msg: errorstring
+        msg: 'Bulk update successful',
+        errorline: "Error in updating at lines numbered"+errorline 
     });
 }
 
@@ -87,273 +66,36 @@ module.exports.ratecardExcelImport = (request, response) => {
     var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
     var sheet_name_list = workbook.SheetNames;
     var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-    var count = 0;
-    var errorstring = '';
-    xlData.forEach(element => {
-        count++;
-        var ratecard = new RateCard({
-            MediaType:element.mediaType,
-            AdType:element.adType,
-            AdWords:element.AdWords,
-            AdWordsMax:element.AdWordsMax,
-            AdTime:element.AdTime,
-            RateCardType:element.rateCardType,
-            BookingCenter:element.bookingCenter,
-            mediahouseID:mediahouseID,
-            Category:element.categories,
-            Rate:element.rate,
-            Position:element.position,
-            Hue:element.hue,
-            MaxSizeLimit: element.maxSizeLimit,
-            MinSizeLimit:element.minSizeLimit,
-            FixSize:element.fixSize,
-            Scheme:element.scheme,
-            Premium:element.premium,
-            Tax:element.tax,
-            ValidFrom:element.validFrom,
-            ValidTill:element.validTill,
-            Covered:element.covered,
-            Remarks:element.remarks,
-            PremiumCustom:element.PremiumCustom,
-            PremiumBox:element.PremiumBox,
-            PremiumBaseColour:element.PremiumBaseColour,
-            PremiumCheckMark:element.PremiumCheckMark,
-            PremiumEmailId:element.PremiumEmailId,
-            PremiumWebsite:element.PremiumWebsite,
-            PremiumExtraWords:element.PremiumWebsite,
-            firm :user.firm,
-            global:false
-        });
-            ratecard.save(function(err){
-                if(err){
-                    errorstring += 'error at line number '+ count+' '+err;
-                }
-            });
-           
-    });
-        console.log(errorstring)
-        if(errorstring === '') errorstring = 'Bulk upload successful';
-        response.send({
-            success: true,
-            msg: errorstring
-        });
-}
-
-module.exports.mediahouseExcel = (request, response) => {
-    var user = response.locals.user;
-    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
-    var sheet_name_list = workbook.SheetNames;
-    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-    var count = 0;
-    var errorstring = '';
-    xlData.forEach(element => {
-        count++;
-            var mediahouse = new MediaHouse({
-                OrganizationName:element.organizationName,
-                PublicationName:element.publicationName,
-                NickName:element.nickName,
-                MediaType:element.mediaType,
-                Language:element.Language,
-                Address:element.address,
-                OfficeLandline:element.officeLandline,
-                officeStdNo:element.officeStdNo,
-                Scheduling:element.scheduling,
-                global:false,
-                pullouts:element.pullouts,
-                GSTIN:element.GSTIN,
-                Remark:element.Remark,
-                firm : user.firm
-            });
-            mediahouse.save(function(err){
-                if(err){
-                    errorstring += 'error at line number '+ count+' '+err;
-                }
-            });
-           
-    });
-        console.log(errorstring)
-        if(errorstring === '') errorstring = 'Bulk upload successful';
-        response.send({
-            success: true,
-            msg: errorstring
-        });
-}
-
-module.exports.executiveExcelImport = (request, response) => {
-    var user = response.locals.user;
-    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
-    var sheet_name_list = workbook.SheetNames;
-    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-    var count = 0;
-    var errorstring = '';
-    xlData.forEach(element => {
-        count++;
-        var executive = new Executive({
-            OrganizationName:element.organizationName,
-            CompanyName:element.companyName,
-            ExecutiveName:element.executiveName,
-            Designation:element.designation,
-            Department:element.department,
-            MobileNo:element.mobileNo,
-            EmailId:element.email,
-            Photo:element.photo,
-            DateOfBirth:element.dob,
-            Anniversary:element.anniversary,
-            Remark:element.Remark,    
-            firm : user.firm 
-        });
-            executive.save(function(err){
-                if(err){
-                    errorstring += 'error at line number '+ count+' '+err;
-                }
-            });
-           
-    });
-        console.log(errorstring)
-        if(errorstring === '') errorstring = 'Bulk upload successful';
-        response.send({
-            success: true,
-            msg: errorstring
-        });
-}
-
-module.exports.clientExcelUpdate = (request, response) => {
-    var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
+    var count = 0; 
+    var errorline = '';
+    for(var i = 0; i < xlData.length; i++){
+        var element = xlData[i];
+        var model = convertElementToRateCard(user, element);
+        console.log(model);
+        if(element.ID){
             try{
-                Client.findByIdAndUpdate(element._id,{$set: element});
+                Ratecard.findByIdAndUpdate(mongoose.mongo.ObjectId(element.ID),{$set: model});
             }
             catch(err){
-                response.send({
-                    success: false,
-                    msg: 'Unsuccessful'
-                });
+                errorline += " ,"+ (i+1);
             }
-            });
-            response.send({
-                success: true,
-                msg: 'Bulk update successful'
-            });
-        }
-    });
-}
-
-module.exports.ratecardExcelUpdate = (request, response) => {
-    var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
         }
         else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
             try{
-                RateCard.findByIdAndUpdate(element._id,{$set: element});
+                var ratecard = new RateCard(model);
+                ratecard.save();
             }
             catch(err){
-                response.send({
-                    success: false,
-                    msg : 'Unsuccessful'
-                });
+                errorline += " ,"+ i+1;
             }
-            });
-            response.send({
-                success: true,
-                msg: 'Bulk update successful'
-            });
         }
+    }   
+    console.log(errorline);
+    response.send({
+        success: true,
+        msg: 'Bulk update successful',
+        errorline: "Error in updating at lines numbered"+errorline 
     });
-}
-
-function convertElementToMediaHouse(user, element) {
-    var pullouts = [];
-    var scheduling = [];
-    for(var i = 1; element["Pullout"+i]; i++){
-        pullouts.push({
-            "Name": element["Pullout"+i],
-            "Language": element["PulloutLanguage"+i],
-            "Frequency": element["PulloutFrequency"+i],
-            "Remark": element["PulloutRemark"+i]
-        });
-    }
-    for(var i = 1; element["PersonName"+i]; i++){
-        scheduling.push({
-            "Name": element["PersonName" + i],
-            "Designation": element["Designation" + i],
-            "MobileNo": element["Mobile" + i],
-            "DeskExtension": element["DeskExtension" + i],
-            "EmailId": element["Email" + i],
-            "Department": element["Department" +i]
-        })
-    }
-
-    var phono, std;
-    var gsttype = '', gstno = '';
-    var phone = element['Phone'].split('-');
-    var gstin = element['GSTIN'].split('-');
-
-    if(phone.length === 0) {
-        std = '',
-        phono = ''
-    }
-    else if(phone.length === 1){
-        std = '',
-        phono = phone[0]
-    }
-    else if(phone.length === 2){
-        std = phone[0],
-        phono = phone[1]
-    }
-
-    if(gstin.length === 1){
-        gsttype = 'URD';
-    }
-    if(gstin.length === 2){
-        gsttype = 'RD';
-        gstno = gstin[1];
-    }
-
-
-
-    var result = {
-        OrganizationName:element["Organization Name"],
-        PublicationName:element["Publication Name"],
-        NickName:element["Nick Name"],
-        MediaType:element["Media Type"],
-        Language:element.Language?element.Language:'',
-        Address:{
-            pincode: element["PIN"],
-            edition: element["Edition"],
-            city: element["City"],
-            state: element["State"]
-        },
-        OfficeLandline: {
-            std:std,
-            phone: phono,
-        },
-        Scheduling:scheduling,
-        global:false,
-        pullouts:pullouts,
-        GSTIN:{
-            GSTType : gsttype,
-            GSTNo : gstno
-        },
-        Remark:element.Remark,
-        firm : user.firm
-    };
-    return result;
 }
 
 module.exports.mediahouseExcelImport = (request, response) => {
@@ -393,33 +135,40 @@ module.exports.mediahouseExcelImport = (request, response) => {
     });
 }
 
-module.exports.executiveExcelUpdate = (request, response) => {
+module.exports.executiveExcelImport = (request, response) => {
     var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0; 
+    var errorline = '';
+    for(var i = 0; i < xlData.length; i++){
+        var element = xlData[i];
+        var model = convertElementToExecutive(user, element);
+        console.log(model);
+        if(element.ID){
             try{
-                Executive.findByIdAndUpdate(element._id,{$set: element});
+                Executive.findByIdAndUpdate(mongoose.mongo.ObjectId(element.ID),{$set: model});
             }
             catch(err){
-                response.send({
-                    success: false,
-                    msg: 'Unsuccessful'
-                });
+                errorline += " ,"+ (i+1);
             }
-            });
-            response.send({
-                success: true,
-                msg: 'Bulk update successful'
-            });
         }
+        else{
+            try{
+                var executive = new Executive(model);
+                executive.save();
+            }
+            catch(err){
+                errorline += " ,"+ i+1;
+            }
+        }
+    }   
+    console.log(errorline);
+    response.send({
+        success: true,
+        msg: 'Bulk update successful',
+        errorline: "Error in updating at lines numbered"+errorline 
     });
 }
 
@@ -633,4 +382,158 @@ async function createSheet(data, request, response, title, subject){
     xlStream.write(wbout);
     
     response.end();
+}
+
+
+function convertElementToMediaHouse(user, element) {
+    var pullouts = [];
+    var scheduling = [];
+    for(var i = 1; element["Pullout"+i]; i++){
+        pullouts.push({
+            "Name": element["Pullout"+i],
+            "Language": element["PulloutLanguage"+i],
+            "Frequency": element["PulloutFrequency"+i],
+            "Remark": element["PulloutRemark"+i]
+        });
+    }
+    for(var i = 1; element["PersonName"+i]; i++){
+        scheduling.push({
+            "Name": element["PersonName" + i],
+            "Designation": element["Designation" + i],
+            "MobileNo": element["Mobile" + i],
+            "DeskExtension": element["DeskExtension" + i],
+            "EmailId": element["Email" + i],
+            "Department": element["Department" +i]
+        })
+    }
+
+    var phono, std;
+    var gsttype = '', gstno = '';
+    var phone = element['Phone'].split('-');
+    var gstin = element['GSTIN'].split('-');
+
+    if(phone.length === 0) {
+        std = '',
+        phono = ''
+    }
+    else if(phone.length === 1){
+        std = '',
+        phono = phone[0]
+    }
+    else if(phone.length === 2){
+        std = phone[0],
+        phono = phone[1]
+    }
+
+    if(gstin.length === 1){
+        gsttype = 'URD';
+    }
+    if(gstin.length === 2){
+        gsttype = 'RD';
+        gstno = gstin[1];
+    }
+
+
+
+    var result = {
+        OrganizationName:element["Organization Name"],
+        PublicationName:element["Publication Name"],
+        NickName:element["Nick Name"],
+        MediaType:element["Media Type"],
+        Language:element.Language?element.Language:'',
+        Address:{
+            pincode: element["PIN"],
+            edition: element["Edition"],
+            city: element["City"],
+            state: element["State"]
+        },
+        OfficeLandline: {
+            std:std,
+            phone: phono,
+        },
+        Scheduling:scheduling,
+        global:false,
+        pullouts:pullouts,
+        GSTIN:{
+            GSTType : gsttype,
+            GSTNo : gstno
+        },
+        Remark:element.Remark,
+        firm : user.firm
+    };
+    return result;
+}
+
+function convertElementToExecutive(user, element) {
+    var result = {
+        ExecutiveName:element["Executive Name"],
+        OrganizationName:element["Organization Name"],
+        Designation:element["Designation"],
+        Department:element["Department"],
+        MobileNo:element["MobileNo"],
+        EmailId:element["Email"],
+        DateOfBirth:element["DOB"],
+        Anniversary:element["Anniversary"],
+        Remark:element["Remark"],    
+        firm : user.firm 
+    };
+    return result;
+}
+
+function convertElementToClient(user, element) {
+    var result = {
+        OrganizationName:element.organizationName,
+        CompanyName:element.companyName,
+        NickName:element.nickName,
+        CategoryType:element.categoryType,
+        SubCategoryType:element.SubCategoryType,
+        IncorporationDate:element.IncorporationDate,
+        Address:element.address,
+        stdNo:element.stdNo,
+        Landline:element.landline,
+        Website:element.website,
+        PanNO:element.panNo,
+        GSTIN:element.GSTIN,
+        ContactPerson:element.contactPerson,
+        Remark:element.Remark,
+        firm : user.firm
+    };
+    return result;
+}
+
+function convertElementToRateCard(user, element) {
+    var result ={
+        MediaType:element.mediaType,
+        AdType:element.adType,
+        AdWords:element.AdWords,
+        AdWordsMax:element.AdWordsMax,
+        AdTime:element.AdTime,
+        RateCardType:element.rateCardType,
+        BookingCenter:element.bookingCenter,
+        mediahouseID:mediahouseID,
+        Category:element.categories,
+        Rate:element.rate,
+        Position:element.position,
+        Hue:element.hue,
+        MaxSizeLimit: element.maxSizeLimit,
+        MinSizeLimit:element.minSizeLimit,
+        FixSize:element.fixSize,
+        Scheme:element.scheme,
+        Premium:element.premium,
+        Tax:element.tax,
+        ValidFrom:element.validFrom,
+        ValidTill:element.validTill,
+        Covered:element.covered,
+        Remarks:element.remarks,
+        PremiumCustom:element.PremiumCustom,
+        PremiumBox:element.PremiumBox,
+        PremiumBaseColour:element.PremiumBaseColour,
+        PremiumCheckMark:element.PremiumCheckMark,
+        PremiumEmailId:element.PremiumEmailId,
+        PremiumWebsite:element.PremiumWebsite,
+        PremiumExtraWords:element.PremiumWebsite,
+        firm :user.firm,
+        global:false
+    };
+    return result;
 }
