@@ -257,10 +257,10 @@ function mhInvoiceTax(query){
                         "Invoice Date": mhinvoice.date.toLocaleDateString(),
                         "Invoice Value":mhinvoice.MHIGrossAmount + mhinvoice.MHITaxAmount,
                         "Net Amount":mhinvoice.MHIGrossAmount,
-                        "Tax Percentage":Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount+ mhinvoice.MHITaxAmount))/100,
-                        "SGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount+ mhinvoice.MHITaxAmount))/100):"NA",
-                        "CGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount+ mhinvoice.MHITaxAmount))/100):"NA",
-                        "IGST ":(mhinvoice.taxType == 'IGST')?(Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount+ mhinvoice.MHITaxAmount))/100) :"NA",
+                        "Tax Percentage":Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount))/100,
+                        "SGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
+                        "CGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
+                        "IGST ":(mhinvoice.taxType == 'IGST')?(Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount))/100) :"NA",
                             };
                     return obj;
                 })

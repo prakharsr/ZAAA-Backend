@@ -205,9 +205,9 @@ ReleaseOrderSchema.pre('save', function(next){
         insertions.forEach(element => {
             var date = element.date;
             element.ISODate = new Date(""+date.month+" "+date.day+" "+date.year+" 00:00 UTC");  
-            var amount =  ((+self.adGrossAmount) + ((+self.taxAmount.primary + +self.taxAmount.secondary) * (+self.adGrossAmount/100)) * (!self.taxIncluded))/insertions.length;
-            var netamount = self.netAmountFigures * 100 /(100 + self.taxAmount.primary + self.taxAmount.secondary);
-            var taxamount = self.netAmountFigures * (self.taxAmount.primary + self.taxAmount.secondary) /(100 + self.taxAmount.primary + self.taxAmount.secondary);
+            var amount = (self.netAmountFigures * 100 /(100 + self.taxAmount.primary + self.taxAmount.secondary))/insertions.length;            
+            var netamount = self.netAmountFigures /insertions.length;
+            var taxamount = (self.netAmountFigures * (self.taxAmount.primary + self.taxAmount.secondary) /(100 + self.taxAmount.primary + self.taxAmount.secondary))/insertions.length;
             element.Amount = Math.round(amount*100)/100;
             element.netAmount = Math.round(netamount*100)/100;
             element.taxAmount = Math.round(taxamount*100)/100;

@@ -187,11 +187,11 @@ module.exports.ROchartData = async function(request, response){
             count: {$sum: 1},
             totalAmount:{$sum:{
                 "$cond": [{"$and":[{"$gte":["$generatedAt", period.period1.from]},{"$lt":["$generatedAt", period.period1.upto]}]},
-                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+                {"$add":["$insertions.netAmount"]},0]
             }},
             generated:{$sum:{
                 "$cond": [{"$and":[{"$gte":["$generatedAt", period.period2.from]},{"$lt":["$generatedAt", period.period2.upto]}]},
-                {"$add":["$insertions.netAmount", "$insertions.taxAmount"]},0]
+                {"$add":["$insertions.netAmount"]},0]
             }},
         }
     }
