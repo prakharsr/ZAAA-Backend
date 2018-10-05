@@ -342,7 +342,89 @@ module.exports.generateRateCardSheet = async function(request, response){
         }
         else{
             try{
-                
+                var el = ratecards.map(function (ratecard) {
+                    var categories='';
+                    var catarray = [ratecard.Category.Main, ratecard.Category.SubCategory1, ratecard.Category.SubCategory2, ratecard.Category.SubCategory3, ratecard.Category.SubCategory4, ratecard.Category.SubCategory5, ratecard.Category.SubCategory6]
+                    catarray.forEach(function loop(element){
+                        if(loop.stop){return ;}
+                        if (element) {
+                            categories += '-' + element;
+                        }
+                        else{
+                            categories += ""
+                            loop.stop = true;
+                        }
+                    });
+                    var obj =  {
+                        "ID": ratecard._id,
+                        "Media type": ratecard.MediaType ? ratecard.MediaType : "",
+                        "Ad Type": ratecard.AdType ? ratecard.AdType : "",
+                        "Ad Words": ratecard.AdWords ? ratecard.AdWords : "",
+                        "Ad Words Max": ratecard.AdWordsMax ? ratecard.AdWordsMax : "",
+                        "Ad Time": ratecard.AdTime ? ratecard.AdTime : "",
+                        "Ad Position": ratecard.Position ? ratecard.Position : "",
+                        "Ad Hue": ratecard.Hue ? ratecard.Hue : "",
+                        "Rate Card Type": ratecard.RateCardType ? ratecard.RateCardType : "",
+                        "Category": categories,
+                        "BookingCenter.MediaHouseName": ratecard.BookingCenter.MediaHouseName ? ratecard.BookingCenter.MediaHouseName : "",
+                        "BookingCenter.Edition": ratecard.BookingCenter.Edition?ratecard.BookingCenter.Edition:'',
+                        "BookingCenter.PulloutName": ratecard.BookingCenter.PulloutName? ratecard.BookingCenter.PulloutName:'',
+                        "Rate": ratecard.Rate.rateQuantity,
+                        "MaxSizeLimit": ratecard.MaxSizeLimit ? ratecard.MaxSizeLimit.Length+'x'+ratecard.MaxSizeLimit.Width : '',
+                        "MinSizeLimit": ratecard.MinSizeLimit ? ratecard.MinSizeLimit.Length+'x'+ratecard.MinSizeLimit.Width : '', 
+                        "ValidFrom": ratecard.ValidFrom ? ratecard.ValidFrom : '',
+                        "ValidTill": ratecard.ValidTill ? ratecard.ValidTill : '',
+                        "PremiumBox": ratecard.PremiumBox ? ratecard.PremiumBox : '',
+                        "PremiumBaseColour": ratecard.PremiumBaseColour ? ratecard.PremiumBaseColour : '',
+                        "PremiumCheckMark": ratecard.PremiumCheckMark ? ratecard.PremiumCheckMark : '',
+                        "PremiumEmailID": ratecard.PremiumEmailId ? ratecard.PremiumEmailId : '',
+                        "PremiumWebsite": ratecard.PremiumWebsite ? ratecard.PremiumWebsite : '',
+                        "PremiumExtraWords": ratecard.PremiumExtraWords ? ratecard.PremiumExtraWords : '',
+                        "PremiumCustomType": ratecard.PremiumCustom.PremiumType ? ratecard.PremiumCustom.PremiumType : '',
+                        "PremiumCustomAmount": ratecard.PremiumCustom.Amount ? ratecard.PremiumCustom.Amount : ''
+                    }
+                    if( ratecard.FixSize !== undefined && ratecard.FixSize.length> 0){
+                        var index;
+                        for(var i = 0; i< ratecard.FixSize.length && i < 2; ++i){
+                            index = i+1;
+                            var FixSize = ratecard.FixSize[i];
+                            obj["Fix Size " + index] = FixSize.Length+'x'+FixSize.Width+':'+FixSize.Amount;
+                        }
+                    }
+                    if( ratecard.Scheme !== undefined && ratecard.Scheme.length> 0){
+                        var index;
+                        for(var i = 0; i< ratecard.Scheme.length && i < 2; ++i){
+                            index = i+1;
+                            var Scheme = ratecard.Scheme[i];
+                            obj["Scheme " + index] = Scheme.paid+'-'+Scheme.Free+' Timelimit:'+Scheme.TimeLimit;
+                        }
+                    }
+                    if( ratecard.Remarks !== undefined && ratecard.Remarks.length> 0){
+                        var index;
+                        for(var i = 0; i< ratecard.Remarks.length && i < 2; ++i){
+                            index = i+1;
+                            var Remarks = ratecard.Remarks[i];
+                            obj["Remarks " + index] = Remarks.remark;
+                        }
+                    }
+                    if( ratecard.Covered !== undefined && ratecard.Covered.length> 0){
+                        var index;
+                        for(var i = 0; i< ratecard.Covered.length && i < 2; ++i){
+                            index = i+1;
+                            var Covered = ratecard.Covered[i];
+                            obj["Covered " + index] = Covered.mediaHouse+'-'+Covered.EditionArea;
+                        }
+                    }
+                    if( ratecard.Tax !== undefined && ratecard.Tax.length> 0){
+                        var index;
+                        for(var i = 0; i< ratecard.Tax.length && i < 2; ++i){
+                            index = i+1;
+                            var Tax = ratecard.Tax[i];
+                            obj["Tax " + index] = Tax.TaxRate +''+(Tax.Included?'(included)':'(excluded )');
+                        }
+                    }
+                    return obj
+                })
             }
             catch(err){
                 console.log(err)
