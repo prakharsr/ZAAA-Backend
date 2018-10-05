@@ -66,7 +66,7 @@ module.exports.createMHInvoice = async (request,response) => {
                     })
                 }
                 else{
-                    releaseorder.insertions.filter(insertion => mhinvoice.insertions.some(ins => ins.insertionId == insertion.insertionId))
+                    releaseorder.insertions.filter(insertion => mhinvoice.insertions.some(ins => '' + ins.insertionId == '' + insertion._id))
                     .forEach(insertion => insertion.mhimarked = true);
                     releaseorder.mediahouseInvoices.push(mhinvoice._id);
                     releaseorder.save((err,doc) => {

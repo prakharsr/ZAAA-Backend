@@ -6,6 +6,7 @@ var Client = require('../models/Client');
 var XLSX = require('xlsx');
 var base64 = require('base64-stream');
 var stream = require('stream');
+var mongoose = require('mongoose');
 
 function convertToJSON(array){
     var first = array[0].join();
@@ -138,7 +139,7 @@ module.exports.ratecardExcelImport = (request, response) => {
         });
 }
 
-module.exports.mediahouseExcelImport = (request, response) => {
+module.exports.mediahouseExcel = (request, response) => {
     var user = response.locals.user;
     var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
     var sheet_name_list = workbook.SheetNames;
@@ -264,7 +265,7 @@ module.exports.ratecardExcelUpdate = (request, response) => {
             catch(err){
                 response.send({
                     success: false,
-                    msg: 'Unsuccessful'
+                    msg : 'Unsuccessful'
                 });
             }
             });
@@ -276,33 +277,119 @@ module.exports.ratecardExcelUpdate = (request, response) => {
     });
 }
 
-module.exports.mediahouseExcelUpdate = (request, response) => {
+function convertElementToMediaHouse(user, element) {
+    var pullouts = [];
+    var scheduling = [];
+    for(var i = 1; element["Pullout"+i]; i++){
+        pullouts.push({
+            "Name": element["Pullout"+i],
+            "Language": element["PulloutLanguage"+i],
+            "Frequency": element["PulloutFrequency"+i],
+            "Remark": element["PulloutRemark"+i]
+        });
+    }
+    for(var i = 1; element["PersonName"+i]; i++){
+        scheduling.push({
+            "Name": element["PersonName" + i],
+            "Designation": element["Designation" + i],
+            "MobileNo": element["Mobile" + i],
+            "DeskExtension": element["DeskExtension" + i],
+            "EmailId": element["Email" + i],
+            "Department": element["Department" +i]
+        })
+    }
+
+    var phono, std;
+    var gsttype = '', gstno = '';
+    var phone = element['Phone'].split('-');
+    var gstin = element['GSTIN'].split('-');
+
+    if(phone.length === 0) {
+        std = '',
+        phono = ''
+    }
+    else if(phone.length === 1){
+        std = '',
+        phono = phone[0]
+    }
+    else if(phone.length === 2){
+        std = phone[0],
+        phono = phone[1]
+    }
+
+    if(gstin.length === 1){
+        gsttype = 'URD';
+    }
+    if(gstin.length === 2){
+        gsttype = 'RD';
+        gstno = gstin[1];
+    }
+
+
+
+    var result = {
+        OrganizationName:element["Organization Name"],
+        PublicationName:element["Publication Name"],
+        NickName:element["Nick Name"],
+        MediaType:element["Media Type"],
+        Language:element.Language?element.Language:'',
+        Address:{
+            pincode: element["PIN"],
+            edition: element["Edition"],
+            city: element["City"],
+            state: element["State"]
+        },
+        OfficeLandline: {
+            std:std,
+            phone: phono,
+        },
+        Scheduling:scheduling,
+        global:false,
+        pullouts:pullouts,
+        GSTIN:{
+            GSTType : gsttype,
+            GSTNo : gstno
+        },
+        Remark:element.Remark,
+        firm : user.firm
+    };
+    return result;
+}
+
+module.exports.mediahouseExcelImport = (request, response) => {
     var user = response.locals.user;
-    xlsx(request.files.excelFile, function(err, data){
-        if(err){
-            response.send({
-                success: false,
-                msg: 'Unsuccessful'
-            });
-        }
-        else{
-            var json = convertToJSON(data);
-            json.forEach(element => {
+    var workbook = XLSX.read(request.files.excelFile.data, {type:'buffer'});
+    var sheet_name_list = workbook.SheetNames;
+    var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+    var count = 0; 
+    var errorline = '';
+    for(var i = 0; i < xlData.length; i++){
+        var element = xlData[i];
+        var model = convertElementToMediaHouse(user, element);
+        console.log(model);
+        if(element.ID){
             try{
-                MediaHouse.findByIdAndUpdate(element._id,{$set: element});
+                MediaHouse.findByIdAndUpdate(mongoose.mongo.ObjectId(element.ID),{$set: model});
             }
             catch(err){
-                response.send({
-                    success: false,
-                    msg: 'Unsuccessful'
-                });
+                errorline += " ,"+ (i+1);
             }
-            });
-            response.send({
-                success: true,
-                msg: 'Bulk update successful'
-            });
         }
+        else{
+            try{
+                var mediahouse = new MediaHouse(model);
+                mediahouse.save();
+            }
+            catch(err){
+                errorline += " ,"+ i+1;
+            }
+        }
+    }   
+    console.log(errorline);
+    response.send({
+        success: true,
+        msg: 'Bulk update successful',
+        errorline: "Error in updating at lines numbered"+errorline 
     });
 }
 
@@ -350,8 +437,9 @@ module.exports.generateMediaHouseSheet = async function(request, response){
         }
         else {
             try {
-                var el = mediahouses.map(function (mediahouse) {
+                var el = mediahouses.map(function (mediahouse){
                     var obj = {
+                        "ID": ''+mediahouse._id,
                         "Publication Name": mediahouse.PublicationName ? mediahouse.PublicationName : "",
                         "Organization Name": mediahouse.OrganizationName ? mediahouse.OrganizationName : "",
                         "Nick Name": mediahouse.NickName ? mediahouse.NickName : "",
@@ -386,7 +474,7 @@ module.exports.generateMediaHouseSheet = async function(request, response){
                             obj["Mobile" + index] = scheduling.MobileNo?scheduling.MobileNo:"";
                             obj["DeskExtension" + index] = scheduling.DeskExtension?scheduling.DeskExtension:"";
                             obj["Email" + index] = scheduling.EmailId?scheduling.EmailId:"";
-                            obj["Department"] = scheduling.Departments[0]?scheduling.Departments[0]:"";
+                            obj["Department" + index] = scheduling.Departments[0]?scheduling.Departments[0]:"";
                         }
                     }
                     return obj;

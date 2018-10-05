@@ -59,7 +59,8 @@ module.exports.createMediaHouseNote = function(request,response){
             releaseOrderNO: request.body.releaseOrderNO,
             amount: request.body.amount,
             remark: request.body.remark,
-            date: request.body.date,
+            MHNDate:request.body.MHNDate,
+            MHNNo:request.body.MHNNo,
             DocId: releaseorder._id,
             firm: user.firm,
             user: user._id
