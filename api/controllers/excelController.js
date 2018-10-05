@@ -372,7 +372,7 @@ module.exports.mediahouseExcelImport = (request, response) => {
                 MediaHouse.findByIdAndUpdate(mongoose.mongo.ObjectId(element.ID),{$set: model});
             }
             catch(err){
-                errorline += "Error in updating at line number "+ (i+1)+"\n";
+                errorline += " ,"+ (i+1);
             }
         }
         else{
@@ -381,7 +381,7 @@ module.exports.mediahouseExcelImport = (request, response) => {
                 mediahouse.save();
             }
             catch(err){
-                errorline += 'error at line number '+ i;
+                errorline += " ,"+ i+1;
             }
         }
     }   
@@ -389,7 +389,7 @@ module.exports.mediahouseExcelImport = (request, response) => {
     response.send({
         success: true,
         msg: 'Bulk update successful',
-        errorline: errorline
+        errorline: "Error in updating at lines numbered"+errorline 
     });
 }
 
