@@ -230,6 +230,7 @@ var mediahouseID =await searchMediahouseID(request, response, user);
 var date = (request.body.date)?(request.body.date):null;
 var query = await formQuery(mediahouseID, date, user, request);
 query['insertions.paymentMode']="Credit";
+query['mediahouseID'] = mediahouseID;
 
 
 MediaHouseInvoice
