@@ -72,7 +72,6 @@ function quartersLeft(firm){
 }
 function calcDuration(firm, newPlan){
     if(firm.plan.name == 'trial'){
-        console.log(new Date(firm.plan.expiresOn));
         if(new Date(firm.plan.expiresOn) - new Date() >= 0)
             return {
                 from: firm.plan.expiresOn,
@@ -121,40 +120,36 @@ module.exports.getPlans2 = async function(request,response){
         var large = await Plan.findOne({ name: "Large"});
         if(firm.plan.planID == undefined || firm.plan.planID == null ){
             plans = await Plan.find({},null, {sort: {cost: 1}})
-            dur = [
-                {from: new Date(), upto: new Date(new Date().setDate(new Date().getDate()+ trial.duration))},
-                {from: new Date(), upto: new Date(new Date().setDate(new Date().getDate()+ small.duration))},
-                {from: new Date(), upto: new Date(new Date().setDate(new Date().getDate()+ medium.duration))},
-                {from: new Date(), upto: new Date(new Date().setDate(new Date().getDate()+ large.duration))}
-            ]
         }
         else if (firm.plan.planID.equals(trial._id)){
             plans = [small, medium, large];
-            dur = [ calcDuration(firm, small), calcDuration(firm , medium), calcDuration(firm, large)]
         }
         else if (firm.plan.planID.equals(small._id)){
             medium.cost -= small.cost*quartersLeft(firm)/4;
             large.cost -= small.cost*quartersLeft(firm)/4;
             plans = [small, medium, large]
-            dur = [ calcDuration(firm, small), calcDuration(firm , medium), calcDuration(firm, large)]
 
         }
         else if (firm.plan.planID.equals(medium._id)){
-            console.log(quartersLeft(firm));
             large.cost -= medium.cost*quartersLeft(firm)/4;
             plans = [small, medium, large]
-            dur = [ calcDuration(firm, small), calcDuration(firm , medium), calcDuration(firm, large)]
 
         }
         else if (firm.plan.planID.equals(large._id)){
             plans = [small, medium, large]
-            dur = [ calcDuration(firm, small), calcDuration(firm , medium), calcDuration(firm, large)]
 
         }
+
+        plans = plans.map(plan => {
+            var doc = plan._doc;
+            return {
+                ...doc,
+                dur: calcDuration(firm, doc)
+            };
+        })
         response.send({
             success:true,
             plans:plans,
-            dur:dur,
             user:user,
             firm: firm
         })

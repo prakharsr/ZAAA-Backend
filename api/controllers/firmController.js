@@ -88,7 +88,7 @@ module.exports.deleteLogoImage = function(request,response){
 		}
 	});
 }	
-module.exports.setPlan = async function(request,response){
+module.exports.setPlan2 = async function(request,response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
 	firm.plan.planID = request.body.planID;
@@ -141,60 +141,158 @@ module.exports.setPlan = async function(request,response){
 	});
 };
 
-function savePlanInFirm(firm,plan){
-    return new Promise((resolve, reject) => {
-		firm.plan = plan;
-		firm.save(function(err){
-			if(err)
-			reject(err);
-			else
-			resolve(firm);
-		})
-    })
 
+function quartersLeft(firm){
+    if(firm.plan.expiresOn - new Date() >= 0)
+    return Math.floor((firm.plan.expiresOn - new Date())/7948800000);
+    else
+    return 0;
 }
-module.exports.setPlan2 = async function(request,response){
-	var user = response.locals.user;
-	var firm = response.locals.firm;
-	firm.plan.name = request.body.plan.name;
-	firm.plan.createdOn = request.body.dur.from;
-	firm.plan.expiresOn = request.body.dur.upto;
-	firm.plan.planID = request.body.plan._id;
-	// instance.payments.capture(request.body.paymentID, request.body.plan.cost*100).then((data) => {
-	// 	console.log(request.body.plan.cost)
-	// 	console.log(data);
-	// 	var Details={
-	// 		email: user.email,
-	// 		firmname:firm.FirmName,
-	// 		paymentId:firm.plan.paymentID,
-	// 		gstin:firm.GSTIN.GSTNo,
-	// 		add:firm.RegisteredAddress.address,
-	// 		city: firm.RegisteredAddress.city,
-	// 		state:firm.RegisteredAddress.state,
-	// 		price: data.amount,
-	// 		fee: data.fee,
-	// 		tax: data.tax,
-	// 		date: data.created_at,
-	// 		method:data.method
-	// 	}					
-	// 	pdf.generateInvoice(request,response,Details);
-	// }).catch((err) => {
-	// 	console.error(err + "b")
-	// })
-	firm.save( err => {
-		if(err){
-			response.send({
-				success: false,
-				msg: "ERROR:" + err
-			})
+function calcDuration(firm, newPlan){
+    if(firm.plan.name == 'trial'){
+        console.log(new Date(firm.plan.expiresOn));
+        if(new Date(firm.plan.expiresOn) - new Date() >= 0)
+            return {
+                from: firm.plan.expiresOn,
+                upto: new Date(new Date().setDate(firm.plan.expiresOn.getDate() + newPlan.duration ))
+            }
+        else{
+            return {
+                from: new Date(),
+                upto:  new Date(new Date().setDate(new Date().getDate() + newPlan.duration ))
+            }
+        }
+    }
+    else{
+        if(new Date(firm.plan.expiresOn) - new Date() >= 0){
+            if(newPlan._id === firm.plan.planID){
+                return {
+                    from: firm.plan.expiresOn,
+                    upto: new Date(new Date().setDate(firm.plan.expiresOn.getDate() + newPlan.duration ))
+                }
+            }
+            else{
+                return {
+                    from: new Date(),
+                    upto:  new Date(new Date().setDate(new Date().getDate() + newPlan.duration ))
+                }
+            }
+        }
+        else{
+            return {
+                from: new Date(),
+                upto:  new Date(new Date().setDate(new Date().getDate() + newPlan.duration ))
+            }
+        }
+    }
+}
+async function calculateCost(firm,plan){
+	var trial = await Plan.findOne({ name: "trial"});
+	if(firm.plan.planID == undefined || firm.plan.planID == null ){
+		return plan.cost;
+	}
+	var firmPlan = await Plan.findOne({ _id: firm.plan.planID});
+	if (firm.plan.planID.equals(trial._id)){
+		return plan.cost;
+	}
+	else if (firm.plan.planID.equals(plan._id)){
+		return plan.cost;
+	}
+	else {
+		var cost = plan.cost - firmPlan.cost*quartersLeft(firm)/4;
+		return cost;
+	}
+}
+module.exports.setPlan = async function(request,response){
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    try{
+		if(firm.plan== null ||firm.plan.planID == undefined || firm.plan.planID == null ){
+			var plan = await Plan.findById(mongoose.mongo.ObjectId(request.body.planID))
+			firm.plan = {
+				name: plan.name,
+				createdOn: new Date(),
+				expiresOn: new Date(new Date().setDate(new Date().getDate()+ plan.duration)),
+				planID: request.body.planID,
+				paymentID: request.body.paymentID
+			};
+			if(plan.name == "trial")
+			firm.plan.validAgain = false;
+			var cost = calculateCost(firm,plan);
+			if(request.body.cost != 0){
+				firm.FirmName = request.body.firmName;
+				firm.plan.paymentID = request.body.paymentID;
+				firm.GSTIN = request.body.GSTIN;
+				firm.RegisteredAddress = request.body.billingAddress;
+				await instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+					console.log(request.body.cost)
+					console.log(data);
+					var Details={
+						email: user.email,
+						firmname:firm.FirmName,
+						paymentId:firm.plan.paymentID,
+						gstin:firm.GSTIN.GSTNo,
+						add:firm.RegisteredAddress.address,
+						city: firm.RegisteredAddress.city,
+						state:firm.RegisteredAddress.state,
+						price: data.amount,
+						fee: data.fee,
+						tax: data.tax,
+						date: data.created_at,
+						method:data.method
+					}					
+					pdf.generateInvoice(request,response,Details);
+				})
+				firm.plan.validAgain=true;
+			}
+			await firm.save();
 		}
 		else{
-			response.send({
-				success: true,
-				msg: "Done with it"
-			})
+			var plan = await Plan.findById(mongoose.mongo.ObjectId(request.body.planID))
+			var dur = calcDuration(firm, plan);
+			firm.plan.name = plan.name;
+			firm.plan.createdOn = dur.from;
+			firm.plan.expiresOn = dur.upto;
+			firm.plan.planID = request.body.planID;
+			firm.plan.paymentID = request.body.paymentID;
+			var cost = calculateCost(firm,plan);
+			if(request.body.cost != 0){
+				firm.plan.paymentID = request.body.paymentID;
+				await instance.payments.capture(request.body.paymentID, request.body.cost*100).then((data) => {
+					console.log(request.body.cost)
+					console.log(data);
+					var Details={
+						email: user.email,
+						firmname:firm.FirmName,
+						paymentId:firm.plan.paymentID,
+						gstin:firm.GSTIN.GSTNo,
+						add:firm.RegisteredAddress.address,
+						city: firm.RegisteredAddress.city,
+						state:firm.RegisteredAddress.state,
+						price: data.amount,
+						fee: data.fee,
+						tax: data.tax,
+						date: data.created_at,
+						method:data.method
+					}					
+					pdf.generateInvoice(request,response,Details);
+				});
+				firm.plan.validAgain=true;
+			}
+			await firm.save();
 		}
-	})
+		response.send({
+			success:true,
+			msg:firm +""
+		})
+    }
+    catch(err){
+        response.send({
+            success:false,
+            msg: 'error' + err
+        })
+        return;
+    }
 };
 module.exports.setFirmProfile = function(request, response){
 	var token = userController.getToken(request.headers);
