@@ -179,7 +179,7 @@ function formQuery(mediahouseID, date, user, request){
             query['releaseOrderNO']=request.body.releaseOrderNO
         }
         console.log(request.body)
-        if((request.body.batchID !== undefined)&&(request.body.batchID != -1)){
+        if(request.body.batchID !== ''){
             query['insertions.batchID'] = request.body.batchID;
         }
         
