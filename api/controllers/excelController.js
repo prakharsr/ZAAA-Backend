@@ -649,7 +649,7 @@ function convertElementToClient(user, element) {
     return result;
 }
 
-function convertElementToRateCard(user, element) {
+async function convertElementToRateCard(user, element) {
     var FixSize = [];
     var Scheme = [];
     var Remarks = [];
