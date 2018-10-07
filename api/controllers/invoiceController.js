@@ -767,7 +767,7 @@ module.exports.queryClientPayments = async function(request, response){
                             var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
                             invoice['releaseOrder'] = releaseOrder;
                             var Details = createDocument(request,response,invoice);
-                            pdf.generateinvoice(request,response,Details);
+                            pdf.mailinvoice(request,response,Details);
                         }
                     })
                 }
@@ -838,6 +838,7 @@ module.exports.queryClientPayments = async function(request, response){
         var firm = response.locals.firm;
         var user = response.locals.user;
         var doc = request.body.invoice;
+        doc['createdAt'] = new Date();
         doc['flogo'] = firm.LogoURL;
         doc['fsign'] = user.signature;
         var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;;
@@ -846,8 +847,8 @@ module.exports.queryClientPayments = async function(request, response){
         doc['femail'] = firm.Email;
         var tnc ='';
         var i = 0;
-        for(; i < firm.ROterms.length; i++){
-            tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
+        for(; i < firm.INterms.length; i++){
+            tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
         }
         doc['tnc'] = tnc;
         var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
@@ -913,7 +914,11 @@ module.exports.queryClientPayments = async function(request, response){
                   .replace('{{medition}}', Details.medition)
                   .replace('{{phone}}', Details.phone)
                   .replace('{{email}}', Details.email)
-                  .replace('{{payday}}', Details.payday);
+                  .replace('{{payday}}', Details.payday)
+                  .replace('{{sac}}', Details.sac)
+                  .replace('{{tnc}}', Details.tnc)
+                  .replace('{{Other}}', Details.other)
+                  .replace('{{otherCharges}}', Details.otheram);
     
                 callback(templateHtml);
             }
@@ -998,15 +1003,21 @@ module.exports.queryClientPayments = async function(request, response){
         var caddress = doc.releaseOrder.clientState;
         var maddress = doc.releaseOrder.publicationState;
     
-        if(doc.releaseOrder.paymentType === 'Cash')
+        if(doc.paymentType === 'Cash')
         paymentDetails = "Cash"
-        else if(doc.releaseOrder.paymentType === 'Credit')
+        else if(doc.paymentType === 'Credit')
         paymentDetails = "Credit"
-        else if(doc.releaseOrder.paymentType === 'Cheque')
-        paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
-        else if(doc.releaseOrder.paymentType === 'NEFT')
-        paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
+        else if(doc.paymentType === 'Cheque')
+        paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
+        else if(doc.paymentType === 'NEFT')
+        paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
         console.log(doc);
+        var otheram=0, Other="";
+
+        doc.otherCharges.forEach(obj => {
+            otheram += obj.amount;
+            Other+= obj.chargeType+" ";
+        })
 
         var payday="";
         if(doc.paymentDate)
@@ -1049,13 +1060,16 @@ module.exports.queryClientPayments = async function(request, response){
             pullout: doc.releaseOrder.pulloutName,
             remark: remark,
             tnc: doc.tnc,
-            sac: doc.releaseOrder.sac,
+            sac: doc.releaseOrder.sac || '',
             image : config.domain+'/'+doc.flogo,
             sign: config.domain+'/'+doc.fsign,
             address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
             phone: "Contact: "+doc.fmobile || '',
             email: "Email: "+doc.femail+"<br>"+(firm.Website || '') || '-',
-            payday: payday
+            payday: payday,
+            createdAt: doc.createdAt,
+            otheram : otheram,
+            other: Other
         }
     
         if(doc.adSchemeFree === 0)

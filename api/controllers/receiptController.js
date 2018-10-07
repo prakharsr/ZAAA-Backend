@@ -1008,6 +1008,8 @@ module.exports.mailReceiptPdf = function(request, response) {
             });
         }
         else{
+            var invoice = await Invoice.findById(receipt.invoiceID);
+            receipt['invoice'] = invoice;
             var Details = await createDocument(request,response,receipt);
             pdf.mailPaymentReceipt(request,response,Details);
         }
@@ -1033,6 +1035,8 @@ module.exports.generateReceiptPdf = async function(request, response) {
             });
         }
         else{
+            var invoice = await Invoice.findById(receipt.invoiceID);
+            receipt['invoice'] = invoice;
             var Details = await createDocument(request,response,invoice);
             pdf.generatePaymentReceipt(request,response,Details);
         }
@@ -1055,9 +1059,12 @@ module.exports.previewreceipthtml = async function(request, response) {
         tnc += (i+1)+'.'+firm.PRterms[i]+'<br>';
     }
     doc['tnc'] = tnc;
+    doc['createdAt'] = doc.createdAt;
 tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
     var Details = await createDocument(request,response,doc);
     console.log(Details);
+    var invoice = await Invoice.findById(receipt.invoiceID);
+    receipt['invoice'] = invoice;
     getreceipthtml(Details, content => {
         response.send({
             content: content
@@ -1082,6 +1089,8 @@ function getreceipthtml(Details, callback) {
               .replace('{{username}}', Details.username)
               .replace('{{mediahouse}}', Details.mediahouse)
               .replace('{{cname}}', Details.cname)
+              .replace('{{caddress}}', Details.caddress)
+              .replace('{{cgstin}}', Details.cgstin)
               .replace('{{amountw}}', Details.amount)
               .replace('{{receiptText}}', Details.receiptText)
               .replace('{{tbody}}', Details.tbody)
@@ -1122,8 +1131,8 @@ async function createDocument(request, response, doc){
     else{
         var inv = await Invoice.findById(mongoose.mongo.ObjectId(doc.invoiceID));
         receiptText = "by "+paymentDetails+" against"+inv.invoiceNO;
-        table+="<table class='table table-bordered table-sm' style='font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;'><tr><th style='background: rgb(128, 128, 204)'>Invoice Amount</th><th style='background: rgb(128, 128, 204)>Invoice Date</th><th style='background: rgb(128, 128, 204)'>Received Amount</th><th style='background: rgb(128, 128, 204)'>Balance Amount</th></tr>";
-        table+="<tr><td>"+doc.FinalAmount+"</td><td>"+toReadableDate(new Date(doc.createdAt))+"</td><td>"+(doc.clearedAmount+doc.collectedAmount+doc.shadowAmount)+"</td><td>"+doc.pendingAmount+"</td></tr><table>";
+        table+="<table class='table table-bordered table-sm' style='font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;'><tr><th>Invoice No.</th><th>Invoice Date</th><th>Invoice Amount</th><th>Previously Received</th><th>Currently Received</th><th>Balance Amount</th></tr>";
+        table+="<tr><td>"+doc.invoiceNO+"</td><td>"+toReadableDate(new Date(doc.createdAt))+"</td><td>"+(doc.invoice.clearedAmount+doc.invoice.collectedAmount+doc.invoice.shadowAmount+doc.invoice.pendingAmount)+"</td><td>"+(+doc.invoice.clearedAmount+doc.invoice.collectedAmount+doc.invoice.shadowAmount)+"</td><td>"+doc.paymentAmount+"</td><td>"+doc.invoice.pendingAmount+"</td></tr><table>";
     }
 
     console.log(doc.createdAt)
