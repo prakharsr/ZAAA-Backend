@@ -1033,7 +1033,7 @@ module.exports.generateReceiptPdf = async function(request, response) {
             });
         }
         else{
-            var Details = await createDocument(request,response,invoice);
+            var Details = await createDocument(request,response,receipt);
             pdf.generatePaymentReceipt(request,response,Details);
         }
     });
