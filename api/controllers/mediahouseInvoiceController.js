@@ -179,7 +179,7 @@ function formQuery(mediahouseID, date, user, request){
             query['releaseOrderNO']=request.body.releaseOrderNO
         }
         console.log(request.body)
-        if(request.body.batchID !== "" ){
+        if((request.body.batchID !== "" )&&(request.body.batchID !== null)  ){
             query['insertions.batchID'] = request.body.batchID;
         }
         
@@ -425,6 +425,7 @@ var mediahouseID =await searchMediahouseID(request, response, user);
 var date = (request.body.date)?(request.body.date):null;
 var query = await formQuery(mediahouseID, date, user, request);       
 query['insertions.paymentMode'] = {$in:["Cheque", "Cash", "NEFT"]} 
+delete query['insertionPeriod'];
 MediaHouseInvoice
 .aggregate([
     {$unwind: "$insertions"}, 
