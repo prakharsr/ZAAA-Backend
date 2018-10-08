@@ -27,10 +27,10 @@
         </div>
     </div>
     <div style="color: white; position: relative; left: 185px; width: 200px; padding: 2px; margin-bottom: 10px; background: rgb(35, 35, 223); border-radius: 20px;"><h5>&nbsp;&nbsp;{{head}}</h5></div>
-    <span style="text-align: left; font-size: 10px">Receipt No. {{rno}}</span>
-    <span style="position: relative; left: 375px; padding: 20px; font-size: 10px">Date: {{date}}</span><br>
-    <div class="text-center" style="width: 500px; text-align:justify;">RECEIVED with thanks from M/S. {{cname}} {{caddress}} {{cgstin}} the sum of ₹ {{amountw}} {{receiptText}}
-    <br><br><div style="position:relative;text-align: left;left: 10px;font-size: 12px; width: 500px; border: 1px black solid ;padding-bottom:0px; margin-bottom: 0px;" > &nbsp;Remarks: <b>{{remarks}}</b>
+    <span style="text-align: left; font-size: 10px">Receipt No. <b>{{rno}}</b></span>
+    <span style="position: relative; left: 375px; padding: 20px; font-size: 10px">Date: <b>{{date}}</b></span><br>
+    <div class="text-center" style="width: 500px; text-align:justify;">RECEIVED with thanks from M/S. {{cname}} {{caddress}} {{cgstin}} the sum of <b>₹ {{amountw}}</b> {{receiptText}}
+    <br><br><div style="position:relative;text-align: left;left: 10px;font-size: 12px; width: 500px; border: 1px black solid ;" > &nbsp;Remarks: <b>{{remarks}}</b>
     </div>
     {{tbody}}
     <div class='row' style="width: 560px;">
@@ -44,7 +44,7 @@
             Authorised Signatory: <b>{{username}}</b>
         </div>
     </div>
-    <hr>
+    <hr style='padding-bottom: 0px; margin-bottom: 0px'>
     <span style="font-size: 6px;">This is a computer generated document generated hence no physical signature is required.</span> 
 </body>
 </html>
