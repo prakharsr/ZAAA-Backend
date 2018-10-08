@@ -6,6 +6,14 @@
         .unbold{
             font-weight: normal;
         }
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-top: 1px solid black;
+        }
     </style>
 </head>
 <body class="container-fluid" style="width : 560px; border: 1px black solid">
@@ -21,11 +29,11 @@
             </p>
         </div>
     </div>
-    <div style="position:relative; left:230px;">
+    <div style="position:relative; left:230px; background:rgb(35, 35, 223); border-radius:20px;">
         <span class="d-inline-block mb-2 bg-info px-3 py-2">Release Order</span>
     </div>
 
-    <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 10px; padding-bottom: 5px;">
+    <table style="font-size:8px; width: 560px; margin-bottom: 10px; padding-bottom: 5px;">
         <tr>
             <th colspan="3">
                 <div class='row'>
@@ -80,7 +88,7 @@
                     </th>
                 </tr>
             </table>
-            <table class="table table-bordered table-sm" style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
+            <table style="font-size:8px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;">
                 <tr>
                     <th colspan='4'>Description</th>
                     <th colspan='2'>Ins Date</th>

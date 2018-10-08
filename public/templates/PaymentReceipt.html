@@ -2,6 +2,16 @@
 <head>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Payment Receipt</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-top: 1px solid black;
+        }
+    </style>
 </head>
 <body class="container-fluid" style="width : 560px;">
     <div class="row" style="width: 560px;">
@@ -9,28 +19,29 @@
             <img src="{{logoimage}}" style="height:150px; max-width:240px; margin-top: 20px; margin-left: 20px;">
         </div>
         <div class="col" style="text-align: right; font-size:12px; margin-top: 20px;">
-            <p><h6>{{firmName}},</h6><br> 
+            <p><h6>{{firmName}},</h6>
                 {{Address}}<br>
                 {{phone}}<br>
                 {{email}}
             </p>
         </div>
     </div>
-    <div style="position: relative; left: 250px; padding: 20px; background: rgb(128, 128, 204)"><h5>Payment Receipt</h5></div>
-    <span style="text-align: left; font-size: 8px">{{rno}}</span><br>
-    <span style="text-align: right; font-size: 8px">{{date}}</span><br>
-    <div class="text-center" style="width: 500px; text-align:justify;">RECEIVED with thanks from M/S. {{cname}} {{caddress}} under GST No. {{cgstin}} the sum of ₹ {{amountw}} {{receiptText}}
-    {{tbody}}
+    <div style="color: white; position: relative; left: 185px; width: 200px; padding: 2px; margin-bottom: 10px; background: rgb(35, 35, 223); border-radius: 20px;"><h5>&nbsp;&nbsp;{{head}}</h5></div>
+    <span style="text-align: left; font-size: 10px">Receipt No. {{rno}}</span>
+    <span style="position: relative; left: 375px; padding: 20px; font-size: 10px">Date: {{date}}</span><br>
+    <div class="text-center" style="width: 500px; text-align:justify;">RECEIVED with thanks from M/S. {{cname}} {{caddress}} {{cgstin}} the sum of ₹ {{amountw}} {{receiptText}}
+    <br><br><div style="position:relative;text-align: left;left: 10px;font-size: 12px; width: 500px; border: 1px black solid ;padding-bottom:0px; margin-bottom: 0px;" > &nbsp;Remarks: <b>{{remarks}}</b>
     </div>
+    {{tbody}}
     <div class='row' style="width: 560px;">
-        <div class='col' style ='font-size: 8px'>
+        <div class='col' style =' text-align: left; font-size: 10px'>
             <b>Note/Remark:</b><br>
             {{tnc}}
         </div>
-        <div class='col' style='text-align: right; font-size: 12px'>
-            Signature:</b><br>
+        <div class='col-auto' style='text-align: left; font-size: 10px'>
+            <b>Signature:&emsp;</b><br>
             <img src="{{sign}}" style="height: 60px; width:60px;"><br>
-            Authorised Signatory: {{username}}
+            Authorised Signatory: <b>{{username}}</b>
         </div>
     </div>
     <hr>

@@ -1037,7 +1037,7 @@ module.exports.generateReceiptPdf = async function(request, response) {
         else{
             var invoice = await Invoice.findById(receipt.invoiceID);
             receipt['invoice'] = invoice;
-            var Details = await createDocument(request,response,invoice);
+            var Details = await createDocument(request,response,receipt);
             pdf.generatePaymentReceipt(request,response,Details);
         }
     });
@@ -1059,12 +1059,17 @@ module.exports.previewreceipthtml = async function(request, response) {
         tnc += (i+1)+'.'+firm.PRterms[i]+'<br>';
     }
     doc['tnc'] = tnc;
-    doc['createdAt'] = doc.createdAt;
-tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+    doc['createdAt'] = new Date(Date.now());
+    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+    if(!doc.advanced){
+        var invoice = await Invoice.findById(doc.invoiceID);
+        doc['invoice'] = invoice;
+        doc['clientName'] = invoice.clientName;
+        doc['clientState'] = invoice.clientState;
+        doc['clientGSTIN'] = invoice.clientGSTIN;
+    }
     var Details = await createDocument(request,response,doc);
     console.log(Details);
-    var invoice = await Invoice.findById(receipt.invoiceID);
-    receipt['invoice'] = invoice;
     getreceipthtml(Details, content => {
         response.send({
             content: content
@@ -1091,12 +1096,14 @@ function getreceipthtml(Details, callback) {
               .replace('{{cname}}', Details.cname)
               .replace('{{caddress}}', Details.caddress)
               .replace('{{cgstin}}', Details.cgstin)
-              .replace('{{amountw}}', Details.amount)
+              .replace('{{amountw}}', Details.amountw)
               .replace('{{receiptText}}', Details.receiptText)
               .replace('{{tbody}}', Details.tbody)
               .replace('{{tnc}}', Details.tnc)
               .replace('{{rno}}', Details.rno)
-              .replace('{{date}}', Details.date);
+              .replace('{{date}}', Details.date)
+              .replace('{{remarks}}', Details.remarks)
+              .replace('{{head}}', Details.head);
 
             callback(templateHtml);
         }
@@ -1110,46 +1117,54 @@ async function createDocument(request, response, doc){
     var user = response.locals.user;
     var firm = response.locals.firm;
     var address= doc.faddress;
-    var paymentDetails="";
+    var paymentDetails="via ";
     var table = "";
     var receiptText = "";
     
-    // if(doc.releaseOrder.paymentType === 'Cash')
-    //     paymentDetails = "Cash"
-    // else if(doc.releaseOrder.paymentType === 'Credit')
-    //     paymentDetails = "Credit"
-    // else if(doc.releaseOrder.paymentType === 'Cheque')
-    //     paymentDetails = "Cheque of "+doc.releaseOrder.paymentBankName+" Dated "+toReadableDate(doc.releaseOrder.paymentDate)+" Numbered "+doc.releaseOrder.paymentNo
-    // else if(doc.releaseOrder.paymentType === 'NEFT')
-    //     paymentDetails = "NEFT TransactionID: "+doc.releaseOrder.paymentNo;
+    if(doc.paymentType === 'Cash')
+        paymentDetails = "Cash"
+    else if(doc.paymentType === 'Credit')
+        paymentDetails = "Credit"
+    else if(doc.paymentType === 'Cheque')
+        paymentDetails = "Cheque of "+doc.paymentBankName+" Dated "+toReadableDate(doc.paymentDate)+" Numbered "+doc.paymentNo
+    else if(doc.paymentType === 'NEFT')
+        paymentDetails = "NEFT TransactionID: "+doc.paymentNo;
         
     
     if(doc.advanced){
-        receiptText="in advance against code of _______________________________________________________________.";
-        doc.createdAt = new Date(Date.now())
+        receiptText=paymentDetails;
+        doc.createdAt = new Date(Date.now());
+        table+= '<br><div style="position:relative;text-align: left;left: 10px; font-size:12px; width: 200px; border: 1px black solid "> &nbsp;Amount(in figures): <b>₹'+doc.paymentAmount+'</b></div><br>';
     }
     else{
-        var inv = await Invoice.findById(mongoose.mongo.ObjectId(doc.invoiceID));
-        receiptText = "by "+paymentDetails+" against"+inv.invoiceNO;
-        table+="<table class='table table-bordered table-sm' style='font-size:12px; width: 560px; margin-bottom: 5px; padding-bottom: 5px;'><tr><th>Invoice No.</th><th>Invoice Date</th><th>Invoice Amount</th><th>Previously Received</th><th>Currently Received</th><th>Balance Amount</th></tr>";
-        table+="<tr><td>"+doc.invoiceNO+"</td><td>"+toReadableDate(new Date(doc.createdAt))+"</td><td>"+(doc.invoice.clearedAmount+doc.invoice.collectedAmount+doc.invoice.shadowAmount+doc.invoice.pendingAmount)+"</td><td>"+(+doc.invoice.clearedAmount+doc.invoice.collectedAmount+doc.invoice.shadowAmount)+"</td><td>"+doc.paymentAmount+"</td><td>"+doc.invoice.pendingAmount+"</td></tr><table>";
+        var inv = await Invoice.findOne(mongoose.mongo.ObjectId(doc.invoiceID));
+        receiptText = " by "+paymentDetails+" against "+inv.invoiceNO;
+        table+="<table style='font-size:12px;position:relative; left:10px; width: 500px;'><tr><th>Invoice No.</th><th>Invoice Date</th><th>Invoice Amount</th><th>Previously Received</th><th>Currently Received</th><th>Balance Amount</th></tr>";
+        table+="<tr><td>"+inv.invoiceNO+"</td><td>"+toReadableDate(new Date(doc.createdAt))+"</td><td>"+(+inv.clearedAmount+inv.collectedAmount+inv.shadowAmount+inv.pendingAmount)+"</td><td>"+(+inv.clearedAmount+inv.collectedAmount+inv.shadowAmount+doc.paymentAmount)+"</td><td>"+doc.paymentAmount+"</td><td>"+(+inv.pendingAmount-doc.paymentAmount)+"</td></tr><table>";
     }
 
     console.log(doc.createdAt)
     
     return {
-        cname :doc.clientName,
+        head: doc.advanced ? 'ADVANCE RECEIPT' : 'PAYMENT RECEIPT',
+        cname :'<b>'+doc.clientName+'</b>',
+        caddress: doc.clientState,
+        cgstin: doc.clientGSTIN.GSTType == 'RD' ?"under GST No. <b>"+doc.clientGSTIN.GSTNo+'</b>' : '', 
         date: doc.createdAt? toReadableDate(new Date(doc.createdAt)): '',
-        amountw: amountToWords(doc.paymentAmountWords),
+        amountw: amountToWords(doc.paymentAmount) ,
         receiptText: receiptText,
         tbody: table,
         tnc: doc.tnc,
         image : doc.flogo,
+        rno: doc.receiptNO ? doc.receiptNO : '',
         sign: doc.fsign,
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
         phone: "Phone: "+doc.fmobile || '',
         email: "Email: "+doc.femail || '',
-        firmname: firm.FirmName
+        firmname: firm.FirmName,
+        firmname1: firm.FirmName,
+        username: user.name,
+        remarks:doc.remark ? doc.remark : '-'
     }
 
 }
