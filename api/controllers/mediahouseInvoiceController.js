@@ -525,12 +525,12 @@ module.exports.updateReceipts = function(request, response){
     })
 };
 
-module.exports.generateSummarySheetPdf = (request,response) => {
+module.exports.generateSummarySheetPdf = async (request,response) => {
     var Details = await createDocument(request,response,receipt);
     pdf.generateSummarySheet(request,response,Details);
 }
 
-module.exports.mailSummarySheetPdf = (request,response) => {
+module.exports.mailSummarySheetPdf = async (request,response) => {
     var Details = await createDocument(request,response,receipt);
     pdf.mailSummarySheet(request,response,Details);
 }
