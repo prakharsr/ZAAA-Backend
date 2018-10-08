@@ -182,6 +182,7 @@ function clientInvoiceTax(query){
                 "clientState":1,
                 "invoiceNO":1,
                 "date":1,
+                "sac":1,
                 "clientGSTIN.GSTType":1,
                 "clientGSTIN.GSTNo":1,
                 "taxAmount.primary":1,
@@ -206,14 +207,18 @@ function clientInvoiceTax(query){
                         "Client State":invoice.clientState,
                         "GST Status":invoice.clientGSTIN.GSTType,
                         "GST No.":invoice.clientGSTIN.GSTType=="RD"?invoice.clientGSTIN.GSTNo:"NA",
+                        "SAC": invoice.sac,
                         "Invoice No": invoice.invoiceNO,
                         "Invoice Date": invoice.date.toLocaleDateString(),
-                        "Invoice Value":invoice.FinalTaxAmount,
-                        "Net Amount":invoice.netAmountFigures,
+                        "Total Invoice Amount":invoice.FinalTaxAmount,
+                        "Taxable Amount":invoice.netAmountFigures,
                         "Tax Percentage":+invoice.taxAmount.primary + +invoice.taxAmount.secondary,
-                        "SGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
-                        "CGST ":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
-                        "IGST ":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
+                        "SGST %":(invoice.taxType == 'SGST + CGST')?(+invoice.taxAmount.primary + +invoice.taxAmount.secondary)/2:"NA",
+                        "SGST Amount":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                        "CGST %":(invoice.taxType == 'SGST + CGST')?(+invoice.taxAmount.primary + +invoice.taxAmount.secondary)/2:"NA",
+                        "CGST Amount":(invoice.taxType == 'SGST + CGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/200)):"NA",
+                        "IGST %":(invoice.taxType == 'IGST')?(+invoice.taxAmount.primary + +invoice.taxAmount.secondary)/2 :"NA",
+                        "IGST Amount":(invoice.taxType == 'IGST')?((+invoice.taxAmount.primary + +invoice.taxAmount.secondary) * (+invoice.adGrossAmount/100)) :"NA",
                     };
                     return obj;
                 })
@@ -238,7 +243,8 @@ function mhInvoiceTax(query){
                 "clientGSTIN.GSTType":1,
                 "clientGSTIN.GSTNo":1,
                 "MHIGrossAmount":1,
-                "MHITaxAmount":1
+                "MHITaxAmount":1,
+                "createdAt":1
             }
         },
             // {$limit: perPage},
@@ -248,19 +254,23 @@ function mhInvoiceTax(query){
                 reject(err);
             else{
                 var mhInvoiceList = mhinvoices.map(function(mhinvoice){
-                    var obj = {                                
+                    var obj = {
+                        "Creation Date": mhinvoice.createdAt,                                
                         "Publication Name": mhinvoice.publicationName,
                         "State":mhinvoice.publicationState,
                         "GST Status":mhinvoice.publicationGSTIN.GSTType,
                         "GST No.":mhinvoice.publicationGSTIN.GSTType=="RD"?mhinvoice.publicationGSTIN.GSTNo:"NA",
                         "Invoice No": mhinvoice.MHINo,
                         "Invoice Date": mhinvoice.date.toLocaleDateString(),
-                        "Invoice Value":mhinvoice.MHIGrossAmount + mhinvoice.MHITaxAmount,
-                        "Net Amount":mhinvoice.MHIGrossAmount,
+                        "Total Invoice Amount":mhinvoice.MHIGrossAmount + mhinvoice.MHITaxAmount,
+                        "Taxable Amount":mhinvoice.MHIGrossAmount,
                         "Tax Percentage":Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount))/100,
-                        "SGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
-                        "CGST ":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
-                        "IGST ":(mhinvoice.taxType == 'IGST')?(Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount))/100) :"NA",
+                        "SGST %":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
+                        "SGST Amount":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*100/200)):"NA",
+                        "CGST %":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*5000/(mhinvoice.MHIGrossAmount))/100):"NA",
+                        "CGST Amount":(mhinvoice.taxType == 'SGST + CGST')?(Math.round(mhinvoice.MHITaxAmount*100/200)):"NA",
+                        "IGST %":(mhinvoice.taxType == 'IGST')?(Math.round(mhinvoice.MHITaxAmount*10000/(mhinvoice.MHIGrossAmount))/100) :"NA",
+                        "IGST Amount":(mhinvoice.taxType == 'IGST')?(Math.round(mhinvoice.MHITaxAmount*100)/100) :"NA",
                             };
                     return obj;
                 })

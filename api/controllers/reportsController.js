@@ -281,8 +281,8 @@ module.exports.releaseOrderReports = function (request, response) {
                     obj["Agency Discount 2"] = releaseOrder.agencyDiscount2;
                     obj["Total Discount"] = +releaseOrder.publicationDiscount + +releaseOrder.agencyDiscount1 + +releaseOrder. agencyDiscount2;
                     obj["Tax"] = +releaseOrder.taxAmount.primary + +releaseOrder.taxAmount.secondary;
-                    obj["Tax Amount"] = ((+releaseOrder.taxAmount.primary + +releaseOrder.taxAmount.secondary) * (+releaseOrder.adGrossAmount/100));
-                    obj["Net Amount"] = "to be calculated";
+                    obj["Tax Amount"] = releaseOrder.netAmountFigures * (releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary) /(100 + releaseOrder.taxAmount.primary + releaseOrder.taxAmount.secondary);
+                    obj["Net Amount"] = releaseOrder.netAmountFigures;
                     obj["Executive Name"] = releaseOrder.executiveName?releaseOrder.executiveName:"-";
                     obj["Executive Org."] = releaseOrder.executiveOrg?releaseOrder.executiveOrg:"-";
                     obj["Tax included"]  =releaseOrder.taxIncluded;
@@ -470,12 +470,10 @@ module.exports.invoiceTaxationReports = function (request, response) {
         }
     })  
 };
-function findInvoice(invoiceNO, user){
+function findInvoice(invoiceID, user){
     return new Promise((resolve, reject) => {
-        var index =invoiceNO.indexOf('.',invoiceNO.indexOf('.')+1);
-        var substring = invoiceNO.slice(0,index);
         Invoice.find({
-            $and:[{"firm":user.firm},{"invoiceNO":substring}]
+            $and:[{"firm":user.firm},{"_id":invoiceID}]
         }).exec(function(err, invoice){
             if(err){
                 console.log(err)
@@ -539,7 +537,7 @@ module.exports.receiptReports = function (request, response) {
         else {
             try{
                 var el =await Promise.all(receipts.map( async function (receipt) {
-                    var invoice = await findInvoice(receipt.receiptNO, user);
+                    var invoice = await findInvoice(receipt.invoiceID, user);
                     
                     var obj =  {
                         "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
@@ -573,9 +571,11 @@ module.exports.receiptReports = function (request, response) {
                     if(receipt.status==0)
                     paymentStatus = "Collected";
                     if(receipt.status==1)
-                    paymentStatus = "Received";
+                    paymentStatus = "Approved";
                     if(receipt.status==2)
                     paymentStatus = "Rejected";
+                    if(receipt.status == 3)
+                    paymentStatus ==" Shadow"
                     
                     obj["Payment Status"] = paymentStatus;
                     return obj
