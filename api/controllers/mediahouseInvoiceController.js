@@ -525,107 +525,61 @@ module.exports.updateReceipts = function(request, response){
 };
 
 module.exports.generateSummarySheetPdf = (request,response) => {
-    var user = resposne.locals.user;
-    var firm = response.locals.firm;
-    try {
-        var mhis = request.body.mhis; // { _id, amount: number }[]
-        var mhijson = [];
-        
-        MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
-            invoices.forEach(invoice => {
-                invoice.insertions.forEach(mhiInsertion => {
-                    mhis.forEach(insertion => {
-                        if (mhiInsertion._id == insertion._id) {
-                            mhiInsertion.collectedAmount += insertion.amount;
-                            mhiInsertion.pendingAmount -=insertion.amount;
-                            mhiInsertion.paymentDate =request.body.paymentDate;
-                            mhiInsertion.paymentNo =request.body.paymentNo;
-                            mhiInsertion.paymentMode =request.body.paymentType;
-                            mhiInsertion.paymentAmount = request.body.paymentAmount
-                            mhiInsertion.paymentBankName =request.body.paymentBankName;
-                            
-                        }
-                    });
-                });
-                
-                invoice.save(function(err, doc) {
-                    if (err) {
-                        response.send({
-                            success: false,
-                            msg: "error" + err
-                        });
-                    }
-                    else{
-                        mhijson.push(doc);
-                    }
-                });
-            });
-            var address = firm.address;
-            var Details = {
-                image : config.domain+'/'+firm.LogoURL,
-                sign: config.domain+'/'+user.signature,
-                jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-                address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-                phone: "Phone: "+firm.Mobile || '',
-                email: "Email: "+firm.Email || ''
-            }
-            pdf.generateSummarySheet(request, response, Details);
-        });
-    }
-    catch (err) {
-        if (err)
-        console.log(err)
-    }
-    
+    var Details = await createDocument(request,response,receipt);
+    pdf.generateSummarySheet(request,response,Details);
 }
 
 module.exports.mailSummarySheetPdf = (request,response) => {
-    try {
-        var mhis = request.body.mhis; // { _id, amount: number }[]
-        var mhijson = [];
-        
-        MediaHouseInvoice.find({ firm: user.firm }).then(invoices => {
-            invoices.forEach(invoice => {
-                invoice.insertions.forEach(mhiInsertion => {
-                    mhis.forEach(insertion => {
-                        if (mhiInsertion._id == insertion._id) {
-                            mhiInsertion.collectedAmount += insertion.amount;
-                            mhiInsertion.pendingAmount -=insertion.amount;
-                            mhiInsertion.paymentDate =request.body.paymentDate;
-                            mhiInsertion.paymentNo =request.body.paymentNo;
-                            mhiInsertion.paymentMode =request.body.paymentType;
-                            mhiInsertion.paymentAmount = request.body.paymentAmount
-                            mhiInsertion.paymentBankName =request.body.paymentBankName;
-                            
-                        }
-                    });
-                });
-                invoice.save(function(err, doc) {
-                    if (err) {
-                        response.send({
-                            success: false,
-                            msg: "error" + err
-                        });
-                    }
-                    else{
-                        mhijson.push(doc);
-                    }
-                });
-            });
-            var address = firm.address;
-            var Details = {
-                image : config.domain+'/'+firm.LogoURL,
-                sign: config.domain+'/'+user.signature,
-                jurisdiction: firm.jurisdiction ? firm.jurisdiction : address.city,
-                address: address?(address.address+'<br>'+address.city+"<br>"+address.state+'<br>PIN code:'+address.pincode):'',
-                phone: "Phone: "+firm.Mobile || '',
-                email: "Email: "+firm.Email || ''
-            }
-            pdf.mailSummarySheet(request, response, Details);
-        });
-    }
-    catch (err) {
-        if (err)
-        console.log(err)
-    }
+    var Details = await createDocument(request,response,receipt);
+    pdf.mailSummarySheet(request,response,Details);
 }
+
+function createDocument(request, response, doc){
+    var firm = response .locals.firm;
+    var user = response.locals.user;
+    var address = firm.RegisteredAddress;
+    var insertions ='';
+    var date = new Date(Date.now());
+    var amount ='';
+    Details = {
+        logoimage: config.domain + firm.LogoURL,
+        firmname: firm.FirmName,
+        Address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
+        phone: "Contact: "+firm.Mobile || '',
+        email: "Email: "+firm.Email+"<br>"+(firm.Website || '') || '-',
+        mname: doc.mname,
+        medition: doc.medition,
+        mstate: doc.mstate,
+        date: date,
+        batch: doc.batch,
+        insertions: insertions,
+        amount: amount
+    }
+    return Details;
+}
+
+
+module.exports.getSShtml = function(Details, callback) {
+    fs.readFile(path.resolve(__dirname, '../../public/templates/summarysheet.html'),'utf8', (err, templateHtml) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            templateHtml = templateHtml.replace('{{logoimage}}', Details.image)
+              .replace('{{firmName}}', Details.firmName)
+              .replace('{{Address}}', Details.Address)
+              .replace('{{phone}}', Details.phone)
+              .replace('{{email}}', Details.email)
+              .replace('{{mname}}', Details.mname)
+              .replace('{{medition}}', Details.medition)
+              .replace('{{mstate}}', Details.mstate)
+              .replace('{{date}}', Details.date)
+              .replace('{{batch}}', Details.batch)
+              .replace('{{insertions}}', Details.insertions)
+              .replace('{{amount}}', Details.amount);
+              
+              callback(templateHtml);
+        }
+    });
+}
+

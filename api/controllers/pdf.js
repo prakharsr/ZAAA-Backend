@@ -6,6 +6,7 @@ var config = require('../../config');
 var roController = require('./releaseorderController');
 var invoiceController = require('./invoiceController');
 var receiptController = require('./receiptController');
+var summarysheet = require('./mediahouseInvoiceController');
 
 var mailgun = require('mailgun-js')({
     apiKey: config.mailgun_api_key,
@@ -355,37 +356,59 @@ module.exports.mailClientNote =  function(request,response,Details) {
 }
 
 
-module.exports.generateSummarySheet =  function(request,response,Details) {
-    var req = http.request(config.domain+'/templates/summarysheet.html', res => {
-        var templateHtml = "";
-        res.on('data', chunk => {
-            templateHtml += chunk;
+module.exports.mailSummarySheet = function(request,response,Details) {
+    summarysheet.getSShtml(Details, content => {
+        var options = {
+            width: '210mm',
+            height: '297mm'
+        }
+        pdf.create(content, options).toBuffer(function (err, buffer) {
+            if (err) {
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg :"cannot create pdf"
+                });
+            }
+            else {
+                mailFile(
+                    request,
+                    response,
+                    buffer,
+                    'SS_'+Details.rno+'_'+Details.cname+'.pdf',
+                    response.locals.user.email,
+                    request.body.to,
+                    request.body.cc,
+                    request.body.bcc,
+                    'ReleaseOrder_'+Details.rno+'_'+Details.cname,
+                    '<html>To '+Details.mediahouse+',<br>Greetings of the day!<br>Please find the attached Release Order bearing No.'+Details.rno+' and insert advertisement accordingly.<br><br> If any issue/query, kindly let us know immediately.<br><br>Thanks for your kind cooperation.<br><br>Sincerely,<br><img src="'+Details.image+'" height="200px" width="200px"><br>'+Details.username+'<br>'+Details.firmname+'<br>'+Details.phone+'<br><p style="color: #777; font-size: 80%">This e-mail and any files transmitted with it are for the sole use of the intended recipients(s) and may contain confidential and legally privileged information. If you are not the intended recipient, please contact the sender by reply e-mail and destroy all copies and the original message. Any unauthorized review, use, disclosure, dissemination, printing or copying of this email or any action taken in reliance on this e-mail is strictly prohibited. The recipient acknowledges that Zenedo India Private Limited(ZIPL) is unable to exercise control or ensure or guarentee the integrity of/over the contents of the information contained in e-mail transmissions and further acknowledges that any views expressed in this message are those of the individual sender and no binding nature of the messsage shall be implied or assumed unless the sender does so expressly with due authority of ZIPL. Before opening any attachments please check them for viruses and defects. ZIPL makes no warrenty that e-mail communications are timely, secure or free from computer virus or other defects.</p></html>'
+                );
+            }
         });
-        res.on('end', () => {
-            response.send({
-                success :false,
-                msg :"cannot create pdf"
-            });
-        });
-        req.on('error', e => console.log(e));
-        req.end();
-    })
+    });
 }
 
-
-module.exports.mailSummarySheet =  function(request,response,Details) {
-    var req = http.request(config.domain+'/templates/summarysheet.html', res => {
-        var templateHtml = "";
-        res.on('data', chunk => {
-            templateHtml += chunk;
+module.exports.generateSummarySheet =  function(request,response,Details) {
+    summarysheet.getSShtml(Details, content => {
+        var options = {
+            width: '210mm',
+            height: '297mm'
+        }
+        pdf.create(content, options).toStream(function (err, data) {
+            if (err) {
+                console.log(err);
+                response.send({
+                    success :false,
+                    msg :"cannot create pdf"
+                });
+            }
+            else {
+                response.writeHead(200, {
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': 'attachment; filename="RO_'+Details.rno+'_'+Details.cname+'.pdf"'
+                });
+                data.pipe(response);
+            }
         });
-        res.on('end', () => {
-            response.send({
-                success :false,
-                msg :"cannot create pdf"
-            });
-        });
-        req.on('error', e => console.log(e));
-        req.end();
-    })
+    });
 }
