@@ -21,7 +21,7 @@
             <img src="{{logoimage}}" style="height:150px; max-width:240px; margin-top: 20px; margin-left: 20px;">
         </div>
         <div class="col" style="text-align: right; font-size:12px; margin-top: 20px;">
-            <p><h6>{{firmName}},</h6><br> 
+            <p><h6>{{firmName}},</h6>
                 {{Address}}<br>
                 {{phone}}<br>
                 {{email}}
@@ -85,7 +85,7 @@
             <td colspan="2"><b>{{pubam}}</b></td>
         </tr>
         <tr>
-            <td colspan="5" style="text-align: right">Other Charges({{Other}})</td>
+            <td colspan="5" style="text-align: right">Other Charges{{Other}}</td>
             <td colspan="2"><b>{{otherCharges}}</b></td>
         </tr>
         <tr>
@@ -110,17 +110,13 @@
         <tr>
             <td colspan="12">Amount(in words): <b>{{namountwords}}</b></td>
         </tr>
-        <tr>
-            <td colspan="4">Payment Details</td>
-            <td colspan="8"><b>{{payday}}</b></td>
-        </tr>
     </table>
     <div class='row' style="width: 560px;">
         <div class='col' style ='font-size: 8px'>
             <b>Note/Remark:</b><br>
             {{tnc}}
         </div>
-        <div class='col' style='text-align: right; font-size: 8px'>
+        <div class='col-auto' style='font-size: 8px'>
             <b><br>Signature:</b><br>
             <img src="{{sign}}" style="height: 60px; width:60px;"><br>
             Authorised Signatory: {{username}}

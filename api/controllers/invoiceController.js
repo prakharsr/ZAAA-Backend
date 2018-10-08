@@ -1019,10 +1019,6 @@ module.exports.queryClientPayments = async function(request, response){
             Other+= obj.chargeType+" ";
         })
 
-        var payday="";
-        if(doc.paymentDate)
-            payday = (doc.paymentDate - doc.createdAt)/864000000;
-    
         var Details = {
             mediahouse :doc.releaseOrder.publicationName,
             cname :doc.releaseOrder.clientName,
@@ -1066,10 +1062,9 @@ module.exports.queryClientPayments = async function(request, response){
             address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
             phone: "Contact: "+doc.fmobile || '',
             email: "Email: "+doc.femail+"<br>"+(firm.Website || '') || '-',
-            payday: payday,
             createdAt: doc.createdAt,
-            otheram : otheram,
-            other: Other
+            otheram : '₹ '+otheram,
+            other: Other != '' ? '('+Other+')':'' 
         }
     
         if(doc.adSchemeFree === 0)
