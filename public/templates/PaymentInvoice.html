@@ -3,6 +3,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Invoice</title>
     <style>
+        .unbold{
+            font-weight: normal;
+        }
         table {
             border-collapse: collapse;
         }
@@ -32,36 +35,36 @@
                 <div class='row'>
                     <div class='col' style="text-align: left;">
                         To the Client<br>
-                        Name : {{cname}}<br>
-                        State  : {{caddress}}
+                        <span class='unbold'>Name  : </span>{{cname}}<br>
+                        <span class='unbold'>State : </span> {{caddress}}
                     </div>
                     <div class='col' style="text-align: left;">
                         <br>
-                        GSTIN : {{cgstin}}
+                        <span class='unbold'>GSTIN :</span> {{cgstin}}
                     </div>
                 </div>
             </th>
             <th colspan="5" style="text-align: left;">
-                Inv No   : {{rno}}<br>
-                Inv Date : {{date}}<br>
-                GSTIN    : {{gstin}}<br>
-                SAC      : {{sac}} 
+                <span class='unbold'>IN No    :</span>{{rno}}<br>
+                <span class='unbold'>Inv Date :</span> {{date}}<br>
+                <span class='unbold'>GSTIN    :</span> {{gstin}}<br>
+                <span class='unbold'>SAC      :</span> {{sac}} 
             </th>
         </tr>
         <tr>
             <th colspan="8">
                 <div class="row">
                     <div class="col" style="text-align: left;">
-                        Media House Name : {{mediahouse}}<br>
-                        Pullout Name     : {{pullout}}
+                        <span class='unbold'>Media House Name :</span> {{mediahouse}}<br>
+                        <span class='unbold'>Pullout Name     :</span> {{pullout}}
                     </div>
                     <div class="col-auto" style="text-align: left;">
-                        Ad Type : {{adtype}}<br>
-                        Edition : {{edition}}
+                        <span class='unbold'>Ad Type :</span> {{adtype}}<br>
+                        <span class='unbold'>Edition :</span> {{edition}}
                     </div>
                     <div class="col-auto" style="text-align: left;">
-                        Scheme : {{scheme}}<br>
-                        Hue    : {{hue}}
+                        <span class='unbold'>`Scheme :</span> {{scheme}}<br>
+                        <span class='unbold'>`Hue    :</span> {{hue}}
                     </div>
                 </div>
             </th>
@@ -88,8 +91,8 @@
         <tr>
             <td colspan="5" style="text-align: right">Agency Discount {{agenD}}</td>
             <td colspan="2"><b>{{agenam}}</b></td>
-        </tr>
-        <tr>
+        </tr>`
+        <tr>`
             <td colspan="2" rowspan="2">Taxable Amount: <b>{{taxamount}}</b></td>
             <td colspan="2">IGST %: <b>{{igst}}</b></td>
             <td colspan="2">CGST %: <b>{{cgst}}</b></td>
