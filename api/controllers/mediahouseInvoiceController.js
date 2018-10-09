@@ -379,7 +379,6 @@ module.exports.generateSummarySheet = function(request, response){
                             mhiInsertion.paymentAmount = request.body.paymentAmount
                             mhiInsertion.paymentBankName =request.body.paymentBankName;                        
                             mhiInsertion.batchID = batchID;
-                            
                         }
                     });
                 });
