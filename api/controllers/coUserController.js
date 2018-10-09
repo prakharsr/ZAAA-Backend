@@ -103,15 +103,22 @@ module.exports.getCoUsers= function(request, response){
 
 
 module.exports.setRole = function(request,response){
-	var user = User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
+	var userSetter = response.locals.user;
+	 User.findById(mongoose.mongo.ObjectId(request.body.id) , function(err,user){
 		if(err||!user){
-			console.log("User not found");
+			console.log(err);
 			response.send({
 				success:false,
-				msg:err
+				msg:"Error occured or User not found."
 			});
 		}
 		else{
+			if(!userSetter.firm.equals(user.firm)){
+				return response.send({
+					success:false,
+					msg:" User belong to some other firm."
+				})
+			}
 			if(user.isAdmin){
 				user.save(function(err,doc){
 					if (err) {
