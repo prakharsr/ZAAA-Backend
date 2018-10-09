@@ -348,6 +348,7 @@ module.exports.clientInvoiceReports = async function (request, response) {
                         "Final Net Amount":invoice.FinalTaxAmount?invoice.FinalTaxAmount:"-",
                         
                     }
+                    var otherChargesString = ""
                     if(invoice.otherCharges.length> 0){
                         var otherCharge = invoice.otherCharges;
                         {
@@ -434,15 +435,24 @@ module.exports.invoiceTaxationReports = function (request, response) {
                     }
                     if(invoice.otherCharges.length> 0){
                         var index;
-                        var index = +i + 1
-                        var otherCharge = invoice.otherCharges[i];
-                        var otherChargesString = "";
-                        for(var i = 0; i< otherCharge.length && i < 8; ++i){
-                            index = i+1;
-                            otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
+                        var otherChargesString="";
+                        for(var i = 0; i< invoice.otherCharges.length && i < 8; ++i){
+                            var otherCharge = invoice.otherCharges[i];
+                            otherChargesString+= "Type- "+otherCharge.chargeType+" Amount- "+ otherCharge.amount+", ";
                         } 
-                        obj["Other Charges"] =otherChargesString;
+                        obj["Other Charges"] = otherChargesString;
                     }
+                    // if(invoice.otherCharges.length> 0){
+                    //     var index;
+                    //     var index = +i + 1
+                    //     var otherCharge = invoice.otherCharges[i];
+                    //     var otherChargesString = "";
+                    //     for(var i = 0; i< otherCharge.length && i < 8; ++i){
+                    //         index = i+1;
+                    //         otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
+                    //     } 
+                    //     obj["Other Charges"] =otherChargesString;
+                    // }
                     if(invoice.insertions.length> 0){
                         var insertionString="";
                         for(var i = 0; i< invoice.insertions.length && i < 8; ++i){
@@ -557,7 +567,7 @@ module.exports.receiptReports = function (request, response) {
                     if(receipt.otherCharges.length> 0){
                         var index;
                         var otherChargesString="";
-                        for(var i = 0; i< receiptotherCharge.length && i < 8; ++i){
+                        for(var i = 0; i< receipt.otherCharges.length && i < 8; ++i){
                             var otherCharge = receipt.otherCharges[i];
                             otherChargesString+= "Type- "+otherCharge.chargeType+" Amount- "+ otherCharge.amount+", ";
                         } 
