@@ -1048,7 +1048,7 @@ module.exports.mailROPdf = function(request, response) {
         else if(!releaseOrder){
             response.send({
                 success :false,
-                msg: 'Invoice not found' 
+                msg: 'Release Order not found' 
             });
         }
         else{
@@ -1065,8 +1065,8 @@ module.exports.mailROPdf = function(request, response) {
                 for(; i < firm.ROterms.length; i++){
                     tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                releaseOrder.tnc = tnc;
                 tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                releaseOrder.tnc = tnc;
                 releaseOrder.generated=true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
@@ -1101,7 +1101,7 @@ module.exports.generateROPdf = async function(request, response) {
         else if(!releaseOrder){
             response.send({
                 success :false,
-                msg: 'Invoice not found' 
+                msg: 'ReleaseOrder not found' 
             });
         }
         else{
@@ -1118,8 +1118,8 @@ module.exports.generateROPdf = async function(request, response) {
                 for(; i < firm.ROterms.length; i++){
                     tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                 }
-                releaseOrder.tnc = tnc;
                 tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                releaseOrder.tnc = tnc;
                 releaseOrder.generated=true;
                 var date = new Date();
                 releaseOrder.generatedAt = date;
@@ -1155,8 +1155,8 @@ module.exports.previewROhtml = async function(request, response) {
     for(; i < firm.ROterms.length; i++){
         tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
     }
-    doc['tnc'] = tnc;
     tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+    doc['tnc'] = tnc;
     var Details = createDocument(request,response,doc);
     getROhtml(Details, content => {
         response.send({
@@ -1291,8 +1291,8 @@ function createDocument(request, response, doc){
         premam : "₹ "+addZeroes(""+Math.round(premam)),
         remark: remark,
         tnc: doc.tnc,
-        image : config.domain+'/'+doc.flogo,
-        sign: config.domain+'/'+doc.fsign,
+        image : config.domain+''+doc.flogo,
+        sign: config.domain+''+doc.fsign,
         jurisdiction: doc.fjuris,
         createdAt: doc.createdAt,
         address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',

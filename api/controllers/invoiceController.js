@@ -754,8 +754,8 @@ module.exports.queryClientPayments = async function(request, response){
                     for(; i < firm.ROterms.length; i++){
                         tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                     }
-                    invoice.tnc = tnc;
                     tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                    invoice.tnc = tnc;
                     invoice.save(async (err,doc) => {
                         if(err){
                             response.save({
@@ -813,8 +813,8 @@ module.exports.queryClientPayments = async function(request, response){
                     for(; i < firm.ROterms.length; i++){
                         tnc += (i+1)+'.'+firm.ROterms[i]+'<br>';
                     }
-                    invoice.tnc = tnc;
                     tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                    invoice.tnc = tnc;
                     invoice.save(async (err,doc) =>{
                         if(err){
                             response.save({
@@ -850,11 +850,11 @@ module.exports.queryClientPayments = async function(request, response){
         for(; i < firm.INterms.length; i++){
             tnc += (i+1)+'.'+firm.INterms[i]+'<br>';
         }
+        tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
         doc['tnc'] = tnc;
         var releaseOrder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(doc.releaseOrderId));
         doc['releaseOrder'] = releaseOrder;
         console.log(doc);
-    tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
         var Details = createDocument(request,response,doc);
         getinvoicehtml(Details, content => {
             response.send({

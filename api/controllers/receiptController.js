@@ -1008,10 +1008,39 @@ module.exports.mailReceiptPdf = function(request, response) {
             });
         }
         else{
-            var invoice = await Invoice.findById(receipt.invoiceID);
-            receipt['invoice'] = invoice;
-            var Details = await createDocument(request,response,receipt);
-            pdf.mailPaymentReceipt(request,response,Details);
+            if (receipt.generated==false){
+                receipt.faddress = firm.RegisteredAddress;
+                receipt.femail = firm.Email;
+                receipt.fmobile = firm.Mobile;
+                receipt.flogo = firm.LogoURL;
+                receipt.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                receipt.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.PRterms.length; i++){
+                    tnc += (i+1)+'.'+firm.PRterms[i]+'<br>';
+                }
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                receipt.tnc = tnc;
+                receipt.generated=true;
+                var date = new Date();
+                receipt.generatedAt = date;
+            }
+            receipt.save(async function(err,receipt){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err
+                    })
+                }
+                else{
+                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    receipt['invoice'] = invoice;
+                    var Details = createDocument(request,response,receipt);
+                    pdf.mailPaymentReceipt(request,response,Details);
+                }
+            })
         }
     });
 }
@@ -1035,10 +1064,39 @@ module.exports.generateReceiptPdf = async function(request, response) {
             });
         }
         else{
-            var invoice = await Invoice.findById(receipt.invoiceID);
-            receipt['invoice'] = invoice;
-            var Details = await createDocument(request,response,receipt);
-            pdf.generatePaymentReceipt(request,response,Details);
+            if (receipt.generated==false){
+                receipt.faddress = firm.RegisteredAddress;
+                receipt.femail = firm.Email;
+                receipt.fmobile = firm.Mobile;
+                receipt.flogo = firm.LogoURL;
+                receipt.fsign = user.signature;
+                var juris = firm.Jurisdication ? firm.Jurisdication: firm.RegisteredAddress.city;
+                receipt.fjuris = juris;
+                var i = 0;
+                var tnc ='';
+                for(; i < firm.PRterms.length; i++){
+                    tnc += (i+1)+'.'+firm.PRterms[i]+'<br>';
+                }
+                tnc += (i+1)+'. All disputed are subject to '+juris+' jurisdiction only.';
+                receipt.tnc = tnc;
+                receipt.generated=true;
+                var date = new Date();
+                receipt.generatedAt = date;
+            }
+            receipt.save(async function(err,receipt){
+                if(err){
+                    response.send({
+                        success:false,
+                        msg: err
+                    })
+                }
+                else{
+                    var invoice = await Invoice.findById(receipt.invoiceID);
+                    receipt['invoice'] = invoice;
+                    var Details = createDocument(request,response,receipt);
+                    pdf.generatePaymentReceipt(request,response,Details);
+                }
+            })
         }
     });
 }
