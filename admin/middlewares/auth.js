@@ -1,4 +1,5 @@
 var userController = require('../controllers/adminController');
+var config = require('../../config');
 var Admin = require('../models/Admin');
 var jwt = require('jsonwebtoken');
 var mongoose = require('mongoose');
