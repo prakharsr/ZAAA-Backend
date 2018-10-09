@@ -161,7 +161,18 @@ async function f (request, response, user){
     }
     var rno = month+year+'-'+sn;
     console.log(rno);
-    
+    if(firm.FirmStatus == 1){
+        return response.send({
+            success:false,
+            msg: " Your Firm is on hold status."
+        });
+    }
+    if(firm.FirmStatus == 2){
+        return response.send({
+            success:false,
+            msg: " Your Firm is on Blocked status."
+        });
+    }
     var releaseOrder = new ReleaseOrder({
         
         releaseOrderNO: rno,

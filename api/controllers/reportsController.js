@@ -299,7 +299,7 @@ module.exports.releaseOrderReports = function (request, response) {
     })
 };
 
-module.exports.clientInvoiceReports = function (request, response) {
+module.exports.clientInvoiceReports = async function (request, response) {
     var user = response.locals.user;
     var query = { "firm": user.firm }
     if (request.body.creationPeriod != 0) {
@@ -313,7 +313,7 @@ module.exports.clientInvoiceReports = function (request, response) {
         query['updatedAt'] = { $gte: from, $lte: to }
     }
     
-    Invoice.find(query, function (err, invoices) {
+    Invoice.find(query, function (err, invoiceList) {
         if (err) {
             console.log(err + "");
             response.send({
@@ -323,7 +323,7 @@ module.exports.clientInvoiceReports = function (request, response) {
         }
         else {
             try{
-                var el = invoices.map(function (invoice) {
+                var el = invoiceList.map(function (invoice) {
                     var obj =  {
                         "Invoice Number": invoice.invoiceNO? invoice.invoiceNO : "-",
                         "Date": invoice.date ? invoice.date.toLocaleDateString() : "-",
@@ -337,25 +337,20 @@ module.exports.clientInvoiceReports = function (request, response) {
                         "Client State": invoice.clientState?invoice.clientState:"-",
                         "Client GSTIN": invoice.clientGSTIN.GSTType + "-" +invoice.clientGSTIN.GSTNo,
                         "Gross Amount":invoice.adGrossAmount?invoice.adGrossAmount:"-",
-                        "Publication Discount":invoice.publicationDiscount?invoice.publicationDiscount:"-",
-                        "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
-                        "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
+                        "Publication Discount":invoice.publicationDiscount?(invoice.publicationDiscount.percentage?invoice.publicationDiscount.amount+"%":invoice.publicationDiscount.amount):"-",
+                        "Agency Discount1":invoice.agencyDiscount1?(invoice.agencyDiscount1.percentage?invoice.agencyDiscount1.amount+"%":invoice.agencyDiscount1.amount):"-",
+                        "Agency Discount2":invoice.agencyDiscount2?(invoice.agencyDiscount2.percentage?invoice.agencyDiscount2.amount+"%":invoice.agencyDiscount2.amount):"-",
                         "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
-                        "Final Gross Amount":"to be calculated",
+                        "Final Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
                         "GSTIN":invoice.taxAmount?+invoice.taxAmount.primary + +invoice.taxAmount.secondary:"-",
                         "GSTIN Included":invoice.taxIncluded?invoice.taxIncluded:"-",
-                        "Tax Amount":invoice.FinalTaxAmount,
-                        "Final Net Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
+                        "Tax Amount":invoice.FinalTaxAmount *(+invoice.taxAmount.primary + +invoice.taxAmount.secondary)/(+invoice.taxAmount.primary + +invoice.taxAmount.secondary +100),
+                        "Final Net Amount":invoice.FinalTaxAmount?invoice.FinalTaxAmount:"-",
                         
                     }
                     if(invoice.otherCharges.length> 0){
-                        var index;
-                        var index = +i + 1
-                        var otherCharge = invoice.otherCharges[i];
-                        if(otherCharge.length > 0)
+                        var otherCharge = invoice.otherCharges;
                         {
-                            
-                        var otherChargesString = "";
                         for(var i = 0; i< otherCharge.length && i < 8; ++i){
                             index = i+1;
                             otherChargesString += "Type-"+ otherCharge.chargeType +" Amount- "+otherCharge.amount +", ";
@@ -372,10 +367,11 @@ module.exports.clientInvoiceReports = function (request, response) {
                             insertionString += insertion.date.day + "/"+insertion.date.month+"/"+insertion.date.year+", ";
                         } 
                         obj["Insertions"] = insertionString;
+                    }
                         obj["Executive Name"]= invoice.executiveName?invoice.executiveName:"-";
                         obj["Executive Organization"]=invoice.executiveOrg?invoice.executiveOrg:"-";
                         obj["Remark"] = invoice.remark?invoice.remark:"-";
-                    }
+                    
                     return obj
                 })
             }
@@ -429,7 +425,7 @@ module.exports.invoiceTaxationReports = function (request, response) {
                         "Agency Discount1":invoice.agencyDiscount1?invoice.agencyDiscount1:"-",
                         "Agency Discount2":invoice.agencyDiscount2?invoice.agencyDiscount2:"-",
                         "Extra Charges":invoice.extraCharges?invoice.extraCharges:"-",
-                        "Final Gross Amount":"to be calculated",
+                        "Final Gross Amount":invoice.adGrossAmount* (invoice.publicationDiscount + invoice.agencyDiscount1 + invoice.agencyDiscount2+100)/100,
                         "GSTIN":invoice.taxAmount?+invoice.taxAmount.primary + +invoice.taxAmount.secondary:"-",
                         "GSTIN Included":invoice.taxIncluded?invoice.taxIncluded:"-",
                         "Tax Amount":invoice.FinalTaxAmount,
@@ -540,7 +536,7 @@ module.exports.receiptReports = function (request, response) {
                     var invoice = await findInvoice(receipt.invoiceID, user);
                     
                     var obj =  {
-                        "Receipt Number": receipt.receiptNO? receipt.receiptNO : "-",
+                        "Receipt Number": receipt.receiptNO? receipt.receiptNO: "-",
                         "Reciept Date": receipt.date ? receipt.date.toLocaleDateString() : "-",
                         "RO No.": receipt.receiptNO? receipt.receiptNO : "-",
                         "Mediahouse Name": receipt.publicationName ? receipt.publicationName : "-",
@@ -548,7 +544,7 @@ module.exports.receiptReports = function (request, response) {
                         "Client Name": receipt.clientName?receipt.clientName:"-",
                         "Client State": receipt.clientState?receipt.clientState:"-",
                         "Invoice No": receipt.receiptNO? receipt.receiptNO : "-",
-                        "Invoice Date": new Date().toLocaleDateString(),
+                        "Invoice Date": invoice.date.toLocaleDateString(),
                         "Executive Name": receipt.executiveName?receipt.executiveName:"-",
                         "Executive Organization":receipt.executiveOrg?receipt.executiveOrg:"-",
                         "Invoice Gross Amount":invoice.netAmountFigures?invoice.netAmountFigures:"-",
