@@ -377,7 +377,7 @@ function convertElementToMediaHouse(user, element) {
             GSTNo : gstno
         },
         Remark:element.Remark,
-        firm : user.firm
+        firm : mongoose.mongo.ObjectId()
     };
     return result;
 }
