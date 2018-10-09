@@ -1,5 +1,7 @@
 var Ratecard = require('../../api/models/Ratecard');
+var mongoose = require('mongoose')
 var MediaHouse = require('../../api/models/MediaHouse');
+var RateCard = require('../../api/models/Ratecard');
 var MediaHouseController = require('../../api/controllers/mediahouseController');
 var RateCardController = require('../../api/controllers/ratecardController');
 
@@ -18,7 +20,8 @@ module.exports.createGMediahouse = function(request,response){
         Scheduling:request.body.scheduling,
         pullouts:request.body.pullouts,
         GSTIN:request.body.GSTIN,
-        Remark:request.body.Remark
+        Remark:request.body.Remark,
+        firm : mongoose.mongo.ObjectId()
     });
     mediahouse.save(function(err){
         if(err){

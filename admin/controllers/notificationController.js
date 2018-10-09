@@ -35,6 +35,7 @@ function sendNotification(title,body,to){
 module.exports.sendNotifs = async (request,response) => {
     User.find({}, function(err,users){
         if(err){
+            console.log(err);
             reject(err);
         }
         else{
@@ -78,8 +79,9 @@ module.exports.tickerNotification = (request,response) =>{
         title : request.body.title,
         body : request.body.notifBody
     });
-    notification.save((err) => {
+    notification.save(function(err){
         if(err){
+            console.log(err)
             response.send({
                 success: false,
                 msg: "Cannot send notification"

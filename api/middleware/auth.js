@@ -53,6 +53,15 @@ function getToken(headers) {
     }
 }
 var roCreateRoutes = [
+    //{method:'POST',path:'/api/user/releaseorder'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    // {method:'POST',path:'/api/user/signup'},
+    
 
     ];
 var roBlockRoutes = [
@@ -92,85 +101,85 @@ var accViewRoutes = [
 
 function hasPermissions(request, user){
     if(roCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Release_order == 1)
+    {   
+        if(user.isAdmin||user.roles.Release_order == 1)
         return true;
         else
         return false;
     }
     if(roViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Release_order == 2)
+    {   
+        if(user.isAdmin||user.roles.Release_order == 2)
         return true;
         else
         return false;
     }
     if(roBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Release_order == 3)
+    {   
+        if(user.isAdmin||user.roles.Release_order == 3)
         return true;
         else
         return false;
     }
     if(inCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Invoice == 1)
+    {   
+        if(user.isAdmin||user.roles.Invoice == 1)
         return true;
         else
         return false;
     }
     if(inViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Invoice == 2)
+    {   
+        if(user.isAdmin||user.roles.Invoice == 2)
         return true;
         else
         return false;
     }
     if(inBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Invoice == 3)
+    {   
+        if(user.isAdmin||user.roles.Invoice == 3)
         return true;
         else
         return false;
     }
     if(prCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Payment_receipts == 1)
+    {   
+        if(user.isAdmin||user.roles.Payment_receipts == 1)
         return true;
         else
         return false;
     }
     if(prBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Payment_receipts == 2)
+    {   
+        if(user.isAdmin||user.roles.Payment_receipts == 2)
         return true;
         else
         return false;
     }
     if(prViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Payment_receipts == 3)
+    {   
+        if(user.isAdmin||user.roles.Payment_receipts == 3)
         return true;
         else
         return false;
     }
     if(accCreateRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Accounts == 1)
+    {   
+        if(user.isAdmin||user.roles.Accounts == 1)
         return true;
         else
         return false;
     }
     if(accViewRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Accounts == 2)
+    {   
+        if(user.isAdmin||user.roles.Accounts == 2)
         return true;
         else
         return false;
     }
     if(accBlockRoutes.findIndex(element => element.method == request.method && element.path == req.originalUrl) != -1)
-    {
-        if(user.roles.Accounts == 3)
+    {   
+        if(user.isAdmin||user.roles.Accounts == 3)
         return true;
         else
         return false;
