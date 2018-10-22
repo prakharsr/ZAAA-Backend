@@ -5,7 +5,7 @@ var ticket = require('../controllers/ticketController');
 var global = require('../controllers/globalController');
 var category = require('../controllers/categoryController');
 var notifs = require('../controllers/notificationController');
-var firm = require('../controllers/firmscontroller');
+var firms = require('../controllers/firmscontroller');
 
 router.post('/signup', admin.signup);
 router.post('/login', admin.login);
@@ -23,8 +23,11 @@ router.post('/attachments/id', admin.IDAttachment);
 router.post('/attachments/other1', admin.OtherAtt1);
 router.post('/attachments/other2', admin.OtherAtt2);
 router.post('/attachments/other3', admin.OtherAtt3);
-router.post('/firm', firm.firmData);
+router.post('/firm', firms.firmData);
 
+
+router.post('/firms', firms.listFirms);
+router.post('/firm/status', firms.changeFirmStatus);
 
 router.post('/ticket/list', ticket.listTickets);
 router.post('/ticket/status', ticket.changeStatus);

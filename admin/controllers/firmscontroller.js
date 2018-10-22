@@ -18,8 +18,8 @@ function formQuery(request){
     })
 }
 
-module.exports.listFirms = function(request,response){
-    var query = formQuery(request);
+module.exports.listFirms = async function(request,response){
+    var query = await formQuery(request);
     Firm.find(query)
     .limit(perPage)
     .skip((perPage * request.body.page) - perPage)
