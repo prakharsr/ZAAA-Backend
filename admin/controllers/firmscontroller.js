@@ -46,6 +46,62 @@ module.exports.listFirms = function(request,response){
     });
 }
 
+module.exports.firmData = function(request,response){
+    Firm.findById(request.body.id,function(err, firm){
+        if(err){
+            console.log(err+ "");
+            response.send({
+                success:false,
+                msg: err +""
+            });
+        }
+        else{
+            User.find({
+                firm:firm._id
+            })
+            .exec(function(err, users){
+                if(err){
+                    console.log({
+                        success:false,
+                        msg:"Error Occured"
+                    })
+                }
+                else{
+                    var max_users, max_admins;
+                    if(firm.plan.name == 'trial')
+                    {
+                        max_users = 3;
+                        max_admins = 1;
+                    }
+                    if(firm.plan.name == 'Small')
+                    {
+                        max_users = 2;
+                        max_admins = 1;
+                    }
+                    if(firm.plan.name == 'Medium')
+                    {
+                        max_users = 5;
+                        max_admins = 2;
+                    }
+                    if(firm.plan.name == 'Large')
+                    {
+                        max_users = 11
+                        max_admins = 3;
+                    }
+                    
+                    response.send({
+                        success:true,
+                        firm:firm,
+                        users:users,
+                        max_users:max_users,
+                        max_admins: max_admins
+
+                    })
+                }
+            })
+        }
+    });
+}
 module.exports.changeFirmStatus = async function(request,response){
     var admin = response.locals.admin;
     try{
