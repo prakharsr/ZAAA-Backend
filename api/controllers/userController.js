@@ -410,6 +410,64 @@ module.exports.verifyMobile = function(request, response) {
 			}
 		});
 	}
+	module.exports.signature2 = (request,response) => {
+		var user = response.locals.user;
+		var firm = response.locals.firm;
+		if (req.file && req.file.cloudStoragePublicUrl) {
+			user.signature = req.file.cloudStoragePublicUrl;
+			user.save(function(err,doc){
+				if (err) {
+					console.log(err);
+					response.send({
+						success: false,
+						msg: err
+					});
+				} 
+				else{
+					response.send({
+						success : true,
+						msg : "File is uploaded.",
+						photo: user.photo
+					});
+				}
+			});
+	    }
+		else{
+			response.send({
+				success: false,
+				msg: 'No File in the body'
+			});
+		}
+	}
+	module.exports.profileImage2 = (request,response) => {
+		var user = response.locals.user;
+		var firm = response.locals.firm;
+		if (req.file && req.file.cloudStoragePublicUrl) {
+			user.photo = req.file.cloudStoragePublicUrl;
+			user.save(function(err,doc){
+				if (err) {
+					console.log(err);
+					response.send({
+						success: false,
+						msg: err
+					});
+				} 
+				else{
+					response.send({
+						success : true,
+						msg : "File is uploaded.",
+						sign: user.sign
+					});
+				}
+			});
+	    }
+		else{
+			response.send({
+				success: false,
+				msg: 'No File in the body'
+			});
+		}
+	}
 	module.exports.deleteSignature = function(request,response){
 		var user = response.locals.user;				
 		user.signature = '/images/sign.png' ;

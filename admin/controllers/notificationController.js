@@ -51,13 +51,11 @@ module.exports.sendNotifs = async (request,response) => {
                     };
                     fcm.send(message, function(err,res){  
                         if(err) {
-                            suc = true;
                             console.log({
                                 success: false,
                                 msg : "Something has gone wrong! "+err
                             });
                         } else {
-                            suc = false;
                             console.log({
                                 success: true,
                                 msg : "Sent Notifications to users"

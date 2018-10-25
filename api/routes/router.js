@@ -39,11 +39,9 @@ router.get('/user/co_user', coUser.getCoUsers);
 router.post('/user/role' , coUser.setRole);
 router.get('/user/role/:id', coUser.getRoles);
 
-router.post('/user/image', user.profileImage);
 router.delete('/user/image', user.deleteProfileImage);
 router.delete('/user/sign', user.deleteSignature);
 
-router.post('/user/sign', user.signature);
 router.get('/user/profile', user.getUserProfile);
 router.post('/user/profile', user.setUserProfile);
 router.get('/firm/profile', firm.getFirmProfile);
@@ -51,7 +49,6 @@ router.get('/firm/users', firm.getFirmUsers);
 router.post('/firm/profile', firm.setFirmProfile);
 router.get('/firm/terms', firm.getTermsAndCondition);
 router.post('/firm/terms', firm.setTermsAndCondition);
-router.post('/firm/logo', firm.logoImage);
 router.delete('/firm/logo', firm.deleteLogoImage);
 router.get('/user', user.getCurrentUser);
 router.get('/firm', firm.getCurrentFirm);
@@ -70,7 +67,6 @@ router.get('/user/client/:id', client.getClient);
 router.delete('/user/client/:id', client.deleteClient);
 router.patch('/user/client', client.updateClient);
 router.get('/user/clients/search/:keyword', client.queryClients);
-router.post('/user/client/picture/:id', client.profileImage);
 
 router.post('/user/executive', executive.createExecutive);
 router.get('/user/executives/:page', executive.getExecutives);

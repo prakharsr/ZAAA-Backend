@@ -261,7 +261,6 @@ module.exports.profileImage = function(request,response){
                             });
                         }
                         else{
-                            
                             client.ContactPerson.Photo = location;
                             client.save(function(err,doc){
                                 if (err) {
@@ -287,7 +286,36 @@ module.exports.profileImage = function(request,response){
         }
     });
 }
-
+module.exports.profileImage2 = async (request,response) => {
+    var user = response.locals.user;
+    var firm = response.locals.firm;
+    var client = await Client.findById(mongoose.mongo.ObjectId(request.params.id));
+    if (req.file && req.file.cloudStoragePublicUrl) {
+        client.ContactPerson.Photo = req.file.cloudStoragePublicUrl;
+        client.save(function(err,doc){
+            if (err) {
+                console.log(err);
+                response.send({
+                    success: false,
+                    msg: err
+                });
+            } 
+            else{
+                response.send({
+                    success : true,
+                    msg : "File is uploaded.",
+                    photo:  req.file.cloudStoragePublicUrl
+                });
+            }
+        });
+    }
+    else{
+        response.send({
+            success: false,
+            msg: 'No File in the body'
+        });
+    }
+}
 module.exports.setContactPersonPhoto = function(request,response){
     var user = response.locals.user;
     Client.find({ '_id': mongoose.mongo.ObjectId(request.params.clientId), 'ContactPerson._id': mongoose.mongo.ObjectId(request.params.contactPersonId) }, function(err,client){

@@ -67,6 +67,35 @@ module.exports.logoImage = function(request,response){
 		}
 	});
 }    
+module.exports.logoImage2 = (request,response) => {
+	var user = response.locals.user;
+	var firm = response.locals.firm;
+	if (req.file && req.file.cloudStoragePublicUrl) {
+		firm.LogoURL = req.file.cloudStoragePublicUrl;
+		firm.save(function(err,doc){
+			if (err) {
+				console.log(err);
+				response.send({
+					success: false,
+					msg: err
+				});
+			} 
+			else{
+				response.send({
+					success : true,
+					msg : "File is uploaded.",
+					photo: doc.LogoURL
+				});
+			}
+		});
+	}
+	else{
+		response.send({
+			success: false,
+			msg: 'No File in the body'
+		});
+	}
+}
 module.exports.deleteLogoImage = function(request,response){
 	var user = response.locals.user;
 	var firm = response.locals.firm;
