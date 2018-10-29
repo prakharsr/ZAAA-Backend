@@ -23,6 +23,8 @@ router.post('/attachments/id', admin.IDAttachment);
 router.post('/attachments/other1', admin.OtherAtt1);
 router.post('/attachments/other2', admin.OtherAtt2);
 router.post('/attachments/other3', admin.OtherAtt3);
+router.post('/firm', firms.firmData);
+
 
 router.post('/firms', firms.listFirms);
 router.post('/firm/status', firms.changeFirmStatus);
