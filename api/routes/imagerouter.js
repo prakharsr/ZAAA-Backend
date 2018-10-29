@@ -5,9 +5,9 @@ var firm = require('../controllers/firmController');
 var client = require('../controllers/clientController');
 
 
-router.post('/user/sign', user.signature);
-router.post('/user/image', user.profileImage);
-router.post('/firm/logo', firm.logoImage);
-router.post('/user/client/picture/:id', client.profileImage);
+router.post('/user/sign', user.signature2);
+router.post('/user/image', user.profileImage2);
+router.post('/firm/logo', firm.logoImage2);
+router.post('/user/client/picture/:id', client.profileImage2);
 
 module.exports = router;

@@ -10,7 +10,15 @@ var bodyParser = require('body-parser');
 var bbodyParser = require('busboy-body-parser');
 var path = require('path');
 var auth = require('./api/middleware/auth');
+var bucket = require('./api/middleware/bucket');
 var adauth = require('./admin/middlewares/auth');
+var Multer = require('multer');
+var multer = Multer({
+  storage: Multer.MemoryStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // no larger than 5mb
+  }
+});
 
 var corsOptions = {
     "origin": "*",
@@ -36,6 +44,7 @@ app.use(bodyParser.json());
 // parse multipart-formdata
 app.use(express.static(__dirname + '/public'));
 app.use('/api', auth, require('./api/routes/router'));
+app.use('/api', auth,multer.single('image'),bucket, require('./api/routes/imagerouter'));
 app.use('/api', auth, bbodyParser(), require('./api/routes/excelrouter'));
 app.use('/adminapi', adauth, require('./admin/routes/router'));
 app.use('/adminapi', adauth, bbodyParser(), require('./admin/routes/excelrouter'));

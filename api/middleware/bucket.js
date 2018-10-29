@@ -1,23 +1,36 @@
-var gcs=require('@google-cloud/storage');
+var googleCloudStorage = require('@google-cloud/storage');
 var path = require('path');
-var bucket = gcs.bucket('gs://aaman-217909.appspot.com')
+
+var storage = new googleCloudStorage.Storage({
+    projectId: 'aaman-217909',
+    keyFilename: 'aaman-217909-59c3727cef6b.json'
+})
+  
+var BUCKET_NAME = 'gooball';
+var bucket = storage.bucket(BUCKET_NAME)
+
 
 module.exports = function(req, res, next) {
+    var firm = res.locals.firm;
+    var user = res.locals.user;
+    console.log("In Bucket");
     if (!req.file) {
         return next();
     }
-    if(req.originalUrl == '/api/user/image')
-        const gcsname = 'user-'+user._id+''+path.extname(req.file.originalname);
-    else if(req.originalUrl == '/api/user/sign')
-        const gcsname = 'sign-'+user._id+''+path.extname(req.file.originalname);
-    else if(req.originalUrl == '/firm/logo')
-        const gcsname = 'firm-'+firm._id+''+path.extname(req.file.originalname);
-    else
-        const gcsname = 'client-'+firm._id+''+path.extname(req.file.originalname);
-    
-    const file = bucket.file(gcsname);
 
-    const stream = file.createWriteStream({
+    var gcsname = "";
+
+    if(req.originalUrl == '/api/user/image')
+        gcsname = 'user-'+user._id+''+path.extname(req.file.originalname);
+    else if(req.originalUrl == '/api/user/sign')
+        gcsname = 'sign-'+user._id+''+path.extname(req.file.originalname);
+    else if(req.originalUrl == '/firm/logo')
+        gcsname = 'firm-'+firm._id+''+path.extname(req.file.originalname);
+    else gcsname = 'client-'+firm._id+''+path.extname(req.file.originalname);
+    
+    var file = bucket.file(gcsname);
+
+    var stream = file.createWriteStream({
         metadata: {
         contentType: req.file.mimetype
         },
@@ -26,6 +39,7 @@ module.exports = function(req, res, next) {
 
     stream.on('error', (err) => {
         req.file.cloudStorageError = err;
+        console.log(err);
         next(err);
     });
 
@@ -41,5 +55,5 @@ module.exports = function(req, res, next) {
 }
 
 function getPublicUrl (filename) {
-    return 'https://storage.googleapis.com/aaman-217909.appspot.com/'+filename;
+    return 'https://storage.googleapis.com/gooball/'+filename;
   }

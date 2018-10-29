@@ -70,8 +70,8 @@ module.exports.logoImage = function(request,response){
 module.exports.logoImage2 = (request,response) => {
 	var user = response.locals.user;
 	var firm = response.locals.firm;
-	if (req.file && req.file.cloudStoragePublicUrl) {
-		firm.LogoURL = req.file.cloudStoragePublicUrl;
+	if (request.file && request.file.cloudStoragePublicUrl) {
+		firm.LogoURL = request.file.cloudStoragePublicUrl;
 		firm.save(function(err,doc){
 			if (err) {
 				console.log(err);
@@ -84,7 +84,7 @@ module.exports.logoImage2 = (request,response) => {
 				response.send({
 					success : true,
 					msg : "File is uploaded.",
-					photo: doc.LogoURL
+					photo: firm.LogoURL
 				});
 			}
 		});

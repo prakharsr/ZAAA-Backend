@@ -413,8 +413,8 @@ module.exports.verifyMobile = function(request, response) {
 	module.exports.signature2 = (request,response) => {
 		var user = response.locals.user;
 		var firm = response.locals.firm;
-		if (req.file && req.file.cloudStoragePublicUrl) {
-			user.signature = req.file.cloudStoragePublicUrl;
+		if (request.file && request.file.cloudStoragePublicUrl) {
+			user.signature = request.file.cloudStoragePublicUrl;
 			user.save(function(err,doc){
 				if (err) {
 					console.log(err);
@@ -427,7 +427,7 @@ module.exports.verifyMobile = function(request, response) {
 					response.send({
 						success : true,
 						msg : "File is uploaded.",
-						photo: user.photo
+						sign: user.signature
 					});
 				}
 			});
@@ -442,8 +442,8 @@ module.exports.verifyMobile = function(request, response) {
 	module.exports.profileImage2 = (request,response) => {
 		var user = response.locals.user;
 		var firm = response.locals.firm;
-		if (req.file && req.file.cloudStoragePublicUrl) {
-			user.photo = req.file.cloudStoragePublicUrl;
+		if (request.file && request.file.cloudStoragePublicUrl) {
+			user.photo = request.file.cloudStoragePublicUrl;
 			user.save(function(err,doc){
 				if (err) {
 					console.log(err);
@@ -456,7 +456,7 @@ module.exports.verifyMobile = function(request, response) {
 					response.send({
 						success : true,
 						msg : "File is uploaded.",
-						sign: user.sign
+						photo: user.photo
 					});
 				}
 			});
