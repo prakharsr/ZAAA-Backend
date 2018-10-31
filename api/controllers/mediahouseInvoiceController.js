@@ -7,6 +7,8 @@ var MediaHouseInvoice = require('../models/MediaHouseInvoice');
 var Executive = require('../models/Executive');
 var Client = require('../models/Client');
 var mongoose = require('mongoose');
+var fs = require('fs');
+var path = require('path');
 var perPage=20;
 
 module.exports.createMHInvoice = async (request,response) => {
@@ -281,8 +283,7 @@ MediaHouseInvoice
         response.send({
             success:true,
             insertions: insertions
-            
-        })
+        });
         
     }
 });
@@ -360,7 +361,7 @@ module.exports.getMHInvoicesForRO = function(request, response){
 
 
 
-module.exports.generateSummarySheet = function(request, response){
+module.exports.generateSummarySheet = async function(request, response){
     var user = response.locals.user;
     var firm = response.locals.firm;
     try {
@@ -393,6 +394,9 @@ module.exports.generateSummarySheet = function(request, response){
                 });
             });
         });
+        mhis.batch = batchID;
+        var Details = await createDocument(request,response,mhis);
+        pdf.generateSummarySheet(request,response,Details);
     }
     catch (err) {
         if (err)
@@ -402,13 +406,13 @@ module.exports.generateSummarySheet = function(request, response){
         firm.SSSerial+=1;
         firm.save(function(err){
             if(err){
-                response.send({
+                console.log({
                     success:false,
                     msg:"Error in updating SummarySheet Counter"
                 })
             }
             else{
-                response.send({
+                console.log({
                     success:true,
                     msg:"done"
                 })
@@ -534,26 +538,78 @@ module.exports.mailSummarySheetPdf = async (request,response) => {
     pdf.mailSummarySheet(request,response,Details);
 }
 
-function createDocument(request, response, doc){
-    var firm = response .locals.firm;
+function toReadableDate(a){
+    var today = a;
+    if(today == 'Invalid Date') today = new Date(Date.now());
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; 
+    var yyyy = today.getFullYear();
+    if(dd<10){
+        dd='0'+dd;
+    } 
+    if(mm<10){
+        mm='0'+mm;
+    } 
+    return dd+'/'+mm+'/'+yyyy;
+}
+
+async function senddata(doc, firm , user){
+    var data = [];
+    var count = 0, tamt = 0;
+    await MediaHouseInvoice.find({ firm: user.firm }).then(async invoices => {
+        for(var i = 0; i < invoices.length; i++){
+            var invoice = invoices[i];
+            var releaseorder = await ReleaseOrder.findById(mongoose.mongo.ObjectId(invoice.releaseOrderId));
+            var mediahouse = await MediaHouse.findById(mongoose.mongo.ObjectId(invoice.mediahouseID));
+            invoice.insertions.forEach(mhiInsertion => {
+                doc.forEach(insertion => {
+                    if (mhiInsertion._id == insertion._id) {
+                        tamt += mhiInsertion.paymentAmount;
+                        count++;
+                        data.push({
+                            "sno": count,
+                            "rno": releaseorder.releaseOrderNO,
+                            "rdate": toReadableDate(new Date(releaseorder.createdAt)),
+                            "cname": releaseorder.clientName,
+                            "idate": toReadableDate(mhiInsertion.insertionDate),
+                            "bno": mhiInsertion.receiptNumber || '-',
+                            "bdate": mhiInsertion.receiptDate || '-',
+                            "amt": mhiInsertion.paymentAmount,
+                            "mh": mediahouse
+                        });
+                    }
+                });
+            });
+        }
+    });
+    data.tamt = tamt;
+    return data;
+}
+
+async function createDocument(request, response, doc){
+    var firm = response.locals.firm;
     var user = response.locals.user;
     var address = firm.RegisteredAddress;
+    var data = await senddata(doc,firm,user);
     var insertions ='';
-    var date = new Date(Date.now());
-    var amount ='';
-    Details = {
-        logoimage: config.domain + firm.LogoURL,
-        firmname: firm.FirmName,
+    data.forEach(date => {
+    insertions += "<tr><td>"+date.sno+"</td><td>"+date.rno+"</td><td>"+date.rdate+"</td><td>"+date.cname+"</td><td>"+date.idate+"</td><td>"+date.bno+"</td><td>"+date.bdate+"</td><td>"+date.amt+"</td></tr>"
+    });
+    var mediahouse = data[0].mh;
+    var date = toReadableDate(new Date(Date.now()));
+    var Details = {
+        image: firm.LogoURL,
+        firmName: firm.FirmName,
         Address: address?(address.address+'<br>'+address.city+"<br>"+address.state+' '+address.pincode):'',
-        phone: "Contact: "+firm.Mobile || '',
+        phone: "Contact: "+firm.Mobile+" "+(firm.OtherMobile || '') || '-',
         email: "Email: "+firm.Email+"<br>"+(firm.Website || '') || '-',
-        mname: doc.mname,
-        medition: doc.medition,
-        mstate: doc.mstate,
+        mname: mediahouse.PublicationName,
+        medition: mediahouse.Address.edition,
+        mstate: mediahouse.Address.state,
         date: date,
         batch: doc.batch,
         insertions: insertions,
-        amount: amount
+        amount: data.tamt
     }
     return Details;
 }
